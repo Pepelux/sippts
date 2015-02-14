@@ -164,8 +164,8 @@ sub f_probe_ctrl_c {
 
 sub help {
 	print qq{
-RtpSCAN v1.2 - by Pepelux <pepeluxx\@gmail.com>
-------------
+SipSNIFF v1.2 - by Pepelux <pepeluxx\@gmail.com>
+-------------
 
 Usage: sudo perl -i <interface> $0 [options]
  

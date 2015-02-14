@@ -449,7 +449,7 @@ Usage: perl $0 -h <host> [options]
 -s  <integer>    = Source number (CallerID) (default: 100)
 -d  <integer>    = Destination number (default: 100)
 -r  <integer>    = Remote port (default: 5060)
--p  <string>     = prefix (for extensions)
+-p  <string>     = Prefix (for extensions)
 -ip <string>     = Source IP (by default it is the same as host)
 -v               = Verbose (trace information)
 -vv              = More verbose (more detailed trace)
