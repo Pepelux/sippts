@@ -32,7 +32,6 @@ Usage: perl sipscan.pl -h <host> [options]
 -vv              = More verbose (more detailed trace)
 }}}
 
-= Examples =
   * To search SIP services on 192.168.0.1 port 5060 (using OPTIONS method)
 {{{
 $perl sipscan.pl -h 192.168.0.1
@@ -48,4 +47,21 @@ $perl sipscan.pl -h 192.168.0.1-192.168.254.254 -m REGISTER
   * To search a large network range of SIP services on a large port range (using INVITE method)
 {{{
 $perl sipscan.pl -h 192.168.0.1-192.168.254.254 -r 5060-5090 -m INVITE
+}}}
+
+= Example =
+{{{
+$ perl sipscan.pl -h 192.168.0.0/24
+[+] 192.168.0.51:5060 - Sending OPTIONS 100 => 100
+[-] 401 Unauthorized
+[+] 192.168.0.55:5060 - Sending OPTIONS 100 => 100
+[-] 200 OK
+[+] 192.168.0.54:5060 - Sending OPTIONS 100 => 100
+[-] 483 Too Many Hops
+
+IP:port			  User-Agent
+=======			  ==========
+192.168.0.51:5060	| kamailio (4.2.1 (x86_64/linux))
+192.168.0.54:5060	| kamailio (4.2.1 (x86_64/linux))
+192.168.0.55:5060	| Asterisk PBX 1.8.13.1~dfsg1-3+deb7u3
 }}}
