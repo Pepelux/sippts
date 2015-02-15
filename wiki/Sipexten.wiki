@@ -7,6 +7,8 @@ Sipexten allows us to:
 
   * Identify extensions on a SIP server.
   * Scan for large ranges of extensions.
+  * Connect over UDP or TCP protocol.
+  * Try UDP and TCP at the same time.
   * Analyze responses using verbose mode.
 
 = Usage =
@@ -24,6 +26,7 @@ Usage: perl sipexten.pl -h <host> [options]
 -d  <integer>    = Destination number (default: 100)
 -r  <integer>    = Remote port (default: 5060)
 -p  <string>     = Prefix (for extensions)
+-proto  <string>  = Protocol (UDP or TCP - By default: UDP)
 -ip <string>     = Source IP (by default it is the same as host)
 -v               = Verbose (trace information)
 -vv              = More verbose (more detailed trace)
