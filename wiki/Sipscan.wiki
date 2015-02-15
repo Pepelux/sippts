@@ -1,0 +1,52 @@
+#summary Sipscan tool
+
+Sipscan is a very fast scanner for SIP services over UDP. It uses multithread and can scan large ranges of networks.
+
+= Features =
+
+Sipscan works sending and waiting well formed SIP packages. For example, Nmap is a great tool for network's scanning, but over UDP is better and quicker sending well formed packages and waiting for valid responses.
+
+Sipscan allows us to:
+  * Identify SIP servers and devices.
+  * Use different methods like as REGISTER, INVITE or OPTIONS.
+  * Scan a server target or large ranges of network.
+  * Scan large ranges of ports.
+  * Analyze responses using verbose mode.
+
+= Usage =
+{{{
+$ perl sipscan.pl 
+
+SipSCAN - by Pepelux <pepeluxx@gmail.com>
+-------
+
+Usage: perl sipscan.pl -h <host> [options]
+ 
+== Options ==
+-m <string>      = Method: REGISTER/INVITE/OPTIONS (default: OPTIONS)
+-u  <string>     = Username
+-s  <integer>    = Source number (CallerID) (default: 100)
+-d  <integer>    = Destination number (default: 100)
+-r  <integer>    = Remote port (default: 5060)
+-ip <string>     = Source IP (by default it is the same as host)
+-v               = Verbose (trace information)
+-vv              = More verbose (more detailed trace)
+}}}
+
+==Examples==
+   * To search SIP services on 192.168.0.1 port 5060 (using OPTIONS method)
+{{{
+$perl sipscan.pl -h 192.168.0.1
+}}}
+   * To search SIP services on 192.168.0.0 network
+{{{
+$perl sipscan.pl -h 192.168.0.0/24
+}}}
+   * To search a large range of SIP services (using REGISTER method)
+{{{
+$perl sipscan.pl -h 192.168.0.1-192.168.254.254 -m REGISTER
+}}}
+   * To search a large network range of SIP services on a large port range (using INVITE method)
+{{{
+$perl sipscan.pl -h 192.168.0.1-192.168.254.254 -r 5060-5090 -m INVITE
+}}}
