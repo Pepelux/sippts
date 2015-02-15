@@ -3,7 +3,6 @@
 Sipexten identifies extensions on a SIP server. Sipexten uses multithread and can check large network and port ranges.
 
 = Features =
-
 Sipexten allows us to:
 
   * Identify extensions on a SIP server.
