@@ -7,6 +7,8 @@ Sipcrack allows us to:
   * Test remotely a list of users and passwords using REGISTER method
   * Test users and passwords on a network range
   * Use a prefix for extensions range (maybe user and extension is not the same)
+  * Connect over UDP or TCP protocol.
+  * Try UDP and TCP at the same time.
   * Resume a previous session
   * Analyze responses using verbose mode.
 
@@ -25,6 +27,7 @@ Usage: perl sipcrack.pl -h <host> -w wordlist [options]
 -d  <integer>    = Destination number (default: 100)
 -r  <integer>    = Remote port (default: 5060)
 -p  <string>     = Prefix (for extensions)
+-proto  <string>  = Protocol (UDP or TCP - By default: UDP)
 -ip <string>     = Source IP (by default it is the same as host)
 -resume          = Resume last session
 -w               = Wordlist
