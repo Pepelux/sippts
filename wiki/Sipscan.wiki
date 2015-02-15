@@ -41,7 +41,7 @@ Usage: perl sipscan.pl -h <host> [options]
 {{{
 $perl sipscan.pl -h 192.168.0.1
 }}}
-  * To search SIP services on 192.168.0.0 network (using TCP connection)
+  * To search SIP services on 192.168.0.0 network (over TCP connection)
 {{{
 $perl sipscan.pl -h 192.168.0.0/24 -t tcp
 }}}
@@ -67,6 +67,6 @@ $ perl sipscan.pl -h 192.168.0.0/24
 IP:port			  User-Agent
 =======			  ==========
 192.168.0.51:5060/udp	| kamailio (4.2.1 (x86_64/linux))
-192.168.0.54:5060/udp	| kamailio (4.2.1 (x86_64/linux))
+192.168.0.54:5060/tcp	| kamailio (4.2.1 (x86_64/linux))
 192.168.0.55:5060/udp	| Asterisk PBX 1.8.13.1~dfsg1-3+deb7u3
 }}}
