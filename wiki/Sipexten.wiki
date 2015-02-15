@@ -44,6 +44,6 @@ $ perl sipexten.pl -h 192.168.0.55 -e 100-200
 ^C
 IP address	Port	Extension	Authentication
 ==========	====	=========	==============
-192.168.0.55	5060	100		Require authentication
+192.168.0.55	5060	100		No authentication required
 192.168.0.55	5060	101		Require authentication
 }}}
