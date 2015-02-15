@@ -404,10 +404,10 @@ sub send_options {
 		if ($response =~ "^200") {
 			my $resinvite = send_invite($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user);
 			if ($resinvite =~ "^1") {
-				print OUTPUT "$to_ip\t$dport\t$to\t\tNo auth\n";
+				print OUTPUT "$to_ip\t$dport\t$to\t\tNo authentication required\n";
 			}
 			else {
-				print OUTPUT "$to_ip\t$dport\t$to\t\tRequire auth\n";
+				print OUTPUT "$to_ip\t$dport\t$to\t\tRequire authentication\n";
 			}
 			{lock($found);$found++;}
 		}
@@ -445,7 +445,7 @@ SipEXTEN v1.2 - by Pepelux <pepeluxx\@gmail.com>
 Usage: perl $0 -h <host> [options]
  
 == Options ==
--e  <string>     = Extension / range
+-e  <string>     = Extensions (default 100-1000)
 -s  <integer>    = Source number (CallerID) (default: 100)
 -d  <integer>    = Destination number (default: 100)
 -r  <integer>    = Remote port (default: 5060)

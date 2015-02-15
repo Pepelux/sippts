@@ -533,7 +533,7 @@ Usage: perl $0 -h <host> -w wordlist [options]
 \$perl $0 -h 192.168.0.1 -w wordlist
 \tTry to crack extensions from 100 to 1000 on 192.168.0.1 port 5060
 \$perl $0 -h 192.168.0.0/24 -e 100-200 -p user -w wordlist -v
-\tTry to crack extensions from user100 to user200 on 192.168.0.1 port 5060
+\tTry to crack extensions from user100 to user200 on 192.168.0.0 network
 
 };
  

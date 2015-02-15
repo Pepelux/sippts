@@ -575,7 +575,7 @@ SipSCAN v1.2 - by Pepelux <pepeluxx\@gmail.com>
 Usage: perl $0 -h <host> [options]
  
 == Options ==
--m <string>      = Method: REGISTER/INVITE/OPTIONS (default: REGISTER)
+-m <string>      = Method: REGISTER/INVITE/OPTIONS (default: OPTIONS)
 -u  <string>     = Username
 -s  <integer>    = Source number (CallerID) (default: 100)
 -d  <integer>    = Destination number (default: 100)
