@@ -21,7 +21,7 @@ Usage: sudo perl -i <interface> sipsniff.pl [options]
 -i  <string>     = Interface (ex: eth0)
 -p  <integer>    = Port (default: 5060)
 -m  <string>     = Filter method (ex: INVITE, REGISTER)
--u               = Filter users
+-u               = Filter authentication digest
 }}}
 
   * Caturing SIP packets:
