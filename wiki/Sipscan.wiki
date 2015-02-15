@@ -31,7 +31,7 @@ Usage: perl sipscan.pl -h <host> [options]
 -s  <integer>    = Source number (CallerID) (default: 100)
 -d  <integer>    = Destination number (default: 100)
 -r  <integer>    = Remote port (default: 5060)
--p  <string>     = Protocol (udp, tcp or all (both of them) - By default: ALL)
+-proto  <string>  = Protocol (UDP or TCP - By default: UDP)
 -ip <string>     = Source IP (by default it is the same as host)
 -v               = Verbose (trace information)
 -vv              = More verbose (more detailed trace)
