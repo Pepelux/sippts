@@ -33,7 +33,7 @@ Usage: perl sipcrack.pl -h <host> -w wordlist [options]
 -vv              = More verbose (more detailed trace)
 }}}
 
-==Examples==
+=Examples=
   * Try to crack extensions from 100 to 1000 on 192.168.0.1 port 5060
 {{{
 perl sipcrack.pl -h 192.168.0.1 -w wordlist
