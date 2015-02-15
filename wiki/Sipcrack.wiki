@@ -44,7 +44,7 @@ perl sipcrack.pl -h 192.168.0.0/24 -e 100-200 -p user -w wordlist
 
 = Example =
 {{{
-$ perl sipcrack.pl -h 192.168.0.55 -e 100-200 -w ../pass 
+$ perl sipcrack.pl -h 192.168.0.55 -e 100-200 -w dictionary
 Found match: 192.168.0.55:5060 - User: 100 - Pass: p3p3lux
 Found match: 192.168.0.55:5060 - User: 101 - Pass: p3p3lux
 
