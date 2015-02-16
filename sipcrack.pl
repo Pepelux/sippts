@@ -38,6 +38,7 @@ my $exten = '';		# extension
 my $prefix = '';	# prefix
 my $resume = 0;		# resume
 my $abort = 0;
+my $proto = '';		# protocol
 
 my $realm = '';
 my $nonce = '';
@@ -58,10 +59,7 @@ my $eini;
 my $efin;
 my $hini = 0;
 
-if (! -d "tmp") {
-	mkdir ("tmp");
-}
-
+mkdir ("tmp") if (! -d "tmp");
 my $tmpfile = "tmp/sipcrack".time().".txt";
  
 open(OUTPUT,">$tmpfile");
@@ -81,12 +79,15 @@ sub init() {
 				"l=s" => \$lport,
 				"r=s" => \$dport,
 				"w=s" => \$wordlist,
+				"proto=s" => \$proto,
 				"resume+" => \$resume,
 				"v+" => \$v,
 				"vv+" => \$vv);
 
 	help() if (($host eq "" || $wordlist eq "") && $resume eq 0);
- 
+ 	$proto = lc($proto);
+	$proto = "all" if ($proto ne "tcp" && $proto ne "udp");
+
  	my $row;
  
 	if ($resume eq 1) {
@@ -257,7 +258,7 @@ sub init() {
 								last unless defined($range[$i]);
 								$csec = 1;
 								$from_ip = $range[$i] if ($from_ip eq "");
-								my $thr = threads->new(\&scan, $range[$i], $from_ip, $lport, $j, $from, $to, $csec, $prefix.$k, $word);
+								my $thr = threads->new(\&scan, $range[$i], $from_ip, $lport, $j, $from, $to, $csec, $prefix.$k, $proto, $word);
 								$thr->detach();
 
 								last;
@@ -380,17 +381,26 @@ sub scan {
 	my $to = shift;
 	my $csec = shift;
 	my $user = shift;
+	my $proto = shift;
 	my $pass = shift;
 
 	my $callid = &generate_random_string(32, 1);
 
-	send_register($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $pass, $callid, "");
+	my $p = $proto;
+	my $r = '';
+	
+	$p = "udp" if ($proto eq "all");
+	$r = send_register($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $pass, $callid, "", $p);
+	if ($proto eq "all" && $r eq "") {
+		$p = "tcp";
+		send_register($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $pass, $callid, "", $p);
+	}
 	my $uri = "sip:$to_ip";
 	my $a = md5_hex($user.':'.$realm.':'.$pass);
 	my $b = md5_hex('REGISTER:'.$uri);
 	my $r = md5_hex($a.':'.$nonce.':'.$b);
 	my $digest = "username=\"$user\", realm=\"$realm\", nonce=\"$nonce\", uri=\"$uri\", response=\"$r\", algorithm=MD5";
-	send_register($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $pass, $callid, $digest);
+	send_register($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $pass, $callid, $digest, $p);
 }
  
 # Send REGISTER message
@@ -409,40 +419,42 @@ sub send_register {
 	my $pass = shift;
 	my $callid = shift;
 	my $digest = shift;
+	my $proto = shift;
+	my $response = "";
 
 	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>'udp', PeerAddr=>$to_ip, Timeout => 10);
-	IO::Socket::Timeout->enable_timeouts_on($sc);
-	$sc->read_timeout(0.5);
-	$sc->enable_timeout;
-	$lport = $sc->sockport();
-
-	my $branch = &generate_random_string(71, 0);
-	
-	my $msg = "REGISTER sip:".$to_ip." SIP/2.0\n";
-	$msg .= "Via: SIP/2.0/UDP $from_ip:$lport;branch=$branch\n";
-	$msg .= "From: <sip:".$user."@".$to_ip.">;tag=0c26cd11\n";
-	$msg .= "To: <sip:".$user."@".$to_ip.">\n";
-	$msg .= "Contact: <sip:".$user."@".$from_ip.":$lport;transport=udp>\n";
-	$msg .= "Authorization: Digest $digest\n" if ($digest ne "");
-	$msg .= "Call-ID: ".$callid."\n";
-	$msg .= "CSeq: $cseq REGISTER\n";
-	$msg .= "User-Agent: $useragent\n";
-	$msg .= "Max-Forwards: 70\n";
-	$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\n";
-	$msg .= "Expires: 10\n";
-	$msg .= "Content-Length: 0\n\n";
-
-	my $data = "";
-	my $response = "";
-	my $server = "";
-	my $ua = "";
-	my $line = "";
 
 	if ($sc) {
+		IO::Socket::Timeout->enable_timeouts_on($sc);
+		$sc->read_timeout(0.5);
+		$sc->enable_timeout;
+		$lport = $sc->sockport();
+
+		my $branch = &generate_random_string(71, 0);
+	
+		my $msg = "REGISTER sip:".$to_ip." SIP/2.0\n";
+		$msg .= "Via: SIP/2.0/".uc($proto)." $from_ip:$lport;branch=$branch\n";
+		$msg .= "From: <sip:".$user."@".$to_ip.">;tag=0c26cd11\n";
+		$msg .= "To: <sip:".$user."@".$to_ip.">\n";
+		$msg .= "Contact: <sip:".$user."@".$from_ip.":$lport;transport=$proto>\n";
+		$msg .= "Authorization: Digest $digest\n" if ($digest ne "");
+		$msg .= "Call-ID: ".$callid."\n";
+		$msg .= "CSeq: $cseq REGISTER\n";
+		$msg .= "User-Agent: $useragent\n";
+		$msg .= "Max-Forwards: 70\n";
+		$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\n";
+		$msg .= "Expires: 10\n";
+		$msg .= "Content-Length: 0\n\n";
+
+		my $data = "";
+		my $server = "";
+		my $ua = "";
+		my $line = "";
+
 		print $sc $msg;
 
-		print "[+] $to_ip - Sending REGISTER $from => $to (trying pass: $pass)\n" if ($v eq 1);
-		print "[+] $to_ip - Sending:\n=======\n$msg" if ($vv eq 1);
+		print "[+] $to_ip/$proto - Sending REGISTER $from => $to (trying pass: $pass)\n" if ($v eq 1);
+		print "[+] $to_ip/$proto - Sending:\n=======\n$msg" if ($vv eq 1);
 
 		use Errno qw(ETIMEDOUT EWOULDBLOCK);
 		
@@ -480,8 +492,8 @@ sub send_register {
 		}
     
 		if ($response =~ "^200") {
-			print OUTPUT "$to_ip\t$dport\t$user\t$pass\n";
-			print "Found match: $to_ip:$dport - User: $user - Pass: $pass\n";
+			print OUTPUT "$to_ip\t$dport/$proto\t$user\t$pass\n";
+			print "Found match: $to_ip:$dport/$proto - User: $user - Pass: $pass\n";
 			{lock($found);$found++;}
 		}
 	}
@@ -523,6 +535,7 @@ Usage: perl $0 -h <host> -w wordlist [options]
 -d  <integer>    = Destination number (default: 100)
 -r  <integer>    = Remote port (default: 5060)
 -p  <string>     = Prefix (for extensions)
+-proto <string>  = Protocol (udp, tcp or all (both of them) - By default: ALL)
 -ip <string>     = Source IP (by default it is the same as host)
 -resume          = Resume last session
 -w               = Wordlist

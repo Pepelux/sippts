@@ -35,17 +35,21 @@ my $method = '';	# method to use (INVITE, REGISTER, OPTIONS)
 my $v = 0;		# verbose mode
 my $vv = 0;		# more verbose
 my $user = '';		# auth user
+my $proto = '';		# protocol
 
 my $to_ip = '';
 my $from_ip = '';
 
+mkdir ("tmp") if (! -d "tmp");
 my $tmpfile = "tmp/sipscan".time().".txt";
  
 open(OUTPUT,">$tmpfile");
  
 OUTPUT->autoflush(1);
 STDOUT->autoflush(1);
- 
+
+$SIG{INT} = \&interrupt;
+
 sub init() {
     my $pini;
     my $pfin;
@@ -59,6 +63,7 @@ sub init() {
 				"u=s" => \$user,
 				"l=s" => \$lport,
 				"r=s" => \$dport,
+				"proto=s" => \$proto,
 				"v+" => \$v,
 				"vv+" => \$vv);
  
@@ -69,6 +74,8 @@ sub init() {
 	$user = "100" if ($user eq "");
 	$from = $user if ($from eq "");
 	$to = $user if ($to eq "");
+	$proto = lc($proto);
+	$proto = "all" if ($proto ne "tcp" && $proto ne "udp");
 
 	$method = uc($method);
 	$method = "OPTIONS" if ($method eq "");
@@ -143,7 +150,7 @@ sub init() {
 					last unless defined($range[$i]);
 					my $csec = 1;
 					$from_ip = $range[$i] if ($from_ip eq "");
-					my $thr = threads->new(\&scan, $range[$i], $from_ip, $lport, $j, $from, $to, $csec, $user);
+					my $thr = threads->new(\&scan, $range[$i], $from_ip, $lport, $j, $from, $to, $csec, $user, $proto);
 					$thr->detach();
 					$percent = ($count/($nhost*($pfin-$pini+1)))*100;
 					$percent = sprintf("%.1f", $percent);
@@ -182,6 +189,44 @@ sub init() {
 	exit;
 }
 
+sub interrupt {
+	if ($abort eq 0) {
+		$abort = 1;
+		my $i2 = $i;
+		my $j2 = $j;
+		my $k2 = $k;
+		{lock($threads); $threads=$maxthreads;}
+
+		print "Closing threads. Please wait ...\n";
+		sleep(2);
+
+		close(OUTPUT);
+
+		open(OUTPUT, $tmpfile);
+ 
+		print "\nIP:port\t\t\t  User-Agent\n";
+		print "=======\t\t\t  ==========\n";
+
+		my @results = <OUTPUT>;
+		close (OUTPUT);
+
+		unlink($tmpfile);
+
+		@results = sort(@results);
+
+		foreach(@results) {
+			print $_;
+		}
+
+		print "\n";
+	 
+		exit;
+	}
+	else {
+		print "Closing threads. Please wait ...\n\n";
+	}
+}
+
 sub scan {
 	my $to_ip = shift;
 	my $from_ip = shift;
@@ -191,10 +236,19 @@ sub scan {
 	my $to = shift;
 	my $csec = shift;
 	my $user = shift;
+	my $proto = shift;
 
-	send_register($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user) if ($method eq "REGISTER");
-	send_invite($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user) if ($method eq "INVITE");
-	send_options($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user) if ($method eq "OPTIONS");
+	my $p = $proto;
+	my $r = '';
+	
+	$p = "udp" if ($proto eq "all");
+	$r = send_register($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $p) if ($method eq "REGISTER");
+	send_register($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, "tcp") if ($method eq "REGISTER" && $proto eq "all" && $r eq "");
+	$r = send_invite($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $p) if ($method eq "INVITE");
+	send_invite($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, "tcp") if ($method eq "INVITE" && $proto eq "all" && $r eq "");
+	$r = send_options($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $p) if ($method eq "OPTIONS");
+	send_options($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, "tcp") if ($method eq "OPTIONS" && $proto eq "all" && $r eq "");
+	
 }
  
 # Send REGISTER message
@@ -210,40 +264,42 @@ sub send_register {
 	my $to = shift;
 	my $cseq = shift;
 	my $user = shift;
-
-	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>'udp', PeerAddr=>$to_ip, Timeout => 5);
-	IO::Socket::Timeout->enable_timeouts_on($sc);
-	$sc->read_timeout(0.5);
-	$sc->enable_timeout;
-	$lport = $sc->sockport();
-
-	my $branch = &generate_random_string(71, 0);
-	my $callid = &generate_random_string(32, 1);
-	
-	my $msg = "REGISTER sip:".$to_ip." SIP/2.0\n";
-	$msg .= "Via: SIP/2.0/UDP $from_ip:$lport;branch=$branch\n";
-	$msg .= "From: <sip:".$user."@".$to_ip.">;tag=0c26cd11\n";
-	$msg .= "To: <sip:".$user."@".$to_ip.">\n";
-	$msg .= "Contact: <sip:".$user."@".$from_ip.":$lport;transport=udp>\n";
-	$msg .= "Call-ID: ".$callid."\n";
-	$msg .= "CSeq: $cseq REGISTER\n";
-	$msg .= "User-Agent: $useragent\n";
-	$msg .= "Max-Forwards: 70\n";
-	$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\n";
-	$msg .= "Expires: 10\n";
-	$msg .= "Content-Length: 0\n\n";
-
-	my $data = "";
+	my $proto = shift;
 	my $response = "";
-	my $server = "";
-	my $ua = "";
-	my $line = "";
+
+	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 5);
 
 	if ($sc) {
+		IO::Socket::Timeout->enable_timeouts_on($sc);
+		$sc->read_timeout(0.5);
+		$sc->enable_timeout;
+		$lport = $sc->sockport();
+
+		my $branch = &generate_random_string(71, 0);
+		my $callid = &generate_random_string(32, 1);
+	
+		my $msg = "REGISTER sip:".$to_ip." SIP/2.0\n";
+		$msg .= "Via: SIP/2.0/UDP $from_ip:$lport;branch=$branch\n";
+		$msg .= "From: <sip:".$user."@".$to_ip.">;tag=0c26cd11\n";
+		$msg .= "To: <sip:".$user."@".$to_ip.">\n";
+		$msg .= "Contact: <sip:".$user."@".$from_ip.":$lport;transport=udp>\n";
+		$msg .= "Call-ID: ".$callid."\n";
+		$msg .= "CSeq: $cseq REGISTER\n";
+		$msg .= "User-Agent: $useragent\n";
+		$msg .= "Max-Forwards: 70\n";
+		$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\n";
+		$msg .= "Expires: 10\n";
+		$msg .= "Content-Length: 0\n\n";
+
+		my $data = "";
+		my $server = "";
+		my $ua = "";
+		my $line = "";
+
 		print $sc $msg;
 
-		print "[+] $to_ip:$dport - Sending REGISTER $from => $to\n" if ($v eq 1);
-		print "[+] $to_ip:$dport - Sending:\n=======\n$msg" if ($vv eq 1);
+		print "[+] $to_ip:$dport/$proto - Sending REGISTER $from => $to\n" if ($v eq 1);
+		print "[+] $to_ip:$dport/$proto - Sending:\n=======\n$msg" if ($vv eq 1);
 
 		use Errno qw(ETIMEDOUT EWOULDBLOCK);
 		
@@ -277,7 +333,7 @@ sub send_register {
 				$data .= $line;
  
 				if ($line =~ /^\r\n/) {
-					print "[+] $to_ip:$dport - Sending REGISTER $from => $to\n" if ($v eq 0);
+					print "[+] $to_ip:$dport/$proto - Sending REGISTER $from => $to\n" if ($v eq 0);
 					print "[-] $response\n" if ($vv eq 0);
 					print "Receiving:\n=========\n$data" if ($vv eq 1);
 
@@ -296,7 +352,7 @@ sub send_register {
 				}
 			}
 
-			my $dhost = "$to_ip:$dport";
+			my $dhost = "$to_ip:$dport/$proto";
 			$dhost .= "\t" if (length($dhost) < 10);
 			$server = "Unknown" if ($server eq "");
 			print OUTPUT "$dhost\t| $server\n";
@@ -322,54 +378,56 @@ sub send_invite {
 	my $to = shift;
 	my $cseq = shift;
 	my $user = shift;
-
-	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>'udp', PeerAddr=>$to_ip, Timeout => 5);
-	IO::Socket::Timeout->enable_timeouts_on($sc);
-	$sc->read_timeout(0.5);
-	$sc->enable_timeout;
-	$lport = $sc->sockport();
-
-	my $branch = &generate_random_string(71, 0);
-	my $callid = &generate_random_string(32, 1);
-	
-	my $msg = "INVITE sip:".$to."@".$to_ip." SIP/2.0\n";
-	$msg .= "Via: SIP/2.0/UDP $from_ip:$lport;branch=$branch\n";
-	$msg .= "From: \"$from\" <sip:".$user."@".$to_ip.">;tag=0c26cd11\n";
-	$msg .= "To: <sip:".$to."@".$to_ip.">\n";
-	$msg .= "Contact: <sip:".$from."@".$from_ip.":$lport;transport=udp>\n";
-	$msg .= "Supported: replaces, timer, path\n";
-	$msg .= "P-Early-Media: Supported\n";
-	$msg .= "Call-ID: ".$callid."\n";
-	$msg .= "CSeq: $cseq INVITE\n";
-	$msg .= "User-Agent: $useragent\n";
-	$msg .= "Max-Forwards: 70\n";
-	$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\n";
-	$msg .= "Content-Type: application/sdp\n";
-
-	my $sdp .= "v=0\n";
-	$sdp .= "o=anonymous 1312841870 1312841870 IN IP4 $from_ip\n";
-	$sdp .= "s=session\n";
-	$sdp .= "c=IN IP4 $from_ip\n";
-	$sdp .= "t=0 0\n";
-	$sdp .= "m=audio 2362 RTP/AVP 0\n";
-	$sdp .= "a=rtpmap:18 G729/8000\n";
-	$sdp .= "a=rtpmap:0 PCMU/8000\n";
-	$sdp .= "a=rtpmap:8 PCMA/8000\n";
-
-	$msg .= "Content-Length: ".length($sdp)."\n\n";
-	$msg .= $sdp;
-
-	my $data = "";
+	my $proto = shift;
 	my $response = "";
-	my $server = "";
-	my $ua = "";
-	my $line = "";
+
+	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 5);
 
 	if ($sc) {
+		IO::Socket::Timeout->enable_timeouts_on($sc);
+		$sc->read_timeout(0.5);
+		$sc->enable_timeout;
+		$lport = $sc->sockport();
+
+		my $branch = &generate_random_string(71, 0);
+		my $callid = &generate_random_string(32, 1);
+	
+		my $msg = "INVITE sip:".$to."@".$to_ip." SIP/2.0\n";
+		$msg .= "Via: SIP/2.0/UDP $from_ip:$lport;branch=$branch\n";
+		$msg .= "From: \"$from\" <sip:".$user."@".$to_ip.">;tag=0c26cd11\n";
+		$msg .= "To: <sip:".$to."@".$to_ip.">\n";
+		$msg .= "Contact: <sip:".$from."@".$from_ip.":$lport;transport=udp>\n";
+		$msg .= "Supported: replaces, timer, path\n";
+		$msg .= "P-Early-Media: Supported\n";
+		$msg .= "Call-ID: ".$callid."\n";
+		$msg .= "CSeq: $cseq INVITE\n";
+		$msg .= "User-Agent: $useragent\n";
+		$msg .= "Max-Forwards: 70\n";
+		$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\n";
+		$msg .= "Content-Type: application/sdp\n";
+
+		my $sdp .= "v=0\n";
+		$sdp .= "o=anonymous 1312841870 1312841870 IN IP4 $from_ip\n";
+		$sdp .= "s=session\n";
+		$sdp .= "c=IN IP4 $from_ip\n";
+		$sdp .= "t=0 0\n";
+		$sdp .= "m=audio 2362 RTP/AVP 0\n";
+		$sdp .= "a=rtpmap:18 G729/8000\n";
+		$sdp .= "a=rtpmap:0 PCMU/8000\n";
+		$sdp .= "a=rtpmap:8 PCMA/8000\n";
+
+		$msg .= "Content-Length: ".length($sdp)."\n\n";
+		$msg .= $sdp;
+
+		my $data = "";
+		my $server = "";
+		my $ua = "";
+		my $line = "";
+
 		print $sc $msg;
 
-		print "[+] $to_ip:$dport - Sending INVITE $from => $to\n" if ($v eq 1);
-		print "[+] $to_ip:$dport - Sending:\n=======\n$msg" if ($vv eq 1);
+		print "[+] $to_ip:$dport/$proto - Sending INVITE $from => $to\n" if ($v eq 1);
+		print "[+] $to_ip:$dport/$proto - Sending:\n=======\n$msg" if ($vv eq 1);
 
 		use Errno qw(ETIMEDOUT EWOULDBLOCK);
 		
@@ -403,7 +461,7 @@ sub send_invite {
 				$data .= $line;
  
 				if ($line =~ /^\r\n/) {
-					print "[+] $to_ip:$dport - Sending INVITE $from => $to\n" if ($v eq 0);
+					print "[+] $to_ip:$dport/$proto - Sending INVITE $from => $to\n" if ($v eq 0);
 					print "[-] $response\n" if ($vv eq 0);
 					print "Receiving:\n=========\n$data" if ($vv eq 1);
 
@@ -422,7 +480,7 @@ sub send_invite {
 				}
 			}
 
-			my $dhost = "$to_ip:$dport";
+			my $dhost = "$to_ip:$dport/$proto";
 			$dhost .= "\t" if (length($dhost) < 10);
 			$server = "Unknown" if ($server eq "");
 			print OUTPUT "$dhost\t| $server\n";
@@ -448,39 +506,41 @@ sub send_options {
 	my $to = shift;
 	my $cseq = shift;
 	my $user = shift;
-
-	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>'udp', PeerAddr=>$to_ip, Timeout => 5);
-	IO::Socket::Timeout->enable_timeouts_on($sc);
-	$sc->read_timeout(0.5);
-	$sc->enable_timeout;
-	$lport = $sc->sockport();
-
-	my $branch = &generate_random_string(71, 0);
-	my $callid = &generate_random_string(32, 1);
-	
-	my $msg = "OPTIONS sip:".$to."@".$to_ip." SIP/2.0\n";
-	$msg .= "Via: SIP/2.0/UDP $from_ip:$lport;branch=$branch\n";
-	$msg .= "From: <sip:".$user."@".$to_ip.">;tag=0c26cd11\n";
-	$msg .= "To: <sip:".$user."@".$to_ip.">\n";
-	$msg .= "Contact: <sip:".$user."@".$from_ip.":$lport;transport=udp>\n";
-	$msg .= "Call-ID: ".$callid."\n";
-	$msg .= "CSeq: $cseq OPTIONS\n";
-	$msg .= "User-Agent: $useragent\n";
-	$msg .= "Max-Forwards: 70\n";
-	$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\n";
-	$msg .= "Content-Length: 0\n\n";
-
-	my $data = "";
+	my $proto = shift;
 	my $response = "";
-	my $server = "";
-	my $ua = "";
-	my $line = "";
+
+	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 5);
 
 	if ($sc) {
+		IO::Socket::Timeout->enable_timeouts_on($sc);
+		$sc->read_timeout(0.5);
+		$sc->enable_timeout;
+		$lport = $sc->sockport();
+
+		my $branch = &generate_random_string(71, 0);
+		my $callid = &generate_random_string(32, 1);
+	
+		my $msg = "OPTIONS sip:".$to."@".$to_ip." SIP/2.0\n";
+		$msg .= "Via: SIP/2.0/".uc($proto)." $from_ip:$lport;branch=$branch\n";
+		$msg .= "From: <sip:".$user."@".$to_ip.">;tag=0c26cd11\n";
+		$msg .= "To: <sip:".$user."@".$to_ip.">\n";
+		$msg .= "Contact: <sip:".$user."@".$from_ip.":$lport;transport=$proto>\n";
+		$msg .= "Call-ID: ".$callid."\n";
+		$msg .= "CSeq: $cseq OPTIONS\n";
+		$msg .= "User-Agent: $useragent\n";
+		$msg .= "Max-Forwards: 70\n";
+		$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\n";
+		$msg .= "Content-Length: 0\n\n";
+
+		my $data = "";
+		my $server = "";
+		my $ua = "";
+		my $line = "";
+
 		print $sc $msg;
 
-		print "[+] $to_ip:$dport - Sending OPTIONS $from => $to\n" if ($v eq 1);
-		print "[+] $to_ip:$dport - Sending:\n=======\n$msg" if ($vv eq 1);
+		print "[+] $to_ip:$dport/$proto - Sending OPTIONS $from => $to\n" if ($v eq 1);
+		print "[+] $to_ip:$dport/$proto - Sending:\n=======\n$msg" if ($vv eq 1);
 
 		use Errno qw(ETIMEDOUT EWOULDBLOCK);
 		
@@ -514,7 +574,7 @@ sub send_options {
 				$data .= $line;
  
 				if ($line =~ /^\r\n/) {
-					print "[+] $to_ip:$dport - Sending OPTIONS $from => $to\n" if ($v eq 0);
+					print "[+] $to_ip:$dport/$proto - Sending OPTIONS $from => $to\n" if ($v eq 0);
 					print "[-] $response\n" if ($vv eq 0);
 					print "Receiving:\n=========\n$data" if ($vv eq 1);
 
@@ -535,7 +595,7 @@ sub send_options {
 				}
 			}
 
-			my $dhost = "$to_ip:$dport";
+			my $dhost = "$to_ip:$dport/$proto";
 			$dhost .= "\t" if (length($dhost) < 10);
 			$server = "Unknown" if ($server eq "");
 			print OUTPUT "$dhost\t| $server\n";
@@ -575,11 +635,12 @@ SipSCAN v1.2 - by Pepelux <pepeluxx\@gmail.com>
 Usage: perl $0 -h <host> [options]
  
 == Options ==
--m <string>      = Method: REGISTER/INVITE/OPTIONS (default: OPTIONS)
+-m  <string>     = Method: REGISTER/INVITE/OPTIONS (default: OPTIONS)
 -u  <string>     = Username
 -s  <integer>    = Source number (CallerID) (default: 100)
 -d  <integer>    = Destination number (default: 100)
 -r  <integer>    = Remote port (default: 5060)
+-proto <string>  = Protocol (udp, tcp or all (both of them) - By default: ALL)
 -ip <string>     = Source IP (by default it is the same as host)
 -v               = Verbose (trace information)
 -vv              = More verbose (more detailed trace)
@@ -589,8 +650,8 @@ Usage: perl $0 -h <host> [options]
 \tTo search SIP services on 192.168.0.1 port 5060 (using OPTIONS method)
 \$perl $0 -h 192.168.0.1 -m INVITE
 \tTo search SIP services on 192.168.0.1 port 5060 (using INVITE method)
-\$perl $0 -h 192.168.0.0/24 -r 5060 -v
-\tTo search SIP services on 192.168.0.0 port 5060 network (using OPTIONS method)
+\$perl $0 -h 192.168.0.0/24 -v -t tcp
+\tTo search SIP services on 192.168.0.0 network by TCP connection (using OPTIONS method)
 \$perl $0 -h 192.168.0.1-192.168.0.100 -r 5060-5070 -vv
 \tTo search SIP services on 192.168.0.100 ports from 5060 to 5070 (using OPTIONS method)
 

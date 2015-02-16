@@ -25,6 +25,7 @@ sub f_probe_ctrl_c;
 my $g_pcap_err = '';
 my $interface = '';
 my $dport = '';
+my $u = 0;
 my $method = '';
 my $g_cap_descrip;
 
@@ -37,7 +38,8 @@ sub init() {
 	# check params
 	my $result = GetOptions ("i=s" => \$interface,
 				"m=s" => \$method,
-				"p=s" => \$dport);
+				"p=s" => \$dport,
+				"u+" => \$u);
 
 	help() if ($interface eq "");
 	$dport = "5060" if ($dport eq "");
@@ -72,8 +74,14 @@ sub f_probe_read80211b_func {
 			my $m = method($cleandata);
 			
 			if ($method eq "" || $method eq $m) {
-				print "[+] $ipsrc:$portsrc => $ipdst:$portdst\n";
-				print hex_to_ascii($cleandata)."\n\n";
+				if ($u eq 0) {
+					print "[+] $ipsrc:$portsrc => $ipdst:$portdst\n";
+					print hex_to_ascii($cleandata)."\n\n";
+				}
+				else {
+					my $auth = auth($cleandata);
+					print $auth."\n" if ($auth ne "");
+				}
 			}
 		}
 	}
@@ -154,6 +162,19 @@ sub method {
 	return $method;
 };
 
+sub auth {
+	my $data = shift;
+	$data = hex_to_ascii($data);
+	my $data1 = lc($data);
+	my $pos1 = index($data1, "authorization")+15;
+	return "" if ($pos1 < 15);
+	
+	my $pos2 = index($data1, "\n", $pos1);
+	my $auth = substr($data, $pos1, $pos2-$pos1);
+
+	return $auth;
+};
+
 sub f_probe_ctrl_c {
 	# Checks if there is a open pcap handle and closes it first.
 	if ($g_cap_descrip) {
@@ -173,6 +194,7 @@ Usage: sudo perl -i <interface> $0 [options]
 -i  <string>     = Interface (ex: eth0)
 -p  <integer>    = Port (default: 5060)
 -m  <string>     = Filter method (ex: INVITE, REGISTER)
+-u               = Filter users
  
 == Examples ==
 \$sudo perl $0 -i eth0
