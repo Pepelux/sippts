@@ -65,9 +65,10 @@ sub init() {
 			$sql .= " ORDER BY host ASC";
 			my $sth2 = $db->prepare($sql) or die "Couldn't prepare statement: " . $db->errstr;
 			$sth2->execute() or die "Couldn't execute statement: " . $sth2->errstr;
+			my $write = 0;
 
 			while (my @data2 = $sth2->fetchrow_array()) {
-				print "[+] $host:$port/$proto \t- UserAgent: $ua\n" if ($noauth eq 1);
+				print "[+] $host:$port/$proto \t- UserAgent: $ua\n" if ($noauth eq 1 && $write eq 0);
 				my $exten = $data2[0];
 				$exten =~ s/\n//g;
 				my $auth = $data2[1];
@@ -85,10 +86,10 @@ sub init() {
 				if ($pass eq "") { print "\t[-] exten: $exten \t- $auth\n"; }
 				else { print "\t[-] exten: $exten \t- $auth \t- pass: $pass\n"; }
 
-				print "\n" if ($noauth eq 1);
+				$write = 1;
 			}
 
-			print "\n" if ($noauth eq 0);
+			print "\n" if ($noauth eq 0 || ($noauth eq 1 && $write eq 1));
 		}
 	}
 	
