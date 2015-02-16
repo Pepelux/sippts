@@ -55,7 +55,8 @@ unless (-e $database || -e $database_empty) {
 system("cp $database_empty $database") if (! -e $database);
 	
 my $db = DBI->connect("dbi:SQLite:dbname=$database","","") or die $DBI::errstr;
-my $extensid = last_id();
+my $extensid = last_id("extens");
+my $hostsid = last_id("hosts");
 
 open(OUTPUT,">$tmpfile");
  
@@ -89,58 +90,120 @@ sub init() {
  
 	$lport = "5070" if ($lport eq "");
 	$dport = "5060" if ($dport eq "");
-	$exten = "100-1000" if ($exten eq "");
+	$exten = "100-300" if ($exten eq "");
 	$proto = lc($proto);
 	$proto = "all" if ($proto ne "tcp" && $proto ne "udp");
 
-	if ($host =~ /\-/) {
-		my $ip = $host;
+	my @hostlist;
 
-		$ip =~ /([0-9|\.]*)-([0-9|\.]*)/;
-		my $ipini = $1;
-		my $ipfin = $2;
+	if ($host =~ /\,/) {
+		@hostlist = split(/\,/, $host);
 
-		my $ip2 = $ipini;
-		$ip2 =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/;
-		my $ip2_1 = int($1);
-		my $ip2_2 = int($2);
-		my $ip2_3 = int($3);
-		my $ip2_4 = int($4);
+		foreach(@hostlist) {
+			my $line = $_;
 
-		my $ip3 = $ipfin;
-		$ip3 =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/;
-		my $ip3_1 = int($1);
-		my $ip3_2 = int($2);
-		my $ip3_3 = int($3);
-		my $ip3_4 = int($4);
+			if ($line =~ /\-/) {
+				my $ip = $line;
 
-		for (my $i1 = $ip2_1; $i1 <= $ip3_1; $i1++) {
-			for (my $i2 = $ip2_2; $i2 <= $ip3_2; $i2++) {
-				for (my $i3 = $ip2_3; $i3 <= $ip3_3; $i3++) {
-					for (my $i4 = $ip2_4; $i4 <= $ip3_4; $i4++) {
-						$ip = "$i1.$i2.$i3.$i4";
-						push @range, $ip;
+				$ip =~ /([0-9|\.]*)-([0-9|\.]*)/;
+				my $ipini = $1;
+				my $ipfin = $2;
+
+				my $ip2 = $ipini;
+				$ip2 =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/;
+				my $ip2_1 = int($1);
+				my $ip2_2 = int($2);
+				my $ip2_3 = int($3);
+				my $ip2_4 = int($4);
+
+				my $ip3 = $ipfin;
+				$ip3 =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/;
+				my $ip3_1 = int($1);
+				my $ip3_2 = int($2);
+				my $ip3_3 = int($3);
+				my $ip3_4 = int($4);
+
+				for (my $i1 = $ip2_1; $i1 <= $ip3_1; $i1++) {
+					for (my $i2 = $ip2_2; $i2 <= $ip3_2; $i2++) {
+						for (my $i3 = $ip2_3; $i3 <= $ip3_3; $i3++) {
+							for (my $i4 = $ip2_4; $i4 <= $ip3_4; $i4++) {
+								$ip = "$i1.$i2.$i3.$i4";
+								push @range, $ip;
+							}
+						}
 					}
+				}
+			}
+			else {
+				my $ip = new NetAddr::IP($line);
+
+				if ($ip < $ip->broadcast) {
+					$ip++;
+
+					while ($ip < $ip->broadcast) {
+						my $ip2 = $ip;
+						$ip2 =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/;
+						$ip2 = "$1.$2.$3.$4";
+						push @range, $ip2;
+						$ip++;
+					}
+				}
+				else {
+					push @range, $line;
 				}
 			}
 		}
 	}
 	else {
-		my $ip = new NetAddr::IP($host);
+		if ($host =~ /\-/) {
+			my $ip = $host;
 
-		if ($ip < $ip->broadcast) {
-			$ip++;
+			$ip =~ /([0-9|\.]*)-([0-9|\.]*)/;
+			my $ipini = $1;
+			my $ipfin = $2;
 
-			while ($ip < $ip->broadcast) {
-				my $ip2 = $ip;
-				$ip2 =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/;
-				$ip2 = "$1.$2.$3.$4";
-				push @range, $ip2;
-				$ip++;
+			my $ip2 = $ipini;
+			$ip2 =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/;
+			my $ip2_1 = int($1);
+			my $ip2_2 = int($2);
+			my $ip2_3 = int($3);
+			my $ip2_4 = int($4);
+
+			my $ip3 = $ipfin;
+			$ip3 =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/;
+			my $ip3_1 = int($1);
+			my $ip3_2 = int($2);
+			my $ip3_3 = int($3);
+			my $ip3_4 = int($4);
+
+			for (my $i1 = $ip2_1; $i1 <= $ip3_1; $i1++) {
+				for (my $i2 = $ip2_2; $i2 <= $ip3_2; $i2++) {
+					for (my $i3 = $ip2_3; $i3 <= $ip3_3; $i3++) {
+						for (my $i4 = $ip2_4; $i4 <= $ip3_4; $i4++) {
+							$ip = "$i1.$i2.$i3.$i4";
+							push @range, $ip;
+						}
+					}
+				}
 			}
 		}
 		else {
-			push @range, $host;
+			my $ip = new NetAddr::IP($host);
+
+			if ($ip < $ip->broadcast) {
+				$ip++;
+
+				while ($ip < $ip->broadcast) {
+					my $ip2 = $ip;
+					$ip2 =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/;
+					$ip2 = "$1.$2.$3.$4";
+					push @range, $ip2;
+					$ip++;
+				}
+			}
+			else {
+				push @range, $host;
+			}
 		}
 	}
 
@@ -203,8 +266,8 @@ sub showres {
 	open(OUTPUT, $tmpfile);
  
  	if ($nolog eq 0) {
-		print "\nIP address\tPort\tProto\tExtension\tAuthentication\n";
-		print "==========\t====\t=====\t=========\t==============\n";
+		print "\nIP address\tPort\tProto\tExtension\tAuthentication\t\tUser-Agent\n";
+		print "==========\t====\t=====\t=========\t==============\t\t==========\n";
 	}
 
 	my @results = <OUTPUT>;
@@ -222,7 +285,9 @@ sub showres {
 }
 
 sub last_id {
-	my $sth = $db->prepare('SELECT id FROM extens ORDER BY id DESC LIMIT 1') or die "Couldn't prepare statement: " . $db->errstr;
+	my $cdb = shift;
+
+	my $sth = $db->prepare("SELECT id FROM $cdb ORDER BY id DESC LIMIT 1") or die "Couldn't prepare statement: " . $db->errstr;
 	$sth->execute() or die "Couldn't execute statement: " . $sth->errstr;
 	my @data = $sth->fetchrow_array();
 	$sth->finish;
@@ -243,10 +308,20 @@ sub save {
 	my $line = shift;
 
 		my @lines = split (/\t/, $line);
-		my $sth = $db->prepare("SELECT id FROM extens WHERE host='".$lines[0]."' AND exten='".$lines[3]."'") or die "Couldn't prepare statement: " . $db->errstr;
+		my $sth = $db->prepare("SELECT id FROM hosts WHERE host='".$lines[0]."'") or die "Couldn't prepare statement: " . $db->errstr;
 		$sth->execute() or die "Couldn't execute statement: " . $sth->errstr;
 		my @data = $sth->fetchrow_array();
 		my $sql;
+		$sth->finish;
+		if ($#data < 0) {
+			$sql = "INSERT INTO hosts (id, host, port, proto, useragent) VALUES ($hostsid, '".$lines[0]."', ".$lines[1].", '".$lines[2]."', '".$lines[6]."')";
+			$db->do($sql);
+			$hostsid = $db->func('last_insert_rowid') + 1;
+		}
+
+		$sth = $db->prepare("SELECT id FROM extens WHERE host='".$lines[0]."' AND exten='".$lines[3]."'") or die "Couldn't prepare statement: " . $db->errstr;
+		$sth->execute() or die "Couldn't execute statement: " . $sth->errstr;
+		@data = $sth->fetchrow_array();
 		$sth->finish;
 		if ($#data < 0) {
 			$sql = "INSERT INTO extens (id, host, port, proto, exten, auth) VALUES ($extensid, '".$lines[0]."', ".$lines[1].", '".$lines[2]."', '".$lines[3]."', '".$lines[5]."')";
@@ -410,6 +485,8 @@ sub send_options {
 		$msg .= "Content-Length: 0\n\n";
 
 		my $data = "";
+		my $server = "";
+		my $ua = "";
 		my $line = "";
 
 		print $sc $msg;
@@ -434,6 +511,18 @@ sub send_options {
 					if ($1) { $response = $1; }
 				}
 
+				if ($line =~ /[Ss]erver/ && $server eq "") {
+					$line =~ /[Ss]erver\:\s(.+)\r\n/;
+ 
+					$server = $1 if ($1);
+				}
+
+				if ($line =~ /[Uu]ser\-[Aa]gent/ && $ua eq "") {
+					$line =~ /[Uu]ser\-[Aa]gent\:\s(.+)\r\n/;
+ 
+					$ua = $1 if ($1);
+				}
+
 				$data .= $line;
  
 				if ($line =~ /^\r\n/) {
@@ -446,12 +535,22 @@ sub send_options {
 		}
    
 		if ($response =~ "^200") {
-			my $resinvite = send_invite($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $proto);
-			if ($resinvite =~ "^1") {
-				print OUTPUT "$to_ip\t$dport\t$proto\t$to\t\tNo authentication required\n";
+			if ($server eq "") {
+				$server = $ua;
 			}
 			else {
-				print OUTPUT "$to_ip\t$dport\t$proto\t$to\t\tRequire authentication\n";
+				if ($ua ne "") {
+					$server .= " - $ua";
+				}
+			}
+
+			$server = "Unknown" if ($server eq "");
+			my $resinvite = send_invite($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $proto);
+			if ($resinvite =~ "^1") {
+				print OUTPUT "$to_ip\t$dport\t$proto\t$to\t\tNo authentication required\t$server\n";
+			}
+			else {
+				print OUTPUT "$to_ip\t$dport\t$proto\t$to\t\tRequire authentication\t$server\n";
 			}
 			{lock($found);$found++;}
 		}
@@ -489,7 +588,7 @@ SipEXTEN v1.2 - by Pepelux <pepeluxx\@gmail.com>
 Usage: perl $0 -h <host> [options]
  
 == Options ==
--e  <string>     = Extensions (default 100-1000)
+-e  <string>     = Extensions (default 100-300)
 -s  <integer>    = Source number (CallerID) (default: 100)
 -d  <integer>    = Destination number (default: 100)
 -r  <integer>    = Remote port (default: 5060)
@@ -503,7 +602,9 @@ Usage: perl $0 -h <host> [options]
 == Examples ==
 \$perl $0 -h 192.168.0.1 -e 100-200 -v
 \tTo check extensions range from 100 to 200 (with verbose mode)
-\$perl $0 -h 192.168.0.1 -e 100-200 -p user
+\$perl $0 -h 192.168.0.1 -e 100-200 -v
+\tTo check several ranges
+\$perl $0 -h 192.168.0.1,192.168.2.0/24.192.168.3.1-192.168.3.200
 \tTo check extensions range from user100 to user200
 \$perl $0 -h 192.168.0.0/24 -e 100 -r 5060-5080 -vv
 \tTo check extension 100 with destination port between 5060 and 5080 (with packages info)

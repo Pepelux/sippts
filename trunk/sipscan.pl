@@ -98,54 +98,116 @@ sub init() {
 	$method = uc($method);
 	$method = "OPTIONS" if ($method eq "");
  
-	if ($host =~ /\-/) {
-		my $ip = $host;
+	my @hostlist;
 
-		$ip =~ /([0-9|\.]*)-([0-9|\.]*)/;
-		my $ipini = $1;
-		my $ipfin = $2;
+	if ($host =~ /\,/) {
+		@hostlist = split(/\,/, $host);
 
-		my $ip2 = $ipini;
-		$ip2 =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/;
-		my $ip2_1 = int($1);
-		my $ip2_2 = int($2);
-		my $ip2_3 = int($3);
-		my $ip2_4 = int($4);
+		foreach(@hostlist) {
+			my $line = $_;
 
-		my $ip3 = $ipfin;
-		$ip3 =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/;
-		my $ip3_1 = int($1);
-		my $ip3_2 = int($2);
-		my $ip3_3 = int($3);
-		my $ip3_4 = int($4);
+			if ($line =~ /\-/) {
+				my $ip = $line;
 
-		for (my $i1 = $ip2_1; $i1 <= $ip3_1; $i1++) {
-			for (my $i2 = $ip2_2; $i2 <= $ip3_2; $i2++) {
-				for (my $i3 = $ip2_3; $i3 <= $ip3_3; $i3++) {
-					for (my $i4 = $ip2_4; $i4 <= $ip3_4; $i4++) {
-						$ip = "$i1.$i2.$i3.$i4";
-						push @range, $ip;
+				$ip =~ /([0-9|\.]*)-([0-9|\.]*)/;
+				my $ipini = $1;
+				my $ipfin = $2;
+
+				my $ip2 = $ipini;
+				$ip2 =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/;
+				my $ip2_1 = int($1);
+				my $ip2_2 = int($2);
+				my $ip2_3 = int($3);
+				my $ip2_4 = int($4);
+
+				my $ip3 = $ipfin;
+				$ip3 =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/;
+				my $ip3_1 = int($1);
+				my $ip3_2 = int($2);
+				my $ip3_3 = int($3);
+				my $ip3_4 = int($4);
+
+				for (my $i1 = $ip2_1; $i1 <= $ip3_1; $i1++) {
+					for (my $i2 = $ip2_2; $i2 <= $ip3_2; $i2++) {
+						for (my $i3 = $ip2_3; $i3 <= $ip3_3; $i3++) {
+							for (my $i4 = $ip2_4; $i4 <= $ip3_4; $i4++) {
+								$ip = "$i1.$i2.$i3.$i4";
+								push @range, $ip;
+							}
+						}
 					}
+				}
+			}
+			else {
+				my $ip = new NetAddr::IP($line);
+
+				if ($ip < $ip->broadcast) {
+					$ip++;
+
+					while ($ip < $ip->broadcast) {
+						my $ip2 = $ip;
+						$ip2 =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/;
+						$ip2 = "$1.$2.$3.$4";
+						push @range, $ip2;
+						$ip++;
+					}
+				}
+				else {
+					push @range, $line;
 				}
 			}
 		}
 	}
 	else {
-		my $ip = new NetAddr::IP($host);
+		if ($host =~ /\-/) {
+			my $ip = $host;
 
-		if ($ip < $ip->broadcast) {
-			$ip++;
+			$ip =~ /([0-9|\.]*)-([0-9|\.]*)/;
+			my $ipini = $1;
+			my $ipfin = $2;
 
-			while ($ip < $ip->broadcast) {
-				my $ip2 = $ip;
-				$ip2 =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/;
-				$ip2 = "$1.$2.$3.$4";
-				push @range, $ip2;
-				$ip++;
+			my $ip2 = $ipini;
+			$ip2 =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/;
+			my $ip2_1 = int($1);
+			my $ip2_2 = int($2);
+			my $ip2_3 = int($3);
+			my $ip2_4 = int($4);
+
+			my $ip3 = $ipfin;
+			$ip3 =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/;
+			my $ip3_1 = int($1);
+			my $ip3_2 = int($2);
+			my $ip3_3 = int($3);
+			my $ip3_4 = int($4);
+
+			for (my $i1 = $ip2_1; $i1 <= $ip3_1; $i1++) {
+				for (my $i2 = $ip2_2; $i2 <= $ip3_2; $i2++) {
+					for (my $i3 = $ip2_3; $i3 <= $ip3_3; $i3++) {
+						for (my $i4 = $ip2_4; $i4 <= $ip3_4; $i4++) {
+							$ip = "$i1.$i2.$i3.$i4";
+							push @range, $ip;
+						}
+					}
+				}
 			}
 		}
 		else {
-			push @range, $host;
+			my $ip = new NetAddr::IP($host);
+
+			if ($ip < $ip->broadcast) {
+				$ip++;
+
+				while ($ip < $ip->broadcast) {
+					my $ip2 = $ip;
+					$ip2 =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/;
+					$ip2 = "$1.$2.$3.$4";
+					push @range, $ip2;
+					$ip++;
+				}
+			}
+			else {
+				push @range, $host;
+			}
 		}
 	}
 
@@ -674,6 +736,8 @@ Usage: perl $0 -h <host> [options]
 == Examples ==
 \$perl $0 -h 192.168.0.1
 \tTo search SIP services on 192.168.0.1 port 5060 (using OPTIONS method)
+\tTo search several ranges
+\$perl $0 -h 192.168.0.1,192.168.2.0/24.192.168.3.1-192.168.3.200
 \$perl $0 -h 192.168.0.1 -m INVITE
 \tTo search SIP services on 192.168.0.1 port 5060 (using INVITE method)
 \$perl $0 -h 192.168.0.0/24 -v -t tcp
