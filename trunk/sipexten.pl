@@ -19,12 +19,10 @@ use DBI;
 my $useragent = 'sipptk';
  
 my $maxthreads = 300;
-my $time_ping = 2; # wait secs
  
 my $threads : shared = 0;
 my $found : shared = 0;
 my $count : shared = 0;
-my $percent : shared = 0;
 my @range;
 my @results;
  
@@ -35,6 +33,7 @@ my $from = '';		# source number
 my $to = '';		# destination number
 my $v = 0;		# verbose mode
 my $vv = 0;		# more verbose
+my $nolog = 0;
 my $exten = '';		# extension
 my $prefix = '';	# prefix
 my $proto = '';		# protocol
@@ -82,6 +81,7 @@ sub init() {
 				"proto=s" => \$proto,
 				"p=s" => \$prefix,
 				"nodb+" => \$nodb,
+				"nolog+" => \$nolog,
 				"v+" => \$v,
 				"vv+" => \$vv);
  
@@ -178,8 +178,6 @@ sub init() {
 						$from_ip = $range[$i] if ($from_ip eq "");
 						my $thr = threads->new(\&scan, $range[$i], $from_ip, $lport, $j, $from, $to, $csec, $prefix.$k, $proto);
 						$thr->detach();
-						$percent = ($count/($nhost*($pfin-$pini+1)))*100;
-						$percent = sprintf("%.1f", $percent);
 
 						last;
 					}
@@ -195,27 +193,32 @@ sub init() {
 
 	close(OUTPUT);
 
+	showres();
+	unlink($tmpfile);
+
+	exit;
+}
+
+sub showres {
 	open(OUTPUT, $tmpfile);
  
-	print "\nIP address\tPort\tProto\tExtension\tAuthentication\n";
-	print "==========\t====\t=====\t=========\t==============\n";
+ 	if ($nolog eq 0) {
+		print "\nIP address\tPort\tProto\tExtension\tAuthentication\n";
+		print "==========\t====\t=====\t=========\t==============\n";
+	}
 
 	my @results = <OUTPUT>;
 	close (OUTPUT);
-
-	unlink($tmpfile);
 
 	@results = sort(@results);
 
 	foreach(@results) {
 		my $line = $_;
-		print $line;
+		print $line if ($nolog eq 0);
 		save($line) if ($nodb eq 0);
 	}
 
 	print "\n";
-
-	exit;
 }
 
 sub last_id {
@@ -230,25 +233,8 @@ sub last_id {
 sub interrupt {
 	close(OUTPUT);
 
-	open(OUTPUT, $tmpfile);
- 
-	print "\nIP address\tPort\tProto\tExtension\tAuthentication\n";
-	print "==========\t====\t=====\t=========\t==============\n";
-
-	my @results = <OUTPUT>;
-	close (OUTPUT);
-
+	showres();
 	unlink($tmpfile);
-
-	@results = sort(@results);
-
-	foreach(@results) {
-		my $line = $_;
-		print $line;
-		save($line) if ($nodb eq 0);
-	}
-
-	print "\n";
 
 	exit;
 }
@@ -404,7 +390,7 @@ sub send_options {
 
 	if ($sc) {
 		IO::Socket::Timeout->enable_timeouts_on($sc);
-		$sc->read_timeout(0.5);
+		$sc->read_timeout(1);
 		$sc->enable_timeout;
 		$lport = $sc->sockport();
 
@@ -460,7 +446,7 @@ sub send_options {
 		}
    
 		if ($response =~ "^200") {
-			my $resinvite = send_invite($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user);
+			my $resinvite = send_invite($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $proto);
 			if ($resinvite =~ "^1") {
 				print OUTPUT "$to_ip\t$dport\t$proto\t$to\t\tNo authentication required\n";
 			}

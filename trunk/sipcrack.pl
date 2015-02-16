@@ -19,7 +19,6 @@ use DBI;
 my $useragent = 'sipptk';
  
 my $maxthreads = 300;
-my $time_ping = 2; # wait secs
  
 my $threads : shared = 0;
 my $found : shared = 0;
