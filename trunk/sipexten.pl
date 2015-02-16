@@ -604,7 +604,7 @@ Usage: perl $0 -h <host> [options]
 \tTo check extensions range from 100 to 200 (with verbose mode)
 \$perl $0 -h 192.168.0.1 -e 100-200 -v
 \tTo check several ranges
-\$perl $0 -h 192.168.0.1,192.168.2.0/24.192.168.3.1-192.168.3.200
+\$perl $0 -h 192.168.0.1,192.168.2.0/24.192.168.3.1-192.168.50.200
 \tTo check extensions range from user100 to user200
 \$perl $0 -h 192.168.0.0/24 -e 100 -r 5060-5080 -vv
 \tTo check extension 100 with destination port between 5060 and 5080 (with packages info)
