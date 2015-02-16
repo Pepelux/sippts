@@ -14,6 +14,7 @@ use threads;
 use threads::shared;
 use Getopt::Long;
 use Digest::MD5;
+use DBI;
 
 my $useragent = 'sipptk';
  
@@ -36,13 +37,28 @@ my $v = 0;		# verbose mode
 my $vv = 0;		# more verbose
 my $user = '';		# auth user
 my $proto = '';		# protocol
+my $nodb = 0;
+
+my $abort = 0;
 
 my $to_ip = '';
 my $from_ip = '';
 
+my $database = "sippts.db";
+my $database_empty = "sippts_empty.db";
+
 mkdir ("tmp") if (! -d "tmp");
 my $tmpfile = "tmp/sipscan".time().".txt";
- 
+
+unless (-e $database || -e $database_empty) {
+	die("Database $database not found\n\n");
+}
+
+system("cp $database_empty $database") if (! -e $database);
+	
+my $db = DBI->connect("dbi:SQLite:dbname=$database","","") or die $DBI::errstr;
+my $hostsid = last_id();
+
 open(OUTPUT,">$tmpfile");
  
 OUTPUT->autoflush(1);
@@ -64,6 +80,7 @@ sub init() {
 				"l=s" => \$lport,
 				"r=s" => \$dport,
 				"proto=s" => \$proto,
+				"nodb+" => \$nodb,
 				"v+" => \$v,
 				"vv+" => \$vv);
  
@@ -152,8 +169,6 @@ sub init() {
 					$from_ip = $range[$i] if ($from_ip eq "");
 					my $thr = threads->new(\&scan, $range[$i], $from_ip, $lport, $j, $from, $to, $csec, $user, $proto);
 					$thr->detach();
-					$percent = ($count/($nhost*($pfin-$pini+1)))*100;
-					$percent = sprintf("%.1f", $percent);
 
 					last;
 				}
@@ -170,8 +185,8 @@ sub init() {
 
 	open(OUTPUT, $tmpfile);
  
-	print "\nIP:port\t\t\t  User-Agent\n";
-	print "=======\t\t\t  ==========\n";
+	print "\nIP address\tPort\tProto\tUser-Agent\n";
+	print "==========\t====\t=====\t==========\n";
 
 	my @results = <OUTPUT>;
 	close (OUTPUT);
@@ -181,7 +196,9 @@ sub init() {
 	@results = sort(@results);
 
 	foreach(@results) {
-		print $_;
+		my $line = $_;
+		print $line;
+		save($line) if ($nodb eq 0);
 	}
 
 	print "\n";
@@ -189,12 +206,38 @@ sub init() {
 	exit;
 }
 
+sub save {
+	my $line = shift;
+
+		my @lines = split (/\t/, $line);
+		my $sth = $db->prepare("SELECT id FROM hosts WHERE host='".$lines[0]."'") or die "Couldn't prepare statement: " . $db->errstr;
+		$sth->execute() or die "Couldn't execute statement: " . $sth->errstr;
+		my @data = $sth->fetchrow_array();
+		my $sql;
+		$sth->finish;
+		if ($#data < 0) {
+			$sql = "INSERT INTO hosts (id, host, port, proto, useragent) VALUES ($hostsid, '".$lines[0]."', ".$lines[1].", '".$lines[2]."', '".$lines[3]."')";
+			$db->do($sql);
+			$hostsid = $db->func('last_insert_rowid') + 1;
+		}
+		else {
+			$sql = "UPDATE hosts SET port=".$lines[1].", proto='".$lines[2]."', useragent='".$lines[3]."' WHERE host='".$lines[0]."'";
+			$db->do($sql);
+		}
+}
+
+sub last_id {
+	my $sth = $db->prepare('SELECT id FROM hosts ORDER BY id DESC LIMIT 1') or die "Couldn't prepare statement: " . $db->errstr;
+	$sth->execute() or die "Couldn't execute statement: " . $sth->errstr;
+	my @data = $sth->fetchrow_array();
+	$sth->finish;
+	if ($#data > -1) { return $data[0] + 1; }
+	else { return 1; }
+}
+
 sub interrupt {
 	if ($abort eq 0) {
 		$abort = 1;
-		my $i2 = $i;
-		my $j2 = $j;
-		my $k2 = $k;
 		{lock($threads); $threads=$maxthreads;}
 
 		print "Closing threads. Please wait ...\n";
@@ -204,8 +247,8 @@ sub interrupt {
 
 		open(OUTPUT, $tmpfile);
  
-		print "\nIP:port\t\t\t  User-Agent\n";
-		print "=======\t\t\t  ==========\n";
+		print "\nIP address\tPort\tProto\tUser-Agent\n";
+		print "==========\t====\t=====\t==========\n";
 
 		my @results = <OUTPUT>;
 		close (OUTPUT);
@@ -215,7 +258,9 @@ sub interrupt {
 		@results = sort(@results);
 
 		foreach(@results) {
-			print $_;
+			my $line = $_;
+			print $line;
+			save($line) if ($nodb eq 0);
 		}
 
 		print "\n";
@@ -279,10 +324,10 @@ sub send_register {
 		my $callid = &generate_random_string(32, 1);
 	
 		my $msg = "REGISTER sip:".$to_ip." SIP/2.0\n";
-		$msg .= "Via: SIP/2.0/UDP $from_ip:$lport;branch=$branch\n";
+		$msg .= "Via: SIP/2.0/".uc($proto)." $from_ip:$lport;branch=$branch\n";
 		$msg .= "From: <sip:".$user."@".$to_ip.">;tag=0c26cd11\n";
 		$msg .= "To: <sip:".$user."@".$to_ip.">\n";
-		$msg .= "Contact: <sip:".$user."@".$from_ip.":$lport;transport=udp>\n";
+		$msg .= "Contact: <sip:".$user."@".$from_ip.":$lport;transport=$proto>\n";
 		$msg .= "Call-ID: ".$callid."\n";
 		$msg .= "CSeq: $cseq REGISTER\n";
 		$msg .= "User-Agent: $useragent\n";
@@ -352,10 +397,8 @@ sub send_register {
 				}
 			}
 
-			my $dhost = "$to_ip:$dport/$proto";
-			$dhost .= "\t" if (length($dhost) < 10);
 			$server = "Unknown" if ($server eq "");
-			print OUTPUT "$dhost\t| $server\n";
+			print OUTPUT "$to_ip\t$dport\t$proto\t$server\n";
 			{lock($found);$found++;}
 		}
 	}
@@ -393,10 +436,10 @@ sub send_invite {
 		my $callid = &generate_random_string(32, 1);
 	
 		my $msg = "INVITE sip:".$to."@".$to_ip." SIP/2.0\n";
-		$msg .= "Via: SIP/2.0/UDP $from_ip:$lport;branch=$branch\n";
+		$msg .= "Via: SIP/2.0/".uc($proto)." $from_ip:$lport;branch=$branch\n";
 		$msg .= "From: \"$from\" <sip:".$user."@".$to_ip.">;tag=0c26cd11\n";
 		$msg .= "To: <sip:".$to."@".$to_ip.">\n";
-		$msg .= "Contact: <sip:".$from."@".$from_ip.":$lport;transport=udp>\n";
+		$msg .= "Contact: <sip:".$from."@".$from_ip.":$lport;transport=$proto>\n";
 		$msg .= "Supported: replaces, timer, path\n";
 		$msg .= "P-Early-Media: Supported\n";
 		$msg .= "Call-ID: ".$callid."\n";
@@ -480,10 +523,8 @@ sub send_invite {
 				}
 			}
 
-			my $dhost = "$to_ip:$dport/$proto";
-			$dhost .= "\t" if (length($dhost) < 10);
 			$server = "Unknown" if ($server eq "");
-			print OUTPUT "$dhost\t| $server\n";
+			print OUTPUT "$to_ip\t$dport\t$proto\t$server\n";
 			{lock($found);$found++;}
 		}
 	}
@@ -595,10 +636,8 @@ sub send_options {
 				}
 			}
 
-			my $dhost = "$to_ip:$dport/$proto";
-			$dhost .= "\t" if (length($dhost) < 10);
 			$server = "Unknown" if ($server eq "");
-			print OUTPUT "$dhost\t| $server\n";
+			print OUTPUT "$to_ip\t$dport\t$proto\t$server\n";
 			{lock($found);$found++;}
 		}
 	}
@@ -642,6 +681,7 @@ Usage: perl $0 -h <host> [options]
 -r  <integer>    = Remote port (default: 5060)
 -proto <string>  = Protocol (udp, tcp or all (both of them) - By default: ALL)
 -ip <string>     = Source IP (by default it is the same as host)
+-nodb            = Don't save into database (default save results on sippts.db)
 -v               = Verbose (trace information)
 -vv              = More verbose (more detailed trace)
  

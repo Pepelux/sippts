@@ -14,7 +14,8 @@ use threads;
 use threads::shared;
 use Getopt::Long;
 use Digest::MD5;
- 
+use DBI;
+
 my $useragent = 'sipptk';
  
 my $maxthreads = 300;
@@ -37,13 +38,26 @@ my $vv = 0;		# more verbose
 my $exten = '';		# extension
 my $prefix = '';	# prefix
 my $proto = '';		# protocol
+my $nodb = 0;
 
 my $to_ip = '';
 my $from_ip = '';
 
+my $database = "sippts.db";
+my $database_empty = "sippts_empty.db";
+
 mkdir ("tmp") if (! -d "tmp");
 my $tmpfile = "tmp/sipexten".time().".txt";
  
+unless (-e $database || -e $database_empty) {
+	die("Database $database not found\n\n");
+}
+
+system("cp $database_empty $database") if (! -e $database);
+	
+my $db = DBI->connect("dbi:SQLite:dbname=$database","","") or die $DBI::errstr;
+my $extensid = last_id();
+
 open(OUTPUT,">$tmpfile");
  
 OUTPUT->autoflush(1);
@@ -67,6 +81,7 @@ sub init() {
 				"r=s" => \$dport,
 				"proto=s" => \$proto,
 				"p=s" => \$prefix,
+				"nodb+" => \$nodb,
 				"v+" => \$v,
 				"vv+" => \$vv);
  
@@ -182,8 +197,8 @@ sub init() {
 
 	open(OUTPUT, $tmpfile);
  
-	print "\nIP address\tPort\tExtension\tAuthentication\n";
-	print "==========\t====\t=========\t==============\n";
+	print "\nIP address\tPort\tProto\tExtension\tAuthentication\n";
+	print "==========\t====\t=====\t=========\t==============\n";
 
 	my @results = <OUTPUT>;
 	close (OUTPUT);
@@ -193,7 +208,9 @@ sub init() {
 	@results = sort(@results);
 
 	foreach(@results) {
-		print $_;
+		my $line = $_;
+		print $line;
+		save($line) if ($nodb eq 0);
 	}
 
 	print "\n";
@@ -201,13 +218,22 @@ sub init() {
 	exit;
 }
 
+sub last_id {
+	my $sth = $db->prepare('SELECT id FROM extens ORDER BY id DESC LIMIT 1') or die "Couldn't prepare statement: " . $db->errstr;
+	$sth->execute() or die "Couldn't execute statement: " . $sth->errstr;
+	my @data = $sth->fetchrow_array();
+	$sth->finish;
+	if ($#data > -1) { return $data[0] + 1; }
+	else { return 1; }
+}
+
 sub interrupt {
 	close(OUTPUT);
 
 	open(OUTPUT, $tmpfile);
  
-	print "\nIP address\tPort\tExtension\tAuthentication\n";
-	print "==========\t====\t=========\t==============\n";
+	print "\nIP address\tPort\tProto\tExtension\tAuthentication\n";
+	print "==========\t====\t=====\t=========\t==============\n";
 
 	my @results = <OUTPUT>;
 	close (OUTPUT);
@@ -217,12 +243,34 @@ sub interrupt {
 	@results = sort(@results);
 
 	foreach(@results) {
-		print $_;
+		my $line = $_;
+		print $line;
+		save($line) if ($nodb eq 0);
 	}
 
 	print "\n";
 
 	exit;
+}
+
+sub save {
+	my $line = shift;
+
+		my @lines = split (/\t/, $line);
+		my $sth = $db->prepare("SELECT id FROM extens WHERE host='".$lines[0]."' AND exten='".$lines[3]."'") or die "Couldn't prepare statement: " . $db->errstr;
+		$sth->execute() or die "Couldn't execute statement: " . $sth->errstr;
+		my @data = $sth->fetchrow_array();
+		my $sql;
+		$sth->finish;
+		if ($#data < 0) {
+			$sql = "INSERT INTO extens (id, host, port, proto, exten, auth) VALUES ($extensid, '".$lines[0]."', ".$lines[1].", '".$lines[2]."', '".$lines[3]."', '".$lines[5]."')";
+			$db->do($sql);
+			$extensid = $db->func('last_insert_rowid') + 1;
+		}
+		else {
+			$sql = "UPDATE extens SET port=".$lines[1].", proto='".$lines[2]."', auth='".$lines[5]."' WHERE host='".$lines[0]."' AND exten='".$lines[3]."'";
+			$db->do($sql);
+		}
 }
 
 sub scan {
@@ -414,10 +462,10 @@ sub send_options {
 		if ($response =~ "^200") {
 			my $resinvite = send_invite($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user);
 			if ($resinvite =~ "^1") {
-				print OUTPUT "$to_ip\t$dport/$proto\t$to\t\tNo authentication required\n";
+				print OUTPUT "$to_ip\t$dport\t$proto\t$to\t\tNo authentication required\n";
 			}
 			else {
-				print OUTPUT "$to_ip/$proto\t$dport\t$to\t\tRequire authentication\n";
+				print OUTPUT "$to_ip\t$dport\t$proto\t$to\t\tRequire authentication\n";
 			}
 			{lock($found);$found++;}
 		}
@@ -462,6 +510,7 @@ Usage: perl $0 -h <host> [options]
 -p  <string>     = Prefix (for extensions)
 -proto <string>  = Protocol (udp, tcp or all (both of them) - By default: ALL)
 -ip <string>     = Source IP (by default it is the same as host)
+-nodb            = Don't save into database (default save results on sippts.db)
 -v               = Verbose (trace information)
 -vv              = More verbose (more detailed trace)
  
