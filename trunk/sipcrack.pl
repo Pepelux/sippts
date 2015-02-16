@@ -14,7 +14,8 @@ use threads;
 use threads::shared;
 use Getopt::Long;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
- 
+use DBI;
+
 my $useragent = 'sipptk';
  
 my $maxthreads = 300;
@@ -39,6 +40,7 @@ my $prefix = '';	# prefix
 my $resume = 0;		# resume
 my $abort = 0;
 my $proto = '';		# protocol
+my $nodb = 0;
 
 my $realm = '';
 my $nonce = '';
@@ -59,9 +61,21 @@ my $eini;
 my $efin;
 my $hini = 0;
 
+my $database = "sippts.db";
+my $database_empty = "sippts_empty.db";
+
 mkdir ("tmp") if (! -d "tmp");
 my $tmpfile = "tmp/sipcrack".time().".txt";
- 
+
+unless (-e $database || -e $database_empty) {
+	die("Database $database not found\n\n");
+}
+
+system("cp $database_empty $database") if (! -e $database);
+	
+my $db = DBI->connect("dbi:SQLite:dbname=$database","","") or die $DBI::errstr;
+my $usersid = last_id();
+
 open(OUTPUT,">$tmpfile");
  
 OUTPUT->autoflush(1);
@@ -81,12 +95,13 @@ sub init() {
 				"w=s" => \$wordlist,
 				"proto=s" => \$proto,
 				"resume+" => \$resume,
+				"nodb+" => \$nodb,
 				"v+" => \$v,
 				"vv+" => \$vv);
 
 	help() if (($host eq "" || $wordlist eq "") && $resume eq 0);
  	$proto = lc($proto);
-	$proto = "all" if ($proto ne "tcp" && $proto ne "udp");
+	$proto = "udp" if ($proto ne "tcp");
 
  	my $row;
  
@@ -280,8 +295,8 @@ sub init() {
 
 	open(OUTPUT, $tmpfile);
  
-	print "\nIP address\tPort\tExten\tPass\n";
-	print "==========\t====\t=====\t====\n";
+	print "\nIP address\tPort\tProto\tExten\tPass\n";
+	print "==========\t====\t=====\t=====\t====\n";
 
 	my @results = <OUTPUT>;
 	close (OUTPUT);
@@ -291,12 +306,23 @@ sub init() {
 	@results = sort(@results);
 
 	foreach(@results) {
-		print $_;
+		my $line = $_;
+		print $line;
+		save($line) if ($nodb eq 0);
 	}
 
 	print "\n";
 
 	exit;
+}
+
+sub last_id {
+	my $sth = $db->prepare('SELECT id FROM users ORDER BY id DESC LIMIT 1') or die "Couldn't prepare statement: " . $db->errstr;
+	$sth->execute() or die "Couldn't execute statement: " . $sth->errstr;
+	my @data = $sth->fetchrow_array();
+	$sth->finish;
+	if ($#data > -1) { return $data[0] + 1; }
+	else { return 1; }
 }
 
 sub interrupt {
@@ -315,8 +341,8 @@ sub interrupt {
 
 		open(OUTPUT, $tmpfile);
 
-		print "\nIP address\tPort\tExten\tPass\n";
-		print "==========\t====\t=====\t====\n";
+		print "\nIP address\tPort\tProto\tExten\tPass\n";
+		print "==========\t====\t=====\t=====\t====\n";
 
 		my @results = <OUTPUT>;
 		close (OUTPUT);
@@ -326,7 +352,9 @@ sub interrupt {
 		@results = sort(@results);
 
 		foreach(@results) {
-			print $_;
+			my $line = $_;
+			print $line;
+			save($line) if ($nodb eq 0);
 		}
 
 		print "\n";
@@ -372,6 +400,26 @@ sub interrupt {
 	}
 }
 
+sub save {
+	my $line = shift;
+
+		my @lines = split (/\t/, $line);
+		my $sth = $db->prepare("SELECT id FROM users WHERE host='".$lines[0]."' AND port=".$lines[1]." AND user='".$lines[3]."'") or die "Couldn't prepare statement: " . $db->errstr;
+		$sth->execute() or die "Couldn't execute statement: " . $sth->errstr;
+		my @data = $sth->fetchrow_array();
+		my $sql;
+		$sth->finish;
+		if ($#data < 0) {
+			$sql = "INSERT INTO users (id, host, port, proto, user, pass) VALUES ($usersid, '".$lines[0]."', ".$lines[1].", '".$lines[2]."', '".$lines[3]."', '".$lines[4]."')";
+			$db->do($sql);
+			$usersid = $db->func('last_insert_rowid') + 1;
+		}
+		else {
+			$sql = "UPDATE users SET proto='".$lines[2]."', pass='".$lines[4]."' WHERE host='".$lines[0]."' AND port=".$lines[1]." AND user='".$lines[3]."'";
+			$db->do($sql);
+		}
+}
+
 sub scan {
 	my $to_ip = shift;
 	my $from_ip = shift;
@@ -386,21 +434,14 @@ sub scan {
 
 	my $callid = &generate_random_string(32, 1);
 
-	my $p = $proto;
-	my $r = '';
-	
-	$p = "udp" if ($proto eq "all");
-	$r = send_register($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $pass, $callid, "", $p);
-	if ($proto eq "all" && $r eq "") {
-		$p = "tcp";
-		send_register($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $pass, $callid, "", $p);
-	}
+	send_register($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $pass, $callid, "", $proto);
+
 	my $uri = "sip:$to_ip";
 	my $a = md5_hex($user.':'.$realm.':'.$pass);
 	my $b = md5_hex('REGISTER:'.$uri);
 	my $r = md5_hex($a.':'.$nonce.':'.$b);
 	my $digest = "username=\"$user\", realm=\"$realm\", nonce=\"$nonce\", uri=\"$uri\", response=\"$r\", algorithm=MD5";
-	send_register($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $pass, $callid, $digest, $p);
+	send_register($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $pass, $callid, $digest, $proto);
 }
  
 # Send REGISTER message
@@ -492,7 +533,7 @@ sub send_register {
 		}
     
 		if ($response =~ "^200") {
-			print OUTPUT "$to_ip\t$dport/$proto\t$user\t$pass\n";
+			print OUTPUT "$to_ip\t$dport\t$proto\t$user\t$pass\n";
 			print "Found match: $to_ip:$dport/$proto - User: $user - Pass: $pass\n";
 			{lock($found);$found++;}
 		}
@@ -535,10 +576,11 @@ Usage: perl $0 -h <host> -w wordlist [options]
 -d  <integer>    = Destination number (default: 100)
 -r  <integer>    = Remote port (default: 5060)
 -p  <string>     = Prefix (for extensions)
--proto <string>  = Protocol (udp, tcp or all (both of them) - By default: ALL)
+-proto <string>  = Protocol (udp or tcp - By default: udp)
 -ip <string>     = Source IP (by default it is the same as host)
 -resume          = Resume last session
 -w               = Wordlist
+-nodb            = Don't save into database (default save results on sippts.db)
 -v               = Verbose (trace information)
 -vv              = More verbose (more detailed trace)
  
