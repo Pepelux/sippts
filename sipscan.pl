@@ -23,7 +23,6 @@ my $maxthreads = 300;
 my $threads : shared = 0;
 my $found : shared = 0;
 my $count : shared = 0;
-my $percent : shared = 0;
 my @range;
 my @results;
  
@@ -35,6 +34,7 @@ my $to = '';		# destination number
 my $method = '';	# method to use (INVITE, REGISTER, OPTIONS)
 my $v = 0;		# verbose mode
 my $vv = 0;		# more verbose
+my $nolog = 0;
 my $user = '';		# auth user
 my $proto = '';		# protocol
 my $nodb = 0;
@@ -81,6 +81,7 @@ sub init() {
 				"r=s" => \$dport,
 				"proto=s" => \$proto,
 				"nodb+" => \$nodb,
+				"nolog+" => \$nolog,
 				"v+" => \$v,
 				"vv+" => \$vv);
  
@@ -183,25 +184,8 @@ sub init() {
 
 	close(OUTPUT);
 
-	open(OUTPUT, $tmpfile);
- 
-	print "\nIP address\tPort\tProto\tUser-Agent\n";
-	print "==========\t====\t=====\t==========\n";
-
-	my @results = <OUTPUT>;
-	close (OUTPUT);
-
+	showres();
 	unlink($tmpfile);
-
-	@results = sort(@results);
-
-	foreach(@results) {
-		my $line = $_;
-		print $line;
-		save($line) if ($nodb eq 0);
-	}
-
-	print "\n";
 
 	exit;
 }
@@ -235,6 +219,28 @@ sub last_id {
 	else { return 1; }
 }
 
+sub showres {
+	open(OUTPUT, $tmpfile);
+ 
+ 	if ($nolog eq 0) {
+	 	print "\nIP address\tPort\tProto\tUser-Agent\n";
+		print "==========\t====\t=====\t==========\n";
+	}
+
+	my @results = <OUTPUT>;
+	close (OUTPUT);
+
+	@results = sort(@results);
+
+	foreach(@results) {
+		my $line = $_;
+		print $line if ($nolog eq 0);
+		save($line) if ($nodb eq 0);
+	}
+
+	print "\n";
+}
+
 sub interrupt {
 	if ($abort eq 0) {
 		$abort = 1;
@@ -245,25 +251,8 @@ sub interrupt {
 
 		close(OUTPUT);
 
-		open(OUTPUT, $tmpfile);
- 
-		print "\nIP address\tPort\tProto\tUser-Agent\n";
-		print "==========\t====\t=====\t==========\n";
-
-		my @results = <OUTPUT>;
-		close (OUTPUT);
-
+		showres();
 		unlink($tmpfile);
-
-		@results = sort(@results);
-
-		foreach(@results) {
-			my $line = $_;
-			print $line;
-			save($line) if ($nodb eq 0);
-		}
-
-		print "\n";
 	 
 		exit;
 	}
@@ -378,8 +367,7 @@ sub send_register {
 				$data .= $line;
  
 				if ($line =~ /^\r\n/) {
-					print "[+] $to_ip:$dport/$proto - Sending REGISTER $from => $to\n" if ($v eq 0);
-					print "[-] $response\n" if ($vv eq 0);
+					print "[-] $response\n" if ($v eq 1);
 					print "Receiving:\n=========\n$data" if ($vv eq 1);
 
 					last LOOP if ($response !~ /^1/);
@@ -504,8 +492,7 @@ sub send_invite {
 				$data .= $line;
  
 				if ($line =~ /^\r\n/) {
-					print "[+] $to_ip:$dport/$proto - Sending INVITE $from => $to\n" if ($v eq 0);
-					print "[-] $response\n" if ($vv eq 0);
+					print "[-] $response\n" if ($v eq 1);
 					print "Receiving:\n=========\n$data" if ($vv eq 1);
 
 					last LOOP if ($response !~ /^1/);
@@ -615,8 +602,7 @@ sub send_options {
 				$data .= $line;
  
 				if ($line =~ /^\r\n/) {
-					print "[+] $to_ip:$dport/$proto - Sending OPTIONS $from => $to\n" if ($v eq 0);
-					print "[-] $response\n" if ($vv eq 0);
+					print "[-] $response\n" if ($v eq 1);
 					print "Receiving:\n=========\n$data" if ($vv eq 1);
 
 					last LOOP if ($response !~ /^1/);
