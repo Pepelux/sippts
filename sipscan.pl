@@ -737,7 +737,8 @@ Usage: perl $0 -h <host> [options]
 \$perl $0 -h 192.168.0.1
 \tTo search SIP services on 192.168.0.1 port 5060 (using OPTIONS method)
 \tTo search several ranges
-\$perl $0 -h 192.168.0.1,192.168.2.0/24.192.168.3.1-192.168.3.200
+\$perl $0 -h 192.168.0.1,192.168.2.0/24.192.168.3.1-192.168.20.200
+\tTo search SIP services using INVITE method
 \$perl $0 -h 192.168.0.1 -m INVITE
 \tTo search SIP services on 192.168.0.1 port 5060 (using INVITE method)
 \$perl $0 -h 192.168.0.0/24 -v -t tcp
