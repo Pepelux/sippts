@@ -462,7 +462,7 @@ sub send_register {
 	my $proto = shift;
 	my $response = "";
 
-	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>'udp', PeerAddr=>$to_ip, Timeout => 10);
+	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 10);
 
 	if ($sc) {
 		IO::Socket::Timeout->enable_timeouts_on($sc);

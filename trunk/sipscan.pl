@@ -262,12 +262,12 @@ sub save {
 		my $sql;
 		$sth->finish;
 		if ($#data < 0) {
-			$sql = "INSERT INTO hosts (id, host, port, proto, useragent) VALUES ($hostsid, '".$lines[0]."', ".$lines[1].", '".$lines[2]."', '".$lines[3]."')";
+			$sql = "INSERT INTO hosts (id, host, port, proto, useragent, web) VALUES ($hostsid, '".$lines[0]."', ".$lines[1].", '".$lines[2]."', '".$lines[3]."',".$lines[4].")";
 			$db->do($sql);
 			$hostsid = $db->func('last_insert_rowid') + 1;
 		}
 		else {
-			$sql = "UPDATE hosts SET port=".$lines[1].", proto='".$lines[2]."', useragent='".$lines[3]."' WHERE host='".$lines[0]."'";
+			$sql = "UPDATE hosts SET port=".$lines[1].", proto='".$lines[2]."', useragent='".$lines[3]."', web=".$lines[4]." WHERE host='".$lines[0]."'";
 			$db->do($sql);
 		}
 }
@@ -285,8 +285,8 @@ sub showres {
 	open(OUTPUT, $tmpfile);
  
  	if ($nolog eq 0) {
-	 	print "\nIP address\tPort\tProto\tUser-Agent\n";
-		print "==========\t====\t=====\t==========\n";
+	 	print "\nIP address\tPort\tProto\tUser-Agent\tWeb\n";
+		print "==========\t====\t=====\t==========\t===\n";
 	}
 
 	my @results = <OUTPUT>;
@@ -684,8 +684,28 @@ sub send_options {
 				}
 			}
 
-			$server = "Unknown" if ($server eq "");
-			print OUTPUT "$to_ip\t$dport\t$proto\t$server\n";
+			$server = "Unknown   " if ($server eq "");
+#			print OUTPUT "$to_ip\t$dport\t$proto\t$server\n";
+
+			my $sc2 = new IO::Socket::INET->new(PeerPort=>80, Proto=>'tcp', PeerAddr=>$to_ip, Timeout => 10);
+			if ($sc2) { print OUTPUT "$to_ip\t$dport\t$proto\t$server\t80\n"; }
+			else {
+				$sc2 = new IO::Socket::INET->new(PeerPort=>81, Proto=>'tcp', PeerAddr=>$to_ip, Timeout => 10);
+				if ($sc2) { print OUTPUT "$to_ip\t$dport\t$proto\t$server\t81\n"; }
+				else {
+					$sc2 = new IO::Socket::INET->new(PeerPort=>8000, Proto=>'tcp', PeerAddr=>$to_ip, Timeout => 10);
+					if ($sc2) { print OUTPUT "$to_ip\t$dport\t$proto\t$server\t8000\n"; }
+					else {
+						$sc2 = new IO::Socket::INET->new(PeerPort=>8080, Proto=>'tcp', PeerAddr=>$to_ip, Timeout => 10);
+						if ($sc2) { print OUTPUT "$to_ip\t$dport\t$proto\t$server\t8080\n"; }
+						else {
+							$sc2 = new IO::Socket::INET->new(PeerPort=>443, Proto=>'tcp', PeerAddr=>$to_ip, Timeout => 10);
+							if ($sc2) { print OUTPUT "$to_ip\t$dport\t$proto\t$server\t443\n"; }
+							else { print OUTPUT "$to_ip\t$dport\t$proto\t$server\t0\n"; }
+						}
+					}
+				}
+			}
 			{lock($found);$found++;}
 		}
 	}
