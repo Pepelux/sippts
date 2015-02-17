@@ -89,7 +89,7 @@ sub init() {
 				$write = 1;
 			}
 
-			print "\n" if ($noauth eq 0 || ($noauth eq 1 && $write eq 1));
+			print "\n" if ($ua eq "" && ($noauth eq 0 || ($noauth eq 1 && $write eq 1)));
 		}
 	}
 	
