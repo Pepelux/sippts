@@ -186,7 +186,7 @@ sub init() {
 
 		if ($sc) {
 			IO::Socket::Timeout->enable_timeouts_on($sc);
-			$sc->read_timeout(5);
+			$sc->read_timeout(0.5); # initial short timeout to scan quickly
 			$sc->enable_timeout;
 			$lport = $sc->sockport() if ($lport eq "");
 
@@ -276,6 +276,7 @@ sub send_invite {
 
 	LOOP: {
 		while (<$sc>) {
+			$sc->read_timeout(15); # if we have a response, increase timeout
 			$line = $_;
 			
 			if ($line =~ /^SIP\/2.0/ && $response eq "") {
