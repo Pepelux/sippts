@@ -14,6 +14,7 @@ my $host = '';	# host
 my $ua = '';	# user-agent
 my $noexten = 0;
 my $noauth = 0;
+my $web = 0;
 
 my $database = "sippts.db";
 
@@ -28,6 +29,7 @@ sub init() {
     my $result = GetOptions ("h=s" => \$host,
 				"u=s" => \$ua,
 				"noauth+" => \$noauth,
+				"web+" => \$web,
 				"noexten+" => \$noexten);
  
 	help() if ($host eq "" && $ua eq "");
@@ -45,7 +47,10 @@ sub init() {
 		else {$search = "useragent LIKE '%$ua%'"; }
 	}
  
-	my $sth = $db->prepare("SELECT host, port, proto, useragent FROM hosts WHERE $search ORDER BY host ASC") or die "Couldn't prepare statement: " . $db->errstr;
+ 	my $sql = "SELECT host, port, proto, useragent, web FROM hosts WHERE $search";
+ 	$sql .= " AND web>0" if ($web eq 1); 
+ 	$sql .= " ORDER BY host ASC";
+	my $sth = $db->prepare($sql) or die "Couldn't prepare statement: " . $db->errstr;
 	$sth->execute() or die "Couldn't execute statement: " . $sth->errstr;
 
 	while (@data = $sth->fetchrow_array()) {
@@ -57,7 +62,11 @@ sub init() {
 		$proto =~ s/\n//g;
 		my $ua = $data[3];
 		$ua =~ s/\n//g;
-		print "[+] $host:$port/$proto \t- UserAgent: $ua\n" if ($noauth eq 0);
+		my $w = $data[4];
+#		$w =~ s/\n//g;
+		print "[+] $host:$port/$proto \t- UserAgent: $ua" if ($noauth eq 0);
+		print "\t$w" if ($noauth eq 0 && $web eq 1);
+		print "\n" if ($noauth eq 0);
 
 		if ($noexten eq 0) {
 			my $sql = "SELECT exten, auth FROM extens WHERE host='$host'";

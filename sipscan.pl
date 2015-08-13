@@ -134,8 +134,14 @@ sub init() {
 								$ip = "$i1.$i2.$i3.$i4";
 								push @range, $ip;
 							}
+				
+							$ip2_4 = 1;
 						}
+				
+						$ip2_3 = 1;
 					}
+				
+					$ip2_2 = 1;
 				}
 			}
 			else {
