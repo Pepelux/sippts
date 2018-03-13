@@ -11,7 +11,7 @@ Sippts is a suite of tools to audit VoIP servers and devices using SIP protocol.
 =======
 Sipscan
 =======
-Fast scanner for SIP services that uses multithread. Sipscan can check IP and port ranges and works with UDP or TCP.
+Fast scanner for SIP services that uses multithread. Sipscan can check IP and port ranges and works over UDP or TCP.
 
 $ perl sipscan.pl 
 
