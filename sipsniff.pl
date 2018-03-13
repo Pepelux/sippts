@@ -29,8 +29,6 @@ my $u = 0;
 my $method = '';
 my $g_cap_descrip;
 
-my $useragent = 'sipptk';
-
 # Trapping Signal "INT" like ctrl+c for cleanup first.
 $SIG{INT} = \&f_probe_ctrl_c; 
 
