@@ -16,7 +16,7 @@ use Getopt::Long;
 use Digest::MD5;
 use DBI;
 
-my $useragent = 'sipptk';
+my $useragent = 'pplsip';
  
 my $maxthreads = 300;
  
