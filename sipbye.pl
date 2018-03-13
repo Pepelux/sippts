@@ -13,7 +13,7 @@ use Getopt::Long;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 use MIME::Base64;
 
-my $useragent = 'sipptk';
+my $useragent = 'pplsip';
  
 my $host = '';	# host
 my $lport = '';	# local port
