@@ -173,6 +173,27 @@ $sudo perl sipsniff.pl -i eth0
 $sudo perl sipsniff.pl -i eth0 -m INVITE
 $sudo perl sipsniff.pl -i eth0 -u
 
+======
+Sipspy
+======
+Simple sip server that show us digest auth requests and responses. Example:
+
+[=>] 192.168.1.129:43455 REGISTER
+     [ Sending digest => WWW-Authenticate: Digest algorithm=MD5, realm="asterisk", nonce="405a7bc0" ]
+[=>] 192.168.1.129:43455 REGISTER
+     [ Digest response => Authorization: Digest username="200", realm="asterisk", nonce="405a7bc0", uri="sip:201@192.168.1.129", response="e270e69d53011d2f1219b6dfe018743d", algorithm=MD5 ]
+
+$ perl sipspy.pl 
+
+SipSPY - by Pepelux <pepeluxx@gmail.com>
+--------
+
+Usage: sudo perl sipspy.pl [options]
+ 
+== Options ==
+-p  <integer>    = Port (default: 5060)
+-v               = Verbose
+
 ==Operating System==
 Sippts was tested on:
 * Linux
