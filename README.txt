@@ -183,7 +183,7 @@ Simple sip server that show us digest auth requests and responses. Example:
 [=>] 192.168.1.129:43455 REGISTER
      [ Digest response => Authorization: Digest username="200", realm="asterisk", nonce="405a7bc0", uri="sip:201@192.168.1.129", response="e270e69d53011d2f1219b6dfe018743d", algorithm=MD5 ]
 
-$ perl sipspy.pl 
+$ perl sipspy.pl -h
 
 SipSPY - by Pepelux <pepeluxx@gmail.com>
 --------
