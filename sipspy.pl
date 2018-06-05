@@ -16,12 +16,15 @@ use IO::Socket::INET;
 
 my $port = '';	# destination port
 my $v = 0;	# verbose mode
+my $h = 0;	# help
 
 sub init() {
 	my $socket;
 
 	# check params
-	my $result = GetOptions ("p=s" => \$port, "v+" => \$v);
+	my $result = GetOptions ("p=s" => \$port, "v+" => \$v, "h+" => \$h);
+
+	help() if ($h eq 1);
 
 	$port = "5060" if ($port eq "");
 
