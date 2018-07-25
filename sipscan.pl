@@ -16,7 +16,7 @@ use Getopt::Long;
 use Digest::MD5;
 use DBI;
 
-my $useragent = 'sipptk';
+my $useragent = 'pplsip';
  
 my $maxthreads = 300;
  
@@ -27,8 +27,8 @@ my @range;
 my @results;
  
 my $host = '';		# host
-my $lport = '';		# local port
-my $dport = '';		# destination port
+my $lport = '';	# local port
+my $dport = '';	# destination port
 my $from = '';		# source number
 my $to = '';		# destination number
 my $method = '';	# method to use (INVITE, REGISTER, OPTIONS)
@@ -36,7 +36,7 @@ my $v = 0;		# verbose mode
 my $vv = 0;		# more verbose
 my $nolog = 0;
 my $user = '';		# auth user
-my $proto = '';		# protocol
+my $proto = '';	# protocol
 my $nodb = 0;
 
 my $abort = 0;
@@ -679,7 +679,7 @@ sub send_options {
 
 			last LOOP;
 		}
-    
+
 		if ($data ne "") {
 			if ($server eq "") {
 				$server = $ua;
@@ -691,7 +691,7 @@ sub send_options {
 			}
 
 			$server = "Unknown   " if ($server eq "");
-#			print OUTPUT "$to_ip\t$dport\t$proto\t$server\n";
+			print OUTPUT "$to_ip\t$dport\t$proto\t$server\n";
 
 			my $sc2 = new IO::Socket::INET->new(PeerPort=>80, Proto=>'tcp', PeerAddr=>$to_ip, Timeout => 10);
 			if ($sc2) { print OUTPUT "$to_ip\t$dport\t$proto\t$server\t80\n"; }

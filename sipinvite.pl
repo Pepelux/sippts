@@ -292,10 +292,10 @@ sub send_invite {
 			}
 
 			if ($line =~ /^WWW-Authenticate:/ || $line =~ /^Proxy-Authenticate:/) {
-				$line =~ /^WWW-Authenticate:\sDigest\salgorithm=(.+),\srealm=\"(.+)\",\snonce=\"(.+)\"\r\n/ if ($line =~ /^WWW-Authenticate:/);
-				$line =~ /^Proxy-Authenticate:\sDigest\salgorithm=(.+),\srealm=\"(.+)\",\snonce=\"(.+)\"\r\n/ if ($line =~ /^Proxy-Authenticate:/);
-				$realm = $2 if ($2);
-				$nonce = $3 if ($3);
+				$line =~ /.*realm=\"([a-zA-Z0-9\.\_\-]*)\".*/;
+				$realm = $1 if ($1);
+				$line =~ /.*nonce=\"([a-zA-Z0-9\/\=\.\_\-\,]*)\".*/;
+				$nonce = $1 if ($1);
 			}
  
 			$data .= $line;
