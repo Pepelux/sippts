@@ -10,7 +10,7 @@ Yes. You can freely use, modify and distribute. If modified, please put a refere
 
 Most security tools can be used for illegal purposes, but the finality of this tool is to check security of your own servers and not to use to do bad purposes. I am not responsible for the misuse of this tool.
 
-# Sippts - Suite of tools for penetration test over SIP protocol #
+# Suite of tools for penetration test over SIP protocol #
 
 Sippts is a suite of tools to audit VoIP servers and devices using SIP protocol. Sippts is programmed in Perl script and it consists of:
   * _**Sipscan**_
