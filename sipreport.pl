@@ -1,7 +1,7 @@
 #!/usr/bin/perl
-# -=-=-=-=-=-=-=
-# SipReport v1.2
-# -=-=-=-=-=-=-=
+# -=-=-=-=-=-=-=-=
+# SipReport v1.2.1
+# -=-=-=-=-=-=-=-=
 #
 # Pepelux <pepeluxx@gmail.com>
  
@@ -16,6 +16,7 @@ my $noexten = 0;
 my $noauth = 0;
 my $web = 0;
 
+my $version = '1.2.1';
 my $database = "sippts.db";
 
 unless (-e $database) {
@@ -33,7 +34,8 @@ sub init() {
 				"noexten+" => \$noexten);
  
 	help() if ($host eq "" && $ua eq "");
-	
+	check_version();
+
 	my @data;
 	my $search = "";
 
@@ -108,12 +110,21 @@ sub init() {
 
 	exit;
 }
-
  
+sub check_version {
+	my $v = `curl -s https://raw.githubusercontent.com/Pepelux/sippts/master/version`;
+	$v =~ s/\n//g;
+
+	if ($v ne $version) {	
+		print "The current version ($version) is outdated. There is a new version ($v). Please update:\n";
+		print "https://github.com/Pepelux/sippts\n";
+	}
+}
+
 sub help {
     print qq{
-SipREPORT v1.2 - by Pepelux <pepeluxx\@gmail.com>
---------------
+SipREPORT v1.2.1 - by Pepelux <pepeluxx\@gmail.com>
+----------------
 
 Usage: perl $0 -h <host> | -u <user-agent> [options]
 

@@ -1,2 +1,7 @@
+v1.2.1
+- Bug fixes
+- Change --nodb by --db (by default don't save session)
+- Now it is possible to change the user-agent
+
 v1.2
 First publication uploaded to Github (previous versions are proofs)

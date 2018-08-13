@@ -24,23 +24,29 @@ SipSCAN - by Pepelux <pepeluxx@gmail.com>
 Usage: perl sipscan.pl -h <host> [options]
  
 == Options ==
--m <string>      = Method: REGISTER/INVITE/OPTIONS (default: OPTIONS)
+-m  <string>     = Method: REGISTER/INVITE/OPTIONS (default: OPTIONS)
 -u  <string>     = Username
 -s  <integer>    = Source number (CallerID) (default: 100)
 -d  <integer>    = Destination number (default: 100)
 -r  <integer>    = Remote port (default: 5060)
--proto  <string>  = Protocol (UDP or TCP - By default: UDP)
+-proto <string>  = Protocol (udp, tcp or all (both of them) - By default: ALL)
 -ip <string>     = Source IP (by default it is the same as host)
+-ua <string>     = Customize the UserAgent
+-db              = Save results into database (sippts.db)
+-nolog           = Don't show anything on the console
 -v               = Verbose (trace information)
 -vv              = More verbose (more detailed trace)
  
 == Examples ==
 $perl sipscan.pl -h 192.168.0.1
 	To search SIP services on 192.168.0.1 port 5060 (using OPTIONS method)
+	To search several ranges
+$perl sipscan.pl -h 192.168.0.1,192.168.2.0/24.192.168.3.1-192.168.20.200
+	To search SIP services using INVITE method
 $perl sipscan.pl -h 192.168.0.1 -m INVITE
 	To search SIP services on 192.168.0.1 port 5060 (using INVITE method)
 $perl sipscan.pl -h 192.168.0.0/24 -v -t tcp
-        To search SIP services on 192.168.0.0 network over TCP connection (using OPTIONS method)
+	To search SIP services on 192.168.0.0 network by TCP connection (using OPTIONS method)
 $perl sipscan.pl -h 192.168.0.1-192.168.0.100 -r 5060-5070 -vv
 	To search SIP services on 192.168.0.100 ports from 5060 to 5070 (using OPTIONS method)
 ```
@@ -55,20 +61,25 @@ SipEXTEN - by Pepelux <pepeluxx@gmail.com>
 Usage: perl sipexten.pl -h <host> [options]
  
 == Options ==
--e  <string>     = Extensions (default 100-1000)
+-e  <string>     = Extensions (default 100-300)
 -s  <integer>    = Source number (CallerID) (default: 100)
 -d  <integer>    = Destination number (default: 100)
 -r  <integer>    = Remote port (default: 5060)
 -p  <string>     = Prefix (for extensions)
--proto  <string>  = Protocol (UDP or TCP - By default: UDP)
+-proto <string>  = Protocol (udp, tcp or all (both of them) - By default: ALL)
 -ip <string>     = Source IP (by default it is the same as host)
+-ua <string>     = Customize the UserAgent
+-db              = Save results into database (sippts.db)
+-nolog           = Don't show anything on the console
 -v               = Verbose (trace information)
 -vv              = More verbose (more detailed trace)
  
 == Examples ==
 $perl sipexten.pl -h 192.168.0.1 -e 100-200 -v
 	To check extensions range from 100 to 200 (with verbose mode)
-$perl sipexten.pl -h 192.168.0.1 -e 100-200 -p user
+$perl sipexten.pl -h 192.168.0.1 -e 100-200 -v
+	To check several ranges
+$perl sipexten.pl -h 192.168.0.1,192.168.2.0/24.192.168.3.1-192.168.50.200
 	To check extensions range from user100 to user200
 $perl sipexten.pl -h 192.168.0.0/24 -e 100 -r 5060-5080 -vv
 	To check extension 100 with destination port between 5060 and 5080 (with packages info)
@@ -89,8 +100,10 @@ Usage: perl sipcrack.pl -h <host> -w wordlist [options]
 -d  <integer>    = Destination number (default: 100)
 -r  <integer>    = Remote port (default: 5060)
 -p  <string>     = Prefix (for extensions)
--proto  <string>  = Protocol (UDP or TCP - By default: UDP)
+-proto <string>  = Protocol (udp or tcp - By default: udp)
 -ip <string>     = Source IP (by default it is the same as host)
+-ua <string>     = Customize the UserAgent
+-db              = Save results into database (sippts.db)
 -resume          = Resume last session
 -w               = Wordlist
 -v               = Verbose (trace information)
@@ -117,9 +130,11 @@ Usage: perl sipinvite.pl -h <host> -d <dst_number> [options]
 -u  <string>     = Username to authenticate
 -p  <string>     = Password to authenticate
 -s  <integer>    = Source number (CallerID) (default: 100)
+-l  <integer>    = Local port (default: 5070)
 -r  <integer>    = Remote port (default: 5060)
 -t  <integer>    = Transfer call to another number
 -ip <string>     = Source IP (by default it is the same as host)
+-ua <string>     = Customize the UserAgent
 -v               = Verbose (trace information)
  
 == Examples ==
@@ -130,9 +145,9 @@ $perl sipinvite.pl -h 192.168.0.1 -u sipuser -p supersecret -d 100 -r 5080
 $perl sipinvite.pl -h 192.168.0.1 -s 200 -d 555555555 -v
 	Trying to make a call to number 555555555 (without auth) with source number 200
 $perl sipinvite.pl -h 192.168.0.1 -d 555555555 -t 666666666
-	Trying to make a call to number 555555555 (without auth) and tranfer it to number 666666666
+	Trying to make a call to number 555555555 (without auth) and transfer it to number 666666666
 $perl sipinvite.pl -h 192.168.0.1 -d 555555555 -t 666666666 -s 123456789
-	Trying to make a call to number 555555555 (without auth) using callerid 123456789 and tranfer it to number 666666666
+	Trying to make a call to number 555555555 (without auth) using callerid 123456789 and transfer it to number 666666666
 ```
   * _**Sipsniff**_
 Simple sniffer for SIP protocol that allows us to filter by SIP method type
@@ -154,6 +169,25 @@ Usage: sudo perl -i <interface> sipsniff.pl [options]
 $sudo perl sipsniff.pl -i eth0
 $sudo perl sipsniff.pl -i eth0 -m INVITE
 $sudo perl sipsniff.pl -i eth0 -u
+```
+  * _**Sipbye**_
+Send BYE message to end a call
+```
+$ perl sipbye.pl 
+
+SipBYE - by Pepelux <pepeluxx@gmail.com>
+------
+
+Usage: perl sipbye.pl -h <host> -p <port> -c <callid> [options]
+ 
+== Options ==
+-p  <integer>    = Remote port
+-c  <string>     = Call-ID
+-ua <string>     = Customize the UserAgent
+-v               = Verbose (trace information)
+ 
+== Examples ==
+\$perl sipbye.pl -h 192.168.0.1 -p 5060
 ```
   * _**Sipspy**_
 Simple sip server that show us digest auth requests and responses. Example:

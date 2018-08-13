@@ -1,7 +1,7 @@
 #!/usr/bin/perl
-# -=-=-=-=-=-=-
-# SipCrack v1.2
-# -=-=-=-=-=-=-
+# -=-=-=-=-=-=-=-
+# SipCrack v1.2.1
+# -=-=-=-=-=-=-=-
 #
 # Pepelux <pepeluxx@gmail.com>
  
@@ -17,6 +17,7 @@ use Digest::MD5 qw(md5 md5_hex md5_base64);
 use DBI;
 
 my $useragent = 'pplsip';
+my $version = '1.2.1';
  
 my $maxthreads = 300;
  
@@ -39,15 +40,13 @@ my $prefix = '';	# prefix
 my $resume = 0;		# resume
 my $abort = 0;
 my $proto = '';		# protocol
-my $nodb = 0;
+my $withdb = 0;
 
 my $realm = '';
 my $nonce = '';
 	
 my $to_ip = '';
 my $from_ip = '';
-ls
-gedit *pl
 
 my $i;
 my $j;
@@ -97,11 +96,14 @@ sub init() {
 				"p=s" => \$prefix,
 				"proto=s" => \$proto,
 				"resume+" => \$resume,
-				"nodb+" => \$nodb,
+				"db+" => \$withdb,
+				"ua=s" => \$useragent,
 				"v+" => \$v,
 				"vv+" => \$vv);
 
 	help() if (($host eq "" || $wordlist eq "") && $resume eq 0);
+	check_version();
+
  	$proto = lc($proto);
 	$proto = "udp" if ($proto ne "tcp");
 
@@ -316,7 +318,7 @@ sub init() {
 	foreach(@results) {
 		my $line = $_;
 		print $line;
-		save($line) if ($nodb eq 0);
+		save($line) if ($withdb eq 1);
 	}
 
 	print "\n";
@@ -362,7 +364,7 @@ sub interrupt {
 		foreach(@results) {
 			my $line = $_;
 			print $line;
-			save($line) if ($nodb eq 0);
+			save($line) if ($withdb eq 1);
 		}
 
 		print "\n";
@@ -571,10 +573,20 @@ sub generate_random_string {
     return $random_string;
 }
  
+sub check_version {
+	my $v = `curl -s https://raw.githubusercontent.com/Pepelux/sippts/master/version`;
+	$v =~ s/\n//g;
+
+	if ($v ne $version) {	
+		print "The current version ($version) is outdated. There is a new version ($v). Please update:\n";
+		print "https://github.com/Pepelux/sippts\n";
+	}
+}
+
 sub help {
     print qq{
-SipCRACK v1.2 - by Pepelux <pepeluxx\@gmail.com>
--------------
+SipCRACK v1.2.1 - by Pepelux <pepeluxx\@gmail.com>
+---------------
 
 Usage: perl $0 -h <host> -w wordlist [options]
  
@@ -586,9 +598,10 @@ Usage: perl $0 -h <host> -w wordlist [options]
 -p  <string>     = Prefix (for extensions)
 -proto <string>  = Protocol (udp or tcp - By default: udp)
 -ip <string>     = Source IP (by default it is the same as host)
+-ua <string>     = Customize the UserAgent
 -resume          = Resume last session
 -w               = Wordlist
--nodb            = Don't save into database (default save results on sippts.db)
+-db              = Save results into database (sippts.db)
 -v               = Verbose (trace information)
 -vv              = More verbose (more detailed trace)
  

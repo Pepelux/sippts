@@ -1,7 +1,7 @@
 #!/usr/bin/perl
-# -=-=-=-=-=-
-# SipBYE v1.2
-# -=-=-=-=-=-
+# -=-=-=-=-=-=-
+# SipBYE v1.2.1
+# -=-=-=-=-=-=-
 #
 # Pepelux <pepeluxx@gmail.com>
  
@@ -14,7 +14,8 @@ use Digest::MD5 qw(md5 md5_hex md5_base64);
 use MIME::Base64;
 
 my $useragent = 'pplsip';
- 
+my $version = '1.2.1';
+
 my $host = '';	# host
 my $lport = '';	# local port
 my $dport = '';	# destination port
@@ -29,9 +30,11 @@ sub init() {
 				"d=s" => \$dport,
 				"l=s" => \$lport,
 				"b=s" => \$msg,
+				"ua=s" => \$useragent,
 				"v+" => \$v);
 
 	help() if ($host eq "" || $lport eq "" || $msg eq "");
+	check_version();
 
 #	$to_ip = inet_ntoa(inet_aton($host));
 	$dport = "5060" if ($dport eq "");
@@ -116,16 +119,27 @@ sub generate_random_string {
 	return $random_string;
 }
  
+sub check_version {
+	my $v = `curl -s https://raw.githubusercontent.com/Pepelux/sippts/master/version`;
+	$v =~ s/\n//g;
+
+	if ($v ne $version) {	
+		print "The current version ($version) is outdated. There is a new version ($v). Please update:\n";
+		print "https://github.com/Pepelux/sippts\n";
+	}
+}
+
 sub help {
     print qq{
-SipBYE v1.2 - by Pepelux <pepeluxx\@gmail.com>
------------
+SipBYE v1.2.1 - by Pepelux <pepeluxx\@gmail.com>
+-------------
 
 Usage: perl $0 -h <host> -p <port> -c <callid> [options]
  
 == Options ==
 -p  <integer>    = Remote port
 -c  <string>     = Call-ID
+-ua <string>     = Customize the UserAgent
 -v               = Verbose (trace information)
  
 == Examples ==

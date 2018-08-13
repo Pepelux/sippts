@@ -28,7 +28,9 @@ Usage: perl sipscan.pl -h <host> [options]
 -r  <integer>    = Remote port (default: 5060)
 -proto <string>  = Protocol (udp, tcp or all (both of them) - By default: ALL)
 -ip <string>     = Source IP (by default it is the same as host)
--nodb            = Don't save into database (default save results on sippts.db)
+-ua <string>     = Customize the UserAgent
+-db              = Save results into database (sippts.db)
+-nolog           = Don't show anything on the console
 -v               = Verbose (trace information)
 -vv              = More verbose (more detailed trace)
  
@@ -66,7 +68,9 @@ Usage: perl sipexten.pl -h <host> [options]
 -p  <string>     = Prefix (for extensions)
 -proto <string>  = Protocol (udp, tcp or all (both of them) - By default: ALL)
 -ip <string>     = Source IP (by default it is the same as host)
--nodb            = Don't save into database (default save results on sippts.db)
+-ua <string>     = Customize the UserAgent
+-db              = Save results into database (sippts.db)
+-nolog           = Don't show anything on the console
 -v               = Verbose (trace information)
 -vv              = More verbose (more detailed trace)
  
@@ -101,9 +105,10 @@ Usage: perl sipcrack.pl -h <host> -w wordlist [options]
 -p  <string>     = Prefix (for extensions)
 -proto <string>  = Protocol (udp or tcp - By default: udp)
 -ip <string>     = Source IP (by default it is the same as host)
+-ua <string>     = Customize the UserAgent
+-db              = Save results into database (sippts.db)
 -resume          = Resume last session
 -w               = Wordlist
--nodb            = Don't save into database (default save results on sippts.db)
 -v               = Verbose (trace information)
 -vv              = More verbose (more detailed trace)
  
@@ -135,6 +140,7 @@ Usage: perl sipinvite.pl -h <host> -d <dst_number> [options]
 -r  <integer>    = Remote port (default: 5060)
 -t  <integer>    = Transfer call to another number
 -ip <string>     = Source IP (by default it is the same as host)
+-ua <string>     = Customize the UserAgent
 -v               = Verbose (trace information)
  
 == Examples ==
@@ -172,6 +178,27 @@ Usage: sudo perl -i <interface> sipsniff.pl [options]
 $sudo perl sipsniff.pl -i eth0
 $sudo perl sipsniff.pl -i eth0 -m INVITE
 $sudo perl sipsniff.pl -i eth0 -u
+
+======
+Sipbye
+======
+Send BYE message to end a call
+
+$ perl sipbye.pl 
+
+SipBYE - by Pepelux <pepeluxx@gmail.com>
+------
+
+Usage: perl sipbye.pl -h <host> -p <port> -c <callid> [options]
+ 
+== Options ==
+-p  <integer>    = Remote port
+-c  <string>     = Call-ID
+-ua <string>     = Customize the UserAgent
+-v               = Verbose (trace information)
+ 
+== Examples ==
+\$perl sipbye.pl -h 192.168.0.1 -p 5060
 
 ======
 Sipspy

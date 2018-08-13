@@ -1,7 +1,7 @@
 #!/usr/bin/perl
-# -=-=-=-=-=-=
-# SipScan v1.2
-# -=-=-=-=-=-=
+# -=-=-=-=-=-=-=
+# SipScan v1.2.1
+# -=-=-=-=-=-=-=
 #
 # Pepelux <pepeluxx@gmail.com>
  
@@ -17,6 +17,7 @@ use Digest::MD5;
 use DBI;
 
 my $useragent = 'pplsip';
+my $version = '1.2.1';
  
 my $maxthreads = 300;
  
@@ -37,7 +38,7 @@ my $vv = 0;		# more verbose
 my $nolog = 0;
 my $user = '';		# auth user
 my $proto = '';	# protocol
-my $nodb = 0;
+my $withdb = 0;
 
 my $abort = 0;
 
@@ -80,12 +81,14 @@ sub init() {
 				"l=s" => \$lport,
 				"r=s" => \$dport,
 				"proto=s" => \$proto,
-				"nodb+" => \$nodb,
+				"db+" => \$withdb,
 				"nolog+" => \$nolog,
+				"ua=s" => \$useragent,
 				"v+" => \$v,
 				"vv+" => \$vv);
  
 	help() if ($host eq "");
+	check_version();
  
 	$lport = "5070" if ($lport eq "");
 	$dport = "5060" if ($dport eq "");
@@ -261,21 +264,25 @@ sub init() {
 sub save {
 	my $line = shift;
 
-		my @lines = split (/\t/, $line);
-		my $sth = $db->prepare("SELECT id FROM hosts WHERE host='".$lines[0]."'") or die "Couldn't prepare statement: " . $db->errstr;
-		$sth->execute() or die "Couldn't execute statement: " . $sth->errstr;
-		my @data = $sth->fetchrow_array();
-		my $sql;
-		$sth->finish;
-		if ($#data < 0) {
-			$sql = "INSERT INTO hosts (id, host, port, proto, useragent, web) VALUES ($hostsid, '".$lines[0]."', ".$lines[1].", '".$lines[2]."', '".$lines[3]."',".$lines[4].")";
-			$db->do($sql);
-			$hostsid = $db->func('last_insert_rowid') + 1;
-		}
-		else {
-			$sql = "UPDATE hosts SET port=".$lines[1].", proto='".$lines[2]."', useragent='".$lines[3]."', web=".$lines[4]." WHERE host='".$lines[0]."'";
-			$db->do($sql);
-		}
+	$line =~ s/\n//g;
+	my @lines = split (/\t/, $line);
+	my $sth = $db->prepare("SELECT id FROM hosts WHERE host='".$lines[0]."'") or die "Couldn't prepare statement: " . $db->errstr;
+	$sth->execute() or die "Couldn't execute statement: " . $sth->errstr;
+	my @data = $sth->fetchrow_array();
+	my $sql;
+	$sth->finish;
+
+	$lines[4] = '' if !($lines[4]);
+
+	if ($#data < 0) {
+		$sql = "INSERT INTO hosts (id, host, port, proto, useragent, web) VALUES ($hostsid, '".$lines[0]."', ".$lines[1].", '".$lines[2]."', '".$lines[3]."','".$lines[4]."')";
+		$db->do($sql);
+		$hostsid = $db->func('last_insert_rowid') + 1;
+	}
+	else {
+		$sql = "UPDATE hosts SET port=".$lines[1].", proto='".$lines[2]."', useragent='".$lines[3]."', web='".$lines[4]."' WHERE host='".$lines[0]."'";
+		$db->do($sql);
+	}
 }
 
 sub last_id {
@@ -303,7 +310,7 @@ sub showres {
 	foreach(@results) {
 		my $line = $_;
 		print $line if ($nolog eq 0);
-		save($line) if ($nodb eq 0);
+		save($line) if ($withdb eq 1);
 	}
 
 	print "\n";
@@ -562,8 +569,6 @@ sub send_invite {
 				if ($line =~ /^\r\n/) {
 					print "[-] $response\n" if ($v eq 1);
 					print "Receiving:\n=========\n$data" if ($vv eq 1);
-
-					last LOOP if ($response !~ /^1/);
 				}
 			}
 		}
@@ -691,27 +696,29 @@ sub send_options {
 			}
 
 			$server = "Unknown   " if ($server eq "");
-			print OUTPUT "$to_ip\t$dport\t$proto\t$server\n";
+			my $webfound = 0;
 
 			my $sc2 = new IO::Socket::INET->new(PeerPort=>80, Proto=>'tcp', PeerAddr=>$to_ip, Timeout => 10);
-			if ($sc2) { print OUTPUT "$to_ip\t$dport\t$proto\t$server\t80\n"; }
+			if ($sc2) { $webfound = 1; print OUTPUT "$to_ip\t$dport\t$proto\t$server\t80/tcp\n"; }
 			else {
 				$sc2 = new IO::Socket::INET->new(PeerPort=>81, Proto=>'tcp', PeerAddr=>$to_ip, Timeout => 10);
-				if ($sc2) { print OUTPUT "$to_ip\t$dport\t$proto\t$server\t81\n"; }
+				if ($sc2) { $webfound = 1; print OUTPUT "$to_ip\t$dport\t$proto\t$server\t81/tcp\n"; }
 				else {
 					$sc2 = new IO::Socket::INET->new(PeerPort=>8000, Proto=>'tcp', PeerAddr=>$to_ip, Timeout => 10);
-					if ($sc2) { print OUTPUT "$to_ip\t$dport\t$proto\t$server\t8000\n"; }
+					if ($sc2) { $webfound = 1; print OUTPUT "$to_ip\t$dport\t$proto\t$server\t8000/tcp\n"; }
 					else {
 						$sc2 = new IO::Socket::INET->new(PeerPort=>8080, Proto=>'tcp', PeerAddr=>$to_ip, Timeout => 10);
-						if ($sc2) { print OUTPUT "$to_ip\t$dport\t$proto\t$server\t8080\n"; }
+						if ($sc2) { $webfound = 1; print OUTPUT "$to_ip\t$dport\t$proto\t$server\t8080/tcp\n"; }
 						else {
 							$sc2 = new IO::Socket::INET->new(PeerPort=>443, Proto=>'tcp', PeerAddr=>$to_ip, Timeout => 10);
-							if ($sc2) { print OUTPUT "$to_ip\t$dport\t$proto\t$server\t443\n"; }
-							else { print OUTPUT "$to_ip\t$dport\t$proto\t$server\t0\n"; }
+							if ($sc2) { $webfound = 1; print OUTPUT "$to_ip\t$dport\t$proto\t$server\t443/tcp\n"; }
+							else { $webfound = 1; print OUTPUT "$to_ip\t$dport\t$proto\t$server\t0\n"; }
 						}
 					}
 				}
 			}
+
+			print OUTPUT "$to_ip\t$dport\t$proto\t$server\n" if ($webfound eq 0);
 			{lock($found);$found++;}
 		}
 	}
@@ -740,10 +747,20 @@ sub generate_random_string {
     return $random_string;
 }
  
+sub check_version {
+	my $v = `curl -s https://raw.githubusercontent.com/Pepelux/sippts/master/version`;
+	$v =~ s/\n//g;
+
+	if ($v ne $version) {	
+		print "The current version ($version) is outdated. There is a new version ($v). Please update:\n";
+		print "https://github.com/Pepelux/sippts\n";
+	}
+}
+
 sub help {
     print qq{
-SipSCAN v1.2 - by Pepelux <pepeluxx\@gmail.com>
-------------
+SipSCAN v1.2.1 - by Pepelux <pepeluxx\@gmail.com>
+--------------
 
 Usage: perl $0 -h <host> [options]
  
@@ -755,7 +772,9 @@ Usage: perl $0 -h <host> [options]
 -r  <integer>    = Remote port (default: 5060)
 -proto <string>  = Protocol (udp, tcp or all (both of them) - By default: ALL)
 -ip <string>     = Source IP (by default it is the same as host)
--nodb            = Don't save into database (default save results on sippts.db)
+-ua <string>     = Customize the UserAgent
+-db              = Save results into database (sippts.db)
+-nolog           = Don't show anything on the console
 -v               = Verbose (trace information)
 -vv              = More verbose (more detailed trace)
  

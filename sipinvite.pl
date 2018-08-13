@@ -1,7 +1,7 @@
 #!/usr/bin/perl
-# -=-=-=-=-=-=-=
-# SipINVITE v1.2
-# -=-=-=-=-=-=-=
+# -=-=-=-=-=-=-=-=
+# SipINVITE v1.2.1
+# -=-=-=-=-=-=-=-=
 #
 # Pepelux <pepeluxx@gmail.com>
  
@@ -14,7 +14,8 @@ use Getopt::Long;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 
 my $useragent = 'pplsip';
- 
+my $version = '1.2.1';
+
 my $host = '';	# host
 my $lport = '';	# local port
 my $dport = '';	# destination port
@@ -43,12 +44,14 @@ sub init() {
 				"d=s" => \$to,
 				"s=s" => \$from,
 				"ip=s" => \$from_ip,
+				"ua=s" => \$useragent,
 				"l=s" => \$lport,
 				"r=s" => \$dport,
 				"t=s" => \$refer,
 				"v+" => \$v);
 
 	help() if ($host eq "" || $to eq "");
+	check_version();
 
 	$dport = "5060" if ($dport eq "");
 	$user = "100" if ($user eq "");
@@ -493,10 +496,20 @@ sub generate_random_string {
 	return $random_string;
 }
  
+sub check_version {
+	my $v = `curl -s https://raw.githubusercontent.com/Pepelux/sippts/master/version`;
+	$v =~ s/\n//g;
+
+	if ($v ne $version) {	
+		print "The current version ($version) is outdated. There is a new version ($v). Please update:\n";
+		print "https://github.com/Pepelux/sippts\n";
+	}
+}
+
 sub help {
     print qq{
-SipINVITE v1.2 - by Pepelux <pepeluxx\@gmail.com>
---------------
+SipINVITE v1.2.1 - by Pepelux <pepeluxx\@gmail.com>
+----------------
 
 Usage: perl $0 -h <host> -d <dst_number> [options]
  
@@ -509,6 +522,7 @@ Usage: perl $0 -h <host> -d <dst_number> [options]
 -r  <integer>    = Remote port (default: 5060)
 -t  <integer>    = Transfer call to another number
 -ip <string>     = Source IP (by default it is the same as host)
+-ua <string>     = Customize the UserAgent
 -v               = Verbose (trace information)
  
 == Examples ==

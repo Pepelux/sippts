@@ -1,7 +1,7 @@
 #!/usr/bin/perl
-# -=-=-=-=-=-=
-# RtpScan v1.2
-# -=-=-=-=-=-=
+# -=-=-=-=-=-=-=-
+# SipSNIFF v1.2.1
+# -=-=-=-=-=-=-=-
 #
 # Pepelux <pepeluxx@gmail.com>
 #
@@ -29,6 +29,8 @@ my $u = 0;
 my $method = '';
 my $g_cap_descrip;
 
+my $version = '1.2.1';
+
 # Trapping Signal "INT" like ctrl+c for cleanup first.
 $SIG{INT} = \&f_probe_ctrl_c; 
 
@@ -40,6 +42,8 @@ sub init() {
 				"u+" => \$u);
 
 	help() if ($interface eq "");
+	check_version();
+
 	$dport = "5060" if ($dport eq "");
 
 	f_probe_pcapinit;
@@ -181,10 +185,20 @@ sub f_probe_ctrl_c {
 	}
 };
 
+sub check_version {
+	my $v = `curl -s https://raw.githubusercontent.com/Pepelux/sippts/master/version`;
+	$v =~ s/\n//g;
+
+	if ($v ne $version) {	
+		print "The current version ($version) is outdated. There is a new version ($v). Please update:\n";
+		print "https://github.com/Pepelux/sippts\n";
+	}
+}
+
 sub help {
 	print qq{
-SipSNIFF v1.2 - by Pepelux <pepeluxx\@gmail.com>
--------------
+SipSNIFF v1.2.1 - by Pepelux <pepeluxx\@gmail.com>
+---------------
 
 Usage: sudo perl -i <interface> $0 [options]
  

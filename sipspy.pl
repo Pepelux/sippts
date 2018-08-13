@@ -1,7 +1,7 @@
 #!/usr/bin/perl
-# -=-=-=-=-=-=-=
-# SipINVITE v1.2
-# -=-=-=-=-=-=-=
+# -=-=-=-=-=-=-=-=
+# SipINVITE v1.2.1
+# -=-=-=-=-=-=-=-=
 #
 # Pepelux <pepeluxx@gmail.com>
  
@@ -18,6 +18,8 @@ my $port = '';	# destination port
 my $v = 0;	# verbose mode
 my $h = 0;	# help
 
+my $version = '1.2.1';
+
 sub init() {
 	my $socket;
 
@@ -25,6 +27,7 @@ sub init() {
 	my $result = GetOptions ("p=s" => \$port, "v+" => \$v, "h+" => \$h);
 
 	help() if ($h eq 1);
+	check_version();
 
 	$port = "5060" if ($port eq "");
 
@@ -122,12 +125,20 @@ sub parse_request() {
 	return $resp;
 }
 
+sub check_version {
+	my $v = `curl -s https://raw.githubusercontent.com/Pepelux/sippts/master/version`;
+	$v =~ s/\n//g;
 
- 
+	if ($v ne $version) {	
+		print "The current version ($version) is outdated. There is a new version ($v). Please update:\n";
+		print "https://github.com/Pepelux/sippts\n";
+	}
+}
+
 sub help {
     print qq{
-SipSPY v1.0 - by Pepelux <pepeluxx\@gmail.com>
---------------
+SipSPY v1.2.1 - by Pepelux <pepeluxx\@gmail.com>
+-------------
 
 Usage: perl $0 [options]
  

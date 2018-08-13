@@ -1,7 +1,7 @@
 #!/usr/bin/perl
-# -=-=-=-=-=-=-
-# SipExten v1.2
-# -=-=-=-=-=-=-
+# -=-=-=-=-=-=-=-
+# SipExten v1.2.1
+# -=-=-=-=-=-=-=-
 #
 # Pepelux <pepeluxx@gmail.com>
  
@@ -17,7 +17,8 @@ use Digest::MD5;
 use DBI;
 
 my $useragent = 'pplsip';
- 
+my $version = '1.2.1';
+
 my $maxthreads = 300;
  
 my $threads : shared = 0;
@@ -37,7 +38,7 @@ my $nolog = 0;
 my $exten = '';		# extension
 my $prefix = '';	# prefix
 my $proto = '';		# protocol
-my $nodb = 0;
+my $withdb = 0;
 
 my $to_ip = '';
 my $from_ip = '';
@@ -81,13 +82,15 @@ sub init() {
 				"r=s" => \$dport,
 				"proto=s" => \$proto,
 				"p=s" => \$prefix,
-				"nodb+" => \$nodb,
+				"db+" => \$withdb,
 				"nolog+" => \$nolog,
+				"ua=s" => \$useragent,
 				"v+" => \$v,
 				"vv+" => \$vv);
  
 	help() if ($host eq "");
- 
+	check_version();
+
 	$lport = "5070" if ($lport eq "");
 	$dport = "5060" if ($dport eq "");
 	$exten = "100-300" if ($exten eq "");
@@ -284,7 +287,7 @@ sub showres {
 	foreach(@results) {
 		my $line = $_;
 		print $line if ($nolog eq 0);
-		save($line) if ($nodb eq 0);
+		save($line) if ($withdb eq 1);
 	}
 
 	print "\n";
@@ -586,10 +589,20 @@ sub generate_random_string {
     return $random_string;
 }
  
+sub check_version {
+	my $v = `curl -s https://raw.githubusercontent.com/Pepelux/sippts/master/version`;
+	$v =~ s/\n//g;
+
+	if ($v ne $version) {	
+		print "The current version ($version) is outdated. There is a new version ($v). Please update:\n";
+		print "https://github.com/Pepelux/sippts\n";
+	}
+}
+
 sub help {
     print qq{
-SipEXTEN v1.2 - by Pepelux <pepeluxx\@gmail.com>
--------------
+SipEXTEN v1.2.1 - by Pepelux <pepeluxx\@gmail.com>
+---------------
 
 Usage: perl $0 -h <host> [options]
  
@@ -601,7 +614,9 @@ Usage: perl $0 -h <host> [options]
 -p  <string>     = Prefix (for extensions)
 -proto <string>  = Protocol (udp, tcp or all (both of them) - By default: ALL)
 -ip <string>     = Source IP (by default it is the same as host)
--nodb            = Don't save into database (default save results on sippts.db)
+-ua <string>     = Customize the UserAgent
+-db              = Save results into database (sippts.db)
+-nolog           = Don't show anything on the console
 -v               = Verbose (trace information)
 -vv              = More verbose (more detailed trace)
  
