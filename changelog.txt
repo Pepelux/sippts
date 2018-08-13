@@ -1,0 +1,2 @@
+v1.2
+First publication uploaded to Github (previous versions are proofs)
