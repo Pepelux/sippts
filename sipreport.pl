@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # -=-=-=-=-=-=-=-=
-# SipReport v1.2.1
+# SipReport v1.2.2
 # -=-=-=-=-=-=-=-=
 #
 # Pepelux <pepeluxx@gmail.com>
@@ -16,7 +16,7 @@ my $noexten = 0;
 my $noauth = 0;
 my $web = 0;
 
-my $version = '1.2.1';
+my $version = '1.2.2';
 my $database = "sippts.db";
 
 unless (-e $database) {
@@ -123,8 +123,8 @@ sub check_version {
 
 sub help {
     print qq{
-SipREPORT v1.2.1 - by Pepelux <pepeluxx\@gmail.com>
-----------------
+SipREPORT - by Pepelux <pepeluxx\@gmail.com>
+---------
 
 Usage: perl $0 -h <host> | -u <user-agent> [options]
 

@@ -1,7 +1,7 @@
 #!/usr/bin/perl
-# -=-=-=-=-=-=-=-=
-# SipINVITE v1.2.1
-# -=-=-=-=-=-=-=-=
+# -=-=-=-=-=-=-
+# SipSPY v1.2.2
+# -=-=-=-=-=-=-
 #
 # Pepelux <pepeluxx@gmail.com>
  
@@ -18,7 +18,7 @@ my $port = '';	# destination port
 my $v = 0;	# verbose mode
 my $h = 0;	# help
 
-my $version = '1.2.1';
+my $version = '1.2.2';
 
 sub init() {
 	my $socket;
@@ -84,7 +84,7 @@ sub parse_request() {
 		$method = "CANCEL" if ($line =~ /^CANCEL/i);
 		$method = "UPDATE" if ($line =~ /^UPDATE/i);
 		$method = "BYE" if ($line =~ /^BYE/i);
-		$via = $line.";received=".$host.";rport=".$port if ($line =~ /^Via/i);
+		$via = $line if ($line =~ /^Via/i);
 		$from = $line if ($line =~ /^From/i);
 		$to = $line if ($line =~ /^To/i);
 		$contact = $line if ($line =~ /^Contact/i);
@@ -92,8 +92,12 @@ sub parse_request() {
 		$cseq = $line if ($line =~ /^CSeq/i);
 		$digest = $line if ($line =~ /digest/i);
 	}
+
+	$via =~ s/\r//g;
+	$via =~ s/\n//g;
+	$via = $via.";received=".$host.";rport=".$port if ($via ne '');
 	
-	print "[=>] $host:$port $method\n" if ($v eq 0);
+	print "[=>] $host:$port $method\r\n" if ($v eq 0);
 
 	if ($method eq "OPTIONS") {
 		$resp .= "SIP/2.0 200 OK\n";
@@ -137,12 +141,13 @@ sub check_version {
 
 sub help {
     print qq{
-SipSPY v1.2.1 - by Pepelux <pepeluxx\@gmail.com>
--------------
+SipSPY - by Pepelux <pepeluxx\@gmail.com>
+------
 
 Usage: perl $0 [options]
  
 == Options ==
+-h               = This help
 -p  <integer>    = Local port (default: 5060)
 -v               = Verbose (trace information)
  

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # -=-=-=-=-=-=-=-=
-# SipINVITE v1.2.1
+# SipINVITE v1.2.2
 # -=-=-=-=-=-=-=-=
 #
 # Pepelux <pepeluxx@gmail.com>
@@ -14,7 +14,7 @@ use Getopt::Long;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 
 my $useragent = 'pplsip';
-my $version = '1.2.1';
+my $version = '1.2.2';
 
 my $host = '';	# host
 my $lport = '';	# local port
@@ -508,8 +508,8 @@ sub check_version {
 
 sub help {
     print qq{
-SipINVITE v1.2.1 - by Pepelux <pepeluxx\@gmail.com>
-----------------
+SipINVITE - by Pepelux <pepeluxx\@gmail.com>
+---------
 
 Usage: perl $0 -h <host> -d <dst_number> [options]
  

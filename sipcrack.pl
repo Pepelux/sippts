@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # -=-=-=-=-=-=-=-
-# SipCrack v1.2.1
+# SipCrack v1.2.2
 # -=-=-=-=-=-=-=-
 #
 # Pepelux <pepeluxx@gmail.com>
@@ -17,7 +17,7 @@ use Digest::MD5 qw(md5 md5_hex md5_base64);
 use DBI;
 
 my $useragent = 'pplsip';
-my $version = '1.2.1';
+my $version = '1.2.2';
  
 my $maxthreads = 300;
  
@@ -585,8 +585,8 @@ sub check_version {
 
 sub help {
     print qq{
-SipCRACK v1.2.1 - by Pepelux <pepeluxx\@gmail.com>
----------------
+SipCRACK - by Pepelux <pepeluxx\@gmail.com>
+--------
 
 Usage: perl $0 -h <host> -w wordlist [options]
  

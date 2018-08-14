@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # -=-=-=-=-=-=-=-
-# SipSNIFF v1.2.1
+# SipSNIFF v1.2.2
 # -=-=-=-=-=-=-=-
 #
 # Pepelux <pepeluxx@gmail.com>
@@ -29,7 +29,7 @@ my $u = 0;
 my $method = '';
 my $g_cap_descrip;
 
-my $version = '1.2.1';
+my $version = '1.2.2';
 
 # Trapping Signal "INT" like ctrl+c for cleanup first.
 $SIG{INT} = \&f_probe_ctrl_c; 
@@ -197,8 +197,8 @@ sub check_version {
 
 sub help {
 	print qq{
-SipSNIFF v1.2.1 - by Pepelux <pepeluxx\@gmail.com>
----------------
+SipSNIFF - by Pepelux <pepeluxx\@gmail.com>
+--------
 
 Usage: sudo perl -i <interface> $0 [options]
  

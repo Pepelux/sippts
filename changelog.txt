@@ -1,3 +1,6 @@
+v1.2.2
+- Bug fixes
+
 v1.2.1
 - Bug fixes
 - Change --nodb by --db (by default don't save session)

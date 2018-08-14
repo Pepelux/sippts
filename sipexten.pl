@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # -=-=-=-=-=-=-=-
-# SipExten v1.2.1
+# SipExten v1.2.2
 # -=-=-=-=-=-=-=-
 #
 # Pepelux <pepeluxx@gmail.com>
@@ -17,7 +17,7 @@ use Digest::MD5;
 use DBI;
 
 my $useragent = 'pplsip';
-my $version = '1.2.1';
+my $version = '1.2.2';
 
 my $maxthreads = 300;
  
@@ -601,8 +601,8 @@ sub check_version {
 
 sub help {
     print qq{
-SipEXTEN v1.2.1 - by Pepelux <pepeluxx\@gmail.com>
----------------
+SipEXTEN - by Pepelux <pepeluxx\@gmail.com>
+--------
 
 Usage: perl $0 -h <host> [options]
  
