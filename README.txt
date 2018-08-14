@@ -179,26 +179,6 @@ $sudo perl sipsniff.pl -i eth0
 $sudo perl sipsniff.pl -i eth0 -m INVITE
 $sudo perl sipsniff.pl -i eth0 -u
 
-======
-Sipbye
-======
-Send BYE message to end a call
-
-$ perl sipbye.pl 
-
-SipBYE - by Pepelux <pepeluxx@gmail.com>
-------
-
-Usage: perl sipbye.pl -h <host> -p <port> -c <callid> [options]
- 
-== Options ==
--p  <integer>    = Remote port
--c  <string>     = Call-ID
--ua <string>     = Customize the UserAgent
--v               = Verbose (trace information)
- 
-== Examples ==
-\$perl sipbye.pl -h 192.168.0.1 -p 5060
 
 ======
 Sipspy
