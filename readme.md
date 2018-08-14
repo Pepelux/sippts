@@ -12,7 +12,7 @@ Most security tools can be used for illegal purposes, but the finality of this t
 
 # Suite of tools for penetration test over SIP protocol #
 
-Sippts is a suite of tools to audit VoIP servers and devices using SIP protocol. Sippts is programmed in Perl script and it consists of:
+Sippts is a suite of tools to audit VoIP servers and devices using SIP protocol. Sippts is programmed in Perl script and the tools are:
   * _**Sipscan**_ is a fast scanner for SIP services that uses multithread. Sipscan can check several IPs and port ranges and it can work over UDP or TCP.
 
 [Click here to read more about SIPscan](https://github.com/Pepelux/sippts/wiki/SIPscan)
