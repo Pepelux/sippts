@@ -16,7 +16,17 @@ my $noexten = 0;
 my $noauth = 0;
 my $web = 0;
 
-my $version = '1.2.2';
+my $version;
+
+my $versionfile = 'version';
+open(my $fh, '<:encoding(UTF-8)', $versionfile)
+  or die "Could not open file '$versionfile' $!";
+ 
+while (my $row = <$fh>) {
+  chomp $row;
+  $version = $row;
+}
+	
 my $database = "sippts.db";
 
 unless (-e $database) {

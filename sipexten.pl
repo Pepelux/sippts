@@ -10,39 +10,44 @@ use strict;
 use IO::Socket;
 use IO::Socket::Timeout;
 use NetAddr::IP;
-use threads;
-use threads::shared;
 use Getopt::Long;
 use Digest::MD5;
 use DBI;
 
 my $useragent = 'pplsip';
-my $version = '1.2.2';
+my $version;
 
-my $maxthreads = 300;
- 
-my $threads : shared = 0;
-my $found : shared = 0;
-my $count : shared = 0;
 my @range;
 my @results;
  
 my $host = '';		# host
-my $lport = '';		# local port
-my $dport = '';		# destination port
+my $lport = '';	# local port
+my $dport = '';	# destination port
 my $from = '';		# source number
 my $to = '';		# destination number
 my $v = 0;		# verbose mode
 my $vv = 0;		# more verbose
 my $nolog = 0;
-my $exten = '';		# extension
+my $exten = '';	# extension
 my $prefix = '';	# prefix
-my $proto = '';		# protocol
+my $proto = '';	# protocol
 my $withdb = 0;
 
 my $to_ip = '';
 my $from_ip = '';
 
+my $alwaysok = '';
+my $server = '';
+
+my $versionfile = 'version';
+open(my $fh, '<:encoding(UTF-8)', $versionfile)
+  or die "Could not open file '$versionfile' $!";
+ 
+while (my $row = <$fh>) {
+  chomp $row;
+  $version = $row;
+}
+	
 my $database = "sippts.db";
 my $database_empty = "sippts_empty.db";
 
@@ -54,7 +59,7 @@ unless (-e $database || -e $database_empty) {
 }
 
 system("cp $database_empty $database") if (! -e $database);
-	
+
 my $db = DBI->connect("dbi:SQLite:dbname=$database","","") or die $DBI::errstr;
 my $extensid = last_id("extens");
 my $hostsid = last_id("hosts");
@@ -237,25 +242,39 @@ sub init() {
 	}
 
 	my $nhost = @range;
- 
+	my $p = $proto;
+
 	for (my $i = 0; $i <= $nhost; $i++) {
 		for (my $j = $pini; $j <= $pfin; $j++) {
 			for (my $k = $eini; $k <= $efin; $k++) {
-				while (1) {
-					if ($threads < $maxthreads) {
-						$from = $prefix.$k if ($from eq "" || $eini ne $efin);
-						$to = $prefix.$k if ($to eq "" || $eini ne $efin);
-						last unless defined($range[$i]);
-						my $csec = 1;
-						$from_ip = $range[$i] if ($from_ip eq "");
-						my $thr = threads->new(\&scan, $range[$i], $from_ip, $lport, $j, $from, $to, $csec, $prefix.$k, $proto);
-						$thr->detach();
+				##### Executed only one time
+				# Get User-agent/server from an OPTIONS message
+				if ($server eq "") {
+					$p = "udp" if ($proto eq "all");
+					$from_ip = $range[$i] if ($from_ip eq "");
+					$server = send_options($range[$i], $from_ip, $lport, $j, $from, $to, 1, $prefix."1", $p);
+					send_options($range[$i], $from_ip, $lport, $j, $from, $to, 1, $prefix."1", "tcp") if ($proto eq "all" && $server eq "");
+				}
+				# Some systems always response 'Ok'. On this case only get the error responses
+				if ($alwaysok eq "") {
+					my $resinvite = send_invite($range[$i], $from_ip, $lport, $j, $from, "123456789", 1, $prefix."1", $p);
+					if ($resinvite =~ "^4") {
+						$alwaysok = "no";
+					} else {
+						$alwaysok = "yes";
+					}
+				}
+				#####
 
-						last;
-					}
-					else {
-						sleep(1);
-					}
+				while (1) {
+					$from = $prefix.$k if ($from eq "" || $eini ne $efin);
+					$to = $prefix.$k if ($to eq "" || $eini ne $efin);
+					last unless defined($range[$i]);
+					my $csec = 1;
+					$from_ip = $range[$i] if ($from_ip eq "");
+					scan($range[$i], $from_ip, $lport, $j, $from, $to, $csec, $prefix.$k, $proto);
+
+					last;
 				}
 			}
 		}
@@ -355,10 +374,10 @@ sub scan {
 	my $proto = shift;
 
 	my $p = $proto;
-	
+
 	$p = "udp" if ($proto eq "all");
-	my $r = send_options($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $p);
-	send_options($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, "tcp") if ($proto eq "all" && $r eq "");
+	my $r = send_invite($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $p);
+	send_invite($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, "tcp") if ($proto eq "all" && $r eq "");
 }
  
 # Send INVITE message
@@ -385,35 +404,34 @@ sub send_invite {
 		my $branch = &generate_random_string(71, 0);
 		my $callid = &generate_random_string(32, 1);
 	
-		my $msg = "INVITE sip:".$to."@".$to_ip." SIP/2.0\n";
-		$msg .= "Via: SIP/2.0/".uc($proto)." $from_ip:$lport;branch=$branch\n";
-		$msg .= "From: \"$from\" <sip:".$user."@".$to_ip.">;tag=0c26cd11\n";
-		$msg .= "To: <sip:".$to."@".$to_ip.">\n";
-		$msg .= "Contact: <sip:".$from."@".$from_ip.":$lport;transport=$proto>\n";
-		$msg .= "Supported: replaces, timer, path\n";
-		$msg .= "P-Early-Media: Supported\n";
-		$msg .= "Call-ID: ".$callid."\n";
-		$msg .= "CSeq: $cseq INVITE\n";
-		$msg .= "User-Agent: $useragent\n";
-		$msg .= "Max-Forwards: 70\n";
-		$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\n";
-		$msg .= "Content-Type: application/sdp\n";
+		my $msg = "INVITE sip:".$to."@".$to_ip." SIP/2.0\r\n";
+		$msg .= "Via: SIP/2.0/".uc($proto)." $from_ip:$lport;branch=$branch\r\n";
+		$msg .= "From: \"$from\" <sip:".$user."@".$to_ip.">;tag=0c26cd11\r\n";
+		$msg .= "To: <sip:".$to."@".$to_ip.">\r\n";
+		$msg .= "Contact: <sip:".$from."@".$from_ip.":$lport;transport=$proto>\r\n";
+		$msg .= "Supported: replaces, timer, path\r\n";
+		$msg .= "P-Early-Media: Supported\r\n";
+		$msg .= "Call-ID: ".$callid."\r\n";
+		$msg .= "CSeq: $cseq INVITE\r\n";
+		$msg .= "User-Agent: $useragent\r\n";
+		$msg .= "Max-Forwards: 70\r\n";
+		$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\r\n";
+		$msg .= "Content-Type: application/sdp\r\n";
 
-		my $sdp .= "v=0\n";
-		$sdp .= "o=anonymous 1312841870 1312841870 IN IP4 $from_ip\n";
-		$sdp .= "s=session\n";
-		$sdp .= "c=IN IP4 $from_ip\n";
-		$sdp .= "t=0 0\n";
-		$sdp .= "m=audio 2362 RTP/AVP 0\n";
-		$sdp .= "a=rtpmap:18 G729/8000\n";
-		$sdp .= "a=rtpmap:0 PCMU/8000\n";
-		$sdp .= "a=rtpmap:8 PCMA/8000\n";
+		my $sdp .= "v=0\r\n";
+		$sdp .= "o=anonymous 1312841870 1312841870 IN IP4 $from_ip\r\n";
+		$sdp .= "s=session\r\n";
+		$sdp .= "c=IN IP4 $from_ip\r\n";
+		$sdp .= "t=0 0\r\n";
+		$sdp .= "m=audio 2362 RTP/AVP 0\r\n";
+		$sdp .= "a=rtpmap:18 G729/8000\r\n";
+		$sdp .= "a=rtpmap:0 PCMU/8000\r\n";
+		$sdp .= "a=rtpmap:8 PCMA/8000\r\n\r\n";
 
-		$msg .= "Content-Length: ".length($sdp)."\n\n";
+		$msg .= "Content-Length: ".length($sdp)."\r\n\r\n";
 		$msg .= $sdp;
 
 		my $data = "";
-		my $server = "";
 		my $ua = "";
 		my $line = "";
 
@@ -423,11 +441,10 @@ sub send_invite {
 		print "[+] $to_ip:$dport/$proto - Sending:\n=======\n$msg" if ($vv eq 1);
 
 		use Errno qw(ETIMEDOUT EWOULDBLOCK);
-		
+	
 		LOOP: {
 			while (<$sc>) {
 				if ( 0+$! == ETIMEDOUT || 0+$! == EWOULDBLOCK ) {
-					{lock($threads);$threads--;}
 					return "";
 				}
 
@@ -445,20 +462,29 @@ sub send_invite {
 					print "[-] $response\n" if ($v eq 1);
 					print "Receiving:\n=========\n$data" if ($vv eq 1);
 
+					if ($to ne "123456789") {
+						if ($response =~ "^1") {
+							if ($alwaysok eq "no") {
+								print OUTPUT "$to_ip\t$dport\t$proto\t$to\t\tNo authentication required\t$server\n";
+								print "Found match: $to_ip:$dport/$proto - User: $to - No authentication required\n";
+							}
+						}
+						else {
+							print OUTPUT "$to_ip\t$dport\t$proto\t$to\t\tRequire authentication\t$server\n";
+							print "Found match: $to_ip:$dport/$proto - User: $to - Require authentication\n";
+						}
+					}
 					last LOOP;
 				}
 			}
 		}
     	}
-	
+
 	return $response;
 }
 
 # Send OPTIONS message
 sub send_options {
-	{lock($count);$count++;}
-	{lock($threads);$threads++;}
- 
 	my $from_ip = shift;
 	my $to_ip = shift;
 	my $lport = shift;
@@ -469,6 +495,7 @@ sub send_options {
 	my $user = shift;
 	my $proto = shift;
 	my $response = "";
+	my $server = "";
 
 	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 10);
 
@@ -481,20 +508,19 @@ sub send_options {
 		my $branch = &generate_random_string(71, 0);
 		my $callid = &generate_random_string(32, 1);
 	
-		my $msg = "OPTIONS sip:".$to."@".$to_ip." SIP/2.0\n";
-		$msg .= "Via: SIP/2.0/".uc($proto)." $from_ip:$lport;branch=$branch\n";
-		$msg .= "From: <sip:".$user."@".$to_ip.">;tag=0c26cd11\n";
-		$msg .= "To: <sip:".$user."@".$to_ip.">\n";
-		$msg .= "Contact: <sip:".$user."@".$from_ip.":$lport;transport=$proto>\n";
-		$msg .= "Call-ID: ".$callid."\n";
-		$msg .= "CSeq: $csec OPTIONS\n";
-		$msg .= "User-Agent: $useragent\n";
-		$msg .= "Max-Forwards: 70\n";
-		$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\n";
-		$msg .= "Content-Length: 0\n\n";
+		my $msg = "OPTIONS sip:".$to."@".$to_ip." SIP/2.0\r\n";
+		$msg .= "Via: SIP/2.0/".uc($proto)." $from_ip:$lport;branch=$branch\r\n";
+		$msg .= "From: <sip:".$user."@".$to_ip.">;tag=0c26cd11\r\n";
+		$msg .= "To: <sip:".$user."@".$to_ip.">\r\n";
+		$msg .= "Contact: <sip:".$user."@".$from_ip.":$lport;transport=$proto>\r\n";
+		$msg .= "Call-ID: ".$callid."\r\n";
+		$msg .= "CSeq: $csec OPTIONS\r\n";
+		$msg .= "User-Agent: $useragent\r\n";
+		$msg .= "Max-Forwards: 70\r\n";
+		$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\r\n";
+		$msg .= "Content-Length: 0\r\n\r\n";
 
 		my $data = "";
-		my $server = "";
 		my $ua = "";
 		my $line = "";
 
@@ -508,7 +534,6 @@ sub send_options {
 		LOOP: {
 			while (<$sc>) {
 				if ( 0+$! == ETIMEDOUT || 0+$! == EWOULDBLOCK ) {
-					{lock($threads);$threads--;}
 					return "";
 				}
 
@@ -554,20 +579,10 @@ sub send_options {
 			}
 
 			$server = "Unknown" if ($server eq "");
-			my $resinvite = send_invite($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $proto);
-			if ($resinvite =~ "^1") {
-				print OUTPUT "$to_ip\t$dport\t$proto\t$to\t\tNo authentication required\t$server\n";
-			}
-			else {
-				print OUTPUT "$to_ip\t$dport\t$proto\t$to\t\tRequire authentication\t$server\n";
-			}
-			{lock($found);$found++;}
 		}
 	}
 	
-	{lock($threads);$threads--;}
-	
-	return $response;
+	return $server;
 }
 
  

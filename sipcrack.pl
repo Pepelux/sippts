@@ -10,22 +10,16 @@ use strict;
 use IO::Socket;
 use IO::Socket::Timeout;
 use NetAddr::IP;
-use threads;
-use threads::shared;
 use Getopt::Long;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 use DBI;
 
 my $useragent = 'pplsip';
-my $version = '1.2.2';
+my $version;
  
-my $maxthreads = 300;
- 
-my $threads : shared = 0;
-my $found : shared = 0;
-my $count : shared = 0;
 my @range;
 my @results;
+my @founds;
  
 my $host = '';		# host
 my $lport = '';		# local port
@@ -51,7 +45,6 @@ my $from_ip = '';
 my $i;
 my $j;
 my $k;
-my $csec;
 my $word = '';
 my $wini = '';
 my $nhost;
@@ -61,6 +54,15 @@ my $eini;
 my $efin;
 my $hini = 0;
 
+my $versionfile = 'version';
+open(my $fh, '<:encoding(UTF-8)', $versionfile)
+  or die "Could not open file '$versionfile' $!";
+ 
+while (my $row = <$fh>) {
+  chomp $row;
+  $version = $row;
+}
+	
 my $database = "sippts.db";
 my $database_empty = "sippts_empty.db";
 
@@ -264,6 +266,8 @@ sub init() {
 	my $analize = 0;
  
  	open(WL,"<$wordlist");
+ 	
+ 	my $first = 0;
 
 	while(<WL>) {
 		chomp;
@@ -277,20 +281,23 @@ sub init() {
 				for ($j = $pini; $j <= $pfin; $j++) {
 					for ($k = $eini; $k <= $efin; $k++) {
 						while (1) {
-							if ($threads < $maxthreads) {
-								$from = $prefix.$k if ($from eq "" || $eini ne $efin);
-								$to = $prefix.$k if ($to eq "" || $eini ne $efin);
-								last unless defined($range[$i]);
-								$csec = 1;
-								$from_ip = $range[$i] if ($from_ip eq "");
-								my $thr = threads->new(\&scan, $range[$i], $from_ip, $lport, $j, $from, $to, $csec, $prefix.$k, $proto, $word);
-								$thr->detach();
+							$from = $prefix.$k if ($from eq "" || $eini ne $efin);
+							$to = $prefix.$k if ($to eq "" || $eini ne $efin);
+							last unless defined($range[$i]);
+							$from_ip = $range[$i] if ($from_ip eq "");
+							my $thr;
+							my $user = $prefix.$k;
 
-								last;
+							if ($first eq 0) {
+								scan($range[$i], $from_ip, $lport, $j, $from, $to, $user, $proto, $from);
+								$first = 1;
 							}
-							else {
-								sleep(1);
+
+							if ( !grep( /^$user$/, @founds ) ) {
+								scan($range[$i], $from_ip, $lport, $j, $from, $to, $user, $proto, $word);
 							}
+
+							last;
 						}
 					}
 				}
@@ -341,10 +348,6 @@ sub interrupt {
 		my $i2 = $i;
 		my $j2 = $j;
 		my $k2 = $k;
-		{lock($threads); $threads=$maxthreads;}
-
-		print "Closing threads. Please wait ...\n";
-		sleep(2);
 
 		close (WL);
 		close(OUTPUT);
@@ -405,9 +408,6 @@ sub interrupt {
  
 		exit;
 	}
-	else {
-		print "Closing threads. Please wait ...\n\n";
-	}
 }
 
 sub save {
@@ -437,28 +437,28 @@ sub scan {
 	my $dport = shift;
 	my $from = shift;
 	my $to = shift;
-	my $csec = shift;
 	my $user = shift;
 	my $proto = shift;
 	my $pass = shift;
 
 	my $callid = &generate_random_string(32, 1);
-
-	send_register($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $pass, $callid, "", $proto);
+	my $cseq = 1;
+	
+	send_register($from_ip, $to_ip, $lport, $dport, $from, $to, $cseq, $user, $pass, $callid, "", $proto);
 
 	my $uri = "sip:$to_ip";
 	my $a = md5_hex($user.':'.$realm.':'.$pass);
 	my $b = md5_hex('REGISTER:'.$uri);
 	my $r = md5_hex($a.':'.$nonce.':'.$b);
 	my $digest = "username=\"$user\", realm=\"$realm\", nonce=\"$nonce\", uri=\"$uri\", response=\"$r\", algorithm=MD5";
-	send_register($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $pass, $callid, $digest, $proto);
+	$cseq = 2;
+	my $res = send_register($from_ip, $to_ip, $lport, $dport, $from, $to, $cseq, $user, $pass, $callid, $digest, $proto);
+	
+	push @founds, $user if ($res =~ /^200/);
 }
  
 # Send REGISTER message
 sub send_register {
-	{lock($count);$count++;}
-	{lock($threads);$threads++;}
- 
 	my $from_ip = shift;
 	my $to_ip = shift;
 	my $lport = shift;
@@ -473,29 +473,28 @@ sub send_register {
 	my $proto = shift;
 	my $response = "";
 
-	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 10);
+	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, LocalPort=>$lport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 10);
 
 	if ($sc) {
 		IO::Socket::Timeout->enable_timeouts_on($sc);
 		$sc->read_timeout(0.5);
 		$sc->enable_timeout;
-		$lport = $sc->sockport();
 
-		my $branch = &generate_random_string(71, 0);
+		my $branch = &generate_random_string(32, 0);
 	
-		my $msg = "REGISTER sip:".$to_ip." SIP/2.0\n";
-		$msg .= "Via: SIP/2.0/".uc($proto)." $from_ip:$lport;branch=$branch\n";
-		$msg .= "From: <sip:".$user."@".$to_ip.">;tag=0c26cd11\n";
-		$msg .= "To: <sip:".$user."@".$to_ip.">\n";
-		$msg .= "Contact: <sip:".$user."@".$from_ip.":$lport;transport=$proto>\n";
-		$msg .= "Authorization: Digest $digest\n" if ($digest ne "");
-		$msg .= "Call-ID: ".$callid."\n";
-		$msg .= "CSeq: $cseq REGISTER\n";
-		$msg .= "User-Agent: $useragent\n";
-		$msg .= "Max-Forwards: 70\n";
-		$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\n";
-		$msg .= "Expires: 10\n";
-		$msg .= "Content-Length: 0\n\n";
+		my $msg = "REGISTER sip:".$to_ip." SIP/2.0\r\n";
+		$msg .= "Via: SIP/2.0/".uc($proto)." $from_ip:$lport;branch=$branch\r\n";
+		$msg .= "From: <sip:".$user."@".$to_ip.">;tag=0c26cd11\r\n";
+		$msg .= "To: <sip:".$user."@".$to_ip.">\r\n";
+		$msg .= "Contact: <sip:".$user."@".$from_ip.":$lport;transport=$proto>\r\n";
+		$msg .= "Authorization: Digest $digest\r\n" if ($digest ne "");
+		$msg .= "Call-ID: ".$callid."\r\n";
+		$msg .= "CSeq: $cseq REGISTER\r\n";
+		$msg .= "User-Agent: $useragent\r\n";
+		$msg .= "Max-Forwards: 70\r\n";
+		$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\r\n";
+		$msg .= "Expires: 10\r\n";
+		$msg .= "Content-Length: 0\r\n\r\n";
 
 		my $data = "";
 		my $server = "";
@@ -504,24 +503,37 @@ sub send_register {
 
 		print $sc $msg;
 
-		print "[+] $to_ip/$proto - Sending REGISTER $from => $to (trying pass: $pass)\n" if ($v eq 1);
+		print "[+] $to_ip/$proto - Sending REGISTER $from (trying pass: $pass)\n" if ($v eq 1);
 		print "[+] $to_ip/$proto - Sending:\n=======\n$msg" if ($vv eq 1);
 
 		use Errno qw(ETIMEDOUT EWOULDBLOCK);
 		
 		LOOP: {
+			my $m = 1;
+			my $c = 1;
+
 			while (<$sc>) {
 				if ( 0+$! == ETIMEDOUT || 0+$! == EWOULDBLOCK ) {
-					{lock($threads);$threads--;}
 					return "";
 				}
 
 				$line = $_;
-			
 				if ($line =~ /^SIP\/2.0/ && $response eq "") {
 					$line =~ /^SIP\/2.0\s(.+)\r\n/;
-				
+
 					if ($1) { $response = $1; }
+				}
+
+				if ($line =~ /^CSeq/i) {
+					$line =~ /^Cseq:\s[0-9]+\s(.+)\r\n/i;
+					$m = 0 if ($1 !~ /REGISTER/);
+				}
+
+
+				if ($line =~ /^Call-ID/i) {
+					$line =~ /^Call-ID:\s(.+)\r\n/i;
+				
+					$c = 0 if ($callid ne $1);
 				}
 
 				if ($line =~ /^WWW-Authenticate:/ || $line =~ /^Proxy-Authenticate:/) {
@@ -537,19 +549,18 @@ sub send_register {
 					print "[-] $response\n" if ($v eq 1);
 					print "Receiving:\n=========\n$data" if ($vv eq 1);
 
-					last LOOP if ($response !~ /^1/);
+					last LOOP if ($response !~ /^1/ && $m eq 1 && $c eq 1);
+
+					$response = "" if ($response =~ /^1/ && $m eq 1 && $c eq 1);
 				}
 			}
 		}
-    
+
 		if ($response =~ "^200") {
 			print OUTPUT "$to_ip\t$dport\t$proto\t$user\t$pass\n";
 			print "Found match: $to_ip:$dport/$proto - User: $user - Pass: $pass\n";
-			{lock($found);$found++;}
 		}
 	}
-	
-	{lock($threads);$threads--;}
 	
 	return $response;
 }

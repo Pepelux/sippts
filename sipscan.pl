@@ -17,9 +17,9 @@ use Digest::MD5;
 use DBI;
 
 my $useragent = 'pplsip';
-my $version = '1.2.2';
+my $version;
  
-my $maxthreads = 300;
+my $maxthreads = 50;
  
 my $threads : shared = 0;
 my $found : shared = 0;
@@ -45,6 +45,15 @@ my $abort = 0;
 my $to_ip = '';
 my $from_ip = '';
 
+my $versionfile = 'version';
+open(my $fh, '<:encoding(UTF-8)', $versionfile)
+  or die "Could not open file '$versionfile' $!";
+ 
+while (my $row = <$fh>) {
+  chomp $row;
+  $version = $row;
+}
+	
 my $database = "sippts.db";
 my $database_empty = "sippts_empty.db";
 
@@ -387,18 +396,18 @@ sub send_register {
 		my $branch = &generate_random_string(71, 0);
 		my $callid = &generate_random_string(32, 1);
 	
-		my $msg = "REGISTER sip:".$to_ip." SIP/2.0\n";
-		$msg .= "Via: SIP/2.0/".uc($proto)." $from_ip:$lport;branch=$branch\n";
-		$msg .= "From: <sip:".$user."@".$to_ip.">;tag=0c26cd11\n";
-		$msg .= "To: <sip:".$user."@".$to_ip.">\n";
-		$msg .= "Contact: <sip:".$user."@".$from_ip.":$lport;transport=$proto>\n";
-		$msg .= "Call-ID: ".$callid."\n";
-		$msg .= "CSeq: $cseq REGISTER\n";
-		$msg .= "User-Agent: $useragent\n";
-		$msg .= "Max-Forwards: 70\n";
-		$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\n";
-		$msg .= "Expires: 10\n";
-		$msg .= "Content-Length: 0\n\n";
+		my $msg = "REGISTER sip:".$to_ip." SIP/2.0\r\n";
+		$msg .= "Via: SIP/2.0/".uc($proto)." $from_ip:$lport;branch=$branch\r\n";
+		$msg .= "From: <sip:".$user."@".$to_ip.">;tag=0c26cd11\r\n";
+		$msg .= "To: <sip:".$user."@".$to_ip.">\r\n";
+		$msg .= "Contact: <sip:".$user."@".$from_ip.":$lport;transport=$proto>\r\n";
+		$msg .= "Call-ID: ".$callid."\r\n";
+		$msg .= "CSeq: $cseq REGISTER\r\n";
+		$msg .= "User-Agent: $useragent\r\n";
+		$msg .= "Max-Forwards: 70\r\n";
+		$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\r\n";
+		$msg .= "Expires: 10\r\n";
+		$msg .= "Content-Length: 0\r\n\r\n";
 
 		my $data = "";
 		my $server = "";
@@ -498,31 +507,31 @@ sub send_invite {
 		my $branch = &generate_random_string(71, 0);
 		my $callid = &generate_random_string(32, 1);
 	
-		my $msg = "INVITE sip:".$to."@".$to_ip." SIP/2.0\n";
-		$msg .= "Via: SIP/2.0/".uc($proto)." $from_ip:$lport;branch=$branch\n";
-		$msg .= "From: \"$from\" <sip:".$user."@".$to_ip.">;tag=0c26cd11\n";
-		$msg .= "To: <sip:".$to."@".$to_ip.">\n";
-		$msg .= "Contact: <sip:".$from."@".$from_ip.":$lport;transport=$proto>\n";
-		$msg .= "Supported: replaces, timer, path\n";
-		$msg .= "P-Early-Media: Supported\n";
-		$msg .= "Call-ID: ".$callid."\n";
-		$msg .= "CSeq: $cseq INVITE\n";
-		$msg .= "User-Agent: $useragent\n";
-		$msg .= "Max-Forwards: 70\n";
-		$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\n";
-		$msg .= "Content-Type: application/sdp\n";
+		my $msg = "INVITE sip:".$to."@".$to_ip." SIP/2.0\r\n";
+		$msg .= "Via: SIP/2.0/".uc($proto)." $from_ip:$lport;branch=$branch\r\n";
+		$msg .= "From: \"$from\" <sip:".$user."@".$to_ip.">;tag=0c26cd11\r\n";
+		$msg .= "To: <sip:".$to."@".$to_ip.">\r\n";
+		$msg .= "Contact: <sip:".$from."@".$from_ip.":$lport;transport=$proto>\r\n";
+		$msg .= "Supported: replaces, timer, path\r\n";
+		$msg .= "P-Early-Media: Supported\r\n";
+		$msg .= "Call-ID: $callid\r\n";
+		$msg .= "CSeq: $cseq INVITE\r\n";
+		$msg .= "User-Agent: $useragent\r\n";
+		$msg .= "Max-Forwards: 70\r\n";
+		$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\r\n";
+		$msg .= "Content-Type: application/sdp\r\n";
 
-		my $sdp .= "v=0\n";
-		$sdp .= "o=anonymous 1312841870 1312841870 IN IP4 $from_ip\n";
-		$sdp .= "s=session\n";
-		$sdp .= "c=IN IP4 $from_ip\n";
-		$sdp .= "t=0 0\n";
-		$sdp .= "m=audio 2362 RTP/AVP 0\n";
-		$sdp .= "a=rtpmap:18 G729/8000\n";
-		$sdp .= "a=rtpmap:0 PCMU/8000\n";
-		$sdp .= "a=rtpmap:8 PCMA/8000\n";
+		my $sdp .= "v=0\r\n";
+		$sdp .= "o=anonymous 1312841870 1312841870 IN IP4 $from_ip\r\n";
+		$sdp .= "s=session\r\n";
+		$sdp .= "c=IN IP4 $from_ip\r\n";
+		$sdp .= "t=0 0\r\n";
+		$sdp .= "m=audio 2362 RTP/AVP 0\r\n";
+		$sdp .= "a=rtpmap:18 G729/8000\r\n";
+		$sdp .= "a=rtpmap:0 PCMU/8000\r\n";
+		$sdp .= "a=rtpmap:8 PCMA/8000\r\n\r\n";
 
-		$msg .= "Content-Length: ".length($sdp)."\n\n";
+		$msg .= "Content-Length: ".length($sdp)."\r\n\r\n";
 		$msg .= $sdp;
 
 		my $data = "";
@@ -621,17 +630,17 @@ sub send_options {
 		my $branch = &generate_random_string(71, 0);
 		my $callid = &generate_random_string(32, 1);
 	
-		my $msg = "OPTIONS sip:".$to."@".$to_ip." SIP/2.0\n";
-		$msg .= "Via: SIP/2.0/".uc($proto)." $from_ip:$lport;branch=$branch\n";
-		$msg .= "From: <sip:".$user."@".$to_ip.">;tag=0c26cd11\n";
-		$msg .= "To: <sip:".$user."@".$to_ip.">\n";
-		$msg .= "Contact: <sip:".$user."@".$from_ip.":$lport;transport=$proto>\n";
-		$msg .= "Call-ID: ".$callid."\n";
-		$msg .= "CSeq: $cseq OPTIONS\n";
-		$msg .= "User-Agent: $useragent\n";
-		$msg .= "Max-Forwards: 70\n";
-		$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\n";
-		$msg .= "Content-Length: 0\n\n";
+		my $msg = "OPTIONS sip:".$to."@".$to_ip." SIP/2.0\r\n";
+		$msg .= "Via: SIP/2.0/".uc($proto)." $from_ip:$lport;branch=$branch\r\n";
+		$msg .= "From: <sip:".$user."@".$to_ip.">;tag=0c26cd11\r\n";
+		$msg .= "To: <sip:".$user."@".$to_ip.">\r\n";
+		$msg .= "Contact: <sip:".$user."@".$from_ip.":$lport;transport=$proto>\r\n";
+		$msg .= "Call-ID: $callid\r\n";
+		$msg .= "CSeq: $cseq OPTIONS\r\n";
+		$msg .= "User-Agent: $useragent\r\n";
+		$msg .= "Max-Forwards: 70\r\n";
+		$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\r\n";
+		$msg .= "Content-Length: 0\r\n\r\n";
 
 		my $data = "";
 		my $server = "";

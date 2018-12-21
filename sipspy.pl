@@ -18,7 +18,17 @@ my $port = '';	# destination port
 my $v = 0;	# verbose mode
 my $h = 0;	# help
 
-my $version = '1.2.2';
+my $version;
+
+my $versionfile = 'version';
+open(my $fh, '<:encoding(UTF-8)', $versionfile)
+  or die "Could not open file '$versionfile' $!";
+ 
+while (my $row = <$fh>) {
+  chomp $row;
+  $version = $row;
+}
+	
 
 sub init() {
 	my $socket;
@@ -100,29 +110,29 @@ sub parse_request() {
 	print "[=>] $host:$port $method\r\n" if ($v eq 0);
 
 	if ($method eq "OPTIONS") {
-		$resp .= "SIP/2.0 200 OK\n";
+		$resp .= "SIP/2.0 200 OK\r\n";
 	}
 	
 	if ($method eq "INVITE") {
-		$resp .= "SIP/2.0 404 Not Found\n";
+		$resp .= "SIP/2.0 404 Not Found\r\n";
 	}
 	
 	if ($method eq "REGISTER") {
-		$resp .= "SIP/2.0 401 Unauthorized\n";
+		$resp .= "SIP/2.0 401 Unauthorized\r\n";
 		
 		if ($digest eq "") {
-			$resp .= "WWW-Authenticate: Digest algorithm=MD5, realm=\"asterisk\", nonce=\"405a7bc0\"\n";
-			print "     [ Sending digest => WWW-Authenticate: Digest algorithm=MD5, realm=\"asterisk\", nonce=\"405a7bc0\" ]\n";
+			$resp .= "WWW-Authenticate: Digest algorithm=MD5, realm=\"asterisk\", nonce=\"405a7bc0\"\r\n";
+			print "     [ Sending digest => WWW-Authenticate: Digest algorithm=MD5, realm=\"asterisk\", nonce=\"405a7bc0\" ]\r\n";
 		}
 	}
 
-	$resp .= $via."\n";
-	$resp .= $from."\n";
-	$resp .= $to."\n";
-	$resp .= $callid."\n";
-	$resp .= $cseq."\n";
-	$resp .= "Server: pplbot\n";
-	$resp .= "Content-Length: 0\n\n";
+	$resp .= $via."\r\n";
+	$resp .= $from."\r\n";
+	$resp .= $to."\r\n";
+	$resp .= $callid."\r\n";
+	$resp .= $cseq."\r\n";
+	$resp .= "Server: pplbot\r\n";
+	$resp .= "Content-Length: 0\r\n\r\n";
 	
 	print "     [ Digest response => $digest ]\n" if ($digest ne "");
 

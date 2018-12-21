@@ -29,7 +29,17 @@ my $u = 0;
 my $method = '';
 my $g_cap_descrip;
 
-my $version = '1.2.2';
+my $version;
+
+my $versionfile = 'version';
+open(my $fh, '<:encoding(UTF-8)', $versionfile)
+  or die "Could not open file '$versionfile' $!";
+ 
+while (my $row = <$fh>) {
+  chomp $row;
+  $version = $row;
+}
+	
 
 # Trapping Signal "INT" like ctrl+c for cleanup first.
 $SIG{INT} = \&f_probe_ctrl_c; 
