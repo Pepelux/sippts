@@ -17,11 +17,11 @@ Sippts is a set of tools to audit VoIP servers and devices using SIP protocol. S
 
 [Click here to read more about SIPscan](https://github.com/Pepelux/sippts/wiki/SIPscan)
 
-  * _**Sipexten**_ identifies extensions on a SIP server. Also tells you if the extension line requires authentication or not. Sipexten uses multithread and can check several IPs and port ranges.
+  * _**Sipexten**_ identifies extensions on a SIP server. Also tells you if the extension line requires authentication or not. Sipexten can check several IPs and port ranges.
 
 [Click here to read more about SIPexten](https://github.com/Pepelux/sippts/wiki/SIPexten)
 
-  * _**Sipcrack**_ is a remote password cracker. Sipcrack uses multithread and can test passwords for several users in different IPs and port ranges.
+  * _**Sipcrack**_ is a remote password cracker. Sipcrack can test passwords for several users in different IPs and port ranges.
 
 [Click here to read more about SIPcrack](https://github.com/Pepelux/sippts/wiki/SIPcrack)
 
