@@ -268,6 +268,8 @@ sub init() {
  	open(WL,"<$wordlist");
  	
  	my $first = 0;
+	my @arrow = ("|", "/", "-", "\\");
+	my $cont = 0;
 
 	while(<WL>) {
 		chomp;
@@ -289,13 +291,18 @@ sub init() {
 							my $user = $prefix.$k;
 
 							if ($first eq 0) {
+								print "\r[".$arrow[$cont]."] Testing ".$range[$i].":$j with $user/$from ...";
 								scan($range[$i], $from_ip, $lport, $j, $from, $to, $user, $proto, $from);
 								$first = 1;
 							}
 
 							if ( !grep( /^$user$/, @founds ) ) {
+								print "\r[".$arrow[$cont]."] Testing ".$range[$i].":$j with $user/$word ...";
 								scan($range[$i], $from_ip, $lport, $j, $from, $to, $user, $proto, $word);
 							}
+
+							$cont++;
+							$cont = 0 if ($cont > 3);
 
 							last;
 						}

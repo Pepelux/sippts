@@ -243,28 +243,34 @@ sub init() {
 
 	my $nhost = @range;
 	my $p = $proto;
+	my @arrow = ("|", "/", "-", "\\");
+	my $cont = 0;
 
 	for (my $i = 0; $i <= $nhost; $i++) {
 		for (my $j = $pini; $j <= $pfin; $j++) {
+			##### Executed only one time
+			# Get User-agent/server from an OPTIONS message
+			my $user = $prefix."1";
+
+			if ($server eq "") {
+				$p = "udp" if ($proto eq "all");
+				$from_ip = $range[$i] if ($from_ip eq "");
+				$server = send_options($range[$i], $from_ip, $lport, $j, $from, $to, 1, $user, $p);
+				send_options($range[$i], $from_ip, $lport, $j, $from, $to, 1, $user, "tcp") if ($proto eq "all" && $server eq "");
+			}
+			# Some systems always response 'Ok'. On this case only get the error responses
+			if ($alwaysok eq "") {
+				my $resinvite = send_invite($range[$i], $from_ip, $lport, $j, $from, "123456789", 1, $user, $p);
+				if ($resinvite =~ "^4" || $resinvite eq "") {
+					$alwaysok = "no";
+				} else {
+					$alwaysok = "yes";
+				}
+			}
+			#####
+				
 			for (my $k = $eini; $k <= $efin; $k++) {
-				##### Executed only one time
-				# Get User-agent/server from an OPTIONS message
-				if ($server eq "") {
-					$p = "udp" if ($proto eq "all");
-					$from_ip = $range[$i] if ($from_ip eq "");
-					$server = send_options($range[$i], $from_ip, $lport, $j, $from, $to, 1, $prefix."1", $p);
-					send_options($range[$i], $from_ip, $lport, $j, $from, $to, 1, $prefix."1", "tcp") if ($proto eq "all" && $server eq "");
-				}
-				# Some systems always response 'Ok'. On this case only get the error responses
-				if ($alwaysok eq "") {
-					my $resinvite = send_invite($range[$i], $from_ip, $lport, $j, $from, "123456789", 1, $prefix."1", $p);
-					if ($resinvite =~ "^4") {
-						$alwaysok = "no";
-					} else {
-						$alwaysok = "yes";
-					}
-				}
-				#####
+				$user = $prefix.$k;
 
 				while (1) {
 					$from = $prefix.$k if ($from eq "" || $eini ne $efin);
@@ -272,7 +278,10 @@ sub init() {
 					last unless defined($range[$i]);
 					my $csec = 1;
 					$from_ip = $range[$i] if ($from_ip eq "");
-					scan($range[$i], $from_ip, $lport, $j, $from, $to, $csec, $prefix.$k, $proto);
+					print "\r[".$arrow[$cont]."] Scanning ".$range[$i].":$j with exten $user ...";
+					scan($range[$i], $from_ip, $lport, $j, $from, $to, $csec, $user, $proto);
+					$cont++;
+					$cont = 0 if ($cont > 3);
 
 					last;
 				}
@@ -465,13 +474,13 @@ sub send_invite {
 					if ($to ne "123456789") {
 						if ($response =~ "^1") {
 							if ($alwaysok eq "no") {
-								print OUTPUT "$to_ip\t$dport\t$proto\t$to\t\tNo authentication required\t$server\n";
-								print "Found match: $to_ip:$dport/$proto - User: $to - No authentication required\n";
+								print OUTPUT "$to_ip\t$dport\t$proto\t$to\t\tNo auth required\t$server\n";
+								print "\rFound match: $to_ip:$dport/$proto - User: $to - No auth required\n";
 							}
 						}
 						else {
 							print OUTPUT "$to_ip\t$dport\t$proto\t$to\t\tRequire authentication\t$server\n";
-							print "Found match: $to_ip:$dport/$proto - User: $to - Require authentication\n";
+							print "\rFound match: $to_ip:$dport/$proto - User: $to - Require authentication\n";
 						}
 					}
 					last LOOP;

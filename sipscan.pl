@@ -19,7 +19,7 @@ use DBI;
 my $useragent = 'pplsip';
 my $version;
  
-my $maxthreads = 50;
+my $maxthreads = 300;
  
 my $threads : shared = 0;
 my $found : shared = 0;
@@ -240,7 +240,9 @@ sub init() {
 	}
 
 	my $nhost = @range;
- 
+ 	my @arrow = ("|", "/", "-", "\\");
+	my $cont = 0;
+
 	for (my $i = 0; $i <= $nhost; $i++) {
 		for (my $j = $pini; $j <= $pfin; $j++) {
 			while (1) {
@@ -248,8 +250,11 @@ sub init() {
 					last unless defined($range[$i]);
 					my $csec = 1;
 					$from_ip = $range[$i] if ($from_ip eq "");
+					print "\r[".$arrow[$cont]."] Scanning ".$range[$i].":$j ...";
 					my $thr = threads->new(\&scan, $range[$i], $from_ip, $lport, $j, $from, $to, $csec, $user, $proto);
 					$thr->detach();
+					$cont++;
+					$cont = 0 if ($cont > 3);
 
 					last;
 				}
