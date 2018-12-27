@@ -525,7 +525,7 @@ sub send_register {
 				}
 
 				$line = $_;
-				if ($line =~ /^SIP\/2.0/ && $response eq "") {
+				if ($line =~ /^SIP\/2.0/ && ($response eq "" || $response =~ /^1/)) {
 					$line =~ /^SIP\/2.0\s(.+)\r\n/;
 
 					if ($1) { $response = $1; }

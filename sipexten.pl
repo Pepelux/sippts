@@ -510,7 +510,7 @@ sub send_options {
 
 	if ($sc) {
 		IO::Socket::Timeout->enable_timeouts_on($sc);
-		$sc->read_timeout(1);
+		$sc->read_timeout(0.5);
 		$sc->enable_timeout;
 		$lport = $sc->sockport();
 
