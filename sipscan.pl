@@ -22,8 +22,6 @@ my $version;
 my $maxthreads = 300;
  
 my $threads : shared = 0;
-my $found : shared = 0;
-my $count : shared = 0;
 my @range;
 my @results;
  
@@ -376,7 +374,6 @@ sub scan {
  
 # Send REGISTER message
 sub send_register {
-	{lock($count);$count++;}
 	{lock($threads);$threads++;}
  
 	my $from_ip = shift;
@@ -476,7 +473,6 @@ sub send_register {
 
 			$server = "Unknown" if ($server eq "");
 			print OUTPUT "$to_ip\t$dport\t$proto\t$server\n";
-			{lock($found);$found++;}
 		}
 	}
 	
@@ -487,7 +483,6 @@ sub send_register {
 
 # Send INVITE message
 sub send_invite {
-	{lock($count);$count++;}
 	{lock($threads);$threads++;}
  
 	my $from_ip = shift;
@@ -599,7 +594,6 @@ sub send_invite {
 
 			$server = "Unknown" if ($server eq "");
 			print OUTPUT "$to_ip\t$dport\t$proto\t$server\n";
-			{lock($found);$found++;}
 		}
 	}
 	
@@ -610,7 +604,6 @@ sub send_invite {
 
 # Send OPTIONS message
 sub send_options {
-	{lock($count);$count++;}
 	{lock($threads);$threads++;}
  
 	my $from_ip = shift;
@@ -711,34 +704,34 @@ sub send_options {
 
 			$server = "Unknown   " if ($server eq "");
 			my $webfound = 0;
+			print OUTPUT "$to_ip\t$dport\t$proto\t$server";
 
 			my $sc2 = new IO::Socket::INET->new(PeerPort=>80, Proto=>'tcp', PeerAddr=>$to_ip, Timeout => 10);
-			if ($sc2) { $webfound = 1; print OUTPUT "$to_ip\t$dport\t$proto\t$server\t80/tcp\n"; }
+			if ($sc2) { $webfound = 1; print OUTPUT "\t80/tcp"; }
 			else {
 				$sc2 = new IO::Socket::INET->new(PeerPort=>81, Proto=>'tcp', PeerAddr=>$to_ip, Timeout => 10);
-				if ($sc2) { $webfound = 1; print OUTPUT "$to_ip\t$dport\t$proto\t$server\t81/tcp\n"; }
+				if ($sc2) { $webfound = 1; print OUTPUT "\t81/tcp"; }
 				else {
 					$sc2 = new IO::Socket::INET->new(PeerPort=>8000, Proto=>'tcp', PeerAddr=>$to_ip, Timeout => 10);
-					if ($sc2) { $webfound = 1; print OUTPUT "$to_ip\t$dport\t$proto\t$server\t8000/tcp\n"; }
+					if ($sc2) { $webfound = 1; print OUTPUT "\t8000/tcp"; }
 					else {
 						$sc2 = new IO::Socket::INET->new(PeerPort=>8080, Proto=>'tcp', PeerAddr=>$to_ip, Timeout => 10);
-						if ($sc2) { $webfound = 1; print OUTPUT "$to_ip\t$dport\t$proto\t$server\t8080/tcp\n"; }
+						if ($sc2) { $webfound = 1; print OUTPUT "\t8080/tcp"; }
 						else {
 							$sc2 = new IO::Socket::INET->new(PeerPort=>443, Proto=>'tcp', PeerAddr=>$to_ip, Timeout => 10);
-							if ($sc2) { $webfound = 1; print OUTPUT "$to_ip\t$dport\t$proto\t$server\t443/tcp\n"; }
-							else { $webfound = 1; print OUTPUT "$to_ip\t$dport\t$proto\t$server\t0\n"; }
+							if ($sc2) { $webfound = 1; print OUTPUT "\t443/tcp"; }
+							else { $webfound = 1; print OUTPUT "\t0"; }
 						}
 					}
 				}
 			}
 
-			print OUTPUT "$to_ip\t$dport\t$proto\t$server\n" if ($webfound eq 0);
-			{lock($found);$found++;}
+			print OUTPUT "\n";
 		}
 	}
 	
 	{lock($threads);$threads--;}
-	
+
 	return $response;
 }
 
