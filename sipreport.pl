@@ -140,7 +140,7 @@ Usage: perl $0 -h <host> | -u <user-agent> [options]
 
 == Options ==
 -noexten    = Show only servers and devices (not extensions nor users)
--noauth     = Show extensions with authentication not required
+-noauth     = Show extensions where authentication is not required
 
 == Examples ==
 \$perl $0 -h 192.168.0.1
