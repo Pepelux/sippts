@@ -50,3 +50,4 @@ And install next modules:
   * cpan -i IO:Socket:Timeout
   * cpan -i NetAddr:IP
   * cpan -i String:HexConvert
+  * cpan -i Net:Pcap
