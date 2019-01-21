@@ -37,6 +37,10 @@ Sippts is a set of tools to audit VoIP servers and devices using SIP protocol. S
 
 [Click here to read more about SIPspy](https://github.com/Pepelux/sippts/wiki/SIPspy)
 
+  * _**SipDigestLeak**_ Exploits the SIP digest leak vulnerability discovered by Sandro Gauci that affects a large number of hardware and software devices.
+
+[Click here to read more about SIPspy](https://github.com/Pepelux/sippts/wiki/SIPspy)
+
 ## Operating System ##
 Sippts has been tested on:
   * Linux
@@ -51,3 +55,4 @@ And install next modules:
   * cpan -i NetAddr:IP
   * cpan -i String:HexConvert
   * cpan -i Net:Pcap
+  * cpan -i Net::Address::IP::Local;
