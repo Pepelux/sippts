@@ -1,7 +1,10 @@
 #!/usr/bin/perl
-# -=-=-=-=-=-=-=-
-# SipSNIFF v1.2.2
-# -=-=-=-=-=-=-=-
+# -=-=-=-=
+# SipSNIFF
+# -=-=-=-=
+#
+# Sipsniff is a very simple sniffer for SIP protocol that allows us to filter
+# by SIP method type.
 #
 # Pepelux <pepeluxx@gmail.com>
 #

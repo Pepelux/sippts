@@ -1,7 +1,32 @@
 #!/usr/bin/perl
-# -=-=-=-=-=-=-=-=
-# SipINVITE v1.2.2
-# -=-=-=-=-=-=-=-=
+# -=-=-=-=-
+# SipINVITE
+# -=-=-=-=-
+#
+# Sipinvite checks if a PBX server allows us to make calls without
+# authentication. If the SIP server has an incorrect configuration, it
+# will allow us to make calls to external numbers. It can also allow us
+# to transfer the call to a second external number.
+# For example, if your Asterisk server has a bad context configuration,
+# you can accept INVITE request without authorization. In this case, an
+# attacker can make calls without knowing any user/pass.
+#
+# SipINVITE                     SIP Server                      Phone1              Phone2
+#          ---> INVITE       ---> 
+#                                         ---> INVITE      --->
+#                                         <--- 100 Trying  <---
+#          <--- 100 Trying   <---
+#                                         <--- 180 Ringing <---
+#          <--- 180 Ringing  <---
+#                                         <--- 200 Ok      <---
+#          <--- 200 Ok       <---
+#          ---> ACK          ---> 
+#          <--- 200 Ok       <---
+#          ---> REFER phone2 ---> 
+#                                         --->           INVITE                --->
+#          <--- 202 Accept   <---
+#                                                             <--->  RTP Session <--->
+#                                                               (Phone 1 && phone 2)
 #
 # Pepelux <pepeluxx@gmail.com>
  
@@ -30,6 +55,8 @@ my $realm = '';
 my $nonce = '';
 my $response = '';
 my $digest = '';
+my $totag = '';
+
  
 my $to_ip = '';
 my $from_ip = '';
@@ -304,6 +331,11 @@ sub send_invite {
 				$ua = $1 if ($1);
 			}
 
+			if ($line =~ /^To/i && $line =~ /;tag/i) {
+				$line =~ /;tag=(.+)\r\n/;
+				$totag = $1 if ($1);
+			}
+
 			if ($line =~ /^WWW-Authenticate:/ || $line =~ /^Proxy-Authenticate:/) {
 				$line =~ /.*realm=\"([a-zA-Z0-9\.\_\-]*)\".*/;
 				$realm = $1 if ($1);
@@ -356,8 +388,8 @@ sub send_ack {
 	my $branch = &generate_random_string(71, 0);
 	
 	my $msg = "ACK sip:".$to."@".$to_ip." SIP/2.0\r\n";
-	$msg .= "To: $to <sip:".$to."@".$to_ip.">\r\n";
 	$msg .= "From: $from <sip:".$from."@".$from_ip.">;tag=0c26cd11\r\n";
+	$msg .= "To: $to <sip:".$to."@".$to_ip.">;tag=$totag\r\n";
 	$msg .= "Via: SIP/2.0/UDP $to_ip:$lport;branch=$branch;rport\r\n";
 	$msg .= "Call-ID: ".$callid."\r\n";
 	$msg .= "CSeq: $cseq ACK\r\n";
@@ -429,8 +461,8 @@ sub send_refer {
 	my $branch = &generate_random_string(71, 0);
 
 	my $msg = "REFER sip:".$to."@".$to_ip." SIP/2.0\r\n";
-	$msg .= "To: $to <sip:".$to."@".$to_ip.">\r\n";
 	$msg .= "From: $user <sip:".$user."@".$to_ip.">;tag=0c26cd11\r\n";
+	$msg .= "To: $to <sip:".$to."@".$to_ip.">;tag=$totag\r\n";
 	$msg .= "Via: SIP/2.0/UDP $to_ip:$lport;branch=$branch;rport\r\n";
 	$msg .= "Call-ID: ".$callid."\r\n";
 	$msg .= "CSeq: $cseq REFER\r\n";

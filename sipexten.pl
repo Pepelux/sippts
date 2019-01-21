@@ -1,8 +1,11 @@
 #!/usr/bin/perl
-# -=-=-=-=-=-=-=-
-# SipExten v1.2.2
-# -=-=-=-=-=-=-=-
+# -=-=-=-=
+# SipExten
+# -=-=-=-=
 #
+# Sipexten identifies extensions on a SIP server. Sipexten can check large
+# network and port ranges.
+# 
 # Pepelux <pepeluxx@gmail.com>
  
 use warnings;

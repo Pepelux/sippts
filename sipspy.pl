@@ -1,7 +1,18 @@
 #!/usr/bin/perl
-# -=-=-=-=-=-=-
-# SipSPY v1.2.2
-# -=-=-=-=-=-=-
+# -=-=-=
+# SipSPY
+# -=-=-=
+#
+# Sipspy is a fake SIP server that listens on port 5060/UDP and responds to
+# REGISTER message authentication requests.
+# The purpose of sipspy is to obtain the digest authentication response from
+# a device that thinks it is connecting to a PBX server:
+#
+# Device                                   Fake SIP Server
+#        ---> REGISTER (with no auth) ---> 
+#        <--- 401 Unauthorized        <---
+#        ---> REGISTER (with auth)    ---> 
+#
 #
 # Pepelux <pepeluxx@gmail.com>
  

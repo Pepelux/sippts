@@ -1,7 +1,13 @@
 #!/usr/bin/perl
-# -=-=-=-=-=-=-=
-# SipScan v1.2.2
-# -=-=-=-=-=-=-=
+# -=-=-=-
+# SipScan
+# -=-=-=-
+#
+# Sipscan works sending and waiting well-formed SIP packages. For example, Nmap
+# is a great tool for scanning networks, but over UDP it is better and faster 
+# to send well-formed SIP packages and wait valid responses.
+# Sipscan tries, by default, to connect over the UDP protocol. If the connection
+# fails, it will try over TCP. You can also force to use only over UDP or TCP.
 #
 # Pepelux <pepeluxx@gmail.com>
  

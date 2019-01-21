@@ -1,7 +1,7 @@
 #!/usr/bin/perl
-# -=-=-=-=-=-=-=-=
-# SipReport v1.2.2
-# -=-=-=-=-=-=-=-=
+# -=-=-=-=-
+# SipReport
+# -=-=-=-=-
 #
 # Pepelux <pepeluxx@gmail.com>
  

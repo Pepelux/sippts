@@ -1,7 +1,10 @@
 #!/usr/bin/perl
-# -=-=-=-=-=-=-=-
-# SipCrack v1.2.2
-# -=-=-=-=-=-=-=-
+# -=-=-=-=
+# SipCrack
+# -=-=-=-=
+#
+# Sipcrack is a remote password cracker. Sipcrack can test passwords for
+# several users in different IPs and port ranges.
 #
 # Pepelux <pepeluxx@gmail.com>
  
