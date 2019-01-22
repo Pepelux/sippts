@@ -55,4 +55,4 @@ And install next modules:
   * cpan -i NetAddr:IP
   * cpan -i String:HexConvert
   * cpan -i Net:Pcap
-  * cpan -i Net::Address::IP::Local;
+  * cpan -i Net::Address::IP::Local
