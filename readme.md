@@ -39,7 +39,7 @@ Sippts is a set of tools to audit VoIP servers and devices using SIP protocol. S
 
   * _**SipDigestLeak**_ Exploits the SIP digest leak vulnerability discovered by Sandro Gauci that affects a large number of hardware and software devices.
 
-[Click here to read more about SIPspy](https://github.com/Pepelux/sippts/wiki/SIPspy)
+[Click here to read more about SIPDigestLeak](https://github.com/Pepelux/sippts/wiki/SIPDigestLeak)
 
 ## Operating System ##
 Sippts has been tested on:
