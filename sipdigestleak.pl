@@ -19,10 +19,11 @@ my $useragent = 'pplsip';
 my $version;
 
 my $host = '';	# host
-my $dport = '';# destination port
-my $from = '';	# source number
-my $to = '';	# destination number
-my $v = 0;	# verbose mode
+my $dport = ''; # destination port
+my $from = '';	# from number
+my $fromname = ''; # from name
+my $to = ''; # to number
+my $v = 0; # verbose mode
 my $from_ip = '';
 my $totag = "";
 my $cseq = "1";
@@ -43,6 +44,7 @@ sub init() {
 	# check params
 	my $result = GetOptions ("h=s" => \$host,
 				"f=s" => \$from,
+				"fn=s" => \$fromname,
 				"t=s" => \$to,
 				"ip=s" => \$from_ip,
 				"ua=s" => \$useragent,
@@ -68,8 +70,8 @@ sub init() {
 		my $lport = $sc->sockport();
 
 		# send INVITE
-		if ($v eq 0) { print "[+] Connecting to $host\n"; }
-		my $res = send_invite($sc, $from_ip, $host, $lport, $dport, $from, $to, $callid);
+		if ($v eq 0) { print "[+] Connecting to $host:$dport\n"; }
+		my $res = send_invite($sc, $from_ip, $host, $lport, $dport, $from, $fromname, $to, $callid);
 
 		# Call is attended. Wait the hung up
 		if ($res =~ /^200/) { 
@@ -91,6 +93,7 @@ sub send_invite {
 	my $lport = shift;
 	my $dport = shift;
 	my $from = shift;
+	my $fromname = shift;
 	my $to = shift;
 	my $callid = shift;
 
@@ -98,7 +101,7 @@ sub send_invite {
 	
 	my $msg = "INVITE sip:".$to."@".$host.":".$dport." SIP/2.0\r\n";
 	$msg .= "Via: SIP/2.0/UDP $from_ip:$lport;branch=$branch\r\n";
-	$msg .= "From: <sip:".$from."@".$host.">;tag=0c26cd11\r\n";
+	$msg .= "From: $fromname <sip:".$from."@".$host.">;tag=0c26cd11\r\n";
 	$msg .= "To: <sip:".$to."@".$host.">\r\n";
 	$msg .= "Contact: <sip:".$from."@".$from_ip.":$lport;transport=udp>\r\n";
 	$msg .= "Call-ID: ".$callid."\r\n";
@@ -357,6 +360,7 @@ Usage: perl $0 -h <host> [options]
  
 == Options ==
 -f  <string>     = From user (default: 100)
+-fn <string>     = From name (default blank)
 -t  <string>     = To user (default: 100)
 -p  <integer>    = Remote port (default: 5060)
 -ip <string>     = Source IP (default: local IP address)
@@ -368,6 +372,7 @@ Usage: perl $0 -h <host> [options]
 \$ perl $0 -h 192.168.0.1
 \$ perl $0 -h 192.168.0.1 -p 5080 -v
 \$ perl $0 -h 192.168.0.1 -sd data.txt
+\$ perl $0 -h 192.168.0.1 -f 666666666 -fn Devil
  
 };
  
