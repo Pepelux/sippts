@@ -42,6 +42,10 @@ my $from_ip = '';
 my $alwaysok = '';
 my $server = '';
 
+my $db;
+my $extensid;
+my $hostsid;
+
 my $versionfile = 'version';
 open(my $fh, '<:encoding(UTF-8)', $versionfile)
   or die "Could not open file '$versionfile' $!";
@@ -51,28 +55,30 @@ while (my $row = <$fh>) {
   $version = $row;
 }
 	
-my $database = "sippts.db";
-my $database_empty = "sippts_empty.db";
-
 mkdir ("tmp") if (! -d "tmp");
 my $tmpfile = "tmp/sipexten".time().".txt";
  
-unless (-e $database || -e $database_empty) {
-	die("Database $database not found\n\n");
-}
-
-system("cp $database_empty $database") if (! -e $database);
-
-my $db = DBI->connect("dbi:SQLite:dbname=$database","","") or die $DBI::errstr;
-my $extensid = last_id("extens");
-my $hostsid = last_id("hosts");
-
 open(OUTPUT,">$tmpfile");
  
 OUTPUT->autoflush(1);
 STDOUT->autoflush(1);
  
 $SIG{INT} = \&interrupt;
+
+sub prepare_db() {
+	my $database = "sippts.db";
+	my $database_empty = "sippts_empty.db";
+
+	unless (-e $database || -e $database_empty) {
+		die("Database $database not found\n\n");
+	}
+
+	system("cp $database_empty $database") if (! -e $database);
+	
+	$db = DBI->connect("dbi:SQLite:dbname=$database","","") or die $DBI::errstr;
+	$extensid = last_id("extens");
+	$hostsid = last_id("hosts");
+}
 
 sub init() {
     my $pini;
@@ -98,6 +104,7 @@ sub init() {
  
 	help() if ($host eq "");
 	check_version();
+	prepare_db() if ($withdb eq 1);
 
 	$lport = "5070" if ($lport eq "");
 	$dport = "5060" if ($dport eq "");
