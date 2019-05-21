@@ -226,7 +226,7 @@ sub init() {
 				}
 			}
 			else {
-				push @range, $host;
+				push @range, $ip->addr;
 			}
 		}
 	}
@@ -256,7 +256,7 @@ sub init() {
 	my @arrow = ("|", "/", "-", "\\");
 	my $cont = 0;
 
-	for (my $i = 0; $i <= $nhost; $i++) {
+	for (my $i = 0; $i < $nhost; $i++) {
 		for (my $j = $pini; $j <= $pfin; $j++) {
 			##### Executed only one time
 			# Get User-agent/server from an OPTIONS message
@@ -411,6 +411,7 @@ sub send_invite {
 	my $user = shift;
 	my $proto = shift;
 	my $response = "";
+	my $server = "";
 
 	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 10);
 
@@ -475,11 +476,36 @@ sub send_invite {
 					if ($1) { $response = $1; }
 				}
 
+				if ($line =~ /[Ss]erver/ && $server eq "") {
+					$line =~ /[Ss]erver\:\s(.+)\r\n/;
+ 
+					$server = $1 if ($1);
+				}
+
+				if ($line =~ /[Uu]ser\-[Aa]gent/ && $ua eq "") {
+					$line =~ /[Uu]ser\-[Aa]gent\:\s(.+)\r\n/;
+ 
+					$ua = $1 if ($1);
+				}
+
 				$data .= $line;
  
 				if ($line =~ /^\r\n/) {
 					print "[-] $response\n" if ($v eq 1);
 					print "Receiving:\n=========\n$data" if ($vv eq 1);
+
+					if ($response =~ "^200") {
+						if ($server eq "") {
+							$server = $ua;
+						}
+						else {
+							if ($ua ne "") {
+								$server .= " - $ua";
+							}
+						}
+
+						$server = "Unknown" if ($server eq "");
+					}
 
 					if ($to ne "123456789") {
 						if ($response =~ "^1") {

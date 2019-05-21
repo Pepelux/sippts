@@ -181,7 +181,7 @@ sub init() {
 			}
 		}
 		else {
-			push @range, $host;
+			push @range, $ip->addr;
 		}
 	}
 

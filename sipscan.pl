@@ -235,7 +235,7 @@ sub init() {
 				}
 			}
 			else {
-				push @range, $host;
+				push @range, $ip->addr;
 			}
 		}
 	}
@@ -254,7 +254,7 @@ sub init() {
  	my @arrow = ("|", "/", "-", "\\");
 	my $cont = 0;
 
-	for (my $i = 0; $i <= $nhost; $i++) {
+	for (my $i = 0; $i < $nhost; $i++) {
 		for (my $j = $pini; $j <= $pfin; $j++) {
 			while (1) {
 				if ($threads < $maxthreads) {
