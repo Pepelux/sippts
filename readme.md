@@ -1,3 +1,6 @@
+![logo](http://blog.pepelux.org/wp-content/uploads/logo-de-sippts.png)
+
+
 # What is Sippts? #
 
 Sippts is a set of tools to audit VoIP servers and devices using SIP protocol. Sippts is programmed in Perl script and it allows us to check the security of a VoIP server using SIP protocol.
