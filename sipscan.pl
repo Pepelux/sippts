@@ -43,6 +43,7 @@ my $nolog = 0;
 my $user = '';		# auth user
 my $proto = '';	# protocol
 my $withdb = 0;
+my $noth = 0; # don't use threads
 
 my $abort = 0;
 
@@ -103,6 +104,7 @@ sub init() {
 				"nolog+" => \$nolog,
 				"ua=s" => \$useragent,
 				"v+" => \$v,
+				"noth+" => \$noth,
 				"vv+" => \$vv);
  
 	help() if ($host eq "");
@@ -117,6 +119,7 @@ sub init() {
 	$to = $user if ($to eq "");
 	$proto = lc($proto);
 	$proto = "all" if ($proto ne "tcp" && $proto ne "udp");
+	$maxthreads = 1 if ($noth eq 1);
 
 	$method = uc($method);
 	$method = "OPTIONS" if ($method eq "");
@@ -262,10 +265,16 @@ sub init() {
 					my $csec = 1;
 					$from_ip = $range[$i] if ($from_ip eq "");
 					print "\r[".$arrow[$cont]."] Scanning ".$range[$i].":$j ...";
-					my $thr = threads->new(\&scan, $range[$i], $from_ip, $lport, $j, $from, $to, $csec, $user, $proto);
-					$thr->detach();
-					$cont++;
-					$cont = 0 if ($cont > 3);
+
+					if ($maxthreads > 1) {
+						my $thr = threads->new(\&scan, $range[$i], $from_ip, $lport, $j, $from, $to, $csec, $user, $proto);
+						$thr->detach();
+						$cont++;
+						$cont = 0 if ($cont > 3);
+					}
+					else{
+						scan($range[$i], $from_ip, $lport, $j, $from, $to, $csec, $user, $proto);
+					} 
 
 					last;
 				}
@@ -344,10 +353,12 @@ sub showres {
 sub interrupt {
 	if ($abort eq 0) {
 		$abort = 1;
-		{lock($threads); $threads=$maxthreads;}
+		if ($maxthreads > 1) {
+			{lock($threads); $threads=$maxthreads;}
 
-		print "Closing threads. Please wait ...\n";
-		sleep(2);
+			print "Closing threads. Please wait ...\n";
+			sleep(2);
+		}
 
 		close(OUTPUT);
 
@@ -387,8 +398,10 @@ sub scan {
  
 # Send REGISTER message
 sub send_register {
-	{lock($threads);$threads++;}
- 
+	if ($maxthreads > 1) {
+		{lock($threads);$threads++;}
+	}
+
 	my $from_ip = shift;
 	my $to_ip = shift;
 	my $lport = shift;
@@ -439,7 +452,9 @@ sub send_register {
 		LOOP: {
 			while (<$sc>) {
 				if ( 0+$! == ETIMEDOUT || 0+$! == EWOULDBLOCK ) {
-					{lock($threads);$threads--;}
+					if ($maxthreads > 1) {
+						{lock($threads);$threads--;}
+					}
 					return "";
 				}
 
@@ -489,15 +504,19 @@ sub send_register {
 		}
 	}
 	
-	{lock($threads);$threads--;}
-	
+	if ($maxthreads > 1) {
+		{lock($threads);$threads--;}
+	}
+
 	return $response;
 }
 
 # Send INVITE message
 sub send_invite {
-	{lock($threads);$threads++;}
- 
+	if ($maxthreads > 1) {
+		{lock($threads);$threads++;}
+	}
+
 	my $from_ip = shift;
 	my $to_ip = shift;
 	my $lport = shift;
@@ -562,7 +581,10 @@ sub send_invite {
 		LOOP: {
 			while (<$sc>) {
 				if ( 0+$! == ETIMEDOUT || 0+$! == EWOULDBLOCK ) {
-					{lock($threads);$threads--;}
+					if ($maxthreads > 1) {
+						{lock($threads);$threads--;}
+					}
+
 					return "";
 				}
 
@@ -610,15 +632,19 @@ sub send_invite {
 		}
 	}
 	
-	{lock($threads);$threads--;}
+	if ($maxthreads > 1) {
+		{lock($threads);$threads--;}
+	}
 	
 	return $response;
 }
 
 # Send OPTIONS message
 sub send_options {
-	{lock($threads);$threads++;}
- 
+	if ($maxthreads > 1) {
+		{lock($threads);$threads++;}
+	}
+
 	my $from_ip = shift;
 	my $to_ip = shift;
 	my $lport = shift;
@@ -668,7 +694,10 @@ sub send_options {
 		LOOP: {
 			while (<$sc>) {
 				if ( 0+$! == ETIMEDOUT || 0+$! == EWOULDBLOCK ) {
-					{lock($threads);$threads--;}
+					if ($maxthreads > 1) {
+						{lock($threads);$threads--;}
+					}
+
 					return "";
 				}
 				
@@ -743,7 +772,9 @@ sub send_options {
 		}
 	}
 	
-	{lock($threads);$threads--;}
+	if ($maxthreads > 1) {
+		{lock($threads);$threads--;}
+	}
 
 	return $response;
 }
@@ -795,6 +826,7 @@ Usage: perl $0 -h <host> [options]
 -ua <string>     = Customize the UserAgent
 -db              = Save results into database (sippts.db)
 -nolog           = Don't show anything on the console
+-noth            = Don't use threads
 -v               = Verbose (trace information)
 -vv              = More verbose (more detailed trace)
  
