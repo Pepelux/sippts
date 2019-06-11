@@ -30,6 +30,7 @@ my $from = '';		# source number
 my $to = '';		# destination number
 my $v = 0;		# verbose mode
 my $vv = 0;		# more verbose
+my $method = '';	# method to use (INVITE, REGISTER, OPTIONS)
 my $nolog = 0;
 my $exten = '';	# extension
 my $prefix = '';	# prefix
@@ -88,6 +89,7 @@ sub init() {
  
     # check params
     my $result = GetOptions ("h=s" => \$host,
+				"m=s" => \$method,
 				"d=s" => \$to,
 				"s=s" => \$from,
 				"ip=s" => \$from_ip,
@@ -111,6 +113,9 @@ sub init() {
 	$exten = "100-300" if ($exten eq "");
 	$proto = lc($proto);
 	$proto = "all" if ($proto ne "tcp" && $proto ne "udp");
+
+	$method = uc($method);
+	$method = "OPTIONS" if ($method eq "");
 
 	my @hostlist;
 
@@ -393,10 +398,19 @@ sub scan {
 	my $proto = shift;
 
 	my $p = $proto;
+	my $r = '';
 
 	$p = "udp" if ($proto eq "all");
-	my $r = send_invite($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $p);
-	send_invite($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, "tcp") if ($proto eq "all" && $r eq "");
+#	my $r = send_invite($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $p);
+#	send_invite($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, "tcp") if ($proto eq "all" && $r eq "");
+
+	$r = send_register($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $p) if ($method eq "REGISTER");
+	send_register($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, "tcp") if ($method eq "REGISTER" && $proto eq "all" && $r eq "");
+	$r = send_invite($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $p) if ($method eq "INVITE");
+	send_invite($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, "tcp") if ($method eq "INVITE" && $proto eq "all" && $r eq "");
+	$r = send_options($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, $p) if ($method eq "OPTIONS");
+	send_options($from_ip, $to_ip, $lport, $dport, $from, $to, $csec, $user, "tcp") if ($method eq "OPTIONS" && $proto eq "all" && $r eq "");
+
 }
  
 # Send INVITE message
@@ -528,6 +542,128 @@ sub send_invite {
 	return $response;
 }
 
+# Send REGISTER message
+sub send_register {
+	my $from_ip = shift;
+	my $to_ip = shift;
+	my $lport = shift;
+	my $dport = shift;
+	my $from = shift;
+	my $to = shift;
+	my $cseq = shift;
+	my $user = shift;
+	my $proto = shift;
+	my $response = "";
+	my $server = "";
+
+	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 10);
+
+	if ($sc) {
+		IO::Socket::Timeout->enable_timeouts_on($sc);
+		$sc->read_timeout(0.5);
+		$sc->enable_timeout;
+		$lport = $sc->sockport();
+
+		my $branch = &generate_random_string(71, 0);
+		my $callid = &generate_random_string(32, 1);
+	
+	
+		my $msg = "REGISTER sip:".$to_ip." SIP/2.0\r\n";
+		$msg .= "Via: SIP/2.0/".uc($proto)." $from_ip:$lport;branch=$branch\r\n";
+		$msg .= "From: <sip:".$user."@".$to_ip.">;tag=0c26cd11\r\n";
+		$msg .= "To: <sip:".$user."@".$to_ip.">\r\n";
+		$msg .= "Contact: <sip:".$user."@".$from_ip.":$lport;transport=$proto>\r\n";
+		$msg .= "Call-ID: ".$callid."\r\n";
+		$msg .= "CSeq: $cseq REGISTER\r\n";
+		$msg .= "User-Agent: $useragent\r\n";
+		$msg .= "Max-Forwards: 70\r\n";
+		$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\r\n";
+		$msg .= "Expires: 10\r\n";
+		$msg .= "Content-Length: 0\r\n\r\n";
+
+		my $data = "";
+		my $ua = "";
+		my $line = "";
+
+		print $sc $msg;
+
+		print "[+] $to_ip:$dport/$proto - Sending INVITE $from => $to\n" if ($v eq 1);
+		print "[+] $to_ip:$dport/$proto - Sending:\n=======\n$msg" if ($vv eq 1);
+
+		use Errno qw(ETIMEDOUT EWOULDBLOCK);
+	
+		LOOP: {
+			while (<$sc>) {
+				if ( 0+$! == ETIMEDOUT || 0+$! == EWOULDBLOCK ) {
+					return "";
+				}
+
+				$line = $_;
+			
+				if ($line =~ /^SIP\/2.0/ && $response eq "") {
+					$line =~ /^SIP\/2.0\s(.+)\r\n/;
+				
+					if ($1) { $response = $1; }
+				}
+
+				if ($line =~ /[Ss]erver/ && $server eq "") {
+					$line =~ /[Ss]erver\:\s(.+)\r\n/;
+ 
+					$server = $1 if ($1);
+				}
+
+				if ($line =~ /[Uu]ser\-[Aa]gent/ && $ua eq "") {
+					$line =~ /[Uu]ser\-[Aa]gent\:\s(.+)\r\n/;
+ 
+					$ua = $1 if ($1);
+				}
+
+				$data .= $line;
+ 
+				if ($line =~ /^\r\n/) {
+					print "[-] $response\n" if ($v eq 1);
+					print "Receiving:\n=========\n$data" if ($vv eq 1);
+
+					if ($response =~ "^200") {
+						if ($server eq "") {
+							$server = $ua;
+						}
+						else {
+							if ($ua ne "") {
+								$server .= " - $ua";
+							}
+						}
+
+						$server = "Unknown" if ($server eq "");
+					}
+
+					if ($to ne "123456789") {
+						if ($response =~ "^1" || $response =~ "^2") {
+							if ($alwaysok eq "no") {
+								print OUTPUT "$to_ip\t$dport\t$proto\t$to\t\tNo auth required\t$server\n";
+								print "\rFound match: $to_ip:$dport/$proto - User: $to - No auth required\n";
+							}
+						}
+						else {
+							if ($response =~ "^401") {
+								print OUTPUT "$to_ip\t$dport\t$proto\t$to\t\tRequire authentication\t$server\n";
+								print "\rFound match: $to_ip:$dport/$proto - User: $to - Require authentication\n";
+							}
+							if ($response =~ "^403") {
+								print OUTPUT "$to_ip\t$dport\t$proto\t$to\t\tIP filtered\t$server\n";
+								print "\rFound match: $to_ip:$dport/$proto - User: $to - IP filtered\n";
+							}
+						}
+					}
+					last LOOP;
+				}
+			}
+		}
+    	}
+
+	return $response;
+}
+
 # Send OPTIONS message
 sub send_options {
 	my $from_ip = shift;
@@ -536,7 +672,7 @@ sub send_options {
 	my $dport = shift;
 	my $from = shift;
 	my $to = shift;
-	my $csec = shift;
+	my $cseq = shift;
 	my $user = shift;
 	my $proto = shift;
 	my $response = "";
@@ -558,8 +694,8 @@ sub send_options {
 		$msg .= "From: <sip:".$user."@".$to_ip.">;tag=0c26cd11\r\n";
 		$msg .= "To: <sip:".$user."@".$to_ip.">\r\n";
 		$msg .= "Contact: <sip:".$user."@".$from_ip.":$lport;transport=$proto>\r\n";
-		$msg .= "Call-ID: ".$callid."\r\n";
-		$msg .= "CSeq: $csec OPTIONS\r\n";
+		$msg .= "Call-ID: $callid\r\n";
+		$msg .= "CSeq: $cseq OPTIONS\r\n";
 		$msg .= "User-Agent: $useragent\r\n";
 		$msg .= "Max-Forwards: 70\r\n";
 		$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\r\n";
@@ -608,22 +744,40 @@ sub send_options {
 					print "[-] $response\n" if ($v eq 1);
 					print "Receiving:\n=========\n$data" if ($vv eq 1);
 
-					last LOOP if ($response !~ /^1/);
-				}
-			}
-		}
-   
-		if ($response =~ "^200") {
-			if ($server eq "") {
-				$server = $ua;
-			}
-			else {
-				if ($ua ne "") {
-					$server .= " - $ua";
-				}
-			}
+					if ($response =~ "^200") {
+						if ($server eq "") {
+							$server = $ua;
+						}
+						else {
+							if ($ua ne "") {
+								$server .= " - $ua";
+							}
+						}
 
-			$server = "Unknown" if ($server eq "");
+						$server = "Unknown" if ($server eq "");
+					}
+
+					if ($to ne "123456789") {
+						if ($response =~ "^1" || $response =~ "^2") {
+							if ($alwaysok eq "no") {
+								print OUTPUT "$to_ip\t$dport\t$proto\t$to\t\tNo auth required\t$server\n";
+								print "\rFound match: $to_ip:$dport/$proto - User: $to - No auth required\n";
+							}
+						}
+						else {
+							if ($response =~ "^401") {
+								print OUTPUT "$to_ip\t$dport\t$proto\t$to\t\tRequire authentication\t$server\n";
+								print "\rFound match: $to_ip:$dport/$proto - User: $to - Require authentication\n";
+							}
+							if ($response =~ "^403") {
+								print OUTPUT "$to_ip\t$dport\t$proto\t$to\t\tIP filtered\t$server\n";
+								print "\rFound match: $to_ip:$dport/$proto - User: $to - IP filtered\n";
+							}
+						}
+					}
+					last LOOP;
+				}
+			}
 		}
 	}
 	
@@ -667,6 +821,7 @@ SipEXTEN - by Pepelux <pepeluxx\@gmail.com>
 Usage: perl $0 -h <host> [options]
  
 == Options ==
+-m  <string>     = Method: REGISTER/INVITE/OPTIONS (default: OPTIONS)
 -e  <string>     = Extensions (default 100-300)
 -s  <integer>    = Source number (CallerID) (default: 100)
 -d  <integer>    = Destination number (default: 100)
