@@ -645,7 +645,7 @@ sub send_register {
 							}
 						}
 						else {
-							if ($response =~ "^401") {
+							if ($response =~ "^401" || $response =~ "^407") {
 								print OUTPUT "$to_ip\t$dport\t$proto\t$to\t\tRequire authentication\t$server\n";
 								print "\rFound match: $to_ip:$dport/$proto - User: $to - Require authentication\n";
 							}
@@ -765,7 +765,7 @@ sub send_options {
 							}
 						}
 						else {
-							if ($response =~ "^401") {
+							if ($response =~ "^401" || $response =~ "^407") {
 								print OUTPUT "$to_ip\t$dport\t$proto\t$to\t\tRequire authentication\t$server\n";
 								print "\rFound match: $to_ip:$dport/$proto - User: $to - Require authentication\n";
 							}
