@@ -3,7 +3,20 @@
 # SipReport
 # -=-=-=-=-
 #
-# Pepelux <pepeluxx@gmail.com>
+# Copyright (C) 2015-2019 Jose Luis Verdeguer <pepeluxx@gmail.com>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  
 use warnings;
 use strict;
@@ -15,17 +28,8 @@ my $ua = '';	# user-agent
 my $noexten = 0;
 my $noauth = 0;
 my $web = 0;
+my $ver = 0;
 
-my $version;
-
-my $versionfile = 'version';
-open(my $fh, '<:encoding(UTF-8)', $versionfile)
-  or die "Could not open file '$versionfile' $!";
- 
-while (my $row = <$fh>) {
-  chomp $row;
-  $version = $row;
-}
 	
 my $database = "sippts.db";
 
@@ -41,10 +45,11 @@ sub init() {
 				"u=s" => \$ua,
 				"noauth+" => \$noauth,
 				"web+" => \$web,
+				"version+" => \$ver,
 				"noexten+" => \$noexten);
  
+	check_version() if ($ver eq 1);
 	help() if ($host eq "" && $ua eq "");
-	check_version();
 
 	my @data;
 	my $search = "";
@@ -122,6 +127,16 @@ sub init() {
 }
  
 sub check_version {
+	my $version = '';
+	my $versionfile = 'version';
+	open(my $fh, '<:encoding(UTF-8)', $versionfile)
+	or die "Could not open file '$versionfile' $!";
+	
+	while (my $row = <$fh>) {
+		chomp $row;
+		$version = $row;
+	}
+
 	my $v = `curl -s https://raw.githubusercontent.com/Pepelux/sippts/master/version`;
 	$v =~ s/\n//g;
 
@@ -129,18 +144,25 @@ sub check_version {
 		print "The current version ($version) is outdated. There is a new version ($v). Please update:\n";
 		print "https://github.com/Pepelux/sippts\n";
 	}
+	else {
+		print "The current version ($version) is latest.\n";
+	}
+
+	exit;
 }
 
 sub help {
     print qq{
 SipREPORT - by Pepelux <pepeluxx\@gmail.com>
 ---------
+Wiki: https://github.com/Pepelux/sippts/wiki/SIPreport
 
 Usage: perl $0 -h <host> | -u <user-agent> [options]
 
 == Options ==
 -noexten    = Show only servers and devices (not extensions nor users)
 -noauth     = Show extensions where authentication is not required
+-version         = Show version and search for updates
 
 == Examples ==
 \$perl $0 -h 192.168.0.1

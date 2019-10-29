@@ -1,13 +1,27 @@
-v1.2.12
+v1.2.13 (Oct/2019)
+- New param (-version) to show current version and search for new updates
+- sipscan.pl: New param (-web) to search for a control panel optionally
+
+v1.2.12 (Oct/2019)
 - sipscan.pl: using threads are now optional (-noth)
 
-v1.2.2
+v1.2.8 (May/2019)
 - Bug fixes
 
-v1.2.1
+v1.2.7 (May/2019)
+- Don't save data into database bt default
+
+v1.2.6 (Jan/2019)
+- New script (sipdigestleak.pl) to exploit the vulnerability discovered by 
+  Sandro Gauci that affects a large number of hardware and software devices
+
+v1.2.2 (Dec/2018)
+- Bug fixes
+
+v1.2.1 (Aug/2018)
 - Bug fixes
 - Change --nodb by --db (by default don't save session)
 - Now it is possible to change the user-agent
 
-v1.2
+v1.2 (Feb/2015)
 First publication uploaded to Github (previous versions are proofs)

@@ -6,9 +6,22 @@
 # Sipsniff is a very simple sniffer for SIP protocol that allows us to filter
 # by SIP method type.
 #
-# Pepelux <pepeluxx@gmail.com>
-#
 # based on remote-exploit.org perl sniffer script: http://www.remote-exploit.org/downloads/simple-perl-sniffer.pl.gz
+#
+# Copyright (C) 2015-2019 Jose Luis Verdeguer <pepeluxx@gmail.com>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 use strict;
 use Net::Pcap;
@@ -31,18 +44,8 @@ my $dport = '';
 my $u = 0;
 my $method = '';
 my $g_cap_descrip;
+my $ver = 0;
 
-my $version;
-
-my $versionfile = 'version';
-open(my $fh, '<:encoding(UTF-8)', $versionfile)
-  or die "Could not open file '$versionfile' $!";
- 
-while (my $row = <$fh>) {
-  chomp $row;
-  $version = $row;
-}
-	
 
 # Trapping Signal "INT" like ctrl+c for cleanup first.
 $SIG{INT} = \&f_probe_ctrl_c; 
@@ -52,10 +55,11 @@ sub init() {
 	my $result = GetOptions ("i=s" => \$interface,
 				"m=s" => \$method,
 				"p=s" => \$dport,
+				"version+" => \$ver,
 				"u+" => \$u);
 
+	check_version() if ($ver eq 1);
 	help() if ($interface eq "");
-	check_version();
 
 	$dport = "5060" if ($dport eq "");
 
@@ -199,6 +203,16 @@ sub f_probe_ctrl_c {
 };
 
 sub check_version {
+	my $version = '';
+	my $versionfile = 'version';
+	open(my $fh, '<:encoding(UTF-8)', $versionfile)
+	or die "Could not open file '$versionfile' $!";
+	
+	while (my $row = <$fh>) {
+		chomp $row;
+		$version = $row;
+	}
+
 	my $v = `curl -s https://raw.githubusercontent.com/Pepelux/sippts/master/version`;
 	$v =~ s/\n//g;
 
@@ -206,12 +220,18 @@ sub check_version {
 		print "The current version ($version) is outdated. There is a new version ($v). Please update:\n";
 		print "https://github.com/Pepelux/sippts\n";
 	}
+	else {
+		print "The current version ($version) is latest.\n";
+	}
+
+	exit;
 }
 
 sub help {
 	print qq{
 SipSNIFF - by Pepelux <pepeluxx\@gmail.com>
 --------
+Wiki: https://github.com/Pepelux/sippts/wiki/SIPsniff
 
 Usage: sudo perl -i <interface> $0 [options]
  
@@ -220,6 +240,7 @@ Usage: sudo perl -i <interface> $0 [options]
 -p  <integer>    = Port (default: 5060)
 -m  <string>     = Filter method (ex: INVITE, REGISTER)
 -u               = Filter users
+-version         = Show version and search for updates
  
 == Examples ==
 \$sudo perl $0 -i eth0

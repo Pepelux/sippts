@@ -5,8 +5,21 @@
 #
 # Sipexten identifies extensions on a SIP server. Sipexten can check large
 # network and port ranges.
-# 
-# Pepelux <pepeluxx@gmail.com>
+#
+# Copyright (C) 2015-2019 Jose Luis Verdeguer <pepeluxx@gmail.com>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  
 use warnings;
 use strict;
@@ -16,9 +29,9 @@ use NetAddr::IP;
 use Getopt::Long;
 use Digest::MD5;
 use DBI;
+use File::Temp qw(tempfile);
 
 my $useragent = 'pplsip';
-my $version;
 
 my @range;
 my @results;
@@ -36,6 +49,7 @@ my $exten = '';	# extension
 my $prefix = '';	# prefix
 my $proto = '';	# protocol
 my $withdb = 0;
+my $ver = 0;
 
 my $to_ip = '';
 my $from_ip = '';
@@ -47,17 +61,10 @@ my $db;
 my $extensid;
 my $hostsid;
 
-my $versionfile = 'version';
-open(my $fh, '<:encoding(UTF-8)', $versionfile)
-  or die "Could not open file '$versionfile' $!";
- 
-while (my $row = <$fh>) {
-  chomp $row;
-  $version = $row;
-}
-	
-mkdir ("tmp") if (! -d "tmp");
-my $tmpfile = "tmp/sipexten".time().".txt";
+
+my $data_path = "/usr/share/sippts/";
+$data_path = "./" if !(-e $data_path . "sippts_empty.db");
+my $tmpfile = new File::Temp( UNLINK => 0 );
  
 open(OUTPUT,">$tmpfile");
  
@@ -67,8 +74,8 @@ STDOUT->autoflush(1);
 $SIG{INT} = \&interrupt;
 
 sub prepare_db() {
-	my $database = "sippts.db";
-	my $database_empty = "sippts_empty.db";
+	my $database = $data_path . "sippts.db";
+	my $database_empty = $data_path . "sippts_empty.db";
 
 	unless (-e $database || -e $database_empty) {
 		die("Database $database not found\n\n");
@@ -101,11 +108,12 @@ sub init() {
 				"db+" => \$withdb,
 				"nolog+" => \$nolog,
 				"ua=s" => \$useragent,
+				"version+" => \$ver,
 				"v+" => \$v,
 				"vv+" => \$vv);
  
+	check_version() if ($ver eq 1);
 	help() if ($host eq "");
-	check_version();
 	prepare_db() if ($withdb eq 1);
 
 	$lport = "5070" if ($lport eq "");
@@ -804,6 +812,16 @@ sub generate_random_string {
 }
  
 sub check_version {
+	my $version = '';
+	my $versionfile = 'version';
+	open(my $fh, '<:encoding(UTF-8)', $versionfile)
+	or die "Could not open file '$versionfile' $!";
+	
+	while (my $row = <$fh>) {
+		chomp $row;
+		$version = $row;
+	}
+
 	my $v = `curl -s https://raw.githubusercontent.com/Pepelux/sippts/master/version`;
 	$v =~ s/\n//g;
 
@@ -811,12 +829,18 @@ sub check_version {
 		print "The current version ($version) is outdated. There is a new version ($v). Please update:\n";
 		print "https://github.com/Pepelux/sippts\n";
 	}
+	else {
+		print "The current version ($version) is latest.\n";
+	}
+
+	exit;
 }
 
 sub help {
     print qq{
 SipEXTEN - by Pepelux <pepeluxx\@gmail.com>
 --------
+Wiki: https://github.com/Pepelux/sippts/wiki/SIPexten
 
 Usage: perl $0 -h <host> [options]
  
@@ -834,6 +858,7 @@ Usage: perl $0 -h <host> [options]
 -nolog           = Don't show anything on the console
 -v               = Verbose (trace information)
 -vv              = More verbose (more detailed trace)
+-version         = Show version and search for updates
  
 == Examples ==
 \$perl $0 -h 192.168.0.1 -e 100-200 -v

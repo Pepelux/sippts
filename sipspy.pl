@@ -13,8 +13,20 @@
 #        <--- 401 Unauthorized        <---
 #        ---> REGISTER (with auth)    ---> 
 #
+# Copyright (C) 2015-2019 Jose Luis Verdeguer <pepeluxx@gmail.com>
 #
-# Pepelux <pepeluxx@gmail.com>
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  
 use warnings;
 use strict;
@@ -28,27 +40,21 @@ use IO::Socket::INET;
 my $port = '';	# destination port
 my $v = 0;	# verbose mode
 my $h = 0;	# help
+my $ver = 0;
 
-my $version;
 
-my $versionfile = 'version';
-open(my $fh, '<:encoding(UTF-8)', $versionfile)
-  or die "Could not open file '$versionfile' $!";
- 
-while (my $row = <$fh>) {
-  chomp $row;
-  $version = $row;
-}
-	
 
 sub init() {
 	my $socket;
 
 	# check params
-	my $result = GetOptions ("p=s" => \$port, "v+" => \$v, "h+" => \$h);
+	my $result = GetOptions ("p=s" => \$port, 
+				"v+" => \$v, 
+				"version+" => \$ver,
+				"h+" => \$h);
 
+	check_version() if ($ver eq 1);
 	help() if ($h eq 1);
-	check_version();
 
 	$port = "5060" if ($port eq "");
 
@@ -151,6 +157,16 @@ sub parse_request() {
 }
 
 sub check_version {
+	my $version = '';
+	my $versionfile = 'version';
+	open(my $fh, '<:encoding(UTF-8)', $versionfile)
+	or die "Could not open file '$versionfile' $!";
+	
+	while (my $row = <$fh>) {
+		chomp $row;
+		$version = $row;
+	}
+
 	my $v = `curl -s https://raw.githubusercontent.com/Pepelux/sippts/master/version`;
 	$v =~ s/\n//g;
 
@@ -158,12 +174,18 @@ sub check_version {
 		print "The current version ($version) is outdated. There is a new version ($v). Please update:\n";
 		print "https://github.com/Pepelux/sippts\n";
 	}
+	else {
+		print "The current version ($version) is latest.\n";
+	}
+
+	exit;
 }
 
 sub help {
     print qq{
 SipSPY - by Pepelux <pepeluxx\@gmail.com>
 ------
+Wiki: https://github.com/Pepelux/sippts/wiki/SIPspy
 
 Usage: perl $0 [options]
  
@@ -171,6 +193,7 @@ Usage: perl $0 [options]
 -h               = This help
 -p  <integer>    = Local port (default: 5060)
 -v               = Verbose (trace information)
+-version         = Show version and search for updates
  
 };
  
