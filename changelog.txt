@@ -1,6 +1,7 @@
 v1.2.13 (Oct/2019)
 - New param (-version) to show current version and search for new updates
 - sipscan.pl: New param (-web) to search for a control panel optionally
+- sipinvite.pl: New param (-log) to save data into a log file
 
 v1.2.12 (Oct/2019)
 - sipscan.pl: using threads are now optional (-noth)
