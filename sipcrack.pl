@@ -652,6 +652,8 @@ Usage: perl $0 -h <host> -w wordlist [options]
 -ip <string>     = Source IP (by default it is the same as host)
 -ua <string>     = Customize the UserAgent
 -resume          = Resume last session
+-db              = Save results into database (sippts.db)
+                   database path: ${data_path}sippts.db
 -w               = Wordlist
 -v               = Verbose (trace information)
 -vv              = More verbose (more detailed trace)

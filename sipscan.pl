@@ -860,6 +860,7 @@ Usage: perl $0 -h <host> [options]
 -ip <string>     = Source IP (by default it is the same as host)
 -ua <string>     = Customize the UserAgent
 -db              = Save results into database (sippts.db)
+                   database path: ${data_path}sippts.db
 -nolog           = Don't show anything on the console
 -noth            = Don't use threads
 -web             = Search web control panel
