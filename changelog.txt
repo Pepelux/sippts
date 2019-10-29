@@ -1,3 +1,6 @@
+v1.2.12
+- sipscan.pl: using threads are now optional (-noth)
+
 v1.2.2
 - Bug fixes
 
