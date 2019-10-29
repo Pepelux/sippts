@@ -1,0 +1,40 @@
+Source: sippts
+Section: comm
+Priority: optional
+Maintainer: Victor Seva <linuxmaniac@torreviejawireless.org>
+Build-Depends:
+ debhelper-compat (= 12),
+Standards-Version: 4.1.4
+Homepage: https://github.com/Pepelux/sippts
+
+Package: sippts
+Architecture: all
+Depends:
+ libio-socket-timeout-perl,
+ libnetaddr-ip-perl,
+ libnet-address-ip-local-perl,
+ libnet-pcap-perl,
+ libtext-string-hexconvert-perl,
+ ${misc:Depends},
+ ${perl:Depends},
+Description: tools to audit VoIP servers and devices using SIP protocol
+ Sipscan is a fast scanner for SIP services that uses multithread. Sipscan
+ can check several IPs and port ranges and it can work over UDP or TCP.
+ .
+ Sipexten identifies extensions on a SIP server. Also detects if the
+ extension line requires authentication or not. Sipexten can check
+ several IPs and port ranges.
+ .
+ Sipcrack is a remote password cracker. Sipcrack can test passwords
+ for several users in different IPs and port ranges.
+ .
+ Sipinvite checks if a server allows making calls without authentication.
+ A SIP server with a bad configuration, may admit calls to external numbers.
+ It could even allow transfering calls to a second external number.
+ .
+ Sipsniff is a simple sniffer for SIP protocol
+ .
+ Sipspy is a simple sip server showing digest info on auth requests and responses.
+ .
+ SipDigestLeak Exploits the SIP digest leak vulnerability discovered by
+ Sandro Gauci that affects a large number of hardware and software devices.
