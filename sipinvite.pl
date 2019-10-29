@@ -63,6 +63,7 @@ my $refer = '';	# refer number
 my $v = 0;	# verbose mode
 my $user = '';	# auth user
 my $pass = '';	# auth pass
+my $log = 0;
 
 my $realm = '';
 my $nonce = '';
@@ -89,6 +90,7 @@ sub init() {
 				"l=s" => \$lport,
 				"r=s" => \$dport,
 				"t=s" => \$refer,
+				"log+" => \$log,
 				"v+" => \$v);
 
 	check_version() if ($ver eq 1);
@@ -350,13 +352,15 @@ sub send_invite {
 			$data .= $line;
  
 			if ($line =~ /^\r\n/) {
-				open(my $fh, '>>', $file) or die "Could not open file '$file' $!";
-				if ($cont eq 0) {
-					print $fh "[+] $from_ip\tSending INVITE $from => $to\n";
-					print $fh "[-] UserAgent: $ua\n";
+				if ($log eq 1) {
+					open(my $fh, '>>', $file) or die "Could not open file '$file' $!";
+					if ($cont eq 0) {
+						print $fh "[+] $from_ip\tSending INVITE $from => $to\n";
+						print $fh "[-] UserAgent: $ua\n";
+					}
+					print $fh "[-] $response\n";
+					close $fh;
 				}
-				print $fh "[-] $response\n";
-				close $fh;
 				
 				$cont++;
 				
@@ -427,10 +431,12 @@ sub send_ack {
 				$data .= $line;
  
 				if ($line =~ /^\r\n/) {
-					open(my $fh, '>>', $file) or die "Could not open file '$file' $!";
-					print $fh "[+] Sending ACK\n";
-					print $fh "[-] $response\n";
-					close $fh;
+					if ($log eq 1) {
+						open(my $fh, '>>', $file) or die "Could not open file '$file' $!";
+						print $fh "[+] Sending ACK\n";
+						print $fh "[-] $response\n";
+						close $fh;
+					}
 				
 					if ($v eq 0) { print "[-] $response\n"; }
 					else { print "Receiving:\n=========\n$data"; }
@@ -501,10 +507,12 @@ sub send_refer {
 			$data .= $line;
  
 			if ($line =~ /^\r\n/) {
-				open(my $fh, '>>', $file) or die "Could not open file '$file' $!";
-				print $fh "[+] Sending REFER $from => $referto\n";
-				print $fh "[-] $response\n";
-				close $fh;
+				if ($log eq 1) {
+					open(my $fh, '>>', $file) or die "Could not open file '$file' $!";
+					print $fh "[+] Sending REFER $from => $referto\n";
+					print $fh "[-] $response\n";
+					close $fh;
+				}
 				
 				if ($v eq 0) { print "[-] $response\n"; }
 				else { print "Receiving:\n=========\n$data"; }
@@ -586,6 +594,7 @@ Usage: perl $0 -h <host> -d <dst_number> [options]
 -ip <string>     = Source IP (by default it is the same as host)
 -ua <string>     = Customize the UserAgent
 -v               = Verbose (trace information)
+-log             = Save results into sipinvite.log file
 -version         = Show version and search for updates
  
 == Examples ==
