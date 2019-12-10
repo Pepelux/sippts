@@ -1,3 +1,8 @@
+v2.0.0 (Dec/2019)
+- sipscan, sipexten, sipcrack, sipinvite: New params to customize SIP headers (From User, From Name, To User, To Name, Contact Domain, SIP Domain)
+- sipinvite.pl: Allow TCP connections
+- Bug fixes
+
 v1.2.13 (Oct/2019)
 - New param (-version) to show current version and search for new updates
 - sipscan.pl: New param (-web) to search for a control panel optionally
@@ -25,4 +30,4 @@ v1.2.1 (Aug/2018)
 - Now it is possible to change the user-agent
 
 v1.2 (Feb/2015)
-First publication uploaded to Github (previous versions are proofs)
+- First publication uploaded to Github (previous versions are proofs)

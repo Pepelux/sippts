@@ -41,8 +41,8 @@ my @founds;
 my $host = '';		# host
 my $lport = '';		# local port
 my $dport = '';		# destination port
-my $from = '';		# source number
-my $to = '';		# destination number
+my $contactdomain = ''; # Contact Domain
+my $domain = ''; # SIP Domain
 my $wordlist = '';	# wordlist
 my $v = 0;		# verbose mode
 my $vv = 0;		# more verbose
@@ -104,9 +104,8 @@ sub prepare_db() {
 sub init() {
     # check params
     my $result = GetOptions ("h=s" => \$host,
-				"d=s" => \$to,
-				"s=s" => \$from,
-				"ip=s" => \$from_ip,
+				"cd=s" => \$contactdomain,
+				"d=s" => \$domain,
 				"e=s" => \$exten,
 				"l=s" => \$lport,
 				"r=s" => \$dport,
@@ -256,7 +255,8 @@ sub init() {
 	else {
 		$lport = "5070" if ($lport eq "");
 		$dport = "5060" if ($dport eq "");
-		$exten = "100-1000" if ($exten eq "");
+		$exten = "100-300" if ($exten eq "");
+		$contactdomain = "1.1.1.1" if ($contactdomain eq "");
 
 		if ($dport =~ /\-/) {
 			$dport =~ /([0-9]*)-([0-9]*)/;
@@ -285,7 +285,6 @@ sub init() {
  
  	open(WL,"<$wordlist");
  	
- 	my $first = 0;
 	my @arrow = ("|", "/", "-", "\\");
 	my $cont = 0;
 
@@ -301,22 +300,15 @@ sub init() {
 				for ($j = $pini; $j <= $pfin; $j++) {
 					for ($k = $eini; $k <= $efin; $k++) {
 						while (1) {
-							$from = $prefix.$k if ($from eq "" || $eini ne $efin);
-							$to = $prefix.$k if ($to eq "" || $eini ne $efin);
 							last unless defined($range[$i]);
 							$from_ip = $range[$i] if ($from_ip eq "");
-							my $thr;
+							my $sipdomain = $domain;
+							$sipdomain = $range[$i] if ($domain eq "");
 							my $user = $prefix.$k;
 
-							if ($first eq 0) {
-								print "\r[".$arrow[$cont]."] Testing ".$range[$i].":$j with $user/$from ...";
-								scan($range[$i], $from_ip, $lport, $j, $from, $to, $user, $proto, $from);
-								$first = 1;
-							}
-
 							if ( !grep( /^$user$/, @founds ) ) {
-								print "\r[".$arrow[$cont]."] Testing ".$range[$i].":$j with $user/$word ...";
-								scan($range[$i], $from_ip, $lport, $j, $from, $to, $user, $proto, $word);
+								print "\r[".$arrow[$cont]."] Testing ".$range[$i].":$j with $user/$word ..." if ($v ne 1 && $vv ne 1);
+								scan($range[$i], $lport, $j, $contactdomain, $user, "1", $proto, $sipdomain, $word);
 							}
 
 							$cont++;
@@ -457,45 +449,43 @@ sub save {
 
 sub scan {
 	my $to_ip = shift;
-	my $from_ip = shift;
 	my $lport = shift;
 	my $dport = shift;
-	my $from = shift;
-	my $to = shift;
+	my $contactdomain = shift;
 	my $user = shift;
+	my $csec = shift;
 	my $proto = shift;
+	my $domain = shift;
 	my $pass = shift;
 
 	my $callid = &generate_random_string(32, 1);
 	my $cseq = 1;
 	
-	send_register($from_ip, $to_ip, $lport, $dport, $from, $to, $cseq, $user, $pass, $callid, "", $proto);
+	send_register($contactdomain, $to_ip, $lport, $dport, $user, $csec, "", $proto, $domain, "");
 
-	my $uri = "sip:$to_ip";
+	my $uri = "sip:$domain";
 	my $a = md5_hex($user.':'.$realm.':'.$pass);
 	my $b = md5_hex('REGISTER:'.$uri);
 	my $r = md5_hex($a.':'.$nonce.':'.$b);
 	my $digest = "username=\"$user\", realm=\"$realm\", nonce=\"$nonce\", uri=\"$uri\", response=\"$r\", algorithm=MD5";
 	$cseq = 2;
-	my $res = send_register($from_ip, $to_ip, $lport, $dport, $from, $to, $cseq, $user, $pass, $callid, $digest, $proto);
-	
+	my $res = send_register($contactdomain, $to_ip, $lport, $dport, $user, $csec, $digest, $proto, $domain, $pass);
+
 	push @founds, $user if ($res =~ /^200/);
 }
  
 # Send REGISTER message
 sub send_register {
-	my $from_ip = shift;
+	my $contactdomain = shift;
 	my $to_ip = shift;
 	my $lport = shift;
 	my $dport = shift;
-	my $from = shift;
-	my $to = shift;
-	my $cseq = shift;
 	my $user = shift;
-	my $pass = shift;
-	my $callid = shift;
+	my $cseq = shift;
 	my $digest = shift;
 	my $proto = shift;
+	my $domain = shift;
+	my $pass = shift;
 	my $response = "";
 
 	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, LocalPort=>$lport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 10);
@@ -505,13 +495,14 @@ sub send_register {
 		$sc->read_timeout(0.5);
 		$sc->enable_timeout;
 
-		my $branch = &generate_random_string(32, 0);
+		my $branch = &generate_random_string(71, 0);
+		my $callid = &generate_random_string(32, 1);
 	
-		my $msg = "REGISTER sip:".$to_ip." SIP/2.0\r\n";
-		$msg .= "Via: SIP/2.0/".uc($proto)." $from_ip:$lport;branch=$branch\r\n";
-		$msg .= "From: <sip:".$user."@".$to_ip.">;tag=0c26cd11\r\n";
-		$msg .= "To: <sip:".$user."@".$to_ip.">\r\n";
-		$msg .= "Contact: <sip:".$user."@".$from_ip.":$lport;transport=$proto>\r\n";
+		my $msg = "REGISTER sip:".$user."@".$domain." SIP/2.0\r\n";
+		$msg .= "Via: SIP/2.0/".uc($proto)." $contactdomain:$lport;branch=$branch\r\n";
+		$msg .= "From: <sip:".$user."@".$domain.">;tag=0c26cd11\r\n";
+		$msg .= "To: <sip:".$user."@".$domain.">\r\n";
+		$msg .= "Contact: <sip:".$user."@".$contactdomain.":$lport;transport=$proto>\r\n";
 		$msg .= "Authorization: Digest $digest\r\n" if ($digest ne "");
 		$msg .= "Call-ID: ".$callid."\r\n";
 		$msg .= "CSeq: $cseq REGISTER\r\n";
@@ -528,7 +519,8 @@ sub send_register {
 
 		print $sc $msg;
 
-		print "[+] $to_ip/$proto - Sending REGISTER $from (trying pass: $pass)\n" if ($v eq 1);
+		print "[+] $to_ip/$proto - Sending REGISTER $user (trying pass: $pass)\n" if ($pass ne "" && $v eq 1);
+		print "[+] $to_ip/$proto - Sending REGISTER $user\n" if ($pass eq "" && $v eq 1);
 		print "[+] $to_ip/$proto - Sending:\n=======\n$msg" if ($vv eq 1);
 
 		use Errno qw(ETIMEDOUT EWOULDBLOCK);
@@ -643,9 +635,10 @@ Wiki: https://github.com/Pepelux/sippts/wiki/SIPcrack
 Usage: perl $0 -h <host> -w wordlist [options]
  
 == Options ==
--e  <string>     = Extension (default from 100 to 1000)
--s  <integer>    = Source number (CallerID) (default: 100)
--d  <integer>    = Destination number (default: 100)
+-e  <string>     = Extension (default from 100 to 300)
+-cd <string>     = Contact Domain (by default 1.1.1.1)
+-d  <string>     = Domain (by default: destination IP address)
+-l  <integer>    = Local port (default: 5070)
 -r  <integer>    = Remote port (default: 5060)
 -p  <string>     = Prefix (for extensions)
 -proto <string>  = Protocol (udp or tcp - By default: udp)

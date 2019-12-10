@@ -57,13 +57,18 @@ my $ver = 0;
 my $host = '';	# host
 my $lport = '';	# local port
 my $dport = '';	# destination port
-my $from = '';	# source number
-my $to = '';	# destination number
+my $fromuser = ''; # From User
+my $fromname = ''; # From Name
+my $touser = ''; # To User
+my $toname = ''; # To Name
+my $contactdomain = ''; # Contact Domain
+my $domain = ''; # SIP Domain
 my $refer = '';	# refer number
 my $v = 0;	# verbose mode
 my $user = '';	# auth user
 my $pass = '';	# auth pass
 my $log = 0;
+my $proto = '';	# protocol
 
 my $realm = '';
 my $nonce = '';
@@ -83,22 +88,33 @@ sub init() {
 	my $result = GetOptions ("h=s" => \$host,
 				"u=s" => \$user,
 				"p=s" => \$pass,
-				"d=s" => \$to,
-				"s=s" => \$from,
-				"ip=s" => \$from_ip,
+				"fu=s" => \$fromuser,
+				"fn=s" => \$fromname,
+				"tu=s" => \$touser,
+				"tn=s" => \$toname,
+				"fu=s" => \$fromuser,
+				"cd=s" => \$contactdomain,
+				"d=s" => \$domain,
+				"proto=s" => \$proto,
 				"ua=s" => \$useragent,
 				"l=s" => \$lport,
 				"r=s" => \$dport,
 				"t=s" => \$refer,
 				"log+" => \$log,
+				"version+" => \$ver,
 				"v+" => \$v);
 
 	check_version() if ($ver eq 1);
-	help() if ($host eq "" || $to eq "");
+	help() if ($host eq "" || $touser eq "");
 
+	$lport = "5070" if ($lport eq "");
 	$dport = "5060" if ($dport eq "");
-	$user = "100" if ($user eq "");
-	$from = $user if ($from eq "");
+	$fromuser = $user if ($fromuser eq "" && $user ne "");
+	$fromuser = "100" if ($fromuser eq "");
+	$touser = "100" if ($touser eq "");
+	$contactdomain = "1.1.1.1" if ($contactdomain eq "");
+	$proto = lc($proto);
+	$proto = "udp" if ($proto ne "tcp" && $proto ne "all");
 
 	my @range;
 	my @hostlist;
@@ -226,6 +242,8 @@ sub init() {
 	for (my $i = 0; $i < $nhost; $i++) {
 		$to_ip = $range[$i];
 		$from_ip = $to_ip if ($from_ip2 eq "");
+		my $sipdomain = $domain;
+		$sipdomain = $range[$i] if ($domain eq "");
 
 		my $callid = &generate_random_string(32, 1);
 		my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>'udp', PeerAddr=>$to_ip, Timeout => 10);
@@ -237,28 +255,28 @@ sub init() {
 			$lport = $sc->sockport() if ($lport eq "");
 
 			# first INVITE
-			my $csec = 1;
-			my $res = send_invite($sc, $from_ip, $to_ip, $lport, $dport, $from, $to, $digest, $callid, $csec, $user);
+			my $cseq = 1;
+			my $res = send_invite($sc, $contactdomain, $from_ip, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $toname, $cseq, "", $callid, $user, $sipdomain, $proto);
 
 			# Authentication
 			if (($res =~ /^401/ || $res =~ /^407/) && $user ne '' && $pass ne '') { 
-				my $uri = "sip:$to\@$to_ip";
+				my $uri = "sip:$touser\@$domain";
 				my $a = md5_hex($user.':'.$realm.':'.$pass);
 				my $b = md5_hex('INVITE:'.$uri);
 				my $r = md5_hex($a.':'.$nonce.':'.$b);
 				$digest = "username=\"$user\", realm=\"$realm\", nonce=\"$nonce\", uri=\"$uri\", response=\"$r\", algorithm=MD5";
 
-				$res = send_ack($sc, $from_ip, $to_ip, $lport, $dport, $from, $to, "", $callid, $csec);
-				$csec++;
-				$res = send_invite($sc, $from_ip, $to_ip, $lport, $dport, $from, $to, $digest, $callid, $csec, $user);
+				$res = send_ack($sc, $contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $toname, $cseq, "", $callid, $sipdomain, $proto);
+				$cseq++;
+				$res = send_invite($sc, $contactdomain, $from_ip, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $toname, $cseq, $digest, $callid, $user, $sipdomain, $proto);
 			}
 
 			# Transfer call
 			if ($res =~ /^200/ && $refer ne "") {
-				$csec++;
-				$res = send_ack($sc, $from_ip, $to_ip, $lport, $dport, $from, $to, $digest, $callid, $csec);
-				$csec++;
-				$res = send_refer($sc, $from_ip, $to_ip, $lport, $dport, $from, $to, $digest, $callid, $csec, $user, $refer);
+				$cseq++;
+				$res = send_ack($sc, $contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $toname, $cseq, $digest, $callid, $sipdomain, $proto);
+				$cseq++;
+				$res = send_refer($sc, $contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $toname, $cseq, $digest, $user, $refer, $callid, $sipdomain, $proto);
 			}
 		}
 	}
@@ -266,30 +284,36 @@ sub init() {
 	exit;
 }
 
-
 # Send INVITE message
 sub send_invite {
 	my $sc = shift;
+	my $contactdomain = shift;
 	my $from_ip = shift;
 	my $to_ip = shift;
 	my $lport = shift;
 	my $dport = shift;
-	my $from = shift;
-	my $to = shift;
+	my $fromuser = shift;
+	my $fromname = shift;
+	my $touser = shift;
+	my $toname = shift;
+	my $cseq = shift;
 	my $digest = shift;
 	my $callid = shift;
-	my $cseq = shift;
 	my $user = shift;
+	my $domain = shift;
+	my $proto = shift;
 
 	my $branch = &generate_random_string(71, 0);
-	
-	my $msg = "INVITE sip:".$to."@".$to_ip." SIP/2.0\r\n";
-	$msg .= "Via: SIP/2.0/UDP $from_ip:$lport;branch=$branch\r\n";
-	$msg .= "From: \"$from\" <sip:".$user."@".$from_ip.">;tag=0c26cd11\r\n";
-	$msg .= "To: <sip:".$to."@".$to_ip.">\r\n";
-	$msg .= "Contact: <sip:".$from."@".$from_ip.":$lport;transport=udp>\r\n";
+
+	my $msg = "INVITE sip:".$touser."@".$domain." SIP/2.0\r\n";
+	$msg .= "Via: SIP/2.0/".uc($proto)." $contactdomain:$lport;branch=$branch\r\n";
+	$msg .= "From: $fromname <sip:".$fromuser."@".$domain.">;tag=0c26cd11\r\n";
+	$msg .= "To: $toname <sip:".$touser."@".$domain.">\r\n";
+	$msg .= "Contact: <sip:".$fromuser."@".$contactdomain.":$lport;transport=$proto>\r\n";
 	$msg .= "Authorization: Digest $digest\r\n" if ($digest ne "");
-	$msg .= "Call-ID: ".$callid."\r\n";
+	$msg .= "Supported: replaces, timer, path\r\n";
+	$msg .= "P-Early-Media: Supported\r\n";
+	$msg .= "Call-ID: $callid\r\n";
 	$msg .= "CSeq: $cseq INVITE\r\n";
 	$msg .= "User-Agent: $useragent\r\n";
 	$msg .= "Max-Forwards: 70\r\n";
@@ -311,7 +335,7 @@ sub send_invite {
 
 	print $sc $msg;
 
-	if ($v eq 0) { print "[+] $from_ip\tSending INVITE $from => $to\n"; }
+	if ($v eq 0) { print "[+] $domain\tSending INVITE $fromuser => $touser\n"; }
 	else { print "Sending:\n=======\n$msg"; }
 
 	my $data = "";
@@ -355,7 +379,7 @@ sub send_invite {
 				if ($log eq 1) {
 					open(my $fh, '>>', $file) or die "Could not open file '$file' $!";
 					if ($cont eq 0) {
-						print $fh "[+] $from_ip\tSending INVITE $from => $to\n";
+						print $fh "[+] $domain\tSending INVITE $fromuser => $touser\n";
 						print $fh "[-] UserAgent: $ua\n";
 					}
 					print $fh "[-] $response\n";
@@ -383,26 +407,32 @@ sub send_invite {
 # Send ACK message
 sub send_ack {
 	my $sc = shift;
-	my $from_ip = shift;
+	my $contactdomain = shift;
 	my $to_ip = shift;
 	my $lport = shift;
 	my $dport = shift;
-	my $from = shift;
-	my $to = shift;
+	my $fromuser = shift;
+	my $fromname = shift;
+	my $touser = shift;
+	my $toname = shift;
+	my $cseq = shift;
 	my $digest = shift;
 	my $callid = shift;
-	my $cseq = shift;
-	
+	my $domain = shift;
+	my $proto = shift;
+
 	my $branch = &generate_random_string(71, 0);
 	
-	my $msg = "ACK sip:".$to."@".$to_ip." SIP/2.0\r\n";
-	$msg .= "From: $from <sip:".$from."@".$from_ip.">;tag=0c26cd11\r\n";
-	$msg .= "To: $to <sip:".$to."@".$to_ip.">;tag=$totag\r\n";
-	$msg .= "Via: SIP/2.0/UDP $to_ip:$lport;branch=$branch;rport\r\n";
-	$msg .= "Call-ID: ".$callid."\r\n";
-	$msg .= "CSeq: $cseq ACK\r\n";
-	$msg .= "Contact: <sip:".$to."@".$to_ip.":$lport>\r\n";
+	my $msg = "ACK sip:".$touser."@".$domain." SIP/2.0\r\n";
+	$msg .= "Via: SIP/2.0/".uc($proto)." $contactdomain:$lport;branch=$branch\r\n";
+	$msg .= "From: $fromname <sip:".$fromuser."@".$domain.">;tag=0c26cd11\r\n";
+	$msg .= "To: $toname <sip:".$touser."@".$domain.">\r\n";
+	$msg .= "Contact: <sip:".$fromuser."@".$contactdomain.":$lport;transport=$proto>\r\n";
 	$msg .= "Authorization: Digest $digest\r\n" if ($digest ne "");
+	$msg .= "Supported: replaces, timer, path\r\n";
+	$msg .= "P-Early-Media: Supported\r\n";
+	$msg .= "Call-ID: $callid\r\n";
+	$msg .= "CSeq: $cseq ACK\r\n";
 	$msg .= "User-Agent: $useragent\r\n";
 	$msg .= "Max-Forwards: 70\r\n";
 	$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\r\n";
@@ -456,38 +486,44 @@ sub send_ack {
 # Send REFER message
 sub send_refer {
 	my $sc = shift;
-	my $from_ip = shift;
+	my $contactdomain = shift;
 	my $to_ip = shift;
 	my $lport = shift;
 	my $dport = shift;
-	my $from = shift;
-	my $to = shift;
+	my $fromuser = shift;
+	my $fromname = shift;
+	my $touser = shift;
+	my $toname = shift;
+	my $cseq = shift;
 	my $digest = shift;
 	my $callid = shift;
-	my $cseq = shift;
 	my $user = shift;
 	my $referto = shift;
-	
+	my $domain = shift;
+	my $proto = shift;
+
 	my $branch = &generate_random_string(71, 0);
 
-	my $msg = "REFER sip:".$to."@".$to_ip." SIP/2.0\r\n";
-	$msg .= "From: $user <sip:".$user."@".$to_ip.">;tag=0c26cd11\r\n";
-	$msg .= "To: $to <sip:".$to."@".$to_ip.">;tag=$totag\r\n";
-	$msg .= "Via: SIP/2.0/UDP $to_ip:$lport;branch=$branch;rport\r\n";
-	$msg .= "Call-ID: ".$callid."\r\n";
-	$msg .= "CSeq: $cseq REFER\r\n";
-	$msg .= "Contact: <sip:".$user."@".$from_ip.":$lport>\r\n";
+	my $msg = "REFER sip:".$touser."@".$domain." SIP/2.0\r\n";
+	$msg .= "Via: SIP/2.0/".uc($proto)." $contactdomain:$lport;branch=$branch\r\n";
+	$msg .= "From: $fromname <sip:".$fromuser."@".$domain.">;tag=0c26cd11\r\n";
+	$msg .= "To: $toname <sip:".$touser."@".$domain.">\r\n";
+	$msg .= "Contact: <sip:".$fromuser."@".$contactdomain.":$lport;transport=$proto>\r\n";
 	$msg .= "Authorization: Digest $digest\r\n" if ($digest ne "");
+	$msg .= "Supported: replaces, timer, path\r\n";
+	$msg .= "P-Early-Media: Supported\r\n";
+	$msg .= "Call-ID: $callid\r\n";
+	$msg .= "CSeq: $cseq REFER\r\n";
 	$msg .= "User-Agent: $useragent\r\n";
 	$msg .= "Max-Forwards: 70\r\n";
 	$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\r\n";
-	$msg .= "Refer-To: <sip:".$referto."@".$to_ip.">\r\n";
-	$msg .= "Referred-By: <sip:".$user."@".$from_ip.":$lport>\r\n";
+	$msg .= "Refer-To: <sip:".$referto."@".$domain.">\r\n";
+	$msg .= "Referred-By: <sip:".$user."@".$domain.":$lport>\r\n";
 	$msg .= "Content-Length: 0\r\n\r\n";
 
 	print $sc $msg;
 
-	if ($v eq 0) { print "[+] Sending REFER $from => $referto\n"; }
+	if ($v eq 0) { print "[+] Sending REFER $fromuser => $referto\n"; }
 	else { print "Sending:\n=======\n$msg"; }
 
 	my $data = "";
@@ -509,7 +545,7 @@ sub send_refer {
 			if ($line =~ /^\r\n/) {
 				if ($log eq 1) {
 					open(my $fh, '>>', $file) or die "Could not open file '$file' $!";
-					print $fh "[+] Sending REFER $from => $referto\n";
+					print $fh "[+] Sending REFER $fromuser => $referto\n";
 					print $fh "[-] $response\n";
 					close $fh;
 				}
@@ -581,33 +617,42 @@ SipINVITE - by Pepelux <pepeluxx\@gmail.com>
 ---------
 Wiki: https://github.com/Pepelux/sippts/wiki/SIPinvite
 
-Usage: perl $0 -h <host> -d <dst_number> [options]
- 
+Usage: perl $0 -h <host> -tu <dst_number> [options]
+
+-h   <string>    = destination server
+-tu  <string>    = To User (destination number)
+
 == Options ==
--d  <integer>    = Destination number
--u  <string>     = Username to authenticate
--p  <string>     = Password to authenticate
--s  <integer>    = Source number (CallerID) (default: 100)
+-u  <string>     = Authentication user
+-p  <string>     = Authentication password
+-fu  <string>    = From User (by default 100)
+-fn  <string>    = From Name
+-tn  <string>    = To Name
+-cd <string>     = Contact Domain (by default 1.1.1.1)
+-d  <string>     = Domain (by default: destination IP address)
 -l  <integer>    = Local port (default: 5070)
 -r  <integer>    = Remote port (default: 5060)
 -t  <integer>    = Transfer call to another number
 -ip <string>     = Source IP (by default it is the same as host)
 -ua <string>     = Customize the UserAgent
+-proto <string>  = Protocol (udp, tcp or all (both of them) - By default: UDP)
 -v               = Verbose (trace information)
 -log             = Save results into sipinvite.log file
 -version         = Show version and search for updates
  
 == Examples ==
-\$perl $0 -h 192.168.0.1 -d 100
+\$perl $0 -h 192.168.0.1 -tu 100
 \tTrying to make a call to exten 100 (without auth)
-\$perl $0 -h 192.168.0.1 -u sipuser -p supersecret -d 100 -r 5080
+\$perl $0 -h 192.168.0.1 -u sipuser -p supersecret -tu 100
 \tTrying to make a call to exten 100 (with auth)
-\$perl $0 -h 192.168.0.1 -s 200 -d 555555555 -v
+\$perl $0 -h 192.168.0.1 -fu 200 -tu 555555555 -v
 \tTrying to make a call to number 555555555 (without auth) with source number 200
-\$perl $0 -h 192.168.0.1 -d 555555555 -t 666666666
-\tTrying to make a call to number 555555555 (without auth) and transfer it to number 666666666
-\$perl $0 -h 192.168.0.1 -d 555555555 -t 666666666 -s 123456789
-\tTrying to make a call to number 555555555 (without auth) using callerid 123456789 and transfer it to number 666666666
+\$perl $0 -h 192.168.0.1 -tu 555555555 -t 444444444
+\tTrying to make a call to number 555555555 (without auth) and transfer it to number 444444444
+\$perl $0 -h 192.168.0.1 -tu 555555555 -fn 123456789 -t 444444444
+\tTrying to make a call to number 555555555 (without auth) using callerid 123456789 and transfer it to number 444444444
+\$perl $0 -h 192.168.0.1 -tu 555555555 -fu 666666666 -fn Devil
+\tThe call from de Devil \};->
  
 };
  
