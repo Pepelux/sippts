@@ -11,7 +11,7 @@ Yes. You can freely use, modify and distribute. If modified, please put a refere
 
 # Can be use sippts for illegal purposes? #
 
-Most security tools can be used for illegal purposes, but the finality of this tool is to check security of your own servers and not to use to do bad purposes. I am not responsible for the misuse of this tool.
+Most security tools can be used for illegal purposes, but the purpose of this tool is to check the security of your own servers and not to use to do bad things. I am not responsible for the misuse of this tool.
 
 # Set of tools for penetration test over SIP protocol #
 
