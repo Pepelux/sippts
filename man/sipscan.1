@@ -1,0 +1,131 @@
+.\" Manpage for sipscan.
+.\" Contact pepeluxx@gmail.com to correct errors or typos.
+.TH SIPSCAN 1 "10 Dec 2019" "version 2.0.0" "sipscan man page"
+.SH NAME
+\fBsipscan\fR is very fast scanner for SIP services over UDP. It uses multithread and can scan large ranges of networks
+
+\fBsipscan\fR is part of SIPPTS suite: https://github.com/Pepelux/sippts
+.SH SYNOPSIS
+nuseradd [USERNAME]
+.SH DESCRIPTION
+\fBsipscan\fR works sending and waiting well-formed SIP packages. It tries, by default, to connect over the UDP protocol. If the connection fails, it will try over TCP. You can also force to use only over UDP or TCP.
+
+\fBsipscan\fR allows us to:
+ - Identify PBX servers and SIP devices (SIP proxy, PBX, phone, gateway, etc).
+ - Connect over UDP or TCP protocol.
+ - Test over UDP and TCP at the same time.
+ - Use different methods like REGISTER, INVITE or OPTIONS.
+ - Scan large ranges of networks.
+ - Scan large ranges of ports.
+ - Analyze responses using verbose mode.
+ - Check if there is a web panel.
+ - Get all the phones on a network to ring at the same time (using INVITE as method).
+ - To customize the UserAgent.
+ - It is possible to save all operations into a database.
+ - It is possible to run it in silent mode.
+ - It uses multithread to run faster.
+.SH OPTIONS
+.PP
+\fB\-h \fR\fIhost\fR
+.RS 4
+Target host. This parameter is mandatory. You can use:
+ - a host (like sip.myserver.com).
+ - an IP address (like 192.168.1.2).
+ - a network (like 192.168.0/24).
+ - several hosts separed by commas (like 192.168.1.1,192.168.1.2,192,168.1.200).
+ - a range (like 192.168.1.1-192.168.1.200).
+.RE
+.PP
+\fB\-m \fR\fImethod\fR
+.RS 4
+Method used for the SIP message: \fBREGISTER\fR/\fBINVITE\fR/\fBOPTIONS\fR. If not specified, the method (\fBOPTIONS\fR) is used.
+.RE
+.PP
+\fB\-fu \fR\from_user\fR
+.RS 4
+Sets the value for FROM USER. This value is used ad the caller number. If not specified, the value (100) is used.
+.RE
+.PP
+\fB\-fn \fR\fIfrom_name\fR
+.RS 4
+Specifies the value for FROM NAME. This value is used as CALLERID.
+.RE
+.PP
+\fB\-tu \fR\fIto_user\fR
+.RS 4
+Sets the value for TO USER. This value is used ad the callee number. If not specified, the value (100) is used.
+.RE
+.PP
+\fB\-tn \fR\fIto_name\fR
+.RS 4
+Specifies the value for TO NAME.
+.RE
+.PP
+\fB\-cd \fR\fIcontact_domain\fR
+.RS 4
+Specifies the value for contact domain. This is the domain used in the contact header. If not specified, the value (1.1.1.1) is used.
+.RE
+.PP
+\fB\-d \fR\fIdomain\fR
+.RS 4
+Sets the value for domain. This value is used in the SIP URI, FROM header and TO header. If not specified, the host IP address is used.
+.RE
+.PP
+\fB\-l \fR\fIlocal_port\fR
+.RS 4
+Specifies a local port number. If not specified, the sip port (5070) is used.
+.RE
+.PP
+\fB\-r \fR\fIremote_port\fR
+.RS 4
+Specifies a port number to contact. If not specified, the sip port (5060) is used.
+.RE
+.PP
+\fB\-proto \fR\fIprotocol\fR
+.RS 4
+Specifies a protocol to be scanned. You can use this tool to scan UDP or TCP services. If not specified, both protocols will be scanned.
+.RE
+.PP
+\fB\-ua \fR\fIuser_agent\fR
+.RS 4
+Customize the user-agent value. If not specified, the value (pplsip) is used.
+.RE
+.PP
+\fB\-db \fR
+.RS 4
+Use this param if you wish to save results into a sqlite database. The database name is sippts.db.
+.RE
+.PP
+\fB\-nolog \fR
+.RS 4
+Using this param the program runs in silence mode. No logs will be printed in the console.
+.RE
+.PP
+\fB\-noth \fR
+.RS 4
+Use this param to run script without threads. By default it uses 3000 threads to scan quickly but in some cases it doesn't obtain good results.
+.RE
+.PP
+\fB\-web \fR
+.RS 4
+For each SIP service found it search for a control panel.
+.RE
+.PP
+\fB\-v \fR
+.RS 4
+Verbose mode (trace information).
+.RE
+.PP
+\fB\-vv \fR
+.RS 4
+More verbose mode (more detailed trace).
+.RE
+.PP
+\fB\-version \fR
+.RS 4
+Shows running vesion.
+.RE
+.SH BUGS
+No known bugs.
+.SH AUTHOR
+Jose Luis Verdeguer (pepeluxx@gmail.com)
