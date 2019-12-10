@@ -30,13 +30,10 @@ my $noauth = 0;
 my $web = 0;
 my $ver = 0;
 
+my $data_path = "/usr/share/sippts/";
+$data_path = "./" if !(-e $data_path . "sippts_empty.db");
 	
-my $database = "sippts.db";
-
-unless (-e $database) {
-	die("Database $database not found\n\n");
-}
-	
+my $database = $data_path . "sippts.db";
 my $db = DBI->connect("dbi:SQLite:dbname=$database","","") or die $DBI::errstr;
 
 sub init() {
@@ -162,7 +159,7 @@ Usage: perl $0 -h <host> | -u <user-agent> [options]
 == Options ==
 -noexten    = Show only servers and devices (not extensions nor users)
 -noauth     = Show extensions where authentication is not required
--version         = Show version and search for updates
+-version    = Show version and search for updates
 
 == Examples ==
 \$perl $0 -h 192.168.0.1
