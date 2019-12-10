@@ -1,3 +1,7 @@
+v2.0.1 (Dec/2019)
+- Bug fixes
+- Added man pages
+
 v2.0.0 (Dec/2019)
 - sipscan, sipexten, sipcrack, sipinvite: New params to customize SIP headers (From User, From Name, To User, To Name, Contact Domain, SIP Domain)
 - sipinvite.pl: Allow TCP connections
