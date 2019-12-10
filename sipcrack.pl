@@ -642,12 +642,10 @@ Usage: perl $0 -h <host> -w wordlist [options]
 -r  <integer>    = Remote port (default: 5060)
 -p  <string>     = Prefix (for extensions)
 -proto <string>  = Protocol (udp or tcp - By default: udp)
--ip <string>     = Source IP (by default it is the same as host)
 -ua <string>     = Customize the UserAgent
 -resume          = Resume last session
 -db              = Save results into database (sippts.db)
                    database path: ${data_path}sippts.db
--w               = Wordlist
 -v               = Verbose (trace information)
 -vv              = More verbose (more detailed trace)
 -version         = Show version and search for updates
