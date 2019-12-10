@@ -442,7 +442,7 @@ sub send_invite {
 	my $response = "";
 	my $server = "";
 
-	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 10);
+	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, LocalPort=>$lport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 10);
 
 	if ($sc) {
 		IO::Socket::Timeout->enable_timeouts_on($sc);
@@ -572,7 +572,7 @@ sub send_register {
 	my $response = "";
 	my $server = "";
 
-	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 10);
+	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, LocalPort=>$lport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 10);
 
 	if ($sc) {
 		IO::Socket::Timeout->enable_timeouts_on($sc);
@@ -692,7 +692,7 @@ sub send_options {
 	my $response = "";
 	my $server = "";
 
-	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 10);
+	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, LocalPort=>$lport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 10);
 
 	if ($sc) {
 		IO::Socket::Timeout->enable_timeouts_on($sc);

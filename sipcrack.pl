@@ -308,7 +308,7 @@ sub init() {
 
 							if ( !grep( /^$user$/, @founds ) ) {
 								print "\r[".$arrow[$cont]."] Testing ".$range[$i].":$j with $user/$word ..." if ($v ne 1 && $vv ne 1);
-								scan($range[$i], $lport, $j, $contactdomain, $user, "1", $proto, $sipdomain, $word);
+								scan($range[$i], $lport, $j, $contactdomain, $user, $proto, $sipdomain, $word);
 							}
 
 							$cont++;
@@ -453,7 +453,6 @@ sub scan {
 	my $dport = shift;
 	my $contactdomain = shift;
 	my $user = shift;
-	my $csec = shift;
 	my $proto = shift;
 	my $domain = shift;
 	my $pass = shift;
@@ -461,15 +460,15 @@ sub scan {
 	my $callid = &generate_random_string(32, 1);
 	my $cseq = 1;
 	
-	send_register($contactdomain, $to_ip, $lport, $dport, $user, $csec, "", $proto, $domain, "");
+	send_register($contactdomain, $to_ip, $lport, $dport, $user, "", $proto, $domain, "", $callid);
 
 	my $uri = "sip:$domain";
 	my $a = md5_hex($user.':'.$realm.':'.$pass);
 	my $b = md5_hex('REGISTER:'.$uri);
 	my $r = md5_hex($a.':'.$nonce.':'.$b);
-	my $digest = "username=\"$user\", realm=\"$realm\", nonce=\"$nonce\", uri=\"$uri\", response=\"$r\", algorithm=MD5";
+	my $digest = "username=\"$user\",realm=\"$realm\",nonce=\"$nonce\",uri=\"$uri\",response=\"$r\",algorithm=MD5";
 	$cseq = 2;
-	my $res = send_register($contactdomain, $to_ip, $lport, $dport, $user, $csec, $digest, $proto, $domain, $pass);
+	my $res = send_register($contactdomain, $to_ip, $lport, $dport, $user, $digest, $proto, $domain, $pass, $callid);
 
 	push @founds, $user if ($res =~ /^200/);
 }
@@ -481,11 +480,11 @@ sub send_register {
 	my $lport = shift;
 	my $dport = shift;
 	my $user = shift;
-	my $cseq = shift;
 	my $digest = shift;
 	my $proto = shift;
 	my $domain = shift;
 	my $pass = shift;
+	my $callid = shift;
 	my $response = "";
 
 	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, LocalPort=>$lport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 10);
@@ -496,7 +495,6 @@ sub send_register {
 		$sc->enable_timeout;
 
 		my $branch = &generate_random_string(71, 0);
-		my $callid = &generate_random_string(32, 1);
 	
 		my $msg = "REGISTER sip:".$user."@".$domain." SIP/2.0\r\n";
 		$msg .= "Via: SIP/2.0/".uc($proto)." $contactdomain:$lport;branch=$branch\r\n";
@@ -505,7 +503,7 @@ sub send_register {
 		$msg .= "Contact: <sip:".$user."@".$contactdomain.":$lport;transport=$proto>\r\n";
 		$msg .= "Authorization: Digest $digest\r\n" if ($digest ne "");
 		$msg .= "Call-ID: ".$callid."\r\n";
-		$msg .= "CSeq: $cseq REGISTER\r\n";
+		$msg .= "CSeq: 1 REGISTER\r\n";
 		$msg .= "User-Agent: $useragent\r\n";
 		$msg .= "Max-Forwards: 70\r\n";
 		$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\r\n";
@@ -575,7 +573,7 @@ sub send_register {
 
 		if ($response =~ "^200") {
 			print OUTPUT "$to_ip\t$dport\t$proto\t$user\t$pass\n";
-			print "Found match: $to_ip:$dport/$proto - User: $user - Pass: $pass\n";
+			print "\nFound match: $to_ip:$dport/$proto - User: $user - Pass: $pass\n";
 		}
 	}
 	
