@@ -633,7 +633,6 @@ Usage: perl $0 -h <host> -tu <dst_number> [options]
 -l  <integer>    = Local port (default: 5070)
 -r  <integer>    = Remote port (default: 5060)
 -t  <integer>    = Transfer call to another number
--ip <string>     = Source IP (by default it is the same as host)
 -ua <string>     = Customize the UserAgent
 -proto <string>  = Protocol (udp, tcp or all (both of them) - By default: UDP)
 -v               = Verbose (trace information)
