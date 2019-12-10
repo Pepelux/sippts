@@ -15,6 +15,7 @@ Depends:
  libnet-address-ip-local-perl,
  libnet-pcap-perl,
  libtext-string-hexconvert-perl,
+ libdbd-sqlite3-perl,
  ${misc:Depends},
  ${perl:Depends},
 Description: tools to audit VoIP servers and devices using SIP protocol
