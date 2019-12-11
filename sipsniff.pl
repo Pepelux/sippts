@@ -40,7 +40,7 @@ sub f_probe_ctrl_c;
 # Declarations of global variables
 my $g_pcap_err = '';
 my $interface = '';
-my $dport = '';
+my $dport = '5060';
 my $u = 0;
 my $method = '';
 my $g_cap_descrip;
@@ -60,8 +60,6 @@ sub init() {
 
 	check_version() if ($ver eq 1);
 	help() if ($interface eq "");
-
-	$dport = "5060" if ($dport eq "");
 
 	f_probe_pcapinit;
 }

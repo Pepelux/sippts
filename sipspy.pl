@@ -37,9 +37,9 @@ use Getopt::Long;
 #use Digest::MD5 qw(md5 md5_hex md5_base64);
 use IO::Socket::INET;
 
-my $port = '';	# destination port
-my $v = 0;	# verbose mode
-my $h = 0;	# help
+my $port = '5060'; # destination port
+my $v = 0; # verbose mode
+my $h = 0; # help
 my $ver = 0;
 
 
@@ -55,8 +55,6 @@ sub init() {
 
 	check_version() if ($ver eq 1);
 	help() if ($h eq 1);
-
-	$port = "5060" if ($port eq "");
 
 	$socket = new IO::Socket::INET (
 		LocalPort => $port,

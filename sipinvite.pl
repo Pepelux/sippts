@@ -54,19 +54,19 @@ use Digest::MD5 qw(md5 md5_hex md5_base64);
 my $useragent = 'pplsip';
 
 my $ver = 0;
-my $host = '';	# host
-my $lport = '';	# local port
-my $dport = '';	# destination port
-my $fromuser = ''; # From User
+my $host = ''; # host
+my $lport = '5070';	# local port
+my $dport = '5060';	# destination port
+my $fromuser = '100'; # From User
 my $fromname = ''; # From Name
-my $touser = ''; # To User
+my $touser = '100'; # To User
 my $toname = ''; # To Name
-my $contactdomain = ''; # Contact Domain
+my $contactdomain = '1.1.1.1'; # Contact Domain
 my $domain = ''; # SIP Domain
 my $refer = '';	# refer number
-my $v = 0;	# verbose mode
-my $user = '';	# auth user
-my $pass = '';	# auth pass
+my $v = 0; # verbose mode
+my $user = ''; # auth user
+my $pass = ''; # auth pass
 my $log = 0;
 my $proto = '';	# protocol
 
@@ -107,12 +107,7 @@ sub init() {
 	check_version() if ($ver eq 1);
 	help() if ($host eq "" || $touser eq "");
 
-	$lport = "5070" if ($lport eq "");
-	$dport = "5060" if ($dport eq "");
 	$fromuser = $user if ($fromuser eq "" && $user ne "");
-	$fromuser = "100" if ($fromuser eq "");
-	$touser = "100" if ($touser eq "");
-	$contactdomain = "1.1.1.1" if ($contactdomain eq "");
 	$proto = lc($proto);
 	$proto = "udp" if ($proto ne "tcp" && $proto ne "all");
 

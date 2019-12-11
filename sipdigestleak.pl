@@ -31,11 +31,11 @@ my $ipaddr = Net::Address::IP::Local->public;
 my $useragent = 'pplsip';
 
 my $host = '';	# host
-my $lport = ''; # local port
-my $dport = ''; # destination port
-my $fromuser = ''; # From User
+my $lport = '5070'; # local port
+my $dport = '5060'; # destination port
+my $fromuser = '100'; # From User
 my $fromname = ''; # From Name
-my $touser = ''; # To User
+my $touser = '100'; # To User
 my $v = 0; # verbose mode
 my $from_ip = '';
 my $totag = "";
@@ -61,10 +61,6 @@ sub init() {
 	check_version() if ($ver eq 1);
 	help() if ($host eq "");
 
-	$lport = "5070" if ($lport eq "");
-	$dport = "5060" if ($dport eq "");
-	$fromuser = "100" if ($fromuser eq "");
-	$touser = "100" if ($touser eq "");
 	$from_ip = $ipaddr if ($from_ip eq "");
 
 	my $callid = &generate_random_string(32, 1);

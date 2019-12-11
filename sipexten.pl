@@ -36,19 +36,19 @@ my $useragent = 'pplsip';
 my @range;
 my @results;
  
-my $host = '';		# host
-my $lport = '';	# local port
-my $dport = '';	# destination port
-my $fromuser = ''; # From User
-my $fromname = ''; # From Name
-my $contactdomain = ''; # Contact Domain
+my $host = ''; # host
+my $lport = '5070';	# local port
+my $dport = '5060';	# destination port
+my $fromuser = '100'; # From User
+my $fromname = '100'; # From Name
+my $contactdomain = '1.1.1.1'; # Contact Domain
 my $domain = ''; # SIP Domain
-my $v = 0;		# verbose mode
-my $vv = 0;		# more verbose
-my $method = '';	# method to use (INVITE, REGISTER, OPTIONS)
+my $v = 0; # verbose mode
+my $vv = 0; # more verbose
+my $method = 'REGISTER'; # method to use (INVITE, REGISTER, OPTIONS)
 my $nolog = 0;
-my $exten = '';	# extension
-my $prefix = '';	# prefix
+my $exten = '100-300'; # extension
+my $prefix = ''; # prefix
 my $proto = '';	# protocol
 my $withdb = 0;
 my $ver = 0;
@@ -120,16 +120,9 @@ sub init() {
 	help() if ($host eq "");
 	prepare_db() if ($withdb eq 1);
 
-	$lport = "5070" if ($lport eq "");
-	$dport = "5060" if ($dport eq "");
-	$exten = "100-300" if ($exten eq "");
-	$fromuser = "100" if ($fromuser eq "");
-	$contactdomain = "1.1.1.1" if ($contactdomain eq "");
 	$proto = lc($proto);
 	$proto = "all" if ($proto ne "tcp" && $proto ne "udp");
-
 	$method = uc($method);
-	$method = "REGISTER" if ($method eq "");
 
 	my @hostlist;
 
