@@ -39,21 +39,19 @@ use File::Temp qw(tempfile);
 
 my $useragent = 'pplsip';
 
-my $maxthreads = 300;
- 
-my $threads : shared = 0;
+my $threads = 0;
 my @range;
 my @results;
  
+my $maxthreads = 300;
 my $host = ''; # host
-my $lport = ''; # local port
-my $dport = ''; # destination port
-my $method = ''; # method to use (INVITE, REGISTER, OPTIONS)
-my $fromuser = ''; # From User
+my $dport = '5060'; # destination port
+my $method = 'OPTIONS'; # method to use (INVITE, REGISTER, OPTIONS)
+my $fromuser = '100'; # From User
 my $fromname = ''; # From Name
-my $touser = ''; # To User
+my $touser = '100'; # To User
 my $toname = ''; # To Name
-my $contactdomain = ''; # Contact Domain
+my $contactdomain = '1.1.1.1'; # Contact Domain
 my $domain = ''; # SIP Domain
 my $v = 0; # verbose mode
 my $vv = 0; # more verbose
@@ -111,7 +109,6 @@ sub init() {
 				"fu=s" => \$fromuser,
 				"cd=s" => \$contactdomain,
 				"d=s" => \$domain,
-				"l=s" => \$lport,
 				"r=s" => \$dport,
 				"proto=s" => \$proto,
 				"db+" => \$withdb,
@@ -119,6 +116,7 @@ sub init() {
 				"web+" => \$web,
 				"ua=s" => \$useragent,
 				"noth+" => \$noth,
+				"th=s" => \$maxthreads,
 				"version+" => \$ver,
 				"v+" => \$v,
 				"vv+" => \$vv);
@@ -128,18 +126,10 @@ sub init() {
 
 	prepare_db() if ($withdb eq 1);
 
-	$lport = "5070" if ($lport eq "");
-	$dport = "5060" if ($dport eq "");
-	$fromuser = "100" if ($fromuser eq "");
-	$touser = "100" if ($touser eq "");
-	$contactdomain = "1.1.1.1" if ($contactdomain eq "");
-
 	$proto = lc($proto);
 	$proto = "all" if ($proto ne "tcp" && $proto ne "udp");
 	$maxthreads = 1 if ($noth eq 1);
-
 	$method = uc($method);
-	$method = "OPTIONS" if ($method eq "");
  
 	my @hostlist;
 
@@ -286,25 +276,34 @@ sub init() {
 					print "\r[".$arrow[$cont]."] Scanning ".$range[$i].":$j ...";
 
 					if ($maxthreads > 1) {
-						my $thr = threads->new(\&scan, $range[$i], $lport, $j, $contactdomain, $fromuser, $fromname, $touser, $toname, $csec, $proto, $sipdomain);
-						$thr->detach();
+						threads->create(\&scan, $range[$i], $j, $contactdomain, $fromuser, $fromname, $touser, $toname, $csec, $proto, $sipdomain);
+						$threads++;
+
 						$cont++;
 						$cont = 0 if ($cont > 3);
 					}
 					else{
-						scan($range[$i], $lport, $j, $contactdomain, $fromuser, $fromname, $touser, $toname, $csec, $proto, $sipdomain);
+						scan($range[$i], $j, $contactdomain, $fromuser, $fromname, $touser, $toname, $csec, $proto, $sipdomain);
 					} 
 
 					last;
 				}
 				else {
-					sleep(1);
+					# Wait for threads to all finish processing.
+					foreach my $thr (threads->list()) {
+						$thr->join();
+					}
+
+					$threads = 0;
 				}
 			}
 		}
 	}
 
-	sleep(1);
+	# Wait for threads to all finish processing.
+	foreach my $thr (threads->list()) {
+		$thr->join();
+	}
 
 	close(OUTPUT);
 
@@ -399,7 +398,6 @@ sub interrupt {
 
 sub scan {
 	my $to_ip = shift;
-	my $lport = shift;
 	my $dport = shift;
 	my $contactdomain = shift;
 	my $fromuser = shift;
@@ -414,23 +412,18 @@ sub scan {
 	my $r = '';
 	
 	$p = "udp" if ($proto eq "all");
-	$r = send_register($contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $csec, $p, $domain) if ($method eq "REGISTER");
-	send_register($contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $csec, "tcp", $domain) if ($method eq "REGISTER" && ($proto eq "all" && $r eq "")) || $proto eq "tcp";
-	$r = send_invite($contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $toname, $csec, $p, $domain) if ($method eq "INVITE");
-	send_invite($contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $toname, $csec, "tcp", $domain) if ($method eq "INVITE" && ($proto eq "all" && $r eq "") || $proto eq "tcp");
-	$r = send_options($contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $csec, $p, $domain) if ($method eq "OPTIONS");
-	send_options($contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $csec, "tcp", $domain) if ($method eq "OPTIONS" && ($proto eq "all" && $r eq "") || $proto eq "tcp");
+	$r = send_register($contactdomain, $to_ip, $dport, $fromuser, $fromname, $csec, $p, $domain) if ($method eq "REGISTER");
+	send_register($contactdomain, $to_ip, $dport, $fromuser, $fromname, $csec, "tcp", $domain) if ($method eq "REGISTER" && ($proto eq "all" && $r eq "")) || $proto eq "tcp";
+	$r = send_invite($contactdomain, $to_ip, $dport, $fromuser, $fromname, $touser, $toname, $csec, $p, $domain) if ($method eq "INVITE");
+	send_invite($contactdomain, $to_ip, $dport, $fromuser, $fromname, $touser, $toname, $csec, "tcp", $domain) if ($method eq "INVITE" && ($proto eq "all" && $r eq "") || $proto eq "tcp");
+	$r = send_options($contactdomain, $to_ip, $dport, $fromuser, $fromname, $csec, $p, $domain) if ($method eq "OPTIONS");
+	send_options($contactdomain, $to_ip, $dport, $fromuser, $fromname, $csec, "tcp", $domain) if ($method eq "OPTIONS" && ($proto eq "all" && $r eq "") || $proto eq "tcp");
 }
  
 # Send REGISTER message
 sub send_register {
-	if ($maxthreads > 1) {
-		{lock($threads);$threads++;}
-	}
-
 	my $contactdomain = shift;
 	my $to_ip = shift;
-	my $lport = shift;
 	my $dport = shift;
 	my $fromuser = shift;
 	my $fromname = shift;
@@ -439,13 +432,13 @@ sub send_register {
 	my $domain = shift;
 	my $response = "";
 
-	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, LocalPort=>$lport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 5);
+	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 5);
 
 	if ($sc) {
 		IO::Socket::Timeout->enable_timeouts_on($sc);
 		$sc->read_timeout(0.5);
 		$sc->enable_timeout;
-		$lport = $sc->sockport();
+		my $lport = $sc->sockport();
 
 		my $branch = &generate_random_string(71, 0);
 		my $callid = &generate_random_string(32, 1);
@@ -478,9 +471,6 @@ sub send_register {
 		LOOP: {
 			while (<$sc>) {
 				if ( 0+$! == ETIMEDOUT || 0+$! == EWOULDBLOCK ) {
-					if ($maxthreads > 1) {
-						{lock($threads);$threads--;}
-					}
 					return "";
 				}
 
@@ -531,22 +521,13 @@ sub send_register {
 		}
 	}
 	
-	if ($maxthreads > 1) {
-		{lock($threads);$threads--;}
-	}
-
 	return $response;
 }
 
 # Send INVITE message
 sub send_invite {
-	if ($maxthreads > 1) {
-		{lock($threads);$threads++;}
-	}
-
 	my $contactdomain = shift;
 	my $to_ip = shift;
-	my $lport = shift;
 	my $dport = shift;
 	my $fromuser = shift;
 	my $fromname = shift;
@@ -557,13 +538,13 @@ sub send_invite {
 	my $domain = shift;
 	my $response = "";
 
-	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, LocalPort=>$lport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 5);
+	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 5);
 
 	if ($sc) {
 		IO::Socket::Timeout->enable_timeouts_on($sc);
 		$sc->read_timeout(0.5);
 		$sc->enable_timeout;
-		$lport = $sc->sockport();
+		my $lport = $sc->sockport();
 
 		my $branch = &generate_random_string(71, 0);
 		my $callid = &generate_random_string(32, 1);
@@ -610,10 +591,6 @@ sub send_invite {
 		LOOP: {
 			while (<$sc>) {
 				if ( 0+$! == ETIMEDOUT || 0+$! == EWOULDBLOCK ) {
-					if ($maxthreads > 1) {
-						{lock($threads);$threads--;}
-					}
-
 					return "";
 				}
 
@@ -663,22 +640,13 @@ sub send_invite {
 		}
 	}
 	
-	if ($maxthreads > 1) {
-		{lock($threads);$threads--;}
-	}
-	
 	return $response;
 }
 
 # Send OPTIONS message
 sub send_options {
-	if ($maxthreads > 1) {
-		{lock($threads);$threads++;}
-	}
-
 	my $contactdomain = shift;
 	my $to_ip = shift;
-	my $lport = shift;
 	my $dport = shift;
 	my $fromuser = shift;
 	my $fromname = shift;
@@ -687,13 +655,13 @@ sub send_options {
 	my $domain = shift;
 	my $response = "";
 
-	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, LocalPort=>$lport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 5);
+	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 5);
 
 	if ($sc) {
 		IO::Socket::Timeout->enable_timeouts_on($sc);
 		$sc->read_timeout(0.5);
 		$sc->enable_timeout;
-		$lport = $sc->sockport();
+		my $lport = $sc->sockport();
 
 		my $branch = &generate_random_string(71, 0);
 		my $callid = &generate_random_string(32, 1);
@@ -725,10 +693,6 @@ sub send_options {
 		LOOP: {
 			while (<$sc>) {
 				if ( 0+$! == ETIMEDOUT || 0+$! == EWOULDBLOCK ) {
-					if ($maxthreads > 1) {
-						{lock($threads);$threads--;}
-					}
-
 					return "";
 				}
 				
@@ -805,10 +769,6 @@ sub send_options {
 		}
 	}
 	
-	if ($maxthreads > 1) {
-		{lock($threads);$threads--;}
-	}
-
 	return $response;
 }
 
@@ -865,26 +825,26 @@ Wiki: https://github.com/Pepelux/sippts/wiki/SIPscan
 Usage: perl $0 -h <host> [options]
  
 == Options ==
--m  <string>     = Method: REGISTER/INVITE/OPTIONS (default: OPTIONS)
--fu  <string>    = From User (by default 100)
--fn  <string>    = From Name
--tu  <string>    = To User (by default 100)
--tn  <string>    = To Name
+-m <string>      = Method: REGISTER/INVITE/OPTIONS (default: OPTIONS)
+-fu <string>     = From User (by default 100)
+-fn <string>     = From Name
+-tu <string>     = To User (by default 100)
+-tn <string>     = To Name
 -cd <string>     = Contact Domain (by default 1.1.1.1)
--d  <string>     = Domain (by default: destination IP address)
--l  <integer>    = Local port (default: 5070)
--r  <integer>    = Remote port (default: 5060)
+-d <string>      = Domain (by default: destination IP address)
+-r <integer>     = Remote port (default: 5060)
 -proto <string>  = Protocol (udp, tcp or all (both of them) - By default: ALL)
 -ua <string>     = Customize the UserAgent
 -db              = Save results into database (sippts.db)
                    database path: ${data_path}sippts.db
+-th <integer>    = Number of threads (by default 300)
 -nolog           = Don't show anything on the console
 -noth            = Don't use threads
 -web             = Search web control panel
 -v               = Verbose (trace information)
 -vv              = More verbose (more detailed trace)
 -version         = Show version and search for updates
- 
+
 == Examples ==
 \$perl $0 -h 192.168.0.1
 \tTo search SIP services on 192.168.0.1 port 5060 (using OPTIONS method)
