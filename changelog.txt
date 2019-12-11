@@ -1,3 +1,8 @@
+v2.0.3 (Dec/2019)
+- Fix manpage-has-bad-whatis-entry error in man pages
+- sipscan.pl: Added -th param and bug fixes in threads
+- Code optimized in several scripts
+
 v2.0.2 (Dec/2019)
 - Fixes in man pages
 - Moved sipcrack to sipcracker
