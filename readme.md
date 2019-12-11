@@ -24,9 +24,9 @@ Sippts is a set of tools to audit VoIP servers and devices using SIP protocol. S
 
 [Click here to read more about SIPexten](https://github.com/Pepelux/sippts/wiki/SIPexten)
 
-  * _**Sipcrack**_ is a remote password cracker. Sipcrack can test passwords for several users in different IPs and port ranges.
+  * _**Sipcracker**_ is a remote password cracker. Sipcracker can test passwords for several users in different IPs and port ranges.
 
-[Click here to read more about SIPcrack](https://github.com/Pepelux/sippts/wiki/SIPcrack)
+[Click here to read more about SIPcracker](https://github.com/Pepelux/sippts/wiki/SIPcracker)
 
   * _**Sipinvite**_ checks if a server allow us to make calls without authentication. If the SIP server has a bad configuration, it will allow us to make calls to external numbers. Also it can allow us to transfer the call to a second external number.
 
