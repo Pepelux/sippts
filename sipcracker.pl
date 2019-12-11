@@ -1,7 +1,7 @@
 #!/usr/bin/perl
-# -=-=-=-=
-# SipCrack
-# -=-=-=-=
+# -=-=-=-=-=
+# SipCracker
+# -=-=-=-=-=
 #
 # Sipcrack is a remote password cracker. Sipcrack can test passwords for
 # several users in different IPs and port ranges.
@@ -42,7 +42,7 @@ my $host = '';		# host
 my $lport = '';		# local port
 my $dport = '';		# destination port
 my $contactdomain = ''; # Contact Domain
-my $domain = ''; # SIP Domain
+my $domain = ''; 	# SIP Domain
 my $wordlist = '';	# wordlist
 my $v = 0;		# verbose mode
 my $vv = 0;		# more verbose
@@ -129,7 +129,7 @@ sub init() {
  	my $row;
  
 	if ($resume eq 1) {
-		open(TMPFILE,"<sipcrack.res");
+		open(TMPFILE,"<sipcracker.res");
 
 		$row = <TMPFILE>;
 		chomp $row;
@@ -389,7 +389,7 @@ sub interrupt {
 
 		print "\n";
 	
-		$tmpfile = "sipcrack.res";
+		$tmpfile = "sipcracker.res";
 		unlink($tmpfile);
 		open(OUTPUT,">$tmpfile");
 		print OUTPUT "$host\n";
@@ -626,9 +626,9 @@ sub check_version {
 
 sub help {
     print qq{
-SipCRACK - by Pepelux <pepeluxx\@gmail.com>
---------
-Wiki: https://github.com/Pepelux/sippts/wiki/SIPcrack
+SipCRACKER - by Pepelux <pepeluxx\@gmail.com>
+----------
+Wiki: https://github.com/Pepelux/sippts/wiki/SIPcracker
 
 Usage: perl $0 -h <host> -w wordlist [options]
  
