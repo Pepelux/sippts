@@ -1,3 +1,7 @@
+v2.0.2 (Dec/2019)
+- Fixes in man pages
+- Moved sipcrack to sipcracker
+
 v2.0.1 (Dec/2019)
 - Bug fixes
 - Added man pages
