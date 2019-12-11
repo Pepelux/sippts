@@ -7,7 +7,7 @@ all:
 
 install:
 	$(INSTALL_DIR)					$(DESTDIR)/usr/bin
-	$(INSTALL_PROGRAM)	sipcrack.pl		$(DESTDIR)/usr/bin/sipcrack
+	$(INSTALL_PROGRAM)	sipcracker.pl		$(DESTDIR)/usr/bin/sipcracker
 	$(INSTALL_PROGRAM)	sipdigestleak.pl	$(DESTDIR)/usr/bin/sipdigestleak
 	$(INSTALL_PROGRAM)	sipexten.pl		$(DESTDIR)/usr/bin/sipexten
 	$(INSTALL_PROGRAM)	sipinvite.pl		$(DESTDIR)/usr/bin/sipinvite
