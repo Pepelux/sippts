@@ -265,7 +265,7 @@ sub init() {
 
 			# Authentication
 			if (($res =~ /^401/ || $res =~ /^407/) && $user ne '' && $pass ne '') { 
-				my $uri = "sip:$touser\@$domain";
+				my $uri = "sip:$touser\@$sipdomain";
 				my $a = md5_hex($user.':'.$realm.':'.$pass);
 				my $b = md5_hex('INVITE:'.$uri);
 				my $r = md5_hex($a.':'.$nonce.':'.$b);
@@ -375,7 +375,7 @@ sub send_invite {
 			if ($line =~ /^WWW-Authenticate:/ || $line =~ /^Proxy-Authenticate:/) {
 				$line =~ /.*realm=\"([a-zA-Z0-9\.\_\-]*)\".*/;
 				$realm = $1 if ($1);
-				$line =~ /.*nonce=\"([a-zA-Z0-9\/\=\.\_\-\,]*)\".*/;
+				$line =~ /.*nonce=\"([a-zA-Z0-9\\\+\/\=\.\_\-\,]*)\".*/;
 				$nonce = $1 if ($1);
 			}
  
