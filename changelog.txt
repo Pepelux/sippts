@@ -1,3 +1,6 @@
+v2.0.4 (Aug/2020)
+- sipinvite.pl: Fixed ACK responses and added BYE message
+
 v2.0.3 (Dec/2019)
 - Fix manpage-has-bad-whatis-entry error in man pages
 - sipscan.pl: Added -th param and bug fixes in threads
