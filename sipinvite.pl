@@ -47,6 +47,7 @@ use warnings;
 use strict;
 use IO::Socket;
 use IO::Socket::Timeout;
+use IO::Socket::SSL;
 use NetAddr::IP;
 use Getopt::Long;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
@@ -56,7 +57,8 @@ my $useragent = 'pplsip';
 my $ver = 0;
 my $host = ''; # host
 my $lport = '5070';	# local port
-my $dport = '5060';	# destination port
+my $dport = '5060'; # destination port for UDP and TCP
+my $tlsport = '5061'; # destination port for TLS
 my $fromuser = '100'; # From User
 my $fromname = ''; # From Name
 my $touser = '100'; # To User
@@ -114,10 +116,16 @@ sub init() {
 
 	$fromuser = $user if ($fromuser eq "" && $user ne "");
 	$proto = lc($proto);
-	$proto = "udp" if ($proto ne "tcp" && $proto ne "all");
+	$proto = "udp" if ($proto ne "tcp" && $proto ne "tls");
+
+	$dport = $tlsport if($proto eq "tls");
 
 	my @range;
 	my @hostlist;
+
+	if ($host !~ /[\,]+/ && $host !~ /\d+\.\d+\.\d+\.\d+/) {
+		$host = inet_ntoa(inet_aton($host));
+	}
 
 	if ($host =~ /\,/) {
 		@hostlist = split(/\,/, $host);
@@ -252,7 +260,13 @@ sub init() {
 		$siptd = $sipdomain if ($siptd eq "");
 
 		my $callid = &generate_random_string(32, 1);
-		my $sc = new IO::Socket::INET->new(PeerPort=>$dport, LocalPort=>$lport, Proto=>'udp', PeerAddr=>$to_ip, Timeout => 10);
+		my $sc;
+
+		if ($proto ne 'tls') {
+			$sc = new IO::Socket::INET->new(PeerPort=>$dport, LocalPort=>$lport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 10);
+		} else {
+			$sc = new IO::Socket::SSL->new(PeerPort=>$dport, LocalPort=>$lport, PeerAddr=>$to_ip, Timeout => 10, SSL_verify_mode => SSL_VERIFY_NONE);
+		}
 
 		if ($sc) {
 			IO::Socket::Timeout->enable_timeouts_on($sc);
@@ -318,10 +332,10 @@ sub send_invite {
 	my $branch = &generate_random_string(71, 0);
 
 	my $msg = "INVITE sip:".$touser."@".$domain." SIP/2.0\r\n";
-	$msg .= "Via: SIP/2.0/UDP $cd:$lport;branch=$branch\r\n";
+	$msg .= "Via: SIP/2.0/".uc($proto)." $cd:$lport;branch=$branch\r\n";
 	$msg .= "From: $fromname <sip:".$fromuser."@".$fd.">;tag=0c26cd11\r\n";
 	$msg .= "To: $toname <sip:".$touser."@".$td.">\r\n";
-	$msg .= "Contact: <sip:".$fromuser."@".$cd.":$lport;transport=UDP>\r\n";
+	$msg .= "Contact: <sip:".$fromuser."@".$cd.":$lport;transport=".uc($proto).">\r\n";
 	$msg .= "Authorization: Digest $digest\r\n" if ($digest ne "");
 	$msg .= "Supported: replaces, timer, path\r\n";
 	$msg .= "P-Early-Media: Supported\r\n";
@@ -542,7 +556,7 @@ sub send_bye {
 	$msg .= "Via: SIP/2.0/".uc($proto)." $cd:$lport;branch=$branch\r\n";
 	$msg .= "From: $fromname <sip:".$fromuser."@".$fd.">;tag=0c26cd11\r\n";
 	$msg .= "To: $toname <sip:".$touser."@".$td.">;tag=".$totag."\r\n";
-	$msg .= "Contact: <sip:".$fromuser."@".$cd.":$lport;transport=$proto>\r\n";
+	$msg .= "Contact: <sip:".$fromuser."@".$cd.":$lport;transport=".uc($proto).">\r\n";
 	$msg .= "Authorization: Digest $digest\r\n" if ($digest ne "");
 	$msg .= "Supported: replaces, timer, path\r\n";
 	$msg .= "P-Early-Media: Supported\r\n";
@@ -625,7 +639,7 @@ sub send_refer {
 	$msg .= "Via: SIP/2.0/".uc($proto)." $cd:$lport;branch=$branch\r\n";
 	$msg .= "From: $fromname <sip:".$fromuser."@".$fd.">;tag=0c26cd11\r\n";
 	$msg .= "To: $toname <sip:".$touser."@".$td.">\r\n";
-	$msg .= "Contact: <sip:".$fromuser."@".$cd.":$lport;transport=$proto>\r\n";
+	$msg .= "Contact: <sip:".$fromuser."@".$cd.":$lport;transport=".uc($proto).">\r\n";
 	$msg .= "Authorization: Digest $digest\r\n" if ($digest ne "");
 	$msg .= "Supported: replaces, timer, path\r\n";
 	$msg .= "P-Early-Media: Supported\r\n";
@@ -753,7 +767,7 @@ Usage: perl $0 -h <host> -tu <dst_number> [options]
 -r  <integer>    = Remote port (default: 5060)
 -t  <integer>    = Transfer call to another number
 -ua <string>     = Customize the UserAgent
--proto <string>  = Protocol (udp, tcp or all (both of them) - By default: UDP)
+-proto <string>  = Protocol (udp, tcp or tls - By default: udp)
 -v               = Verbose (trace information)
 -log             = Save results into sipinvite.log file
 -version         = Show version and search for updates

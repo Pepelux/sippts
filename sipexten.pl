@@ -25,6 +25,7 @@ use warnings;
 use strict;
 use IO::Socket;
 use IO::Socket::Timeout;
+use IO::Socket::SSL;
 use NetAddr::IP;
 use Getopt::Long;
 use Digest::MD5;
@@ -38,7 +39,8 @@ my @results;
  
 my $host = ''; # host
 my $lport = '5070';	# local port
-my $dport = '5060';	# destination port
+my $dport = '5060'; # destination port for UDP and TCP
+my $tlsport = '5061'; # destination port for TLS
 my $fromuser = '100'; # From User
 my $fromname = '100'; # From Name
 my $contactdomain = '1.1.1.1'; # Contact Domain
@@ -121,10 +123,16 @@ sub init() {
 	prepare_db() if ($withdb eq 1);
 
 	$proto = lc($proto);
-	$proto = "all" if ($proto ne "tcp" && $proto ne "udp");
+	$proto = "udp" if ($proto ne "tcp" && $proto ne "tls");
 	$method = uc($method);
 
+	$dport = $tlsport if($proto eq "tls");
+
 	my @hostlist;
+
+	if ($host !~ /[\,]+/ && $host !~ /\d+\.\d+\.\d+\.\d+/) {
+		$host = inet_ntoa(inet_aton($host));
+	}
 
 	if ($host =~ /\,/) {
 		@hostlist = split(/\,/, $host);
@@ -264,7 +272,6 @@ sub init() {
 	}
 
 	my $nhost = @range;
-	my $p = $proto;
 	my @arrow = ("|", "/", "-", "\\");
 	my $cont = 0;
 
@@ -277,14 +284,12 @@ sub init() {
 			$sipdomain = $range[$i] if ($domain eq "");
 
 			if ($server eq "") {
-				$p = "udp" if ($proto eq "all");
 				$from_ip = $range[$i] if ($from_ip eq "");
-				$server = send_options($contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $fromuser, 1, $p, $sipdomain);
-				send_options($contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $fromuser, 1, "tcp", $sipdomain) if (($proto eq "all" && $server eq "") || $proto eq "tcp");
+				send_options($contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $fromuser, 1, $proto, $sipdomain) if ($proto eq "udp");
 			}
 			# Some systems always response 'Ok'. On this case only get the error responses
 			if ($alwaysok eq "") {
-				my $resinvite = send_invite($contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, "123456789", 1, $p, $sipdomain);
+				my $resinvite = send_invite($contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, "123456789", 1, $proto, $sipdomain);
 				if ($resinvite =~ "^4" || $resinvite eq "") {
 					$alwaysok = "no";
 				} else {
@@ -408,16 +413,9 @@ sub scan {
 	my $proto = shift;
 	my $domain = shift;
 
-	my $p = $proto;
-	my $r = '';
-
-	$p = "udp" if ($proto eq "all");
-	$r = send_register($contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $csec, $p, $domain) if ($method eq "REGISTER");
-	send_register($contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $csec, "tcp", $domain) if ($method eq "REGISTER" && ($proto eq "all" && $r eq "")) || $proto eq "tcp";
-	$r = send_invite($contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $csec, $p, $domain) if ($method eq "INVITE");
-	send_invite($contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $csec, "tcp", $domain) if ($method eq "INVITE" && ($proto eq "all" && $r eq "") || $proto eq "tcp");
-	$r = send_options($contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $csec, $p, $domain) if ($method eq "OPTIONS");
-	send_options($contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $csec, "tcp", $domain) if ($method eq "OPTIONS" && ($proto eq "all" && $r eq "") || $proto eq "tcp");
+	send_register($contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $csec, $proto, $domain) if ($method eq "REGISTER");
+	send_invite($contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $csec, $proto, $domain) if ($method eq "INVITE");
+	send_options($contactdomain, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $csec, $proto, $domain) if ($method eq "OPTIONS");
 }
  
 # Send INVITE message
@@ -435,7 +433,13 @@ sub send_invite {
 	my $response = "";
 	my $server = "";
 
-	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, LocalPort=>$lport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 10);
+	my $sc;
+
+	if ($proto ne 'tls') {
+		$sc = new IO::Socket::INET->new(PeerPort=>$dport, LocalPort=>$lport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 10);
+	} else {
+		$sc = new IO::Socket::SSL->new(PeerPort=>$dport, LocalPort=>$lport, PeerAddr=>$to_ip, Timeout => 10, SSL_verify_mode => SSL_VERIFY_NONE);
+	}
 
 	if ($sc) {
 		IO::Socket::Timeout->enable_timeouts_on($sc);
@@ -450,7 +454,7 @@ sub send_invite {
 		$msg .= "Via: SIP/2.0/".uc($proto)." $contactdomain:$lport;branch=$branch\r\n";
 		$msg .= "From: $fromname <sip:".$fromuser."@".$domain.">;tag=0c26cd11\r\n";
 		$msg .= "To: <sip:".$touser."@".$domain.">\r\n";
-		$msg .= "Contact: <sip:".$fromuser."@".$contactdomain.":$lport;transport=$proto>\r\n";
+		$msg .= "Contact: <sip:".$fromuser."@".$contactdomain.":$lport;transport=".uc($proto).">\r\n";
 		$msg .= "Supported: replaces, timer, path\r\n";
 		$msg .= "P-Early-Media: Supported\r\n";
 		$msg .= "Call-ID: $callid\r\n";
@@ -565,7 +569,13 @@ sub send_register {
 	my $response = "";
 	my $server = "";
 
-	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, LocalPort=>$lport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 10);
+	my $sc;
+
+	if ($proto ne 'tls') {
+		$sc = new IO::Socket::INET->new(PeerPort=>$dport, LocalPort=>$lport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 10);
+	} else {
+		$sc = new IO::Socket::SSL->new(PeerPort=>$dport, LocalPort=>$lport, PeerAddr=>$to_ip, Timeout => 10, SSL_verify_mode => SSL_VERIFY_NONE);
+	}
 
 	if ($sc) {
 		IO::Socket::Timeout->enable_timeouts_on($sc);
@@ -580,7 +590,7 @@ sub send_register {
 		$msg .= "Via: SIP/2.0/".uc($proto)." $contactdomain:$lport;branch=$branch\r\n";
 		$msg .= "From: $fromname <sip:".$fromuser."@".$domain.">;tag=0c26cd11\r\n";
 		$msg .= "To: <sip:".$touser."@".$domain.">\r\n";
-		$msg .= "Contact: <sip:".$fromuser."@".$contactdomain.":$lport;transport=$proto>\r\n";
+		$msg .= "Contact: <sip:".$fromuser."@".$contactdomain.":$lport;transport=".uc($proto).">\r\n";
 		$msg .= "Call-ID: ".$callid."\r\n";
 		$msg .= "CSeq: $cseq REGISTER\r\n";
 		$msg .= "User-Agent: $useragent\r\n";
@@ -700,7 +710,7 @@ sub send_options {
 		$msg .= "Via: SIP/2.0/".uc($proto)." $contactdomain:$lport;branch=$branch\r\n";
 		$msg .= "From: $fromname <sip:".$fromuser."@".$domain.">;tag=0c26cd11\r\n";
 		$msg .= "To: <sip:".$touser."@".$domain.">\r\n";
-		$msg .= "Contact: <sip:".$fromuser."@".$contactdomain.":$lport;transport=$proto>\r\n";
+		$msg .= "Contact: <sip:".$fromuser."@".$contactdomain.":$lport;transport=".uc($proto).">\r\n";
 		$msg .= "Call-ID: $callid\r\n";
 		$msg .= "CSeq: $cseq OPTIONS\r\n";
 		$msg .= "User-Agent: $useragent\r\n";
@@ -851,7 +861,7 @@ Usage: perl $0 -h <host> [options]
 -l  <integer>    = Local port (default: 5070)
 -r  <integer>    = Remote port (default: 5060)
 -p  <string>     = Prefix (for extensions)
--proto <string>  = Protocol (udp, tcp or all (both of them) - By default: ALL)
+-proto <string>  = Protocol (udp, tcp or tls - By default: udp)
 -ua <string>     = Customize the UserAgent
 -db              = Save results into database (sippts.db)
                    database path: ${data_path}sippts.db

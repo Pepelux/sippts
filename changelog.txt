@@ -1,4 +1,6 @@
 v2.0.4 (Aug/2020)
+- Hostname to IP address resolution
+- TLS support
 - sipinvite.pl: Fixed ACK responses and added BYE message
 
 v2.0.3 (Dec/2019)

@@ -29,6 +29,7 @@ use warnings;
 use strict;
 use IO::Socket;
 use IO::Socket::Timeout;
+use IO::Socket::SSL;
 use NetAddr::IP;
 use threads;
 use threads::shared;
@@ -45,7 +46,8 @@ my @results;
  
 my $maxthreads = 300;
 my $host = ''; # host
-my $dport = '5060'; # destination port
+my $dport = '5060'; # destination port for UDP and TCP
+my $tlsport = '5061'; # destination port for TLS
 my $method = 'OPTIONS'; # method to use (INVITE, REGISTER, OPTIONS)
 my $fromuser = '100'; # From User
 my $fromname = ''; # From Name
@@ -127,11 +129,15 @@ sub init() {
 	prepare_db() if ($withdb eq 1);
 
 	$proto = lc($proto);
-	$proto = "all" if ($proto ne "tcp" && $proto ne "udp");
+	$proto = "all" if ($proto ne "tcp" && $proto ne "udp" && $proto ne "tls");
 	$maxthreads = 1 if ($noth eq 1);
 	$method = uc($method);
  
 	my @hostlist;
+
+	if ($host !~ /[\,]+/ && $host !~ /\d+\.\d+\.\d+\.\d+/) {
+		$host = inet_ntoa(inet_aton($host));
+	}
 
 	if ($host =~ /\,/) {
 		@hostlist = split(/\,/, $host);
@@ -408,16 +414,17 @@ sub scan {
 	my $proto = shift;
 	my $domain = shift;
 
-	my $p = $proto;
-	my $r = '';
-	
-	$p = "udp" if ($proto eq "all");
-	$r = send_register($contactdomain, $to_ip, $dport, $fromuser, $fromname, $csec, $p, $domain) if ($method eq "REGISTER");
-	send_register($contactdomain, $to_ip, $dport, $fromuser, $fromname, $csec, "tcp", $domain) if ($method eq "REGISTER" && ($proto eq "all" && $r eq "")) || $proto eq "tcp";
-	$r = send_invite($contactdomain, $to_ip, $dport, $fromuser, $fromname, $touser, $toname, $csec, $p, $domain) if ($method eq "INVITE");
-	send_invite($contactdomain, $to_ip, $dport, $fromuser, $fromname, $touser, $toname, $csec, "tcp", $domain) if ($method eq "INVITE" && ($proto eq "all" && $r eq "") || $proto eq "tcp");
-	$r = send_options($contactdomain, $to_ip, $dport, $fromuser, $fromname, $csec, $p, $domain) if ($method eq "OPTIONS");
-	send_options($contactdomain, $to_ip, $dport, $fromuser, $fromname, $csec, "tcp", $domain) if ($method eq "OPTIONS" && ($proto eq "all" && $r eq "") || $proto eq "tcp");
+	send_register($contactdomain, $to_ip, $dport, $fromuser, $fromname, $csec, "udp", $domain) if ($method eq "REGISTER" && ($proto eq "all" || $proto eq "udp"));
+	send_register($contactdomain, $to_ip, $dport, $fromuser, $fromname, $csec, "tcp", $domain) if ($method eq "REGISTER" && ($proto eq "all"  || $proto eq "tcp"));
+	send_register($contactdomain, $to_ip, $tlsport, $fromuser, $fromname, $csec, "tls", $domain) if ($method eq "REGISTER" && ($proto eq "all" || $proto eq "tls"));
+
+	send_invite($contactdomain, $to_ip, $dport, $fromuser, $fromname, $touser, $toname, $csec, "udp", $domain) if ($method eq "INVITE" && ($proto eq "all" || $proto eq "udp"));
+	send_invite($contactdomain, $to_ip, $dport, $fromuser, $fromname, $touser, $toname, $csec, "tcp", $domain) if ($method eq "INVITE" && ($proto eq "all" || $proto eq "tcp"));
+	send_invite($contactdomain, $to_ip, $tlsport, $fromuser, $fromname, $touser, $toname, $csec, "tls", $domain) if ($method eq "INVITE" && ($proto eq "all" || $proto eq "tls"));
+
+	send_options($contactdomain, $to_ip, $dport, $fromuser, $fromname, $csec, "udp", $domain) if ($method eq "OPTIONS" && ($proto eq "all" || $proto eq "udp"));
+	send_options($contactdomain, $to_ip, $dport, $fromuser, $fromname, $csec, "tcp", $domain) if ($method eq "OPTIONS" && ($proto eq "all" || $proto eq "tcp"));
+	send_options($contactdomain, $to_ip, $tlsport, $fromuser, $fromname, $csec, "tls", $domain) if ($method eq "OPTIONS" && ($proto eq "all" || $proto eq "tls"));
 }
  
 # Send REGISTER message
@@ -432,7 +439,13 @@ sub send_register {
 	my $domain = shift;
 	my $response = "";
 
-	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 5);
+	my $sc;
+
+	if ($proto ne 'tls') {
+		$sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 5);
+	} else {
+		$sc = new IO::Socket::SSL->new(PeerPort=>$dport, PeerAddr=>$to_ip, Timeout => 5, SSL_verify_mode => SSL_VERIFY_NONE);
+	}
 
 	if ($sc) {
 		IO::Socket::Timeout->enable_timeouts_on($sc);
@@ -538,7 +551,13 @@ sub send_invite {
 	my $domain = shift;
 	my $response = "";
 
-	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 5);
+	my $sc;
+
+	if ($proto ne 'tls') {
+		$sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 5);
+	} else {
+		$sc = new IO::Socket::SSL->new(PeerPort=>$dport, PeerAddr=>$to_ip, Timeout => 5, SSL_verify_mode => SSL_VERIFY_NONE);
+	}
 
 	if ($sc) {
 		IO::Socket::Timeout->enable_timeouts_on($sc);
@@ -655,7 +674,13 @@ sub send_options {
 	my $domain = shift;
 	my $response = "";
 
-	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 5);
+	my $sc;
+
+	if ($proto ne 'tls') {
+		$sc = new IO::Socket::INET->new(PeerPort=>$dport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 5);
+	} else {
+		$sc = new IO::Socket::SSL->new(PeerPort=>$dport, PeerAddr=>$to_ip, Timeout => 5, SSL_verify_mode => SSL_VERIFY_NONE);
+	}
 
 	if ($sc) {
 		IO::Socket::Timeout->enable_timeouts_on($sc);
@@ -833,7 +858,7 @@ Usage: perl $0 -h <host> [options]
 -cd <string>     = Contact Domain (by default 1.1.1.1)
 -d <string>      = Domain (by default: destination IP address)
 -r <integer>     = Remote port (default: 5060)
--proto <string>  = Protocol (udp, tcp or all (both of them) - By default: ALL)
+-proto <string>  = Protocol (udp, tcp, tls or all - By default: ALL)
 -ua <string>     = Customize the UserAgent
 -db              = Save results into database (sippts.db)
                    database path: ${data_path}sippts.db
