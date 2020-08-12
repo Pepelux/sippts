@@ -77,7 +77,8 @@ my $nonce = '';
 my $response = '';
 my $digest = '';
 my $totag = '';
-
+my $response_contact = '';
+my $rr = '';
  
 my $to_ip = '';
 my $from_ip = '';
@@ -276,6 +277,8 @@ sub init() {
 				$res = send_invite($sc, $sipcd, $from_ip, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $toname, $cseq, $digest, $callid, $user, $sipdomain, $sipfd, $siptd);
 			}
 
+			$res = send_ack($sc, $sipcd, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $toname, $cseq, "", $callid, $sipdomain, $sipfd, $siptd);
+
 			# Transfer call
 			if ($res =~ /^200/ && $refer ne "") {
 				$cseq++;
@@ -283,6 +286,9 @@ sub init() {
 				$cseq++;
 				$res = send_refer($sc, $sipcd, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $toname, $cseq, $digest, $user, $refer, $callid, $sipdomain, $siptd, $siptd);
 			}
+
+			$cseq++;
+			$res = send_bye($sc, $sipcd, $to_ip, $lport, $dport, $fromuser, $fromname, $touser, $toname, $cseq, "", $callid, $sipdomain, $sipfd, $siptd);
 		}
 	}
 
@@ -357,13 +363,11 @@ sub send_invite {
 			
 			if ($line =~ /^SIP\/2.0/ && ($response eq "" || $response =~ /^1/)) {
 				$line =~ /^SIP\/2.0\s(.+)\r\n/;
-				
 				if ($1) { $response = $1; }
 			}
 				
-			if ($line =~ /[Uu]ser\-[Aa]gent/ && $ua eq "") {
+			if ($line =~ /User\-Agent/i && $ua eq "") {
 				$line =~ /[Uu]ser\-[Aa]gent\:\s(.+)\r\n/;
-
 				$ua = $1 if ($1);
 			}
 
@@ -372,7 +376,17 @@ sub send_invite {
 				$totag = $1 if ($1);
 			}
 
-			if ($line =~ /^WWW-Authenticate:/ || $line =~ /^Proxy-Authenticate:/) {
+			if ($line =~ /^Contact/i) {
+				$line =~ /\<(.+)\>/;
+				$response_contact = $1 if ($1);
+			}
+
+			if ($line =~ /^Record\-Route/i) {
+				$line =~ /[Rr]ecord\-[Rr]oute\:\s(.+)\r\n/;
+				$rr = $1 if ($1);
+			}
+
+			if ($line =~ /^WWW-Authenticate:/i || $line =~ /^Proxy-Authenticate:/i) {
 				$line =~ /.*realm=\"([a-zA-Z0-9\.\_\-]*)\".*/;
 				$realm = $1 if ($1);
 				$line =~ /.*nonce=\"([a-zA-Z0-9\\\+\/\=\.\_\-\,]*)\".*/;
@@ -429,11 +443,18 @@ sub send_ack {
 	my $td = shift;
 
 	my $branch = &generate_random_string(71, 0);
-	
-	my $msg = "ACK sip:".$touser."@".$domain." SIP/2.0\r\n";
+	my $msg = '';
+
+	if ($response_contact ne '') {
+		$msg = "ACK $response_contact SIP/2.0\r\n";
+		$msg .= "Route: $rr\r\n" if ($rr ne '');
+	} else{
+		$msg = "ACK sip:".$touser."@".$domain." SIP/2.0\r\n";
+	}
+
 	$msg .= "Via: SIP/2.0/".uc($proto)." $cd:$lport;branch=$branch\r\n";
 	$msg .= "From: $fromname <sip:".$fromuser."@".$fd.">;tag=0c26cd11\r\n";
-	$msg .= "To: $toname <sip:".$touser."@".$td.">\r\n";
+	$msg .= "To: $toname <sip:".$touser."@".$td.">;tag=".$totag."\r\n";
 	$msg .= "Contact: <sip:".$fromuser."@".$cd.":$lport;transport=$proto>\r\n";
 	$msg .= "Authorization: Digest $digest\r\n" if ($digest ne "");
 	$msg .= "Supported: replaces, timer, path\r\n";
@@ -471,6 +492,93 @@ sub send_ack {
 					if ($log eq 1) {
 						open(my $fh, '>>', $file) or die "Could not open file '$file' $!";
 						print $fh "[+] Sending ACK\n";
+						print $fh "[-] $response\n";
+						close $fh;
+					}
+				
+					if ($v eq 0) { print "[-] $response\n"; }
+					else { print "Receiving:\n=========\n$data"; }
+
+					last LOOP if ($response !~ /^1/);
+
+					$data = "";
+					$response = "";
+				}
+			}
+		}
+	}
+	
+	return $response;
+}
+
+# Send BYE message
+sub send_bye {
+	my $sc = shift;
+	my $cd = shift;
+	my $to_ip = shift;
+	my $lport = shift;
+	my $dport = shift;
+	my $fromuser = shift;
+	my $fromname = shift;
+	my $touser = shift;
+	my $toname = shift;
+	my $cseq = shift;
+	my $digest = shift;
+	my $callid = shift;
+	my $domain = shift;
+	my $fd = shift;
+	my $td = shift;
+
+	my $branch = &generate_random_string(71, 0);
+	my $msg = '';
+
+	if ($response_contact ne '') {
+		$msg = "BYE $response_contact SIP/2.0\r\n";
+		$msg .= "Route: $rr\r\n" if ($rr ne '');
+	} else{
+		$msg = "BYE sip:".$touser."@".$domain." SIP/2.0\r\n";
+	}
+
+	$msg .= "Via: SIP/2.0/".uc($proto)." $cd:$lport;branch=$branch\r\n";
+	$msg .= "From: $fromname <sip:".$fromuser."@".$fd.">;tag=0c26cd11\r\n";
+	$msg .= "To: $toname <sip:".$touser."@".$td.">;tag=".$totag."\r\n";
+	$msg .= "Contact: <sip:".$fromuser."@".$cd.":$lport;transport=$proto>\r\n";
+	$msg .= "Authorization: Digest $digest\r\n" if ($digest ne "");
+	$msg .= "Supported: replaces, timer, path\r\n";
+	$msg .= "P-Early-Media: Supported\r\n";
+	$msg .= "Call-ID: $callid\r\n";
+	$msg .= "CSeq: $cseq BYE\r\n";
+	$msg .= "User-Agent: $useragent\r\n";
+	$msg .= "Max-Forwards: 70\r\n";
+	$msg .= "Allow: INVITE,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE\r\n";
+	$msg .= "Content-Length: 0\r\n\r\n";
+
+	print $sc $msg;
+
+	if ($v eq 0) { print "[+] Sending BYE\n"; }
+	else { print "Sending:\n=======\n$msg"; }
+
+	my $data = "";
+	my $response = "";
+	my $line = "";
+
+	if ($digest ne "") {
+		LOOP: {
+			while (<$sc>) {
+				$line = $_;
+			
+				if ($line =~ /^SIP\/2.0/ && ($response eq "" || $response =~ /^1/)) {
+					$line =~ /^SIP\/2.0\s(.+)\r\n/;
+				
+					if ($1) { $response = $1; }
+				}
+				
+				$data .= $line;
+ 
+				if ($line =~ /^\r\n/) {
+					if ($log eq 1) {
+						open(my $fh, '>>', $file) or die "Could not open file '$file' $!";
+						print $fh "[+] Sending BYE\n";
 						print $fh "[-] $response\n";
 						close $fh;
 					}
