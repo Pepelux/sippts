@@ -756,12 +756,13 @@ Usage: perl $0 -h <host> -tu <dst_number> [options]
 == Options ==
 -u  <string>     = Authentication user
 -p  <string>     = Authentication password
--fu  <string>    = From User (by default 100)
--fn  <string>    = From Name
--tn  <string>    = To Name
+-fu <string>     = From User (by default 100)
+-fn <string>     = From Name
+-tu <string>     = To User (by default 100)
+-tn <string>     = To Name
 -cd <string>     = Contact Domain (by default 1.1.1.1)
--fd  <string>    = From Domain (by default: destination IP address)
--td  <string>    = To Domain (by default: destination IP address)
+-fd <string>     = From Domain (by default: destination IP address)
+-td <string>     = To Domain (by default: destination IP address)
 -d  <string>     = Domain (by default: destination IP address)
 -l  <integer>    = Local port (default: 5070)
 -r  <integer>    = Remote port (default: 5060)
