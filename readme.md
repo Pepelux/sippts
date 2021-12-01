@@ -44,6 +44,10 @@ Sippts is a set of tools to audit VoIP servers and devices using SIP protocol. S
 
 [Click here to read more about SIPDigestLeak](https://github.com/Pepelux/sippts/wiki/SIPDigestLeak)
 
+  * _**SipFlood**_ Send unlimited messages to the target.
+
+[Click here to read more about SIPFlood](https://github.com/Pepelux/sippts/wiki/SIPFlood)
+
 ## Operating System ##
 Sippts has been tested on:
   * Linux
@@ -64,7 +68,7 @@ And install next modules:
 In a Debian system or Kali Linux:
   * apt install libio-socket-timeout-perl libnetaddr-ip-perl libnet-address-ip-local-perl libnet-pcap-perl libtext-string-hexconvert-perl libdbd-sqlite3-perl
 
-## Last release: 2.0.4 ##
+## Last release: 2.0.5 ##
 
  * .tar.gz: https://github.com/Pepelux/sippts/archive/refs/tags/2.0.4.tar.gz
  * .zip: https://github.com/Pepelux/sippts/archive/refs/tags/2.0.4.zip
