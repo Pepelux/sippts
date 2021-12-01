@@ -1,3 +1,6 @@
+v2.0.5 (???)
+- New script (sipflood.pl) to send unlimited messages to the target
+
 v2.0.4 (Aug/2020)
 - Hostname to IP address resolution
 - TLS support
