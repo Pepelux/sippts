@@ -25,7 +25,6 @@ use warnings;
 use strict;
 use IO::Socket;
 use IO::Socket::Timeout;
-use IO::Socket::SSL;
 use NetAddr::IP;
 use Getopt::Long;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
@@ -38,11 +37,12 @@ my $useragent = 'pplsip';
 my @range;
 my @results;
 my @founds;
+
+my $targets = 0;
  
 my $host = '';		# host
 my $lport = '';		# local port
-my $dport = '5060'; # destination port for UDP and TCP
-my $tlsport = '5061'; # destination port for TLS
+my $dport = '';		# destination port
 my $contactdomain = ''; # Contact Domain
 my $domain = ''; 	# SIP Domain
 my $wordlist = '';	# wordlist
@@ -126,7 +126,7 @@ sub init() {
 	prepare_db() if ($withdb eq 1);
 
  	$proto = lc($proto);
-	$proto = "udp" if ($proto ne "tcp" && $proto ne "tls");
+	$proto = "udp" if ($proto ne "tcp");
 
  	my $row;
  
@@ -136,10 +136,6 @@ sub init() {
 		$row = <TMPFILE>;
 		chomp $row;
 		$host = $row;
-	}
-
-	if ($host !~ /[\,]+/ && $host !~ /\d+\.\d+\.\d+\.\d+/) {
-		$host = inet_ntoa(inet_aton($host));
 	}
 
 	if ($host =~ /\-/) {
@@ -294,7 +290,16 @@ sub init() {
 	my @arrow = ("|", "/", "-", "\\");
 	my $cont = 0;
 
+	for ($i = $hini; $i < $nhost; $i++) {
+		for ($j = $pini; $j <= $pfin; $j++) {
+			for ($k = $eini; $k <= $efin; $k++) {
+				$targets++;
+			}
+		}
+	}
+
 	while(<WL>) {
+		last if $targets eq 0;
 		chomp;
 		
 		$word = $_;
@@ -307,6 +312,7 @@ sub init() {
 					for ($k = $eini; $k <= $efin; $k++) {
 						while (1) {
 							last unless defined($range[$i]);
+							last if $targets eq 0;
 							$from_ip = $range[$i] if ($from_ip eq "");
 							my $sipdomain = $domain;
 							$sipdomain = $range[$i] if ($domain eq "");
@@ -493,13 +499,7 @@ sub send_register {
 	my $callid = shift;
 	my $response = "";
 
-	my $sc;
-
-	if ($proto ne 'tls') {
-		$sc = new IO::Socket::INET->new(PeerPort=>$dport, LocalPort=>$lport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 10);
-	} else {
-		$sc = new IO::Socket::SSL->new(PeerPort=>$dport, LocalPort=>$lport, PeerAddr=>$to_ip, Timeout => 10, SSL_verify_mode => SSL_VERIFY_NONE);
-	}
+	my $sc = new IO::Socket::INET->new(PeerPort=>$dport, LocalPort=>$lport, Proto=>$proto, PeerAddr=>$to_ip, Timeout => 10);
 
 	if ($sc) {
 		IO::Socket::Timeout->enable_timeouts_on($sc);
@@ -512,7 +512,7 @@ sub send_register {
 		$msg .= "Via: SIP/2.0/".uc($proto)." $contactdomain:$lport;branch=$branch\r\n";
 		$msg .= "From: <sip:".$user."@".$domain.">;tag=0c26cd11\r\n";
 		$msg .= "To: <sip:".$user."@".$domain.">\r\n";
-		$msg .= "Contact: <sip:".$user."@".$contactdomain.":$lport;transport=".uc($proto).">\r\n";
+		$msg .= "Contact: <sip:".$user."@".$contactdomain.":$lport;transport=$proto>\r\n";
 		$msg .= "Authorization: Digest $digest\r\n" if ($digest ne "");
 		$msg .= "Call-ID: ".$callid."\r\n";
 		$msg .= "CSeq: 1 REGISTER\r\n";
@@ -586,6 +586,7 @@ sub send_register {
 		if ($response =~ "^200") {
 			print OUTPUT "$to_ip\t$dport\t$proto\t$user\t$pass\n";
 			print "\nFound match: $to_ip:$dport/$proto - User: $user - Pass: $pass\n";
+			$targets--;
 		}
 	}
 	
@@ -651,7 +652,7 @@ Usage: perl $0 -h <host> -w wordlist [options]
 -l  <integer>    = Local port (default: 5070)
 -r  <integer>    = Remote port (default: 5060)
 -p  <string>     = Prefix (for extensions)
--proto <string>  = Protocol (udp, tcp or tls - By default: udp)
+-proto <string>  = Protocol (udp or tcp - By default: udp)
 -ua <string>     = Customize the UserAgent
 -resume          = Resume last session
 -db              = Save results into database (sippts.db)
