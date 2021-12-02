@@ -38,6 +38,8 @@ my $useragent = 'pplsip';
 my @range;
 my @results;
 my @founds;
+
+my $targets = 0;
  
 my $host = '';		# host
 my $lport = '';		# local port
@@ -294,7 +296,16 @@ sub init() {
 	my @arrow = ("|", "/", "-", "\\");
 	my $cont = 0;
 
+	for ($i = $hini; $i < $nhost; $i++) {
+		for ($j = $pini; $j <= $pfin; $j++) {
+			for ($k = $eini; $k <= $efin; $k++) {
+				$targets++;
+			}
+		}
+	}
+
 	while(<WL>) {
+		last if $targets eq 0;
 		chomp;
 		
 		$word = $_;
@@ -307,6 +318,7 @@ sub init() {
 					for ($k = $eini; $k <= $efin; $k++) {
 						while (1) {
 							last unless defined($range[$i]);
+							last if $targets eq 0;
 							$from_ip = $range[$i] if ($from_ip eq "");
 							my $sipdomain = $domain;
 							$sipdomain = $range[$i] if ($domain eq "");
@@ -586,6 +598,7 @@ sub send_register {
 		if ($response =~ "^200") {
 			print OUTPUT "$to_ip\t$dport\t$proto\t$user\t$pass\n";
 			print "\nFound match: $to_ip:$dport/$proto - User: $user - Pass: $pass\n";
+			$targets--;
 		}
 	}
 	

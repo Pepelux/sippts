@@ -1,5 +1,6 @@
-v2.0.5 (???)
+v2.0.5 (?????)
 - New script (sipflood.pl) to send unlimited messages to the target
+- sipcracker.pl: if all password are found, the script ends
 
 v2.0.4 (Aug/2020)
 - Hostname to IP address resolution
@@ -25,8 +26,8 @@ v2.0.0 (Dec/2019)
 - Bug fixes
 
 v1.2.13 (Oct/2019)
-- New param (-version) to show current version and search for new updates
-- sipscan.pl: New param (-web) to search for a control panel optionally
+- New param (-version) to show current version and check for new updates
+- sipscan.pl: New optinal param (-web) to check for a control panel
 - sipinvite.pl: New param (-log) to save data into a log file
 
 v1.2.12 (Oct/2019)
