@@ -299,13 +299,13 @@ sub send_error {
 				$auth =~ /response\=\"(.+)\"/i;
 				$resp = $1 if ($1);
 
-				$auth =~ /uri\=\"[\w\+\/]+)\"/i;
+				$auth =~ /cnonce\=\"([\w\+\/]+)\"/i;
 				$cnonce = $1 if ($1);
 
-				$auth =~ /uri\=\"*[\w\+]+)\"*/i;
+				$auth =~ /nc\=\"*([\w\+]+)\"*/i;
 				$nc = $1 if ($1);
 
-				$auth =~ /uri\=\"*[\w\+]+)\"*/i;
+				$auth =~ /qop\=\"*([\w\+]+)\"*/i;
 				$qop = $1 if ($1);
 
 				$cnonce = "" if (!defined $cnonce);
