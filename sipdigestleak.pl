@@ -273,6 +273,9 @@ sub send_error {
 	my $resp = "";
 	my $user = "";
 	my $uri = "";
+	my $cnonce = "";
+	my $nc = "";
+	my $qop = "";
 
 	LOOP: {
 		while (<$sc>) {
@@ -295,6 +298,19 @@ sub send_error {
 
 				$auth =~ /response\=\"(.+)\"/i;
 				$resp = $1 if ($1);
+
+				$auth =~ /uri\=\"[\w\+\/]+)\"/i;
+				$cnonce = $1 if ($1);
+
+				$auth =~ /uri\=\"*[\w\+]+)\"*/i;
+				$nc = $1 if ($1);
+
+				$auth =~ /uri\=\"*[\w\+]+)\"*/i;
+				$qop = $1 if ($1);
+
+				$cnonce = "" if (!defined $cnonce);
+				$nc = "" if (!defined $nc);
+				$qop = "" if (!defined $qop);
 			}
 
 			$data .= $line;
@@ -304,7 +320,7 @@ sub send_error {
 				else { print "Receiving:\n=========\n$data"; }
 
 				if ($auth ne "" && $sd ne "") {
-					my $res = "$host\"$from_ip\"$user\"$realm\"BYE\"$uri\"$nonce\"\"\"\"MD5\"$resp";
+					my $res = "$host\"$from_ip\"$user\"$realm\"BYE\"$uri\"$nonce\"$cnonce\"$nc\"$qop\"MD5\"$resp";
 					open(my $fh, '>>', $sd) or die "Could not open file '$sd' $!";
 					print $fh "$res\n";
 					close $fh;
