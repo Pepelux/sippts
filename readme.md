@@ -68,7 +68,7 @@ And install next modules:
 In a Debian system or Kali Linux:
   * apt install libio-socket-timeout-perl libnetaddr-ip-perl libnet-address-ip-local-perl libnet-pcap-perl libtext-string-hexconvert-perl libdbd-sqlite3-perl
 
-## Last release: 2.0.5 ##
+## Last release: 2.0.4 ##
 
  * .tar.gz: https://github.com/Pepelux/sippts/archive/refs/tags/2.0.4.tar.gz
  * .zip: https://github.com/Pepelux/sippts/archive/refs/tags/2.0.4.zip
