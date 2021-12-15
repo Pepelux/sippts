@@ -46,6 +46,11 @@ my $method = '';
 my $g_cap_descrip;
 my $ver = 0;
 
+my $login = (getpwuid $>);
+if ($login ne 'root') {
+  print "must run as root\n\n";
+  exit;
+}
 
 # Trapping Signal "INT" like ctrl+c for cleanup first.
 $SIG{INT} = \&f_probe_ctrl_c; 
