@@ -46,11 +46,6 @@ my $method = '';
 my $g_cap_descrip;
 my $ver = 0;
 
-my $login = (getpwuid $>);
-if ($login ne 'root') {
-  print "must run as root\n\n";
-  exit;
-}
 
 # Trapping Signal "INT" like ctrl+c for cleanup first.
 $SIG{INT} = \&f_probe_ctrl_c; 
@@ -93,21 +88,33 @@ sub f_probe_read80211b_func {
 		
 		if ($portdst eq $dport || $portsrc eq $dport) {		
 			my $cleandata = substr($data, 84);
-			my $m = method($cleandata);
+        	my $msg = hex_to_ascii($cleandata);
+        	$msg = clear($msg);
+			my ($method) = $msg =~ m/^([\w.\/]+)\s/;
 			
-			if ($method eq "" || $method eq $m) {
+			if (defined($method) && $method ne "") {
 				if ($u eq 0) {
 					print "[+] $ipsrc:$portsrc => $ipdst:$portdst\n";
-					print hex_to_ascii($cleandata)."\n\n";
+					print $msg."\n\n";
 				}
 				else {
-					my $auth = auth($cleandata);
+					my $auth = auth($msg);
 					print $auth."\n" if ($auth ne "");
 				}
 			}
 		}
 	}
 };
+
+sub clear {
+	my $msg = shift;
+
+	while ( $msg ne "" && $msg !~ /^[A-Z]/ ) {
+		$msg = substr( $msg, 1 );
+	}
+
+	return $msg;
+}
 
 # Generate a random string
 sub generate_random_string {
