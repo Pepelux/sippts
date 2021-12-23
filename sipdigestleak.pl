@@ -221,10 +221,12 @@ LOOP: {
       $data .= $line;
 
       if ( $line =~ /^\r\n/ ) {
-        if   ( $v eq 0 ) { print "[-] BYE received\n"; }
-        else             { print "Receiving:\n=========\n$data"; }
+        if ( $bye eq 1 ) {
+          if   ( $v eq 0 ) { print "[-] BYE received\n"; }
+          else             { print "Receiving:\n=========\n$data"; }
 
-        last LOOP if ( $bye eq 1 );
+          last LOOP;
+        }
 
         $data     = "";
         $response = "";
@@ -279,7 +281,6 @@ LOOP: {
     while (<$sc>) {
       $line = $_;
 
-      print "L=$line\n";
       if ( $line =~ /^SIP\/2.0/ && ( $response eq "" || $response =~ /^1/ ) ) {
         $line =~ /^SIP\/2.0\s(.+)\r\n/;
         if ($1) { $response = $1; }
