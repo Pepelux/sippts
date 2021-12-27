@@ -64,7 +64,6 @@ And install next modules:
   * cpan -i Net:Pcap
   * cpan -i Net::Address::IP::Local
   * cpan -i DBD::SQLite
-  * cpan -i IP::Decimal
 
 In a Debian system or Kali Linux:
   * apt install libio-socket-timeout-perl libnetaddr-ip-perl libnet-address-ip-local-perl libnet-pcap-perl libtext-string-hexconvert-perl libdbd-sqlite3-perl
