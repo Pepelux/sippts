@@ -31,7 +31,6 @@ use IO::Socket;
 use IO::Socket::Timeout;
 use IO::Socket::SSL;
 use NetAddr::IP;
-use Net::IPAddress;
 use threads;
 use threads::shared;
 use Getopt::Long;
@@ -209,14 +208,32 @@ sub init() {
 			my $ip = $host;
 
 			$ip =~ /([0-9|\.]*)-([0-9|\.]*)/;
-	        # my $decimal_ini = ipv4_to_decimal($1);
-    	    # my $decimal_end = ipv4_to_decimal($2);
-	        my $decimal_ini = ip2num($1);
-    	    my $decimal_end = ip2num($2);
+			my $ipini = $1;
+			my $ipfin = $2;
 
-	        for ( my $i = $decimal_ini ; $i <= $decimal_end ; $i++ ) {
-    	    	my $ipaddr = num2ip($i);
-				push @range, $ipaddr;
+			my $ip2 = $ipini;
+			$ip2 =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/;
+			my $ip2_1 = int($1);
+			my $ip2_2 = int($2);
+			my $ip2_3 = int($3);
+			my $ip2_4 = int($4);
+
+			my $ip3 = $ipfin;
+			$ip3 =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/;
+			my $ip3_1 = int($1);
+			my $ip3_2 = int($2);
+			my $ip3_3 = int($3);
+			my $ip3_4 = int($4);
+
+			for (my $i1 = $ip2_1; $i1 <= $ip3_1; $i1++) {
+				for (my $i2 = $ip2_2; $i2 <= $ip3_2; $i2++) {
+					for (my $i3 = $ip2_3; $i3 <= $ip3_3; $i3++) {
+						for (my $i4 = $ip2_4; $i4 <= $ip3_4; $i4++) {
+							$ip = "$i1.$i2.$i3.$i4";
+							push @range, $ip;
+						}
+					}
+				}
 			}
 		}
 		else {
