@@ -194,6 +194,15 @@ sub wait_bye {
   my $response = "";
   my $line     = "";
   my $bye      = 0;
+  my $auth     = "";
+  my $resp     = "";
+  my $user     = "";
+  my $uri      = "";
+  my $cnonce   = "";
+  my $nc       = "";
+  my $qop      = "";
+  my $realm  = "asterisk";
+  my $nonce  = &generate_random_string( 8, 0 );
 
   if ( $v eq 0 ) { print "[+] Waiting for the BYE message\n"; }
 
@@ -218,9 +227,57 @@ LOOP: {
         $bye_branch = $1 if ($1);
       }
 
+      # If is not the first try, maybe auth is received in the first BYE
+      if ( $line =~ /Authorization/i ) {
+        $line =~ /Authorization\:\s(.+)\r\n/i;
+        $auth = $1 if ($1);
+
+        $auth =~ /username\=\"([a-z|A-Z|0-9|-|_]+)\"/i;
+        $user = $1 if ($1);
+
+        $auth =~ /uri\=\"([a-z|A-Z|0-9|-|_|\.|\:|\;|\=|\@|\#]+)\"/i;
+        $uri = $1 if ($1);
+
+        $auth =~ /response\=\"(.+)\"/i;
+        $resp = $1 if ($1);
+
+        if ( $auth =~ /cnonce\=\"[\w\+\/]+\"/i ) {
+          $auth =~ /cnonce\=\"([\w\+\/]+)\"/i;
+          $cnonce = $1 if ($1);
+        }
+        else {
+          $cnonce = "";
+        }
+
+        if ( $auth =~ /nc\=\"*[\w\+]+\"*/i ) {
+          $auth =~ /nc\=\"*([\w\+]+)\"*/i;
+          $nc = $1 if ($1);
+        }
+        else {
+          $nc = "";
+        }
+
+        if ( $auth =~ /qop\=\"*[\w\+]+\"*/i ) {
+          $auth =~ /qop\=\"*([\w\+]+)\"*/i;
+          $qop = $1 if ($1);
+        }
+        else {
+          $qop = "";
+        }
+      }
+
       $data .= $line;
 
       if ( $line =~ /^\r\n/ ) {
+        if ( $auth ne "" && $sd ne "" ) {
+          my $res = "$host\"$from_ip\"$user\"$realm\"BYE\"$uri\"$nonce\"$cnonce\"$nc\"$qop\"MD5\"$resp";
+          open( my $fh, '>>', $sd ) or die "Could not open file '$sd' $!";
+          print $fh "$res\n";
+          close $fh;
+          print "Data saved in file: $sd\n";
+          exit;
+        }
+
         if ( $bye eq 1 ) {
           if   ( $v eq 0 ) { print "[-] BYE received\n"; }
           else             { print "Receiving:\n=========\n$data"; }
