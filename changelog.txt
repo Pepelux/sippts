@@ -1,5 +1,4 @@
 v2.0.5 (Jan/2022)
-- New script (sipflood.pl) to send unlimited messages to the target
 - sipcracker.pl: if all password are found, the script ends
 - sipdigestleak.pl: added cnonce, nc and qop params when export files with sipdump format
 - sipscan.pl: bug fixes
