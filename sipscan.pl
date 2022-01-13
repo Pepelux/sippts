@@ -31,7 +31,6 @@ use IO::Socket;
 use IO::Socket::Timeout;
 use IO::Socket::SSL;
 use NetAddr::IP;
-use Net::IPAddress;
 use threads;
 use threads::shared;
 use Getopt::Long;
@@ -397,15 +396,15 @@ sub scan {
 
 	send_register($contactdomain, $to_ip, $dport, $fromuser, $fromname, $csec, "udp", $domain) if ($method eq "REGISTER" && ($proto eq "all" || $proto eq "udp"));
 	send_register($contactdomain, $to_ip, $dport, $fromuser, $fromname, $csec, "tcp", $domain) if ($method eq "REGISTER" && ($proto eq "all"  || $proto eq "tcp"));
-	send_register($contactdomain, $to_ip, $tlsport, $fromuser, $fromname, $csec, "tls", $domain) if ($method eq "REGISTER" && ($proto eq "all" || $proto eq "tls"));
+	send_register($contactdomain, $to_ip, $dport, $fromuser, $fromname, $csec, "tls", $domain) if ($method eq "REGISTER" && ($proto eq "all" || $proto eq "tls"));
 
 	send_invite($contactdomain, $to_ip, $dport, $fromuser, $fromname, $touser, $toname, $csec, "udp", $domain) if ($method eq "INVITE" && ($proto eq "all" || $proto eq "udp"));
 	send_invite($contactdomain, $to_ip, $dport, $fromuser, $fromname, $touser, $toname, $csec, "tcp", $domain) if ($method eq "INVITE" && ($proto eq "all" || $proto eq "tcp"));
-	send_invite($contactdomain, $to_ip, $tlsport, $fromuser, $fromname, $touser, $toname, $csec, "tls", $domain) if ($method eq "INVITE" && ($proto eq "all" || $proto eq "tls"));
+	send_invite($contactdomain, $to_ip, $dport, $fromuser, $fromname, $touser, $toname, $csec, "tls", $domain) if ($method eq "INVITE" && ($proto eq "all" || $proto eq "tls"));
 
 	send_options($contactdomain, $to_ip, $dport, $fromuser, $fromname, $csec, "udp", $domain) if ($method eq "OPTIONS" && ($proto eq "all" || $proto eq "udp"));
 	send_options($contactdomain, $to_ip, $dport, $fromuser, $fromname, $csec, "tcp", $domain) if ($method eq "OPTIONS" && ($proto eq "all" || $proto eq "tcp"));
-	send_options($contactdomain, $to_ip, $tlsport, $fromuser, $fromname, $csec, "tls", $domain) if ($method eq "OPTIONS" && ($proto eq "all" || $proto eq "tls"));
+	send_options($contactdomain, $to_ip, $dport, $fromuser, $fromname, $csec, "tls", $domain) if ($method eq "OPTIONS" && ($proto eq "all" || $proto eq "tls"));
 }
  
 # Send REGISTER message
