@@ -14,6 +14,7 @@ install:
 	$(INSTALL_PROGRAM)	sipcracker.pl		$(DESTDIR)/$(bindir)/sipcracker
 	$(INSTALL_PROGRAM)	sipdigestleak.pl	$(DESTDIR)/$(bindir)/sipdigestleak
 	$(INSTALL_PROGRAM)	sipexten.pl		$(DESTDIR)/$(bindir)/sipexten
+	$(INSTALL_PROGRAM)	sipflood.pl		$(DESTDIR)/$(bindir)/sipflood
 	$(INSTALL_PROGRAM)	sipinvite.pl		$(DESTDIR)/$(bindir)/sipinvite
 	$(INSTALL_PROGRAM)	sipreport.pl		$(DESTDIR)/$(bindir)/sipreport
 	$(INSTALL_PROGRAM)	sipscan.pl		$(DESTDIR)/$(bindir)/sipscan
