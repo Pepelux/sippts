@@ -40,6 +40,22 @@ Sippts is a set of tools to audit VoIP servers and devices using SIP protocol. S
 
 [Click here to read more about SIPFlood](https://github.com/Pepelux/sippts/wiki/SIPFlood)
 
+  * _**SipSend**_ Allow us to send a customized SIP message and analyze the response.
+
+[Click here to read more about SIPSend](https://github.com/Pepelux/sippts/wiki/SIPSend)
+
+  * _**SipEnumerate**_ Enumerate available methods of a SIP service/server.
+
+[Click here to read more about SIPEnumerate](https://github.com/Pepelux/sippts/wiki/SIPEnumerate)
+
+  * _**SipDump**_ Extracts SIP Digest authentications from a PCAP file.
+
+[Click here to read more about SIPDump](https://github.com/Pepelux/sippts/wiki/SIPDump)
+
+  * _**SipCrack**_ Cracking tool to crack the digest authentications within the SIP protocol.
+
+[Click here to read more about SIPCrack](https://github.com/Pepelux/sippts/wiki/SIPCrack)
+
 ## Operating System ##
 Sippts has been tested on:
   * Linux
