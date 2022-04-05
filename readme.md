@@ -24,21 +24,13 @@ Sippts is a set of tools to audit VoIP servers and devices using SIP protocol. S
 
 [Click here to read more about SIPexten](https://github.com/Pepelux/sippts/wiki/SIPexten)
 
-  * _**Sipcracker**_ is a remote password cracker. Sipcracker can test passwords for several users in different IPs and port ranges.
+  * _**Siprcrack**_ is a remote password cracker. Siprcrack can test passwords for several users in different IPs and port ranges.
 
-[Click here to read more about SIPcracker](https://github.com/Pepelux/sippts/wiki/SIPcracker)
+[Click here to read more about SIPRcrack](https://github.com/Pepelux/sippts/wiki/SIPRCrack)
 
   * _**Sipinvite**_ checks if a server allow us to make calls without authentication. If the SIP server has a bad configuration, it will allow us to make calls to external numbers. Also it can allow us to transfer the call to a second external number.
 
 [Click here to read more about SIPinvite](https://github.com/Pepelux/sippts/wiki/SIPinvite)
-
-  * _**Sipsniff**_ is a simple sniffer for SIP protocol that allows us to filter by SIP method type.
-
-[Click here to read more about SIPsniff](https://github.com/Pepelux/sippts/wiki/SIPsniff)
-
-  * _**Sipspy**_ is a simple sip server that show us digest auth requests and responses.
-
-[Click here to read more about SIPspy](https://github.com/Pepelux/sippts/wiki/SIPspy)
 
   * _**SipDigestLeak**_ Exploits the SIP digest leak vulnerability discovered by Sandro Gauci that affects a large number of hardware and software devices.
 
@@ -55,21 +47,4 @@ Sippts has been tested on:
   * Windows
 
 ## Requirements ##
-  * Perl
-
-And install next modules:
-  * cpan -i IO:Socket:Timeout
-  * cpan -i NetAddr:IP
-  * cpan -i String:HexConvert
-  * cpan -i Net:Pcap
-  * cpan -i Net::Address::IP::Local
-  * cpan -i DBD::SQLite
-
-In a Debian system or Kali Linux:
-  * apt install libio-socket-timeout-perl libnetaddr-ip-perl libnet-address-ip-local-perl libnet-pcap-perl libtext-string-hexconvert-perl libdbd-sqlite3-perl
-
-## Last release: 2.0.4 ##
-
- * .tar.gz: https://github.com/Pepelux/sippts/archive/refs/tags/2.0.4.tar.gz
- * .zip: https://github.com/Pepelux/sippts/archive/refs/tags/2.0.4.zip
- * .deb: https://github.com/Pepelux/sippts/releases/download/2.0.4/sippts_2.0.4-0kali1_all.deb (for Kali Linux)
+  * Python 3
