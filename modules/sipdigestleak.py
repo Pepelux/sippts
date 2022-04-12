@@ -107,7 +107,7 @@ class SipDigestLeak:
         print(YELLOW + '[=>] Request %s' % method + WHITE)
 
         try:
-            sock.settimeout(5)
+            sock.settimeout(15)
 
             # send INVITE
             if proto == 'TCP':
@@ -190,7 +190,6 @@ class SipDigestLeak:
 
                     print(WHITE+'Auth data saved in file %s' % self.ofile)
         except socket.timeout:
-            # No response
             pass
         except:
             pass

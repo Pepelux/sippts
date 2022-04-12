@@ -131,6 +131,8 @@ class SipFlood:
 
         while self.run == True:
             try:
+                sock.settimeout(1)
+
                 if self.proto == 'TCP':
                     sock.connect(host)
 
@@ -154,7 +156,6 @@ class SipFlood:
                         pos = 0
 
             except socket.timeout:
-                # No response
                 pass
             except:
                 pass

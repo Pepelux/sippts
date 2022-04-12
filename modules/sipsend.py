@@ -94,7 +94,7 @@ class SipSend:
                              self.to_user, self.to_name, self.proto, self.domain, self.user_agent, lport, '', '', '', 1, '', self.digest, '', 0)
 
         try:
-            sock.settimeout(1)
+            sock.settimeout(5)
 
             if self.proto == 'TCP':
                 sock.connect(host)
@@ -119,7 +119,6 @@ class SipSend:
                   (self.ip, self.rport))
             print(GREEN + resp.decode() + WHITE)
         except socket.timeout:
-            # No response
             pass
         except:
             pass

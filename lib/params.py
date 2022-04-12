@@ -398,14 +398,26 @@ def get_sipcrack_args():
 ''' + BWHITE + '''BY ''' + GREEN + ''' █▀▀ ██▄ █▀▀ ██▄ █▄▄ █▄█ █░█''' + BWHITE + '''
 
 ''' + BLUE + ''' -= SIP digest authentication cracking =-''' + WHITE,
-        epilog=BWHITE + '''
-SIP Digest Crack is a tool to crack the digest authentications within the SIP protocol.
+        epilog=WHITE + '''Bruteforce charsets
+-------------------
+ascii_letters             # The ascii_lowercase and ascii_uppercase constants
+alphabet=ascii_lowercase  # The lowercase letters: abcdefghijklmnopqrstuvwxyz
+alphabet=ascii_uppercase  # The uppercase letters: ABCDEFGHIJKLMNOPQRSTUVWXYZ
+alphabet=digits           # The string: 0123456789
+alphabet=hexdigits        # The string: 0123456789abcdefABCDEF
+alphabet=octdigits        # The string: 01234567
+alphabet=punctuation      # String of ASCII characters: !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
+alphabet=printable        # Combination of digits, ascii_letters, punctuation, and whitespace
+alphabet=whitespace       # This includes the characters space, tab, linefeed, return, formfeed, and vertical tab
+alphabet=0123456789abcdef # Custom alphabet
+
+''' + BWHITE + '''SIP Digest Crack is a tool to crack the digest authentications within the SIP protocol. ''' + WHITE + '''
  
 ''')
 
     # Add arguments
     parser.add_argument('-w', '--wordlist', help='Wordlist for bruteforce', dest='wordlist', default="")
-    parser.add_argument('-bf', '--bruteforce', help='Bruteforce password (config in lib/pplsip.cfg)', dest='bruteforce', action="count")
+    parser.add_argument('-bf', '--bruteforce', help='Bruteforce password', dest='bruteforce', action="count")
     parser.add_argument('-p' , '--prefix', type=str, help='Prefix for passwords', dest='prefix', default='')
     parser.add_argument('-s' , '--suffix', type=str, help='Suffix for passwords', dest='suffix', default='')
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")

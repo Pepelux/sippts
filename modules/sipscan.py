@@ -285,7 +285,6 @@ class SipScan:
 
                 return headers
             except socket.timeout:
-                # No response
                 pass
             except:
                 pass

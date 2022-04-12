@@ -131,7 +131,7 @@ class SipInvite:
             print(WHITE + msg)
 
         try:
-            sock.settimeout(5)
+            sock.settimeout(15)
 
             # send INVITE
             if self.proto == 'TCP':
@@ -294,7 +294,6 @@ class SipInvite:
                 if self.verbose == 1:
                     print(WHITE + msg)
         except socket.timeout:
-            # No response
             pass
         except:
             pass

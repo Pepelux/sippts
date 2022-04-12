@@ -88,7 +88,7 @@ class SipRemoteCrack:
                                  to_user, '', self.proto, self.domain, self.user_agent, lport, '', '', '', 1, '', '', '', 0)
 
             try:
-                sock.settimeout(1)
+                sock.settimeout(5)
 
                 if self.proto == 'TCP':
                     sock.connect(host)
@@ -167,7 +167,6 @@ class SipRemoteCrack:
 
                 return data
             except socket.timeout:
-                # No response
                 pass
             except:
                 pass

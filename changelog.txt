@@ -1,3 +1,11 @@
+v3.0.0 (Apr/2022)
+- New version coded in python
+- Erased some scripts: sipsniff, sipspy and sipreport
+- Renamed script sipcracker to siprcrack
+- New script sipenumerate to enumerate available methods of a SIP sevice/server
+- New script sipdump to extract SIP Digest authentications from a PCAP file
+- New script sipcrack to crack the digest authentications within the SIP protocol
+
 v2.0.5 (Jan/2022)
 - sipflood.pl: new script to flood a SIP server
 - sipcracker.pl: if all password are found, the script ends

@@ -197,7 +197,7 @@ class SipExten:
                                  to_user, '', self.proto, domain, self.user_agent, lport, '', '', '', 1, '', '', '', 0)
 
             try:
-                sock.settimeout(3)
+                sock.settimeout(5)
 
                 if self.proto == 'TCP':
                     sock.connect(host)
@@ -243,7 +243,6 @@ class SipExten:
 
                 return headers
             except socket.timeout:
-                # No response
                 pass
             except:
                 pass
