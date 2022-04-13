@@ -175,6 +175,8 @@ class SipScan:
                   GREEN + '%s' % self.user_agent)
 
         print(BWHITE + '[!] Used threads: ' + GREEN + '%d' % nthreads)
+        if nthreads > 200:
+            print(BRED + '[x] More than 200 threads can cause socket problems')
         print(WHITE)
 
         values = product(ips, ports, protos)
