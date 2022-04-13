@@ -240,7 +240,7 @@ class SipScan:
                                  self.to_user, self.to_name, proto, domain, self.user_agent, lport, '', '', '', 1, '', '', '', 0)
 
             try:
-                sock.settimeout(1)
+                sock.settimeout(2)
 
                 if proto == 'TCP':
                     sock.connect(host)
