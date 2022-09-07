@@ -60,7 +60,6 @@ class SipRemoteCrack:
         self.line = ['-', '\\', '|', '/']
         self.pos = 0
 
-
     def register(self, ip, to_user, pwd):
         if self.run == True:
             try:
@@ -110,8 +109,14 @@ class SipRemoteCrack:
                 headers = parse_message(resp.decode())
 
                 if headers:
+                    auth_header = ''
+                    try:
+                        auth_header = headers['auth']
+                    except:
+                        pass
+
                     # Received the auth digest?
-                    if headers['auth'] != '':
+                    if auth_header != '':
                         method = 'REGISTER'
                         auth = headers['auth']
                         callid = headers['callid']
@@ -156,14 +161,16 @@ class SipRemoteCrack:
                         else:
                             resp = sock.recv(4096)
 
-                        headers = parse_message(resp.decode())
-                        data['code'] = headers['response_code']
-                        data['text'] = headers['response_text']
+                    headers = parse_message(resp.decode())
+                    data['code'] = headers['response_code']
+                    data['text'] = headers['response_text']
 
                 return data
             except socket.timeout:
+                print('Socket timeout error')
                 pass
             except:
+                print('Socket error')
                 pass
             finally:
                 sock.close()
@@ -195,7 +202,7 @@ class SipRemoteCrack:
         # if rport is by default but we want to scan TLS protocol, use port 5061
         if self.rport == 5060 and self.proto == 'TLS':
             self.rport = 5061
-        
+
         # check protocol
         if self.proto not in supported_protos:
             print(BRED + 'Protocol %s is not supported' % self.proto)
@@ -305,8 +312,8 @@ class SipRemoteCrack:
                 if pwd != '':
                     while pwd and self.run == True:
                         try:
-                            print(BYELLOW+'[%s] Scanning %s:%s/%s => Exten/Pass: %s/%s'.ljust(150) %
-                                  (self.line[self.pos], ipaddr, self.rport, self.proto, to_user, pwd), end="\r")
+                            # print(BYELLOW+'[%s] Scanning %s:%s/%s => Exten/Pass: %s/%s'.ljust(150) %
+                            #       (self.line[self.pos], ipaddr, self.rport, self.proto, to_user, pwd), end="\r")
                             self.pos += 1
                             if self.pos > 3:
                                 self.pos = 0
@@ -318,11 +325,16 @@ class SipRemoteCrack:
                                 self.contact_domain = '10.0.0.1'
 
                             data = self.register(ipaddr, to_user, pwd)
+
+                            str = BYELLOW+'[%s] ' % self.line[self.pos] + BWHITE+'Scanning ' + BYELLOW+'%s:%s/%s' % (
+                                ipaddr, self.rport, self.proto) + BWHITE + '=> Exten/Pass: ' + BGREEN + '%s/%s' % (to_user, pwd) + BBLUE + ' - %s %s' % (data['code'], data['text'])
+                            print(str.ljust(150), end="\r")
+
                             if data and data['code'] == '200':
                                 print(WHITE)
                                 pre = ''
                                 print(BWHITE + '%s' % pre + WHITE+'Password for user ' + BBLUE + '%s' %
-                                    to_user + WHITE + ' found: ' + BRED + '%s' % pwd + WHITE)
+                                      to_user + WHITE + ' found: ' + BRED + '%s' % pwd + WHITE)
                                 line = '%s###%s###%s###%s###%s' % (
                                     ipaddr, self.rport, self.proto, to_user, pwd)
                                 self.found.append(line)
