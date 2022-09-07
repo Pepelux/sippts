@@ -61,12 +61,13 @@ class SipFlood:
 
         self.method = self.method.upper()
         self.proto = self.proto.upper()
-        if not self.verbose:
-            self.verbose = '0'
 
         # if rport is by default but we want to scan TLS protocol, use port 5061
         if self.rport == 5060 and self.proto == 'TLS':
             self.rport = 5061
+
+        if not self.verbose:
+            self.verbose = '0'
 
         # check method
         if self.method not in supported_methods:
