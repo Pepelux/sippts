@@ -146,13 +146,7 @@ class SipRemoteCrack:
                         msg = create_message('REGISTER', self.contact_domain, username, '',
                                              to_user, '', self.proto, self.domain, self.user_agent, lport, '', callid, '', 1, '', digest, '', 0)
 
-                        if self.proto == 'TCP':
-                            sock.connect(host)
-
                         if self.proto == 'TLS':
-                            sock_ssl = ssl.wrap_socket(
-                                sock, ssl_version=ssl.PROTOCOL_TLS, ciphers=None, cert_reqs=ssl.CERT_NONE)
-                            sock_ssl.connect(host)
                             sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
                         else:
                             sock.sendto(bytes(msg[:8192], 'utf-8'), host)
@@ -308,42 +302,46 @@ class SipRemoteCrack:
                 pwd = pwd.strip()
                 pwd = pwd[0:50]
 
+                print(pwd)
                 if pwd != '':
                     while pwd and self.run == True:
-                        print(BYELLOW+'[%s] Scanning %s:%s/%s => Exten/Pass: %s/%s'.ljust(150) %
-                              (self.line[self.pos], ipaddr, self.rport, self.proto, to_user, pwd), end="\r")
-                        self.pos += 1
-                        if self.pos > 3:
-                            self.pos = 0
+                        try:
+                            print(BYELLOW+'[%s] Scanning %s:%s/%s => Exten/Pass: %s/%s'.ljust(150) %
+                                  (self.line[self.pos], ipaddr, self.rport, self.proto, to_user, pwd), end="\r")
+                            self.pos += 1
+                            if self.pos > 3:
+                                self.pos = 0
 
-                        if self.domain == '':
-                            self.domain = ipaddr
+                            if self.domain == '':
+                                self.domain = ipaddr
 
-                        if self.contact_domain == '':
-                            self.contact_domain = '10.0.0.1'
+                            if self.contact_domain == '':
+                                self.contact_domain = '10.0.0.1'
 
-                        data = self.register(ipaddr, to_user, pwd)
-                        if data and data['code'] == '200':
-                            print(WHITE)
-                            pre = ''
-                            print(BWHITE + '%s' % pre + WHITE+'Password for user ' + BBLUE + '%s' %
-                                  to_user + WHITE + ' found: ' + BRED + '%s' % pwd + WHITE)
-                            line = '%s###%s###%s###%s###%s' % (
-                                ipaddr, self.rport, self.proto, to_user, pwd)
-                            self.found.append(line)
+                            data = self.register(ipaddr, to_user, pwd)
+                            if data and data['code'] == '200':
+                                print(WHITE)
+                                pre = ''
+                                print(BWHITE + '%s' % pre + WHITE+'Password for user ' + BBLUE + '%s' %
+                                    to_user + WHITE + ' found: ' + BRED + '%s' % pwd + WHITE)
+                                line = '%s###%s###%s###%s###%s' % (
+                                    ipaddr, self.rport, self.proto, to_user, pwd)
+                                self.found.append(line)
 
-                            f.close()
-                            return
+                                f.close()
+                                return
 
-                        pwd = f.readline()
-                        if pwd != '\n':
-                            pwd = pwd.replace('\n', '')
-                            pwd = pwd.replace('\'', '')
-                            pwd = pwd.replace('"', '')
-                            pwd = pwd.replace('<', '')
-                            pwd = pwd.replace('>', '')
-                            pwd = pwd.strip()
-                            pwd = pwd[0:50]
+                            pwd = f.readline()
+                            if pwd != '\n':
+                                pwd = pwd.replace('\n', '')
+                                pwd = pwd.replace('\'', '')
+                                pwd = pwd.replace('"', '')
+                                pwd = pwd.replace('<', '')
+                                pwd = pwd.replace('>', '')
+                                pwd = pwd.strip()
+                                pwd = pwd[0:50]
+                        except:
+                            print('error')
 
         f.close()
 
