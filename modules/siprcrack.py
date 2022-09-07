@@ -60,6 +60,7 @@ class SipRemoteCrack:
         self.line = ['-', '\\', '|', '/']
         self.pos = 0
 
+
     def register(self, ip, to_user, pwd):
         if self.run == True:
             try:
@@ -197,6 +198,10 @@ class SipRemoteCrack:
 
         self.proto = self.proto.upper()
 
+        # if rport is by default but we want to scan TLS protocol, use port 5061
+        if self.rport == 5060 and self.proto == 'TLS':
+            self.rport = 5061
+        
         # check protocol
         if self.proto not in supported_protos:
             print(BRED + 'Protocol %s is not supported' % self.proto)
