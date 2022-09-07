@@ -113,6 +113,10 @@ class SipScan:
         # create a list of IP addresses
         ips = []
         hosts = list(ipaddress.ip_network(str(self.ip)).hosts())
+
+        if hosts == []:
+            hosts.append(self.ip)
+
         last = len(hosts)-1
         start_ip = hosts[0]
         end_ip = hosts[last]
