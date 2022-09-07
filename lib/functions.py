@@ -246,6 +246,7 @@ def parse_message(buffer):
     data = dict()
     data['sipuser'] = ''
     data['sipdomain'] = ''
+    data['ua'] = ''
 
     for header in headers:
         m = re.search('^SIP\/[0-9|\.]+\s([0-9]+)\s(.+)', header)
