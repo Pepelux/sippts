@@ -302,7 +302,6 @@ class SipRemoteCrack:
                 pwd = pwd.strip()
                 pwd = pwd[0:50]
 
-                print(pwd)
                 if pwd != '':
                     while pwd and self.run == True:
                         try:
