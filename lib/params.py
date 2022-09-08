@@ -705,3 +705,173 @@ SIP Flood send messages with a selected method
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
+
+
+def get_rtpbleed_args():
+    print(WHITE)
+    screen_clear()
+
+    parser = argparse.ArgumentParser(
+        formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
+            prog, max_help_position=50),
+        description= RED + u'''
+██████╗░████████╗██████╗░  ██████╗░██╗░░░░░███████╗███████╗██████╗░
+██╔══██╗╚══██╔══╝██╔══██╗  ██╔══██╗██║░░░░░██╔════╝██╔════╝██╔══██╗
+██████╔╝░░░██║░░░██████╔╝  ██████╦╝██║░░░░░█████╗░░█████╗░░██║░░██║
+██╔══██╗░░░██║░░░██╔═══╝░  ██╔══██╗██║░░░░░██╔══╝░░██╔══╝░░██║░░██║
+██║░░██║░░░██║░░░██║░░░░░  ██████╦╝███████╗███████╗███████╗██████╔╝
+╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░░░░  ╚═════╝░╚══════╝╚══════╝╚══════╝╚═════╝░
+
+''' + BWHITE + '''   ''' + GREEN + ''' █▀█ █▀▀ █▀█ █▀▀ █░░ █░█ ▀▄▀''' + BWHITE + '''
+''' + BWHITE + '''BY ''' + GREEN + ''' █▀▀ ██▄ █▀▀ ██▄ █▄▄ █▄█ █░█''' + BWHITE + '''
+
+''' + BLUE + ''' -= Detects the RTP Bleed vulnerability sending RTP streams =-''' + WHITE,
+        epilog=BWHITE + '''
+The RTP bleed Bug is a serious vulnerability in a number of RTP proxies. This weakness allows 
+malicious users to inject and receive RTP streams of ongoing calls without needing to be positioned 
+as man-in-the-middle. This may lead to eavesdropping of audio calls, impersonation and possibly cause 
+toll fraud by redirecting ongoing calls.
+
+More info about the vulnerability: https://www.rtpbleed.com/
+ 
+''')
+
+    # Add arguments
+    parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
+    parser.add_argument('-s', '--start_port', type=int, help='Start port of the host (default: 10000)', dest='start_port', default=10000)
+    parser.add_argument('-e', '--end_port', type=int, help='End port of the host (default: 20000)', dest='end_port', default=20000)
+    parser.add_argument('-l', '--loops', type=int,help='Number of times to probe the port ranges on the target(s) (default: 4)', dest='loops', default=4)
+    parser.add_argument('-p', '--payload', type=int,help='Codec payload (default: 0)', dest='payload', default=0)
+    parser.add_argument('-d', '--delay', dest='delay', type=int, help='Delay for timeout in microseconds (default: 50)', default=50)
+
+    # Array for all arguments passed to script
+    args = parser.parse_args()
+
+    try:
+        try:
+            ip = socket.gethostbyname(args.ipaddr)
+            IPADDR = IP(ip)
+        except:
+            IPADDR = IP(args.ipaddr)
+        SP = args.start_port
+        EP = args.end_port
+        # Always start on odd port
+        if SP % 2 != 0:
+            SP = SP + 1
+        if EP % 2 != 0:
+            EP = EP + 1
+        LOOPS = args.loops
+        PAYLOAD = args.payload
+        DELAY = args.delay
+        return IPADDR, SP, EP, LOOPS, PAYLOAD, DELAY
+    except ValueError:
+        print('[-] Error: Bad IP format')
+        sys.exit(1)
+
+
+def get_rtcpbleed_args():
+    print(WHITE)
+    screen_clear()
+
+    parser = argparse.ArgumentParser(
+        formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
+            prog, max_help_position=50),
+        description= RED + u'''
+██████╗░████████╗░█████╗░██████╗░  ██████╗░██╗░░░░░███████╗███████╗██████╗░
+██╔══██╗╚══██╔══╝██╔══██╗██╔══██╗  ██╔══██╗██║░░░░░██╔════╝██╔════╝██╔══██╗
+██████╔╝░░░██║░░░██║░░╚═╝██████╔╝  ██████╦╝██║░░░░░█████╗░░█████╗░░██║░░██║
+██╔══██╗░░░██║░░░██║░░██╗██╔═══╝░  ██╔══██╗██║░░░░░██╔══╝░░██╔══╝░░██║░░██║
+██║░░██║░░░██║░░░╚█████╔╝██║░░░░░  ██████╦╝███████╗███████╗███████╗██████╔╝
+╚═╝░░╚═╝░░░╚═╝░░░░╚════╝░╚═╝░░░░░  ╚═════╝░╚══════╝╚══════╝╚══════╝╚═════╝░
+
+''' + BWHITE + '''   ''' + GREEN + ''' █▀█ █▀▀ █▀█ █▀▀ █░░ █░█ ▀▄▀''' + BWHITE + '''
+''' + BWHITE + '''BY ''' + GREEN + ''' █▀▀ ██▄ █▀▀ ██▄ █▄▄ █▄█ █░█''' + BWHITE + '''
+
+''' + BLUE + ''' -= Detects the RTP Bleed vulnerability sending RTCP streams =-''' + WHITE,
+        epilog=BWHITE + '''
+The RTP bleed Bug is a serious vulnerability in a number of RTP proxies. This weakness allows 
+malicious users to inject and receive RTP streams of ongoing calls without needing to be positioned 
+as man-in-the-middle. This may lead to eavesdropping of audio calls, impersonation and possibly cause 
+toll fraud by redirecting ongoing calls.
+
+More info about the vulnerability: https://www.rtpbleed.com/
+ 
+''')
+
+    # Add arguments
+    parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
+    parser.add_argument('-s', '--start_port', type=int, help='Start port of the host (default: 10001)', dest='start_port', default=10001)
+    parser.add_argument('-e', '--end_port', type=int, help='End port of the host (default: 20001)', dest='end_port', default=20001)
+    parser.add_argument('-d', '--delay', dest='delay', type=int, help='Delay for timeout in microseconds (default: 1)', default=1)
+
+    # Array for all arguments passed to script
+    args = parser.parse_args()
+
+    try:
+        try:
+            ip = socket.gethostbyname(args.ipaddr)
+            IPADDR = IP(ip)
+        except:
+            IPADDR = IP(args.ipaddr)
+        SP = args.start_port
+        EP = args.end_port
+        # Always start on odd port
+        if SP % 2 == 0:
+            SP = SP + 1
+        if EP % 2 == 0:
+            EP = EP + 1
+        DELAY = args.delay
+        return IPADDR, SP, EP, DELAY
+    except ValueError:
+        print('[-] Error: Bad IP format')
+        sys.exit(1)
+
+
+def get_rtcbleed_flood_args():
+    print(WHITE)
+    screen_clear()
+
+    parser = argparse.ArgumentParser(
+        formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
+            prog, max_help_position=50),
+        description= RED + u'''
+██████╗░████████╗██████╗░  ██████╗░██╗░░░░░███████╗███████╗██████╗░  ███████╗██╗░░░░░░█████╗░░█████╗░██████╗░
+██╔══██╗╚══██╔══╝██╔══██╗  ██╔══██╗██║░░░░░██╔════╝██╔════╝██╔══██╗  ██╔════╝██║░░░░░██╔══██╗██╔══██╗██╔══██╗
+██████╔╝░░░██║░░░██████╔╝  ██████╦╝██║░░░░░█████╗░░█████╗░░██║░░██║  █████╗░░██║░░░░░██║░░██║██║░░██║██║░░██║
+██╔══██╗░░░██║░░░██╔═══╝░  ██╔══██╗██║░░░░░██╔══╝░░██╔══╝░░██║░░██║  ██╔══╝░░██║░░░░░██║░░██║██║░░██║██║░░██║
+██║░░██║░░░██║░░░██║░░░░░  ██████╦╝███████╗███████╗███████╗██████╔╝  ██║░░░░░███████╗╚█████╔╝╚█████╔╝██████╔╝
+╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░░░░  ╚═════╝░╚══════╝╚══════╝╚══════╝╚═════╝░  ╚═╝░░░░░╚══════╝░╚════╝░░╚════╝░╚═════╝░
+
+''' + BWHITE + '''   ''' + GREEN + ''' █▀█ █▀▀ █▀█ █▀▀ █░░ █░█ ▀▄▀''' + BWHITE + '''
+''' + BWHITE + '''BY ''' + GREEN + ''' █▀▀ ██▄ █▀▀ ██▄ █▄▄ █▄█ █░█''' + BWHITE + '''
+
+''' + BLUE + ''' -= Exploit the RTP Bleed vulnerability sending RTP streams =-''' + WHITE,
+        epilog=BWHITE + '''
+The RTP bleed Bug is a serious vulnerability in a number of RTP proxies. This weakness allows 
+malicious users to inject and receive RTP streams of ongoing calls without needing to be positioned 
+as man-in-the-middle. This may lead to eavesdropping of audio calls, impersonation and possibly cause 
+toll fraud by redirecting ongoing calls.
+
+More info about the vulnerability: https://www.rtpbleed.com/
+ 
+''')
+
+    # Add arguments
+    parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
+    parser.add_argument('-p', '--port', type=int, help='Port number to flood', dest='port', required=True)
+
+    # Array for all arguments passed to script
+    args = parser.parse_args()
+    try:
+        try:
+            ip = socket.gethostbyname(args.ipaddr)
+            IPADDR = IP(ip)
+        except:
+            IPADDR = IP(args.ipaddr)
+        P = args.port
+        return IPADDR, P
+    except ValueError:
+        print('[-] Error: Bad IP format')
+        sys.exit(1)
+
+
