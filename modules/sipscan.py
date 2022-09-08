@@ -116,44 +116,48 @@ class SipScan:
         ips = []
 
         if self.file != '':
-            with open(self.file) as f:
-                line = f.readline()
-
-                while(line):
-                    try:
-                        ip = socket.gethostbyname(line)
-                        line = IP(ip)
-                    except:
-                        line = IP(line)
-
-                    hosts = list(ipaddress.ip_network(str(line)).hosts())
-
-                    if hosts == []:
-                        hosts.append(self.ip)
-
-                    last = len(hosts)-1
-                    start_ip = hosts[0]
-                    end_ip = hosts[last]
-
-                    ipini = int(ip2long(str(start_ip)))
-                    ipend = int(ip2long(str(end_ip)))
-
-                    for i in range(ipini, ipend+1):
-                        if i != local_ip:
-                            if self.ping == 'False':
-                                ips.append(long2ip(i))
-                            else:
-                                print(YELLOW + '[+] Ping %s ...' %
-                                    str(long2ip(i)) + WHITE, end='\r')
-
-                                if ping(long2ip(i), '0.1') == True:
-                                    print(GREEN + '\n   [-] ... Pong %s' %
-                                        str(long2ip(i)) + WHITE)
-                                    ips.append(long2ip(i))
-
+            try:
+                with open(self.file) as f:
                     line = f.readline()
 
-            f.close()
+                    while(line):
+                        try:
+                            ip = socket.gethostbyname(line)
+                            line = IP(ip)
+                        except:
+                            line = IP(line)
+
+                        hosts = list(ipaddress.ip_network(str(line)).hosts())
+
+                        if hosts == []:
+                            hosts.append(self.ip)
+
+                        last = len(hosts)-1
+                        start_ip = hosts[0]
+                        end_ip = hosts[last]
+
+                        ipini = int(ip2long(str(start_ip)))
+                        ipend = int(ip2long(str(end_ip)))
+
+                        for i in range(ipini, ipend+1):
+                            if i != local_ip:
+                                if self.ping == 'False':
+                                    ips.append(long2ip(i))
+                                else:
+                                    print(YELLOW + '[+] Ping %s ...' %
+                                        str(long2ip(i)) + WHITE, end='\r')
+
+                                    if ping(long2ip(i), '0.1') == True:
+                                        print(GREEN + '\n   [-] ... Pong %s' %
+                                            str(long2ip(i)) + WHITE)
+                                        ips.append(long2ip(i))
+
+                        line = f.readline()
+
+                f.close()
+            except:
+                print('Error opening file %s' % self.file)
+                exit()
         else:
             hosts = list(ipaddress.ip_network(str(self.ip)).hosts())
 
