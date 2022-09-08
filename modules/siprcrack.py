@@ -327,7 +327,7 @@ class SipRemoteCrack:
                             data = self.register(ipaddr, to_user, pwd)
 
                             str = BYELLOW+'[%s] ' % self.line[self.pos] + BWHITE+'Scanning ' + BYELLOW+'%s:%s/%s' % (
-                                ipaddr, self.rport, self.proto) + BWHITE + '=> Exten/Pass: ' + BGREEN + '%s/%s' % (to_user, pwd) + BBLUE + ' - %s %s' % (data['code'], data['text'])
+                                ipaddr, self.rport, self.proto) + BWHITE + ' => Exten/Pass: ' + BGREEN + '%s/%s' % (to_user, pwd) + BBLUE + ' - %s %s' % (data['code'], data['text'])
                             print(str.ljust(150), end="\r")
 
                             if data and data['code'] == '200':
