@@ -328,7 +328,7 @@ class SipRemoteCrack:
 
                             str = BYELLOW+'[%s] ' % self.line[self.pos] + BWHITE+'Scanning ' + BYELLOW+'%s:%s/%s' % (
                                 ipaddr, self.rport, self.proto) + BWHITE + ' => Exten/Pass: ' + BGREEN + '%s/%s' % (to_user, pwd) + BBLUE + ' - %s %s' % (data['code'], data['text'])
-                            print(str.ljust(150), end="\r")
+                            print(str.ljust(200), end="\r")
 
                             if data and data['code'] == '200':
                                 print(WHITE)
