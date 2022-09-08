@@ -1,3 +1,8 @@
+v3.1.0 (Sep/2022)
+- Added parameter From Domain and To Domain to SipScan, SipSend, SipInvite, SipFlood and SipDigestLeak
+- Bug fixes in TLS connections
+- New scripts rtpbleed, rtcpbleed and rtpbleedflood to exploit RTPBleed vulnerability
+
 v3.0.0 (Apr/2022)
 - New version coded in python
 - Erased some scripts: sipsniff, sipspy and sipreport
