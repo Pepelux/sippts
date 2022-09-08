@@ -1,6 +1,6 @@
 v3.1.0 (Sep/2022)
 - Added parameter From Domain and To Domain to SipScan, SipSend, SipInvite, SipFlood and SipDigestLeak
-- SipScan can load IPss or network ranges from a file
+- SipScan can load IPs or network ranges from a file
 - Bug fixes in TLS connections
 - New scripts rtpbleed, rtcpbleed and rtpbleedflood to exploit RTPBleed vulnerability
 
