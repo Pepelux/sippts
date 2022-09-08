@@ -12,6 +12,7 @@ import sys
 import ipaddress
 import ssl
 import re
+from IPy import IP
 from lib.functions import create_message, parse_message, get_machine_default_ip, ip2long, long2ip, get_free_port, ping
 from itertools import product
 from concurrent.futures import ThreadPoolExecutor
@@ -52,6 +53,7 @@ class SipScan:
         self.threads = '100'
         self.verbose = '0'
         self.ping = 'False'
+        self.file = ''
 
         self.found = []
         self.line = ['-', '\\', '|', '/']
@@ -112,30 +114,71 @@ class SipScan:
 
         # create a list of IP addresses
         ips = []
-        hosts = list(ipaddress.ip_network(str(self.ip)).hosts())
 
-        if hosts == []:
-            hosts.append(self.ip)
+        if self.file != '':
+            with open(self.file) as f:
+                line = f.readline()
 
-        last = len(hosts)-1
-        start_ip = hosts[0]
-        end_ip = hosts[last]
+                while(line):
+                    try:
+                        ip = socket.gethostbyname(line)
+                        line = IP(ip)
+                    except:
+                        line = IP(line)
 
-        ipini = int(ip2long(str(start_ip)))
-        ipend = int(ip2long(str(end_ip)))
+                    hosts = list(ipaddress.ip_network(str(line)).hosts())
 
-        for i in range(ipini, ipend+1):
-            if i != local_ip:
-                if self.ping == 'False':
-                    ips.append(long2ip(i))
-                else:
-                    print(YELLOW + '[+] Ping %s ...' %
-                          str(long2ip(i)) + WHITE, end='\r')
+                    if hosts == []:
+                        hosts.append(self.ip)
 
-                    if ping(long2ip(i), '0.1') == True:
-                        print(GREEN + '\n   [-] ... Pong %s' %
-                              str(long2ip(i)) + WHITE)
+                    last = len(hosts)-1
+                    start_ip = hosts[0]
+                    end_ip = hosts[last]
+
+                    ipini = int(ip2long(str(start_ip)))
+                    ipend = int(ip2long(str(end_ip)))
+
+                    for i in range(ipini, ipend+1):
+                        if i != local_ip:
+                            if self.ping == 'False':
+                                ips.append(long2ip(i))
+                            else:
+                                print(YELLOW + '[+] Ping %s ...' %
+                                    str(long2ip(i)) + WHITE, end='\r')
+
+                                if ping(long2ip(i), '0.1') == True:
+                                    print(GREEN + '\n   [-] ... Pong %s' %
+                                        str(long2ip(i)) + WHITE)
+                                    ips.append(long2ip(i))
+
+                    line = f.readline()
+
+            f.close()
+        else:
+            hosts = list(ipaddress.ip_network(str(self.ip)).hosts())
+
+            if hosts == []:
+                hosts.append(self.ip)
+
+            last = len(hosts)-1
+            start_ip = hosts[0]
+            end_ip = hosts[last]
+
+            ipini = int(ip2long(str(start_ip)))
+            ipend = int(ip2long(str(end_ip)))
+
+            for i in range(ipini, ipend+1):
+                if i != local_ip:
+                    if self.ping == 'False':
                         ips.append(long2ip(i))
+                    else:
+                        print(YELLOW + '[+] Ping %s ...' %
+                              str(long2ip(i)) + WHITE, end='\r')
+
+                        if ping(long2ip(i), '0.1') == True:
+                            print(GREEN + '\n   [-] ... Pong %s' %
+                                  str(long2ip(i)) + WHITE)
+                            ips.append(long2ip(i))
 
         # threads to use
         nthreads = int(self.threads)
@@ -286,8 +329,12 @@ class SipScan:
                     self.found.append(line)
 
                     if self.verbose == 1:
-                        print(WHITE + 'Response <%s %s> from %s:%d/%s with User-Agent %s' %
-                              (headers['response_code'], headers['response_text'], ip, rport, proto, headers['ua']))
+                        if headers['ua'] != '':
+                            print(WHITE + 'Response <%s %s> from %s:%d/%s with User-Agent %s' %
+                                  (headers['response_code'], headers['response_text'], ip, rport, proto, headers['ua']))
+                        else:
+                            print(WHITE + 'Response <%s %s> from %s:%d/%s without User-Agent' %
+                                  (headers['response_code'], headers['response_text'], ip, rport, proto))
 
                 return headers
             except socket.timeout:

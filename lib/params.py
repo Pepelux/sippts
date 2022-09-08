@@ -50,7 +50,7 @@ UDP, TCP and TLS protocols.
 ''')
 
     # Add arguments
-    parser.add_argument('-i', '--ip', type=str, help='Host/IP address/network (ex: mysipserver.com | 192.168.0.10 | 192.168.0.0/24 | 192.168.0.0-255.255.0.0)', dest="ipaddr", required=True)
+    parser.add_argument('-i', '--ip', type=str, help='Host/IP address/network (ex: mysipserver.com | 192.168.0.10 | 192.168.0.0/24 | 192.168.0.0-255.255.0.0)', dest="ipaddr")
     parser.add_argument('-r', '--remote_port', type=str, help='Ports to scan. Ex: 5060 | 5070,5080 | 5060-5080 | 5060,5062,5070-5080 (default: 5060)', dest='remote_port', default='5060')
     parser.add_argument('-p', '--proto', type=str, help='Protocol: udp|tcp|tls|all (default: udp)', dest='proto', default='udp')
     parser.add_argument('-m', '--method', type=str, help='Method used to scan: options, invite, register (default: options)', dest='method', default='options')
@@ -65,9 +65,15 @@ UDP, TCP and TLS protocols.
     parser.add_argument('-ping', help='Ping host before scan', dest='ping', action="count")
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
     parser.add_argument('-vv', '--more_verbose', help='Increase more verbosity', dest='more_verbose', action="count")
+    parser.add_argument('-f', '--file', type=str, help='File with several IPs or network ranges', dest='file', default='')
 
     # Array for all arguments passed to script
     args = parser.parse_args()
+
+    if not args.ipaddr and not args.file:
+        print(
+            'error: one of the following arguments are required: -i/--ip, -f/--file')
+        sys.exit()
 
     try:
         if args.ipaddr:
@@ -94,8 +100,9 @@ UDP, TCP and TLS protocols.
         if MORE_VERBOSE == 1:
             VERBOSE = 2
         PING = args.ping
+        FILE = args.file
 
-        return IPADDR, PORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, TONAME, TOUSER, UA, THREADS, VERBOSE, PING
+        return IPADDR, PORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, TONAME, TOUSER, UA, THREADS, VERBOSE, PING, FILE
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
