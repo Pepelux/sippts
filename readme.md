@@ -66,6 +66,6 @@ Sippts has been tested on:
   * Python 3
   
 ## Instalation & Usage ##
-  1 Clone or download the repository
-  2 pip3 install -r requirements
-  3 Enjoy
+  * Clone or download the repository
+  * pip3 install -r requirements
+  * Enjoy
