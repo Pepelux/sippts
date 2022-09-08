@@ -48,12 +48,16 @@ class SipSend:
         self.digest = ''
 
     def start(self):
-        supported_protos = ['UDP', 'TCP']
+        supported_protos = ['UDP', 'TCP', 'TLS']
         supported_methods = ['REGISTER', 'SUBSCRIBE', 'NOTIFY', 'PUBLISH', 'MESSAGE', 'INVITE',
                              'OPTIONS', 'ACK', 'CANCEL', 'BYE', 'PRACK', 'INFO', 'REFER', 'UPDATE']
 
         self.method = self.method.upper()
         self.proto = self.proto.upper()
+
+        # if rport is by default but we want to scan TLS protocol, use port 5061
+        if self.rport == 5060 and self.proto == 'TLS':
+            self.rport = 5061
 
         # check method
         if self.method not in supported_methods:
@@ -61,7 +65,7 @@ class SipSend:
             sys.exit()
 
         # check protocol
-        if self.proto != 'ALL' and self.proto not in supported_protos:
+        if self.proto not in supported_protos:
             print(BRED + 'Protocol %s is not supported' % self.proto)
             sys.exit()
 
