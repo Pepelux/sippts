@@ -12,7 +12,7 @@ from lib.params import get_sipscan_args
 
 
 def main():
-    ip, rport, proto, method, domain, contact_domain, from_name, from_user, to_name, to_user, user_agent, nthreads, verbose, ping, file = get_sipscan_args()
+    ip, rport, proto, method, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, user_agent, nthreads, verbose, ping, file = get_sipscan_args()
 
     s = SipScan()
     s.ip = ip
@@ -24,7 +24,9 @@ def main():
     s.from_name = from_name
     s.to_name = to_name
     s.from_user = from_user
+    s.from_domain = from_domain
     s.to_user = to_user
+    s.to_domain = to_domain
     s.user_agent = user_agent
     s.threads = nthreads
     s.verbose = verbose

@@ -47,8 +47,10 @@ class SipScan:
         self.contact_domain = ''
         self.from_user = '100'
         self.from_name = ''
+        self.from_domain = ''
         self.to_user = '100'
         self.to_name = ''
+        self.to_domain = ''
         self.user_agent = 'pplsip'
         self.threads = '100'
         self.verbose = '0'
@@ -145,11 +147,11 @@ class SipScan:
                                     ips.append(long2ip(i))
                                 else:
                                     print(YELLOW + '[+] Ping %s ...' %
-                                        str(long2ip(i)) + WHITE, end='\r')
+                                          str(long2ip(i)) + WHITE, end='\r')
 
                                     if ping(long2ip(i), '0.1') == True:
                                         print(GREEN + '\n   [-] ... Pong %s' %
-                                            str(long2ip(i)) + WHITE)
+                                              str(long2ip(i)) + WHITE)
                                         ips.append(long2ip(i))
 
                         line = f.readline()
@@ -215,12 +217,18 @@ class SipScan:
         if self.from_user != '100':
             print(BWHITE + '[!] Customized From User: ' +
                   GREEN + '%s' % self.from_user)
+        if self.from_domain != '':
+            print(BWHITE + '[!] Customized From Domain: ' +
+                  GREEN + '%s' % self.from_domain)
         if self.to_name != '':
             print(BWHITE + '[!] Customized To Name: ' +
                   GREEN + '%s' % self.to_name)
         if self.to_user != '100':
             print(BWHITE + '[!] Customized To User:' +
                   GREEN + ' %s' % self.to_user)
+        if self.to_domain != '':
+            print(BWHITE + '[!] Customized To Domain: ' +
+                  GREEN + '%s' % self.to_domain)
         if self.user_agent != 'pplsip':
             print(BWHITE + '[!] Customized User-Agent: ' +
                   GREEN + '%s' % self.user_agent)
@@ -242,6 +250,10 @@ class SipScan:
 
                         if not self.domain or self.domain == '':
                             self.domain = val_ipaddr
+                        if not self.from_domain or self.from_domain == '':
+                            self.from_domain = val_ipaddr
+                        if not self.to_domain or self.to_domain == '':
+                            self.to_domain = val_ipaddr
 
                         executor.submit(self.scan_host, val_ipaddr,
                                         val_port, val_proto)
@@ -289,8 +301,8 @@ class SipScan:
             if contact_domain == '':
                 contact_domain = '10.0.0.1'
 
-            msg = create_message(self.method, contact_domain, self.from_user, self.from_name,
-                                 self.to_user, self.to_name, proto, domain, self.user_agent, lport, '', '', '', 1, '', '', '', 0)
+            msg = create_message(self.method, contact_domain, self.from_user, self.from_name, self.from_domain,
+                                 self.to_user, self.to_name, self.to_domain, proto, domain, self.user_agent, lport, '', '', '', 1, '', '', '', 0)
 
             try:
                 sock.settimeout(2)

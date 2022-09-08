@@ -101,7 +101,7 @@ def generate_random_string(len, only_hex):
     return(result_str)
 
 
-def create_message(method, contactdomain, fromuser, fromname, touser, toname, proto, domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, referto, withsdp):
+def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser, toname, todomain, proto, domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, referto, withsdp):
     if method == 'NOTIFY':
         starting_line = '%s sip:%s SIP/2.0' % (method, domain)
     else:
@@ -121,19 +121,19 @@ def create_message(method, contactdomain, fromuser, fromname, touser, toname, pr
     headers['Via'] = 'SIP/2.0/%s %s:%s;branch=%s' % (
         proto.upper(), contactdomain, fromport, branch)
     headers['From'] = '%s <sip:%s@%s>;tag=%s' % (
-        fromname, fromuser, domain, tag)
+        fromname, fromuser, fromdomain, tag)
 
     if method == 'NOTIFY':
         if totag == '':
-            headers['To'] = '<sip:%s>' % domain
+            headers['To'] = '<sip:%s>' % todomain
         else:
-            headers['To'] = '<sip:%s>;tag=%s' % (domain, totag)
+            headers['To'] = '<sip:%s>;tag=%s' % (todomain, totag)
     else:
         if totag == '':
-            headers['To'] = '%s <sip:%s@%s>' % (toname, touser, domain)
+            headers['To'] = '%s <sip:%s@%s>' % (toname, touser, todomain)
         else:
             headers['To'] = '%s <sip:%s@%s>;tag=%s' % (
-                toname, touser, domain, totag)
+                toname, touser, todomain, totag)
 
     if method != 'CANCEL':
         headers['Contact'] = '<sip:%s@%s:%d;transport=%s>' % (

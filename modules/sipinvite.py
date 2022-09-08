@@ -62,8 +62,10 @@ class SipInvite:
         self.contact_domain = ''
         self.from_user = '100'
         self.from_name = ''
+        self.from_domain = ''
         self.to_user = '100'
         self.to_name = ''
+        self.to_domain = ''
         self.user_agent = 'pplsip'
         self.transfer = ''
         self.verbose = '0'
@@ -88,6 +90,10 @@ class SipInvite:
         # SIP headers
         if self.domain == '':
             self.domain = self.ip
+        if self.from_domain == '':
+            self.from_domain = self.ip
+        if self.to_domain == '':
+            self.to_domain = self.ip
         if self.contact_domain == '':
             self.contact_domain = local_ip
         if self.auth_user != '':
@@ -123,8 +129,8 @@ class SipInvite:
         callid = generate_random_string(32, 1)
         tag = generate_random_string(8, 1)
 
-        msg = create_message('INVITE', self.contact_domain, self.from_user, self.from_name,
-                             self.to_user, self.to_name, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, 1, '', '', '', 1)
+        msg = create_message('INVITE', self.contact_domain, self.from_user, self.from_name, self.from_domain, 
+                             self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, 1, '', '', '', 1)
 
         print(YELLOW + '[+] Request INVITE')
         if self.verbose == 1:
@@ -197,8 +203,8 @@ class SipInvite:
                         digest += ', nc=%s' % nc
 
                     print(BYELLOW + '[+] Request INVITE')
-                    msg = create_message('INVITE', self. contact_domain, self.from_user, self.from_name,
-                                         self.to_user, self.to_name, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, 2, totag, local_ip, digest, '', 1)
+                    msg = create_message('INVITE', self. contact_domain, self.from_user, self.from_name, self.from_domain, 
+                                         self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, 2, totag, local_ip, digest, '', 1)
 
                     if self.verbose == 1:
                         print(WHITE + msg)
@@ -238,8 +244,8 @@ class SipInvite:
             if headers['response_code'] == '200':
                 # send ACK
                 print(YELLOW + '[+] Request ACK')
-                msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name,
-                                     self.to_user, self.to_name, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, 2, totag, local_ip, '', '', 0)
+                msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name, self.from_domain,
+                                     self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, 2, totag, local_ip, '', '', 0)
 
                 if self.verbose == 1:
                     print(WHITE + msg)
@@ -249,8 +255,8 @@ class SipInvite:
                 if self.transfer != '':
                     # send REFER
                     print(YELLOW + '[+] Request REFER')
-                    msg = create_message('REFER', self.contact_domain, self.from_user, self.from_name,
-                                         self.to_user, self.to_name, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, 3, totag, local_ip, '', self.transfer, 0)
+                    msg = create_message('REFER', self.contact_domain, self.from_user, self.from_name, self.from_domain,
+                                         self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, 3, totag, local_ip, '', self.transfer, 0)
 
                     if self.verbose == 1:
                         print(WHITE + msg)

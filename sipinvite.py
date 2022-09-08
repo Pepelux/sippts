@@ -12,7 +12,7 @@ from lib.params import get_sipinvite_args
 
 
 def main():
-    ip, rport, proto, domain, contact_domain, from_name, from_user, to_name, to_user, transfer, auth_user, auth_pwd, user_agent, verbose = get_sipinvite_args()
+    ip, rport, proto, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, transfer, auth_user, auth_pwd, user_agent, verbose = get_sipinvite_args()
 
     s = SipInvite()
 
@@ -23,8 +23,10 @@ def main():
     s.contact_domain = contact_domain
     s.from_name = from_name
     s.from_user = from_user
+    s.from_domain = from_domain
     s.to_name = to_name
     s.to_user = to_user
+    s.to_domain = to_domain
     s.transfer = transfer
     s.auth_user = auth_user
     s.auth_pwd = auth_pwd

@@ -197,8 +197,8 @@ class SipExten:
             if self.method == 'REGISTER':
                 self.from_user = to_user
 
-            msg = create_message(self.method, contact_domain, self.from_user, '',
-                                 to_user, '', self.proto, domain, self.user_agent, lport, '', '', '', 1, '', '', '', 0)
+            msg = create_message(self.method, contact_domain, self.from_user, '', self.domain,
+                                 to_user, '', self.domain, self.proto, domain, self.user_agent, lport, '', '', '', 1, '', '', '', 0)
 
             try:
                 sock.settimeout(5)

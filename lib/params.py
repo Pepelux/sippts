@@ -58,8 +58,10 @@ UDP, TCP and TLS protocols.
     parser.add_argument('-cd', '--contact_domain', type=str, help='Domain or IP address for Contact header. Ex: 10.0.1.2', dest='contact_domain', default='')
     parser.add_argument('-fn', '--from_name', type=str, help='From Name. Ex: Bob', dest='from_name', default='')
     parser.add_argument('-fu', '--from_user', type=str, help='From User (default: 100)', dest='from_user', default='100')
+    parser.add_argument('-fd', '--from_domain', type=str, help='From Domain. Ex: 10.0.0.1', dest='from_domain', default='')
     parser.add_argument('-tn', '--to_name', type=str, help='To Name. Ex: Alice', dest='to_name', default='')
     parser.add_argument('-tu', '--to_user', type=str, help='To User (default: 100)', dest='to_user', default='100')
+    parser.add_argument('-td', '--to_domain', type=str, help='To Domain. Ex: 10.0.0.1', dest='to_domain', default='')
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
     parser.add_argument('-th', '--threads', type=int, help='Number of threads (default: 100)', dest='threads', default=100)
     parser.add_argument('-ping', help='Ping host before scan', dest='ping', action="count")
@@ -91,8 +93,10 @@ UDP, TCP and TLS protocols.
         CONTACTDOMAIN = args.contact_domain
         FROMNAME = args.from_name
         FROMUSER = args.from_user
+        FROMDOMAIN = args.from_domain
         TONAME = args.to_name
         TOUSER = args.to_user
+        TODOMAIN = args.to_domain
         UA = args.user_agent
         THREADS = args.threads
         VERBOSE = args.verbose
@@ -102,7 +106,7 @@ UDP, TCP and TLS protocols.
         PING = args.ping
         FILE = args.file
 
-        return IPADDR, PORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, TONAME, TOUSER, UA, THREADS, VERBOSE, PING, FILE
+        return IPADDR, PORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, THREADS, VERBOSE, PING, FILE
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -275,8 +279,10 @@ possible and can recover most passwords based on the challenge response.
     parser.add_argument('-cd', '--contact_domain', type=str, help='Domain or IP address for Contact header. Ex: 10.0.1.2', dest='contact_domain', default='')
     parser.add_argument('-fn', '--from_name', type=str, help='From Name. Ex: Bob', dest='from_name', default='')
     parser.add_argument('-fu', '--from_user', type=str, help='From User (default: 100)', dest='from_user', default='100')
+    parser.add_argument('-fd', '--from_domain', type=str, help='From Domain. Ex: 10.0.0.1', dest='from_domain', default='')
     parser.add_argument('-tn', '--to_name', type=str, help='To Name. Ex: Alice', dest='to_name', default='')
     parser.add_argument('-tu', '--to_user', type=str, help='To User (default: 100)', dest='to_user', default='100')
+    parser.add_argument('-td', '--to_domain', type=str, help='To Domain. Ex: 10.0.0.1', dest='to_domain', default='')
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
     parser.add_argument('-o', '--output-file', type=str, help='Save digest to file in SipCrack format', dest='ofile', default='')
 
@@ -303,12 +309,14 @@ possible and can recover most passwords based on the challenge response.
         CONTACTDOMAIN = args.contact_domain
         FROMNAME = args.from_name
         FROMUSER = args.from_user
+        FROMDOMAIN = args.from_domain
         TONAME = args.to_name
         TOUSER = args.to_user
+        TODOMAIN = args.to_domain
         UA = args.user_agent
         OFILE = args.ofile
 
-        return IPADDR, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, TONAME, TOUSER, UA, OFILE
+        return IPADDR, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, OFILE
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -348,8 +356,10 @@ the call to a second external number.
     parser.add_argument('-cd', '--contact_domain', type=str, help='Domain or IP address for Contact header. Ex: 10.0.1.2', dest='contact_domain', default='')
     parser.add_argument('-fn', '--from_name', type=str, help='From Name. Ex: Bob', dest='from_name', default='')
     parser.add_argument('-fu', '--from_user', type=str, help='From User (default: 100)', dest='from_user', default='100')
+    parser.add_argument('-fd', '--from_domain', type=str, help='From Domain. Ex: 10.0.0.1', dest='from_domain', default='')
     parser.add_argument('-tn', '--to_name', type=str, help='To Name. Ex: Alice', dest='to_name', default='')
     parser.add_argument('-tu', '--to_user', type=str, help='To User (default: 100)', dest='to_user', default='100')
+    parser.add_argument('-td', '--to_domain', type=str, help='To Domain. Ex: 10.0.0.1', dest='to_domain', default='')
     parser.add_argument('-t', '--transfer', type=str, help='Phone number to transfer the call', dest='transfer_number', default='')
     parser.add_argument('--user', type=str, help='Authentication user', dest='user', default='')
     parser.add_argument('--pass', type=str, help='Authentication password', dest='pwd', default='')
@@ -371,15 +381,17 @@ the call to a second external number.
         CONTACTDOMAIN = args.contact_domain
         FROMNAME = args.from_name
         FROMUSER = args.from_user
+        FROMDOMAIN = args.from_domain
         TONAME = args.to_name
         TOUSER = args.to_user
+        TODOMAIN = args.to_domain
         TRANSFER = args.transfer_number
         USER = args.user
         PWD = args.pwd
         UA = args.user_agent
         VERBOSE = args.verbose
 
-        return IPADDR, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, TONAME, TOUSER, TRANSFER, USER, PWD, UA, VERBOSE
+        return IPADDR, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, TRANSFER, USER, PWD, UA, VERBOSE
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -491,8 +503,10 @@ SIP Send allow us to send a customized SIP message and analyze the response.
     parser.add_argument('-cd', '--contact_domain', type=str, help='Domain or IP address for Contact header. Ex: 10.0.1.2', dest='contact_domain', default='')
     parser.add_argument('-fn', '--from_name', type=str, help='From Name. Ex: Bob', dest='from_name', default='')
     parser.add_argument('-fu', '--from_user', type=str, help='From User (default: 100)', dest='from_user', default='100')
+    parser.add_argument('-fd', '--from_domain', type=str, help='From Domain. Ex: 10.0.0.1', dest='from_domain', default='')
     parser.add_argument('-tn', '--to_name', type=str, help='To Name. Ex: Alice', dest='to_name', default='')
     parser.add_argument('-tu', '--to_user', type=str, help='To User (default: 100)', dest='to_user', default='100')
+    parser.add_argument('-td', '--to_domain', type=str, help='To Domain. Ex: 10.0.0.1', dest='to_domain', default='')
     parser.add_argument('--digest', type=str, help='Digest', dest='digest', default='')
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
 
@@ -509,12 +523,14 @@ SIP Send allow us to send a customized SIP message and analyze the response.
         CONTACTDOMAIN = args.contact_domain
         FROMNAME = args.from_name
         FROMUSER = args.from_user
+        FROMDOMAIN = args.from_domain
         TONAME = args.to_name
         TOUSER = args.to_user
+        TODOMAIN = args.to_domain
         DIGEST = args.digest
         UA = args.user_agent
 
-        return IPADDR, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, TONAME, TOUSER, DIGEST, UA
+        return IPADDR, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, DIGEST, UA
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -652,8 +668,10 @@ SIP Flood send messages with a selected method
     parser.add_argument('-cd', '--contact_domain', type=str, help='Domain or IP address for Contact header. Ex: 10.0.1.2', dest='contact_domain', default='')
     parser.add_argument('-fn', '--from_name', type=str, help='From Name. Ex: Bob', dest='from_name', default='')
     parser.add_argument('-fu', '--from_user', type=str, help='From User (default: 100)', dest='from_user', default='100')
+    parser.add_argument('-fd', '--from_domain', type=str, help='From Domain. Ex: 10.0.0.1', dest='from_domain', default='')
     parser.add_argument('-tn', '--to_name', type=str, help='To Name. Ex: Alice', dest='to_name', default='')
     parser.add_argument('-tu', '--to_user', type=str, help='To User (default: 100)', dest='to_user', default='100')
+    parser.add_argument('-td', '--to_domain', type=str, help='To Domain. Ex: 10.0.0.1', dest='to_domain', default='')
     parser.add_argument('--digest', type=str, help='Digest', dest='digest', default='')
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
@@ -672,8 +690,10 @@ SIP Flood send messages with a selected method
         CONTACTDOMAIN = args.contact_domain
         FROMNAME = args.from_name
         FROMUSER = args.from_user
+        FROMDOMAIN = args.from_domain
         TONAME = args.to_name
         TOUSER = args.to_user
+        TODOMAIN = args.to_domain
         DIGEST = args.digest
         UA = args.user_agent
         VERBOSE = args.verbose
@@ -681,7 +701,7 @@ SIP Flood send messages with a selected method
         if MORE_VERBOSE == 1:
             VERBOSE = 2
 
-        return IPADDR, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, TONAME, TOUSER, DIGEST, UA, VERBOSE
+        return IPADDR, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, DIGEST, UA, VERBOSE
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)

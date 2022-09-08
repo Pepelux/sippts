@@ -42,8 +42,10 @@ class SipDigestLeak:
         self.contact_domain = ''
         self.from_user = '100'
         self.from_name = ''
+        self.from_domain = ''
         self.to_user = '100'
         self.to_name = ''
+        self.to_domain = ''
         self.user_agent = 'pplsip'
         self.ofile = ''
 
@@ -74,6 +76,10 @@ class SipDigestLeak:
         # SIP headers
         if self.domain == '':
             self.domain = ip
+        if self.from_domain == '':
+            self.from_domain = ip
+        if self.to_domain == '':
+            self.to_domain = ip
         if self.contact_domain == '':
             self.contact_domain = local_ip
 
@@ -101,8 +107,8 @@ class SipDigestLeak:
         callid = generate_random_string(32, 1)
         tag = generate_random_string(8, 1)
 
-        msg = create_message(method, self.contact_domain, self.from_user, self.from_name,
-                             self.to_user, self.to_name, proto, self.domain, self.user_agent, lport, branch, callid, tag, 1, '', '', '', 0)
+        msg = create_message(method, self.contact_domain, self.from_user, self.from_name, self.from_domain, 
+                             self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, 1, '', '', '', 0)
 
         print(YELLOW + '[=>] Request %s' % method + WHITE)
 
@@ -135,8 +141,8 @@ class SipDigestLeak:
             if headers['response_code'] == '200':
                 # send ACK
                 print(YELLOW + '[=>] Request ACK')
-                msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name,
-                                     self.to_user, self.to_name, proto, self.domain, self.user_agent, lport, branch, callid, tag, 1, totag, '', '', 0)
+                msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name, self.from_domain,
+                                     self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, 1, totag, '', '', 0)
 
                 sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 

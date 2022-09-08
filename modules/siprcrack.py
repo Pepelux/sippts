@@ -84,8 +84,8 @@ class SipRemoteCrack:
 
             data = dict()
 
-            msg = create_message('REGISTER', self.contact_domain, to_user, '',
-                                 to_user, '', self.proto, self.domain, self.user_agent, lport, '', '', '', 1, '', '', '', 0)
+            msg = create_message('REGISTER', self.contact_domain, to_user, '', self.domain,
+                                 to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', 1, '', '', '', 0)
 
             try:
                 sock.settimeout(5)
@@ -148,8 +148,8 @@ class SipRemoteCrack:
                         if nc != '':
                             digest += ', nc=%s' % nc
 
-                        msg = create_message('REGISTER', self.contact_domain, username, '',
-                                             to_user, '', self.proto, self.domain, self.user_agent, lport, '', callid, '', 1, '', digest, '', 0)
+                        msg = create_message('REGISTER', self.contact_domain, username, '', self.domain,
+                                             to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', callid, '', 1, '', digest, '', 0)
 
                         if self.proto == 'TLS':
                             sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))

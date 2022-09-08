@@ -42,8 +42,10 @@ class SipSend:
         self.contact_domain = ''
         self.from_user = '100'
         self.from_name = ''
+        self.from_domain = ''
         self.to_user = '100'
         self.to_name = ''
+        self.to_domain = ''
         self.user_agent = 'pplsip'
         self.digest = ''
 
@@ -91,11 +93,15 @@ class SipSend:
 
         if self.domain == '':
             self.domain = self.ip
+        if self.from_domain == '':
+            self.from_domain = self.ip
+        if self.to_domain == '':
+            self.to_domain = self.ip
         if self.contact_domain == '':
             self.contact_domain = '10.0.0.1'
 
-        msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name,
-                             self.to_user, self.to_name, self.proto, self.domain, self.user_agent, lport, '', '', '', 1, '', self.digest, '', 0)
+        msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain, 
+                             self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, '', '', '', 1, '', self.digest, '', 0)
 
         try:
             sock.settimeout(5)
