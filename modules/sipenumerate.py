@@ -107,8 +107,8 @@ class SipEnumerate:
             exit()
 
         for method in supported_methods:
-            msg = create_message(method, self.contact_domain, self.from_user, self.from_name,
-                                 self.to_user, self.to_name, self.proto, self.domain, self.user_agent, lport, '', '', '', 1, '', self.digest, '', 0)
+            msg = create_message(method, self.contact_domain, self.from_user, self.from_name, self.domain,
+                                 self.to_user, self.to_name, self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', 1, '', self.digest, '', 0)
 
             try:
                 if self.proto == 'TLS':
