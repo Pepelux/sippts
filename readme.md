@@ -56,6 +56,10 @@ Sippts is a set of tools to audit VoIP servers and devices using SIP protocol. S
 
 [Click here to read more about SIPCrack](https://github.com/Pepelux/sippts/wiki/SIPCrack)
 
+  * _**SipTshark**_ Extract data of SIP protocol from a PCAP file.
+
+[Click here to read more about SIPTshark](https://github.com/Pepelux/sippts/wiki/SIPTshark)
+
 ## Operating System ##
 Sippts has been tested on:
   * Linux
