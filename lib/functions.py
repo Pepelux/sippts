@@ -144,7 +144,7 @@ def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser
     if digest != '':
         headers['Authorization'] = '%s' % digest
 
-    headers['CSeq'] = '%d %s' % (cseq, method)
+    headers['CSeq'] = '%s %s' % (cseq, method)
     headers['Max-Forwards'] = '70'
 
     if method == 'REFER':

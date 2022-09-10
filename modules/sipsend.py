@@ -112,9 +112,7 @@ class SipSend:
             self.contact_domain = '10.0.0.1'
 
         msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
-                             self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, int(self.cseq), self.to_tag, self.digest, '', self.sdp)
-        # msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
-        #                      self.domain, self.user_agent, lport, '', '', '', 1, '', self.digest, '', 0)
+                             self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, self.to_tag, self.digest, '', self.sdp)
 
         try:
             sock.settimeout(5)

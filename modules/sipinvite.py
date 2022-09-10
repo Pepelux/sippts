@@ -133,7 +133,7 @@ class SipInvite:
         tag = generate_random_string(8, 1)
 
         msg = create_message('INVITE', self.contact_domain, self.from_user, self.from_name, self.from_domain, 
-                             self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, 1, '', '', '', 1)
+                             self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '1', '', '', '', 1)
 
         print(YELLOW + '[+] Request INVITE')
         if self.verbose == 1:
@@ -210,7 +210,7 @@ class SipInvite:
 
                     print(BYELLOW + '[+] Request INVITE')
                     msg = create_message('INVITE', self. contact_domain, self.from_user, self.from_name, self.from_domain, 
-                                         self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, 2, totag, local_ip, digest, '', 1)
+                                         self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '2', totag, local_ip, digest, '', 1)
 
                     if self.verbose == 1:
                         print(WHITE + msg)
@@ -254,7 +254,7 @@ class SipInvite:
                 # send ACK
                 print(YELLOW + '[+] Request ACK')
                 msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                                     self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, 2, totag, local_ip, '', '', 0)
+                                     self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '2', totag, local_ip, '', '', 0)
 
                 if self.verbose == 1:
                     print(WHITE + msg)
@@ -265,7 +265,7 @@ class SipInvite:
                     # send REFER
                     print(YELLOW + '[+] Request REFER')
                     msg = create_message('REFER', self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                                         self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, 3, totag, local_ip, '', self.transfer, 0)
+                                         self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '3', totag, local_ip, '', self.transfer, 0)
 
                     if self.verbose == 1:
                         print(WHITE + msg)
