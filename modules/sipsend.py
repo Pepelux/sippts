@@ -43,11 +43,17 @@ class SipSend:
         self.from_user = '100'
         self.from_name = ''
         self.from_domain = ''
+        self.from_tag = ''
         self.to_user = '100'
         self.to_name = ''
         self.to_domain = ''
+        self.to_tag = ''
         self.user_agent = 'pplsip'
         self.digest = ''
+        self.branch = ''
+        self.callid = ''
+        self.cseq = '1'
+        self.sdp = 0
 
     def start(self):
         supported_protos = ['UDP', 'TCP', 'TLS']
@@ -56,6 +62,11 @@ class SipSend:
 
         self.method = self.method.upper()
         self.proto = self.proto.upper()
+
+        if self.sdp == None:
+            self.sdp = 0
+        if self.cseq == None or self.cseq == '':
+            self.cseq = '1'
 
         # if rport is by default but we want to scan TLS protocol, use port 5061
         if self.rport == 5060 and self.proto == 'TLS':
@@ -100,8 +111,10 @@ class SipSend:
         if self.contact_domain == '':
             self.contact_domain = '10.0.0.1'
 
-        msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain, 
-                             self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, '', '', '', 1, '', self.digest, '', 0)
+        msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
+                             self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, int(self.cseq), self.to_tag, self.digest, '', self.sdp)
+        # msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
+        #                      self.domain, self.user_agent, lport, '', '', '', 1, '', self.digest, '', 0)
 
         try:
             sock.settimeout(5)

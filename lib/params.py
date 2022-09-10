@@ -504,10 +504,16 @@ SIP Send allow us to send a customized SIP message and analyze the response.
     parser.add_argument('-fn', '--from_name', type=str, help='From Name. Ex: Bob', dest='from_name', default='')
     parser.add_argument('-fu', '--from_user', type=str, help='From User (default: 100)', dest='from_user', default='100')
     parser.add_argument('-fd', '--from_domain', type=str, help='From Domain. Ex: 10.0.0.1', dest='from_domain', default='')
+    parser.add_argument('-ft', '--from_tag', type=str, help='From Tag', dest='from_tag', default='')
     parser.add_argument('-tn', '--to_name', type=str, help='To Name. Ex: Alice', dest='to_name', default='')
     parser.add_argument('-tu', '--to_user', type=str, help='To User (default: 100)', dest='to_user', default='100')
     parser.add_argument('-td', '--to_domain', type=str, help='To Domain. Ex: 10.0.0.1', dest='to_domain', default='')
+    parser.add_argument('-tt', '--to_tag', type=str, help='To Tag', dest='to_tag', default='')
     parser.add_argument('--digest', type=str, help='Digest', dest='digest', default='')
+    parser.add_argument('--branch', type=str, help='Branch', dest='branch', default='')
+    parser.add_argument('-cid', '--callid', type=str, help='CallID', dest='callid', default='')
+    parser.add_argument('--cseq', type=str, help='Seq number', dest='cseq', default='')
+    parser.add_argument('--sdp', help='Include SDP', dest='sdp', action="count")
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
 
     # Array for all arguments passed to script
@@ -524,13 +530,19 @@ SIP Send allow us to send a customized SIP message and analyze the response.
         FROMNAME = args.from_name
         FROMUSER = args.from_user
         FROMDOMAIN = args.from_domain
+        FROMTAG = args.from_tag
         TONAME = args.to_name
         TOUSER = args.to_user
+        TOTAG = args.to_tag
         TODOMAIN = args.to_domain
         DIGEST = args.digest
+        BRANCH = args.branch
+        CALLID = args.callid
+        CSEQ = args.cseq
+        SDP = args.sdp
         UA = args.user_agent
 
-        return IPADDR, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, DIGEST, UA
+        return IPADDR, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, DIGEST, BRANCH, CALLID, CSEQ, SDP, UA
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
