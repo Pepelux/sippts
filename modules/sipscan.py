@@ -321,7 +321,7 @@ class SipScan:
                 if self.verbose == 2:
                     print(BWHITE + '[+] Sending to %s:%d/%s ...' %
                           (ipaddr, port, proto))
-                    print(WHITE + msg)
+                    print(YELLOW + msg)
 
                 if proto == 'TLS':
                     resp = sock_ssl.recv(4096)
@@ -333,7 +333,7 @@ class SipScan:
                 if self.verbose == 2:
                     print(BWHITE + '[+] Receiving from %s:%d ...' %
                           (ip, rport))
-                    print(WHITE + resp.decode())
+                    print(GREEN + resp.decode())
 
                 headers = parse_message(resp.decode())
 
