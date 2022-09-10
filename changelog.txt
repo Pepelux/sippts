@@ -1,5 +1,8 @@
 devel version
 - sipsend: added params from_tag, to_tag, branch, callid, cseq, sdp
+- sipinvite: added param --no-sdp to send the INVITE without SDP
+- sipenumerate: added verbose mode
+- bug fixes
 
 v3.1.0 (Sep/2022)
 - Added parameter From Domain and To Domain to SipScan, SipSend, SipInvite, SipFlood and SipDigestLeak
