@@ -46,6 +46,7 @@ class SipEnumerate:
         self.to_name = ''
         self.user_agent = 'pplsip'
         self.digest = ''
+        self.verbose = '0'
 
     def start(self):
         supported_protos = ['UDP', 'TCP', 'TLS']
@@ -110,6 +111,11 @@ class SipEnumerate:
             msg = create_message(method, self.contact_domain, self.from_user, self.from_name, self.domain,
                                  self.to_user, self.to_name, self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, '', 0)
 
+
+            if self.verbose == 1:
+                print(BWHITE + '[+] Sending to %s:%s/%s ...' % (self.ip, self.rport, self.proto))
+                print(YELLOW + msg)
+
             try:
                 if self.proto == 'TLS':
                     sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
@@ -136,7 +142,11 @@ class SipEnumerate:
                         resdata = resdata + YELLOW + \
                             '%s %s' % (rescode, restext)
 
-                print(BCYAN + '%s' % method + WHITE + ' => %s' % resdata)
+                if self.verbose == 1:
+                    print(BWHITE + '[+] Receiving from %s:%d ...' % (self.ip, self.rport))
+                    print(GREEN + resp.decode())
+                else:
+                    print(BCYAN + '%s' % method + WHITE + ' => %s' % resdata)
             except socket.timeout:
                 print(BGREEN + '%s' % method + RED + ' => Timeout error')
                 pass

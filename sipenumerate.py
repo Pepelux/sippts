@@ -12,7 +12,7 @@ from lib.params import get_sipenumerate_args
 
 
 def main():
-    ip, rport, proto, domain, contact_domain, from_name, from_user, to_name, to_user, user_agent = get_sipenumerate_args()
+    ip, rport, proto, domain, contact_domain, from_name, from_user, to_name, to_user, user_agent, verbose = get_sipenumerate_args()
 
     s = SipEnumerate()
     s.ip = ip
@@ -25,6 +25,7 @@ def main():
     s.from_user = from_user
     s.to_user = to_user
     s.user_agent = user_agent
+    s.verbose = verbose
 
     s.start()
 

@@ -585,6 +585,7 @@ Enumerate available methods of a SIP sevice/server.
     parser.add_argument('-tn', '--to_name', type=str, help='To Name. Ex: Alice', dest='to_name', default='')
     parser.add_argument('-tu', '--to_user', type=str, help='To User (default: 100)', dest='to_user', default='100')
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
+    parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -601,8 +602,9 @@ Enumerate available methods of a SIP sevice/server.
         TONAME = args.to_name
         TOUSER = args.to_user
         UA = args.user_agent
+        VERBOSE = args.verbose
 
-        return IPADDR, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, TONAME, TOUSER, UA
+        return IPADDR, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, TONAME, TOUSER, UA, VERBOSE
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
