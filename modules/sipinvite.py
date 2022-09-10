@@ -82,6 +82,9 @@ class SipInvite:
             print(BRED + 'Protocol %s is not supported' % self.proto)
             sys.exit()
 
+        if self.rport == 5060 and self.proto == 'TLS':
+            self.rport = 5061
+
         # my IP address
         local_ip = get_machine_default_ip()
 
@@ -155,7 +158,10 @@ class SipInvite:
 
             while rescode[:1] == '1':
                 # receive temporary code
-                resp = sock.recv(4096)
+                if self.proto == 'TLS':
+                    resp = sock_ssl.recv(4096)
+                else:
+                    resp = sock.recv(4096)
 
                 headers = parse_message(resp.decode())
 
@@ -226,7 +232,10 @@ class SipInvite:
 
                     while rescode[:1] == '1':
                         # receive temporary code
-                        resp = sock.recv(4096)
+                        if self.proto == 'TLS':
+                            resp = sock_ssl.recv(4096)
+                        else:
+                            resp = sock.recv(4096)
 
                         headers = parse_message(resp.decode())
 
@@ -278,7 +287,10 @@ class SipInvite:
 
                 while bye == '':
                     # wait bor BYE
-                    resp = sock.recv(4096)
+                    if self.proto == 'TLS':
+                        resp = sock_ssl.recv(4096)
+                    else:
+                        resp = sock.recv(4096)
 
                     try:
                         headers = parse_message(resp.decode())
