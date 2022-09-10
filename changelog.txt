@@ -2,6 +2,7 @@ devel version
 - sipsend: added params from_tag, to_tag, branch, callid, cseq, sdp
 - sipinvite: added param --no-sdp to send the INVITE without SDP
 - sipenumerate: added verbose mode
+- siptshark: new module to extract info of a PCAP file
 - bug fixes
 
 v3.1.0 (Sep/2022)

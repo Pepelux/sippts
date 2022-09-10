@@ -891,3 +891,75 @@ More info about the vulnerability: https://www.rtpbleed.com/
         sys.exit(1)
 
 
+def get_tshark_args():
+    print(WHITE)
+    # screen_clear()
+
+    parser = argparse.ArgumentParser(
+        formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
+            prog, max_help_position=50),
+        description= RED + u'''
+████████╗░██████╗██╗░░██╗░█████╗░██████╗░██╗░░██╗
+╚══██╔══╝██╔════╝██║░░██║██╔══██╗██╔══██╗██║░██╔╝
+░░░██║░░░╚█████╗░███████║███████║██████╔╝█████═╝░
+░░░██║░░░░╚═══██╗██╔══██║██╔══██║██╔══██╗██╔═██╗░
+░░░██║░░░██████╔╝██║░░██║██║░░██║██║░░██║██║░╚██╗
+░░░╚═╝░░░╚═════╝░╚═╝░░╚═╝╚═╝░░╚═╝╚═╝░░╚═╝╚═╝░░╚═╝
+
+''' + BWHITE + '''   ''' + GREEN + ''' █▀█ █▀▀ █▀█ █▀▀ █░░ █░█ ▀▄▀''' + BWHITE + '''
+''' + BWHITE + '''BY ''' + GREEN + ''' █▀▀ ██▄ █▀▀ ██▄ █▄▄ █▄█ █░█''' + BWHITE + '''
+
+''' + BLUE + ''' -= TShark filters =-''' + WHITE,
+        epilog=WHITE + '''
+Filters:
+-------
+stats               SIP packet statistics
+dialogs             Show all SIP dialogs
+auth                Show auth digest
+messages            Show all SIP messages
+method <method>     Filter frames by method: register, invite, ...
+callids             Show all call-ID
+callid <cid>        Filter by call-ID
+frame <id>          Show a SIP message filtering by frame number
+rtp                 Show all RTP streams
+''' + WHITE + '''
+\nPCAP manipulation with TShark.
+ 
+''')
+
+    # Add arguments
+    parser.add_argument('-f', '--file', type=str, help='PCAP file to analyze', required=True, dest='file', default="")
+    parser.add_argument('-filter', help='Filter data to show', dest='filter', default="")
+    parser.add_argument('-rtp_extract', help='Extract RTP streams. Ex: --rtp_extract -p 1210 -o rtp.pcap', dest='rtpextract', action="count")
+    parser.add_argument('-rport', type=str, help='RTP port to extract streams', dest='rtpport', default="")
+    parser.add_argument('-o', '--output-file', type=str, help='Save RTP streams into a PCAP file', dest='ofile', default="")
+
+    # Array for all arguments passed to script
+    args = parser.parse_args()
+
+    if args.rtpextract and (not args.rtpport or not args.ofile):
+        print(
+            'error: --rtp_extract requires -p/--rtp_port and -o/--output_file')
+        sys.exit()
+
+    if not args.rtpextract and (args.rtpport or args.ofile):
+        print(
+            'error: --rtp_extract requires -p/--rtp_port and -o/--output_file')
+        sys.exit()
+
+    if len(sys.argv) < 4:
+        print(
+            'error: you must write a filter (with -filter). Use -h to show help')
+        sys.exit()
+
+    try:
+        FILE = args.file
+        FILTER = args.filter
+        RTPPORT = args.rtpport
+        OFILE = args.ofile
+
+        return FILE, FILTER, RTPPORT, OFILE
+    except ValueError:
+        print('[-] Error')
+        sys.exit(1)
+
