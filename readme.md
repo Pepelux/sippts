@@ -60,6 +60,18 @@ Sippts is a set of tools to audit VoIP servers and devices using SIP protocol. S
 
 [Click here to read more about SIPTshark](https://github.com/Pepelux/sippts/wiki/SIPTshark)
 
+  * _**RTPBleed**_ to exploit RTPBleed vulnerability sending data to RTP ports.
+
+[Click here to read more about RTPBleed](https://github.com/Pepelux/sippts/wiki/RTPBleed)
+
+  * _**RTCPBleed**_ to exploit RTPBleed vulnerability sending data to RTCP ports.
+
+[Click here to read more about RTCPBleed](https://github.com/Pepelux/sippts/wiki/RTCPBleed)
+
+  * _**RTPBleedFlood**_ to exploit RTPBleed vulnerability flooding a RTP port with an active dialog.
+
+[Click here to read more about RTPBleedFlood](https://github.com/Pepelux/sippts/wiki/RTPBleedFlood)
+
 ## Operating System ##
 Sippts has been tested on:
   * Linux
