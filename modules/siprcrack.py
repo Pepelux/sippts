@@ -45,6 +45,7 @@ class SipRemoteCrack:
         self.proto = 'UDP'
         self.exten = ''
         self.prefix = ''
+        self.ext_len = ''
         self.domain = ''
         self.contact_domain = ''
         self.wordlist = ''
@@ -231,9 +232,15 @@ class SipRemoteCrack:
             m = re.search('([0-9]+)-([0-9]+)', p)
             if m:
                 for x in range(int(m.group(1)), int(m.group(2))+1):
-                    self.extens.append(x)
+                    if self.ext_len != '':
+                        self.extens.append(str(x).zfill(int(self.ext_len)))
+                    else:
+                        self.extens.append(x)
             else:
-                self.extens.append(p)
+                if self.ext_len != '':
+                    self.extens.append(str(p).zfill(int(self.ext_len)))
+                else:
+                    self.extens.append(p)
 
         signal.signal(signal.SIGINT, self.signal_handler)
         print(BYELLOW + '\nPress Ctrl+C to stop\n')
@@ -283,7 +290,8 @@ class SipRemoteCrack:
                 if self.run == True:
                     for i, val in enumerate(values):
                         val_ipaddr = val[0]
-                        val_exten = int(val[1])
+                        # val_exten = int(val[1])
+                        val_exten = val[1]
                         to_user = '%s%s' % (self.prefix, val_exten)
                         if not self.domain or self.domain == '':
                             self.domain = val_ipaddr

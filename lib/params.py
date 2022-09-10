@@ -212,6 +212,7 @@ passwords for several users using bruteforce.
     parser.add_argument('-r', '--remote_port', type=int, help='Remote port (default: 5060)', dest='remote_port', default=5060)
     parser.add_argument('-e', '--exten', type=str, help='Extensions to attack. Ex: 100 | 100,102,105 | 100-200 | 100,102,200-300', dest='exten', required=True)
     parser.add_argument('-pr', '--prefix', type=str, help='Prefix for extensions, used for authentication', dest='prefix', default='')
+    parser.add_argument('-l', '--lenght', type=str, help='Lenght of the extensions (if sett, left padding with 0\'s', dest='lenght', default='')
     parser.add_argument('-p', '--proto', type=str, help='Protocol: udp|tcp|tls (default: udp)', dest='proto', default='udp')
     parser.add_argument('-d', '--domain', type=str, help='SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)', dest='domain', default='')
     parser.add_argument('-cd', '--contact_domain', type=str, help='Domain or IP address for Contact header. Ex: 10.0.1.2', dest='contact_domain', default='')
@@ -231,6 +232,7 @@ passwords for several users using bruteforce.
         RPORT = args.remote_port
         EXTEN = args.exten
         PREFIX = args.prefix
+        LENGHT = args.lenght
         PROTO = args.proto
         DOMAIN = args.domain
         CONTACTDOMAIN = args.contact_domain
@@ -238,7 +240,7 @@ passwords for several users using bruteforce.
         WORDLIST = args.wordlist
         THREADS = args.threads
 
-        return IPADDR, RPORT, EXTEN, PREFIX, PROTO, DOMAIN, CONTACTDOMAIN, UA, WORDLIST, THREADS
+        return IPADDR, RPORT, EXTEN, PREFIX, LENGHT, PROTO, DOMAIN, CONTACTDOMAIN, UA, WORDLIST, THREADS
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
