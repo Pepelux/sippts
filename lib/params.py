@@ -26,7 +26,7 @@ WHITE = '\033[0;37;40m'
 
 def get_sipscan_args():
     print(WHITE)
-    screen_clear()
+    # screen_clear()
 
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
@@ -114,7 +114,7 @@ UDP, TCP and TLS protocols.
 
 def get_sipexten_args():
     print(WHITE)
-    screen_clear()
+    # screen_clear()
 
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
@@ -184,7 +184,7 @@ or not. Sipexten uses multithread and can check several IPs and port ranges.
 
 def get_sipremotecrack_args():
     print(WHITE)
-    screen_clear()
+    # screen_clear()
 
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
@@ -246,7 +246,7 @@ passwords for several users using bruteforce.
 
 def get_sipdigestleak_args():
     print(WHITE)
-    screen_clear()
+    # screen_clear()
 
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
@@ -324,7 +324,7 @@ possible and can recover most passwords based on the challenge response.
 
 def get_sipinvite_args():
     print(WHITE)
-    screen_clear()
+    # screen_clear()
 
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
@@ -399,7 +399,7 @@ the call to a second external number.
 
 def get_sipcrack_args():
     print(WHITE)
-    screen_clear()
+    # screen_clear()
 
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
@@ -472,7 +472,7 @@ alphabet=0123456789abcdef # Custom alphabet
 
 def get_sipsend_args():
     print(WHITE)
-    screen_clear()
+    # screen_clear()
 
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
@@ -550,7 +550,7 @@ SIP Send allow us to send a customized SIP message and analyze the response.
 
 def get_sipenumerate_args():
     print(WHITE)
-    screen_clear()
+    # screen_clear()
 
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
@@ -608,7 +608,7 @@ Enumerate available methods of a SIP sevice/server.
 
 def get_sipdump_args():
     print(WHITE)
-    screen_clear()
+    # screen_clear()
 
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
@@ -649,7 +649,7 @@ Extracts SIP Digest authentications from a PCAP file
 
 def get_sipflood_args():
     print(WHITE)
-    screen_clear()
+    # screen_clear()
 
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
@@ -721,7 +721,7 @@ SIP Flood send messages with a selected method
 
 def get_rtpbleed_args():
     print(WHITE)
-    screen_clear()
+    # screen_clear()
 
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
@@ -783,7 +783,7 @@ More info about the vulnerability: https://www.rtpbleed.com/
 
 def get_rtcpbleed_args():
     print(WHITE)
-    screen_clear()
+    # screen_clear()
 
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
@@ -841,7 +841,7 @@ More info about the vulnerability: https://www.rtpbleed.com/
 
 def get_rtcbleed_flood_args():
     print(WHITE)
-    screen_clear()
+    # screen_clear()
 
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
