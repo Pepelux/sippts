@@ -100,7 +100,7 @@ class SipShark:
             print(WHITE)
 
         if self.filter.lower() == 'auth':
-            print(BYELLOW + 'Captured Authenticacion Digest:' + WHITE)
+            print(BYELLOW + 'Captured Authentication Digest:' + WHITE)
             print(GREEN)
             os.system(
                 "tshark -r %s -Y sip -T fields -e sip.auth |grep username |sort |uniq |sed 's/\\\\r\\\\n/\\n/g'" % self.file)

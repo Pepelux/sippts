@@ -572,7 +572,7 @@ def get_sipenumerate_args():
 
 ''' + BLUE + ''' -= Enumerate methods =-''' + WHITE,
         epilog=BWHITE + '''
-Enumerate available methods of a SIP sevice/server.
+Enumerate available methods of a SIP service/server.
  
 ''')
 
