@@ -71,6 +71,9 @@ class SipInvite:
         self.verbose = '0'
         self.auth_user = ''
         self.auth_pwd = ''
+        self.nosdp = 0
+
+        self.sdp = 1
 
     def start(self):
         supported_protos = ['UDP', 'TCP', 'TLS']
@@ -101,6 +104,10 @@ class SipInvite:
             self.contact_domain = local_ip
         if self.auth_user != '':
             self.from_user = self.auth_user
+        if self.nosdp != None and self.nosdp == 1:
+            self.sdp = 0
+        
+        print(self.sdp)
 
         print(BWHITE + '[!] Target: ' + YELLOW + '%s' % self.ip + WHITE + ':' +
               YELLOW + '%s' % self.rport + WHITE + '/' + YELLOW + '%s' % self.proto)
@@ -139,7 +146,7 @@ class SipInvite:
         tag = generate_random_string(8, 1)
 
         msg = create_message('INVITE', self.contact_domain, self.from_user, self.from_name, self.from_domain, 
-                             self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '1', '', '', '', 1)
+                             self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '1', '', '', '', self.sdp)
 
         print(YELLOW + '[+] Request INVITE')
         if self.verbose == 1:
@@ -216,7 +223,7 @@ class SipInvite:
 
                     print(BYELLOW + '[+] Request INVITE')
                     msg = create_message('INVITE', self. contact_domain, self.from_user, self.from_name, self.from_domain, 
-                                         self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '2', totag, local_ip, digest, '', 1)
+                                         self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '2', totag, local_ip, digest, '', self.sdp)
 
                     if self.verbose == 1:
                         print(WHITE + msg)
