@@ -123,8 +123,14 @@ class SipInvite:
         try:
             sock.bind((bind, lport))
         except:
-            lport = get_free_port()
-            sock.bind((bind, lport))
+            try:
+                # First try
+                lport = get_free_port()
+                sock.bind((bind, lport))
+            except:
+                # Second try
+                lport = get_free_port()
+                sock.bind((bind, lport))
 
         host = (self.ip, int(self.rport))
 
