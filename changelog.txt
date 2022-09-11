@@ -4,6 +4,7 @@ devel version
 - sipenumerate: added verbose mode
 - siprcrack: added param lenght to force the size of extensions
 - siptshark: new module to extract info from a PCAP file
+- added class Color and para nocolor to show console responses in ansii
 - bug fixes
 
 v3.1.0 (Sep/2022)

@@ -32,25 +32,7 @@ import sys
 import ipaddress
 import ssl
 from lib.functions import create_message, create_response_ok, parse_message, generate_random_string, get_machine_default_ip, parse_digest, calculateHash, get_free_port
-
-BRED = '\033[1;31;40m'
-RED = '\033[0;31;40m'
-BRED_BLACK = '\033[1;30;41m'
-RED_BLACK = '\033[0;30;41m'
-BGREEN = '\033[1;32;40m'
-GREEN = '\033[0;32;40m'
-BGREEN_BLACK = '\033[1;30;42m'
-GREEN_BLACK = '\033[0;30;42m'
-BYELLOW = '\033[1;33;40m'
-YELLOW = '\033[0;33;40m'
-BBLUE = '\033[1;34;40m'
-BLUE = '\033[0;34;40m'
-BMAGENTA = '\033[1;35;40m'
-MAGENTA = '\033[0;35;40m'
-BCYAN = '\033[1;36;40m'
-CYAN = '\033[0;36;40m'
-BWHITE = '\033[1;37;40m'
-WHITE = '\033[0;37;40m'
+from lib.color import Color
 
 
 class SipInvite:
@@ -72,17 +54,23 @@ class SipInvite:
         self.auth_user = ''
         self.auth_pwd = ''
         self.nosdp = 0
+        self.nocolor = ''
 
         self.sdp = 1
+
+        self.c = Color()
 
     def start(self):
         supported_protos = ['UDP', 'TCP', 'TLS']
 
         self.proto = self.proto.upper()
 
+        if self.nocolor == 1:
+            self.c.ansy()
+
         # check protocol
         if self.proto not in supported_protos:
-            print(BRED + 'Protocol %s is not supported' % self.proto)
+            print(self.c.BRED + 'Protocol %s is not supported' % self.proto)
             sys.exit()
 
         if self.rport == 5060 and self.proto == 'TLS':
@@ -106,14 +94,16 @@ class SipInvite:
             self.from_user = self.auth_user
         if self.nosdp != None and self.nosdp == 1:
             self.sdp = 0
-        
+
         print(self.sdp)
 
-        print(BWHITE + '[!] Target: ' + YELLOW + '%s' % self.ip + WHITE + ':' +
-              YELLOW + '%s' % self.rport + WHITE + '/' + YELLOW + '%s' % self.proto)
-        print(BWHITE + '[!] Call From: ' + YELLOW + '%s' % self.from_user)
-        print(BWHITE + '[!] Call To: ' + YELLOW + '%s' % self.to_user)
-        print(WHITE)
+        print(self.c.BWHITE + '[!] Target: ' + self.c.YELLOW + '%s' % self.ip + self.c.WHITE + ':' +
+              self.c.YELLOW + '%s' % self.rport + self.c.WHITE + '/' + self.c.YELLOW + '%s' % self.proto)
+        print(self.c.BWHITE + '[!] Call From: ' +
+              self.c.YELLOW + '%s' % self.from_user)
+        print(self.c.BWHITE + '[!] Call To: ' +
+              self.c.YELLOW + '%s' % self.to_user)
+        print(self.c.WHITE)
 
         try:
             if self.proto == 'UDP':
@@ -121,7 +111,7 @@ class SipInvite:
             else:
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         except socket.error:
-            print(RED+'Failed to create socket')
+            print(self.c.RED+'Failed to create socket')
             sys.exit(1)
 
         bind = '0.0.0.0'
@@ -145,12 +135,12 @@ class SipInvite:
         callid = generate_random_string(32, 1)
         tag = generate_random_string(8, 1)
 
-        msg = create_message('INVITE', self.contact_domain, self.from_user, self.from_name, self.from_domain, 
+        msg = create_message('INVITE', self.contact_domain, self.from_user, self.from_name, self.from_domain,
                              self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '1', '', '', '', self.sdp)
 
-        print(YELLOW + '[+] Request INVITE')
+        print(self.c.YELLOW + '[+] Request INVITE')
         if self.verbose == 1:
-            print(WHITE + msg)
+            print(self.c.WHITE + msg)
 
         try:
             sock.settimeout(15)
@@ -182,9 +172,9 @@ class SipInvite:
                     response = '%s %s' % (
                         headers['response_code'], headers['response_text'])
                     rescode = headers['response_code']
-                    print(BWHITE + '[-] Response %s' % response)
+                    print(self.c.BWHITE + '[-] Response %s' % response)
                     if self.verbose == 1:
-                        print(WHITE + resp.decode())
+                        print(self.c.WHITE + resp.decode())
 
                     totag = headers['totag']
 
@@ -221,12 +211,12 @@ class SipInvite:
                     if nc != '':
                         digest += ', nc=%s' % nc
 
-                    print(BYELLOW + '[+] Request INVITE')
-                    msg = create_message('INVITE', self. contact_domain, self.from_user, self.from_name, self.from_domain, 
+                    print(self.c.BYELLOW + '[+] Request INVITE')
+                    msg = create_message('INVITE', self. contact_domain, self.from_user, self.from_name, self.from_domain,
                                          self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '2', totag, local_ip, digest, '', self.sdp)
 
                     if self.verbose == 1:
-                        print(WHITE + msg)
+                        print(self.c.WHITE + msg)
 
                     sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
@@ -237,9 +227,9 @@ class SipInvite:
                         response = '%s %s' % (
                             headers['response_code'], headers['response_text'])
                         rescode = headers['response_code']
-                        print(BYELLOW + '[-] Response %s' % response)
+                        print(self.c.BYELLOW + '[-] Response %s' % response)
                         if self.verbose == 1:
-                            print(WHITE + resp.decode())
+                            print(self.c.WHITE + resp.decode())
 
                     rescode = '100'
 
@@ -256,32 +246,33 @@ class SipInvite:
                             response = '%s %s' % (
                                 headers['response_code'], headers['response_text'])
                             rescode = headers['response_code']
-                            print(BYELLOW + '[-] Response %s' % response)
+                            print(self.c.BYELLOW +
+                                  '[-] Response %s' % response)
                             if self.verbose == 1:
-                                print(WHITE + resp.decode())
+                                print(self.c.WHITE + resp.decode())
 
                             totag = headers['totag']
 
             # receive 200 Ok - call answered
             if headers['response_code'] == '200':
                 # send ACK
-                print(YELLOW + '[+] Request ACK')
+                print(self.c.YELLOW + '[+] Request ACK')
                 msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name, self.from_domain,
                                      self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '2', totag, local_ip, '', '', 0)
 
                 if self.verbose == 1:
-                    print(WHITE + msg)
+                    print(self.c.WHITE + msg)
 
                 sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
                 if self.transfer != '':
                     # send REFER
-                    print(YELLOW + '[+] Request REFER')
+                    print(self.c.YELLOW + '[+] Request REFER')
                     msg = create_message('REFER', self.contact_domain, self.from_user, self.from_name, self.from_domain,
                                          self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '3', totag, local_ip, '', self.transfer, 0)
 
                     if self.verbose == 1:
-                        print(WHITE + msg)
+                        print(self.c.WHITE + msg)
 
                     sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
@@ -292,9 +283,9 @@ class SipInvite:
                         response = '%s %s' % (
                             headers['response_code'], headers['response_text'])
                         rescode = headers['response_code']
-                        print(YELLOW + '[-] Response %s' % response)
+                        print(self.c.YELLOW + '[-] Response %s' % response)
                         if self.verbose == 1:
-                            print(WHITE + resp.decode())
+                            print(self.c.WHITE + resp.decode())
 
                 bye = ''
 
@@ -308,9 +299,9 @@ class SipInvite:
                     try:
                         headers = parse_message(resp.decode())
                         bye = headers['method']
-                        print(BWHITE + '[-] Response %s' % bye)
+                        print(self.c.BWHITE + '[-] Response %s' % bye)
                         if self.verbose == 1:
-                            print(WHITE + resp.decode())
+                            print(self.c.WHITE + resp.decode())
                     except:
                         pass
 
@@ -319,11 +310,11 @@ class SipInvite:
                 msg = create_response_ok(self.from_user, self.to_user, self.proto, self.domain, lport, int(
                     cseq), branch, callid, tag, totag)
 
-                print(YELLOW+'[+] Sending 200 Ok\n')
+                print(self.c.YELLOW+'[+] Sending 200 Ok\n')
                 sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
                 if self.verbose == 1:
-                    print(WHITE + msg)
+                    print(self.c.WHITE + msg)
         except socket.timeout:
             pass
         except:

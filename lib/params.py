@@ -25,9 +25,6 @@ WHITE = '\033[0;37;40m'
 
 
 def get_sipscan_args():
-    print(WHITE)
-    # screen_clear()
-
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
             prog, max_help_position=50),
@@ -68,6 +65,7 @@ UDP, TCP and TLS protocols.
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
     parser.add_argument('-vv', '--more_verbose', help='Increase more verbosity', dest='more_verbose', action="count")
     parser.add_argument('-f', '--file', type=str, help='File with several IPs or network ranges', dest='file', default='')
+    parser.add_argument('--nocolor', help='Show result without colors', dest='nocolor', action="count")
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -105,17 +103,15 @@ UDP, TCP and TLS protocols.
             VERBOSE = 2
         PING = args.ping
         FILE = args.file
+        NOCOLOR = args.nocolor
 
-        return IPADDR, PORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, THREADS, VERBOSE, PING, FILE
+        return IPADDR, PORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, THREADS, VERBOSE, PING, FILE, NOCOLOR
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
 
 
 def get_sipexten_args():
-    print(WHITE)
-    # screen_clear()
-
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
             prog, max_help_position=50),
@@ -151,6 +147,7 @@ or not. Sipexten uses multithread and can check several IPs and port ranges.
     parser.add_argument('-th', '--threads', type=int, help='Number of threads (default: 100)', dest='threads', default=100)
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
     parser.add_argument('-vv', '--more_verbose', help='Increase more verbosity', dest='more_verbose', action="count")
+    parser.add_argument('--nocolor', help='Show result without colors', dest='nocolor', action="count")
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -175,17 +172,15 @@ or not. Sipexten uses multithread and can check several IPs and port ranges.
         MORE_VERBOSE = args.more_verbose
         if MORE_VERBOSE == 1:
             VERBOSE = 2
+        NOCOLOR = args.nocolor
 
-        return IPADDR, RPORT, EXTEN, PREFIX, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMUSER, UA, THREADS, VERBOSE
+        return IPADDR, RPORT, EXTEN, PREFIX, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMUSER, UA, THREADS, VERBOSE, NOCOLOR
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
 
 
 def get_sipremotecrack_args():
-    print(WHITE)
-    # screen_clear()
-
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
             prog, max_help_position=50),
@@ -219,6 +214,7 @@ passwords for several users using bruteforce.
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
     parser.add_argument('-w', '--wordlist', help='Wordlist for bruteforce', dest='wordlist', default="", required=True)
     parser.add_argument('-th', '--threads', type=int, help='Number of threads (default: 10)', dest='threads', default=10)
+    parser.add_argument('--nocolor', help='Show result without colors', dest='nocolor', action="count")
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -239,17 +235,15 @@ passwords for several users using bruteforce.
         UA = args.user_agent
         WORDLIST = args.wordlist
         THREADS = args.threads
+        NOCOLOR = args.nocolor
 
-        return IPADDR, RPORT, EXTEN, PREFIX, LENGHT, PROTO, DOMAIN, CONTACTDOMAIN, UA, WORDLIST, THREADS
+        return IPADDR, RPORT, EXTEN, PREFIX, LENGHT, PROTO, DOMAIN, CONTACTDOMAIN, UA, WORDLIST, THREADS, NOCOLOR
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
 
 
 def get_sipdigestleak_args():
-    print(WHITE)
-    # screen_clear()
-
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
             prog, max_help_position=50),
@@ -325,9 +319,6 @@ possible and can recover most passwords based on the challenge response.
 
 
 def get_sipinvite_args():
-    print(WHITE)
-    # screen_clear()
-
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
             prog, max_help_position=50),
@@ -368,6 +359,7 @@ the call to a second external number.
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
     parser.add_argument('--no-sdp', help='Do not send SDP (by default is included)', dest='nosdp', action="count")
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
+    parser.add_argument('--nocolor', help='Show result without colors', dest='nocolor', action="count")
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -394,17 +386,15 @@ the call to a second external number.
         UA = args.user_agent
         NOSDP = args.nosdp
         VERBOSE = args.verbose
+        NOCOLOR = args.nocolor
 
-        return IPADDR, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, TRANSFER, USER, PWD, UA, NOSDP, VERBOSE
+        return IPADDR, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, TRANSFER, USER, PWD, UA, NOSDP, VERBOSE, NOCOLOR
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
 
 
 def get_sipcrack_args():
-    print(WHITE)
-    # screen_clear()
-
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
             prog, max_help_position=50),
@@ -475,9 +465,6 @@ alphabet=0123456789abcdef # Custom alphabet
 
 
 def get_sipsend_args():
-    print(WHITE)
-    # screen_clear()
-
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
             prog, max_help_position=50),
@@ -519,6 +506,7 @@ SIP Send allow us to send a customized SIP message and analyze the response.
     parser.add_argument('--cseq', type=str, help='Seq number', dest='cseq', default='')
     parser.add_argument('--sdp', help='Include SDP', dest='sdp', action="count")
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
+    parser.add_argument('--nocolor', help='Show result without colors', dest='nocolor', action="count")
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -545,17 +533,15 @@ SIP Send allow us to send a customized SIP message and analyze the response.
         CSEQ = args.cseq
         SDP = args.sdp
         UA = args.user_agent
+        NOCOLOR = args.nocolor
 
-        return IPADDR, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, DIGEST, BRANCH, CALLID, CSEQ, SDP, UA
+        return IPADDR, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, DIGEST, BRANCH, CALLID, CSEQ, SDP, UA, NOCOLOR
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
 
 
 def get_sipenumerate_args():
-    print(WHITE)
-    # screen_clear()
-
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
             prog, max_help_position=50),
@@ -613,9 +599,6 @@ Enumerate available methods of a SIP service/server.
 
 
 def get_sipdump_args():
-    print(WHITE)
-    # screen_clear()
-
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
             prog, max_help_position=50),
@@ -654,9 +637,6 @@ Extracts SIP Digest authentications from a PCAP file
 
 
 def get_sipflood_args():
-    print(WHITE)
-    # screen_clear()
-
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
             prog, max_help_position=50),
@@ -726,9 +706,6 @@ SIP Flood send messages with a selected method
 
 
 def get_rtpbleed_args():
-    print(WHITE)
-    # screen_clear()
-
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
             prog, max_help_position=50),
@@ -788,9 +765,6 @@ More info about the vulnerability: https://www.rtpbleed.com/
 
 
 def get_rtcpbleed_args():
-    print(WHITE)
-    # screen_clear()
-
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
             prog, max_help_position=50),
@@ -846,9 +820,6 @@ More info about the vulnerability: https://www.rtpbleed.com/
 
 
 def get_rtcbleed_flood_args():
-    print(WHITE)
-    # screen_clear()
-
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
             prog, max_help_position=50),
@@ -894,9 +865,6 @@ More info about the vulnerability: https://www.rtpbleed.com/
 
 
 def get_tshark_args():
-    print(WHITE)
-    # screen_clear()
-
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
             prog, max_help_position=50),
@@ -935,6 +903,7 @@ rtp                 Show all RTP streams
     parser.add_argument('-rtp_extract', help='Extract RTP streams. Ex: --rtp_extract -p 1210 -o rtp.pcap', dest='rtpextract', action="count")
     parser.add_argument('-rport', type=str, help='RTP port to extract streams', dest='rtpport', default="")
     parser.add_argument('-o', '--output-file', type=str, help='Save RTP streams into a PCAP file', dest='ofile', default="")
+    parser.add_argument('--nocolor', help='Show result without colors', dest='nocolor', action="count")
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -959,8 +928,9 @@ rtp                 Show all RTP streams
         FILTER = args.filter
         RTPPORT = args.rtpport
         OFILE = args.ofile
+        NOCOLOR = args.nocolor
 
-        return FILE, FILTER, RTPPORT, OFILE
+        return FILE, FILTER, RTPPORT, OFILE, NOCOLOR
     except ValueError:
         print('[-] Error')
         sys.exit(1)

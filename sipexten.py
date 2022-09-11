@@ -12,7 +12,7 @@ from lib.params import get_sipexten_args
 
 
 def main():
-    ip, rport, rexten, prefix, proto, method, domain, contact_domain, from_user, user_agent, nthreads, verbose = get_sipexten_args()
+    ip, rport, rexten, prefix, proto, method, domain, contact_domain, from_user, user_agent, nthreads, verbose, nocolor = get_sipexten_args()
 
     s = SipExten()
     s.ip = ip
@@ -27,6 +27,7 @@ def main():
     s.user_agent = user_agent
     s.threads = nthreads
     s.verbose = verbose
+    s.nocolor = nocolor
 
     s.start()
 

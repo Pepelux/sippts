@@ -10,9 +10,8 @@ __email__ = "pepeluxx@gmail.com"
 from modules.siprcrack import SipRemoteCrack
 from lib.params import get_sipremotecrack_args
 
-
 def main():
-    ip, rport, rexten, prefix, ext_len, proto, domain, contact_domain, user_agent, wordlist, nthreads = get_sipremotecrack_args()
+    ip, rport, rexten, prefix, ext_len, proto, domain, contact_domain, user_agent, wordlist, nthreads, nocolor = get_sipremotecrack_args()
 
     s = SipRemoteCrack()
     s.ip = ip
@@ -26,6 +25,7 @@ def main():
     s.user_agent = user_agent
     s.threads = nthreads
     s.wordlist = wordlist
+    s.nocolor = nocolor
 
     s.start()
 

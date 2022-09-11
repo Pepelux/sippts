@@ -15,27 +15,8 @@ import re
 import threading
 import signal
 from lib.functions import create_message, parse_message, parse_digest, ip2long, long2ip, generate_random_string, get_free_port, calculateHash
+from lib.color import Color
 from itertools import product
-from concurrent.futures import ThreadPoolExecutor
-
-BRED = '\033[1;31;40m'
-RED = '\033[0;31;40m'
-BRED_BLACK = '\033[1;30;41m'
-RED_BLACK = '\033[0;30;41m'
-BGREEN = '\033[1;32;40m'
-GREEN = '\033[0;32;40m'
-BGREEN_BLACK = '\033[1;30;42m'
-GREEN_BLACK = '\033[0;30;42m'
-BYELLOW = '\033[1;33;40m'
-YELLOW = '\033[0;33;40m'
-BBLUE = '\033[1;34;40m'
-BLUE = '\033[0;34;40m'
-BMAGENTA = '\033[1;35;40m'
-MAGENTA = '\033[0;35;40m'
-BCYAN = '\033[1;36;40m'
-CYAN = '\033[0;36;40m'
-BWHITE = '\033[1;37;40m'
-WHITE = '\033[0;37;40m'
 
 
 class SipRemoteCrack:
@@ -51,6 +32,7 @@ class SipRemoteCrack:
         self.wordlist = ''
         self.user_agent = 'pplsip'
         self.threads = '10'
+        self.nocolor = ''
 
         self.run = True
 
@@ -61,6 +43,8 @@ class SipRemoteCrack:
         self.line = ['-', '\\', '|', '/']
         self.pos = 0
 
+        self.c = Color()
+
     def register(self, ip, to_user, pwd):
         if self.run == True:
             try:
@@ -69,7 +53,7 @@ class SipRemoteCrack:
                 else:
                     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             except socket.error:
-                print(RED+'Failed to create socket')
+                print(self.c.RED+'Failed to create socket')
                 sys.exit(1)
 
             bind = '0.0.0.0'
@@ -179,9 +163,9 @@ class SipRemoteCrack:
         return data
 
     def signal_handler(self, sig, frame):
-        print(BYELLOW + 'You pressed Ctrl+C!')
-        print(BWHITE + '\nStopping siprcrack ...')
-        print(WHITE)
+        print(self.c.BYELLOW + 'You pressed Ctrl+C!')
+        print(self.c.BWHITE + '\nStopping siprcrack ...')
+        print(self.c.WHITE)
 
         self.stop()
 
@@ -200,13 +184,16 @@ class SipRemoteCrack:
 
         self.proto = self.proto.upper()
 
+        if self.nocolor == 1:
+            self.c.ansy()
+
         # if rport is by default but we want to scan TLS protocol, use port 5061
         if self.rport == 5060 and self.proto == 'TLS':
             self.rport = 5061
 
         # check protocol
         if self.proto not in supported_protos:
-            print(BRED + 'Protocol %s is not supported' % self.proto)
+            print(self.c.BRED + 'Protocol %s is not supported' % self.proto)
             sys.exit()
 
         # create a list of IP addresses
@@ -243,8 +230,8 @@ class SipRemoteCrack:
                     self.extens.append(p)
 
         signal.signal(signal.SIGINT, self.signal_handler)
-        print(BYELLOW + '\nPress Ctrl+C to stop\n')
-        print(WHITE)
+        print(self.c.BYELLOW + '\nPress Ctrl+C to stop\n')
+        print(self.c.WHITE)
 
         threads = list()
         t = threading.Thread(target=self.crack, daemon=True)
@@ -262,26 +249,32 @@ class SipRemoteCrack:
         if nthreads < 1:
             nthreads = 1
 
-        print(BWHITE+'[!] IP/Network: ' + GREEN + '%s' % str(self.ip))
-        print(BWHITE+'[!] Port: ' + GREEN + '%s' % (self.rport))
+        print(self.c.BWHITE+'[!] IP/Network: ' +
+              self.c.GREEN + '%s' % str(self.ip))
+        print(self.c.BWHITE+'[!] Port: ' + self.c.GREEN + '%s' % (self.rport))
         if self.prefix != '':
-            print(BWHITE+'[!] Users prefix: ' + GREEN + '%s' % self.prefix)
-        print(BWHITE+'[!] Exten range: ' + GREEN + '%s' % self.exten)
-        print(BWHITE+'[!] Protocol: ' + GREEN + '%s' % self.proto.upper())
+            print(self.c.BWHITE+'[!] Users prefix: ' +
+                  self.c.GREEN + '%s' % self.prefix)
+        print(self.c.BWHITE+'[!] Exten range: ' +
+              self.c.GREEN + '%s' % self.exten)
+        print(self.c.BWHITE+'[!] Protocol: ' +
+              self.c.GREEN + '%s' % self.proto.upper())
 
         if self.domain != '':
-            print(BWHITE + '[!] Customized Domain: ' +
-                  GREEN + '%s' % self.domain)
+            print(self.c.BWHITE + '[!] Customized Domain: ' +
+                  self.c.GREEN + '%s' % self.domain)
         if self.contact_domain != '':
-            print(BWHITE + '[!] Customized Contact Domain: ' + GREEN + '%s' %
+            print(self.c.BWHITE + '[!] Customized Contact Domain: ' + self.c.GREEN + '%s' %
                   self.contact_domain)
         if self.user_agent != 'pplsip':
-            print(BWHITE + '[!] Customized User-Agent: ' +
-                  GREEN + '%s' % self.user_agent)
+            print(self.c.BWHITE + '[!] Customized User-Agent: ' +
+                  self.c.GREEN + '%s' % self.user_agent)
 
-        print(BWHITE+'[!] Total threads: ' + GREEN + '%d' % nthreads)
-        print(BWHITE + '[!] Wordlist: ' + GREEN + '%s' % self.wordlist)
-        print(WHITE)
+        print(self.c.BWHITE+'[!] Total threads: ' +
+              self.c.GREEN + '%d' % nthreads)
+        print(self.c.BWHITE + '[!] Wordlist: ' +
+              self.c.GREEN + '%s' % self.wordlist)
+        print(self.c.WHITE)
 
         values = product(self.ips, self.extens)
 
@@ -334,15 +327,15 @@ class SipRemoteCrack:
 
                             data = self.register(ipaddr, to_user, pwd)
 
-                            str = BYELLOW+'[%s] ' % self.line[self.pos] + BWHITE+'Scanning ' + BYELLOW+'%s:%s/%s' % (
-                                ipaddr, self.rport, self.proto) + BWHITE + ' => Exten/Pass: ' + BGREEN + '%s/%s' % (to_user, pwd) + BBLUE + ' - %s %s' % (data['code'], data['text'])
+                            str = self.c.BYELLOW+'[%s] ' % self.line[self.pos] + self.c.BWHITE+'Scanning ' + self.c.BYELLOW+'%s:%s/%s' % (
+                                ipaddr, self.rport, self.proto) + self.c.BWHITE + ' => Exten/Pass: ' + self.c.BGREEN + '%s/%s' % (to_user, pwd) + self.c.BBLUE + ' - %s %s' % (data['code'], data['text'])
                             print(str.ljust(200), end="\r")
 
                             if data and data['code'] == '200':
-                                print(WHITE)
+                                print(self.c.WHITE)
                                 pre = ''
-                                print(BWHITE + '%s' % pre + WHITE+'Password for user ' + BBLUE + '%s' %
-                                      to_user + WHITE + ' found: ' + BRED + '%s' % pwd + WHITE)
+                                print(self.c.BWHITE + '%s' % pre + self.c.WHITE+'Password for user ' + self.c.BBLUE + '%s' %
+                                      to_user + self.c.WHITE + ' found: ' + self.c.BRED + '%s' % pwd + self.c.WHITE)
                                 line = '%s###%s###%s###%s###%s' % (
                                     ipaddr, self.rport, self.proto, to_user, pwd)
                                 self.found.append(line)
@@ -385,27 +378,28 @@ class SipRemoteCrack:
                 pwlen = len(pwd)
 
         tlen = iplen+polen+prlen+uslen+pwlen+14
-        print(WHITE + ' ' + '-' * tlen)
-        print(WHITE +
-              '| ' + BWHITE + 'IP address'.ljust(iplen) + WHITE +
-              ' | ' + BWHITE + 'Port'.ljust(polen) + WHITE +
-              ' | ' + BWHITE + 'Proto'.ljust(prlen) + WHITE +
-              ' | ' + BWHITE + 'User'.ljust(uslen) + WHITE +
-              ' | ' + BWHITE + 'Password'.ljust(pwlen) + WHITE + ' |')
-        print(WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE +
+              '| ' + self.c.BWHITE + 'IP address'.ljust(iplen) + self.c.WHITE +
+              ' | ' + self.c.BWHITE + 'Port'.ljust(polen) + self.c.WHITE +
+              ' | ' + self.c.BWHITE + 'Proto'.ljust(prlen) + self.c.WHITE +
+              ' | ' + self.c.BWHITE + 'User'.ljust(uslen) + self.c.WHITE +
+              ' | ' + self.c.BWHITE + 'Password'.ljust(pwlen) + self.c.WHITE + ' |')
+        print(self.c.WHITE + ' ' + '-' * tlen)
 
         if len(self.found) == 0:
-            print(WHITE + '| ' + WHITE + 'Nothing found'.ljust(tlen-2) + ' |')
+            print(self.c.WHITE + '| ' + self.c.WHITE +
+                  'Nothing found'.ljust(tlen-2) + ' |')
         else:
             for x in self.found:
                 (ip, port, proto, user, pwd) = x.split('###')
 
-                print(WHITE +
-                      '| ' + BGREEN + '%s' % ip.ljust(iplen) + WHITE +
-                      ' | ' + GREEN + '%s' % port.ljust(polen) + WHITE +
-                      ' | ' + GREEN + '%s' % proto.ljust(prlen) + WHITE +
-                      ' | ' + BBLUE + '%s' % user.ljust(uslen) + WHITE +
-                      ' | ' + BRED + '%s' % pwd.ljust(pwlen) + WHITE + ' |')
+                print(self.c.WHITE +
+                      '| ' + self.c.BGREEN + '%s' % ip.ljust(iplen) + self.c.WHITE +
+                      ' | ' + self.c.GREEN + '%s' % port.ljust(polen) + self.c.WHITE +
+                      ' | ' + self.c.GREEN + '%s' % proto.ljust(prlen) + self.c.WHITE +
+                      ' | ' + self.c.BBLUE + '%s' % user.ljust(uslen) + self.c.WHITE +
+                      ' | ' + self.c.BRED + '%s' % pwd.ljust(pwlen) + self.c.WHITE + ' |')
 
-        print(WHITE + ' ' + '-' * tlen)
-        print(WHITE)
+        print(self.c.WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE)

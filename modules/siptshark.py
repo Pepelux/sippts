@@ -8,27 +8,9 @@ __copyright__ = "Copyright (C) 2015-2022, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
 
 import os
+from lib.color import Color
 
 # https://www.wireshark.org/docs/dfref/s/sip.html
-
-BRED = '\033[1;31;40m'
-RED = '\033[0;31;40m'
-BRED_BLACK = '\033[1;30;41m'
-RED_BLACK = '\033[0;30;41m'
-BGREEN = '\033[1;32;40m'
-GREEN = '\033[0;32;40m'
-BGREEN_BLACK = '\033[1;30;42m'
-GREEN_BLACK = '\033[0;30;42m'
-BYELLOW = '\033[1;33;40m'
-YELLOW = '\033[0;33;40m'
-BBLUE = '\033[1;34;40m'
-BLUE = '\033[0;34;40m'
-BMAGENTA = '\033[1;35;40m'
-MAGENTA = '\033[0;35;40m'
-BCYAN = '\033[1;36;40m'
-CYAN = '\033[0;36;40m'
-BWHITE = '\033[1;37;40m'
-WHITE = '\033[0;37;40m'
 
 
 class SipShark:
@@ -43,7 +25,13 @@ class SipShark:
         self.frame = ''
         self.rtp_extract = 'False'
 
+        self.nocolor = ''
+        self.c = Color()
+
     def start(self):
+        if self.nocolor == 1:
+            self.c.ansy()
+
         if self.filter.lower()[0:6] == 'method':
             (self.filter, self.method) = self.filter.split(' ')
             self.method = self.method.upper()
@@ -55,24 +43,24 @@ class SipShark:
             (self.filter, self.cid) = self.filter.split(' ')
 
         if self.filter.lower() == 'stats':
-            print(BYELLOW + 'Dialog statistics:' + WHITE)
-            print(GREEN)
+            print(self.c.BYELLOW + 'Dialog statistics:' + self.c.WHITE)
+            print(self.c.GREEN)
             os.system(
                 "tshark -r %s -d udp.port==5060,sip -q -z sip,stat" % self.file)
-            print(WHITE)
+            print(self.c.WHITE)
 
         if self.filter.lower() == 'messages':
-            print(BYELLOW + 'SIP messages:' + WHITE)
-            print(WHITE)
+            print(self.c.BYELLOW + 'SIP messages:' + self.c.WHITE)
+            print(self.c.WHITE)
             os.system("tshark -r %s -Y sip" % self.file)
-            print(GREEN)
+            print(self.c.GREEN)
 
         if self.filter.lower() == 'frames':
-            print(BYELLOW + 'Frames:' + WHITE)
-            print(WHITE)
+            print(self.c.BYELLOW + 'Frames:' + self.c.WHITE)
+            print(self.c.WHITE)
             os.system(
                 "tshark -r %s -Y sip -T fields -e sip.msg_hdr |sed 's/\\\\r\\\\n/\\n/g'" % self.file)
-            print(WHITE)
+            print(self.c.WHITE)
 
         if self.frame != '':
             os.system(
@@ -83,28 +71,28 @@ class SipShark:
                 "tshark -r %s -Y 'sip.CSeq.method eq %s'" % (self.file, self.method))
 
         if self.filter.lower() == 'callids':
-            print(BYELLOW + 'Captured CallerID from dialogs:' + WHITE)
-            print(WHITE)
+            print(self.c.BYELLOW + 'Captured CallerID from dialogs:' + self.c.WHITE)
+            print(self.c.WHITE)
             os.system(
                 "tshark -r %s -T fields -e sip.Call-ID |sort |uniq" % self.file)
-            print(WHITE)
+            print(self.c.WHITE)
 
         if self.cid != '':
             os.system(
                 "tshark -r %s -Y 'sip.Call-ID eq \"%s\"' -T fields -e sip.msg_hdr |sed 's/\\\\r\\\\n/\\n/g'" % (self.file, self.cid))
 
         if self.filter.lower() == 'rtp':
-            print(BYELLOW + 'Captured RTP streams:' + WHITE)
-            print(CYAN)
+            print(self.c.BYELLOW + 'Captured RTP streams:' + self.c.WHITE)
+            print(self.c.CYAN)
             os.system("tshark -r %s -q -z rtp,streams" % self.file)
-            print(WHITE)
+            print(self.c.WHITE)
 
         if self.filter.lower() == 'auth':
-            print(BYELLOW + 'Captured Authentication Digest:' + WHITE)
-            print(GREEN)
+            print(self.c.BYELLOW + 'Captured Authentication Digest:' + self.c.WHITE)
+            print(self.c.GREEN)
             os.system(
                 "tshark -r %s -Y sip -T fields -e sip.auth |grep username |sort |uniq |sed 's/\\\\r\\\\n/\\n/g'" % self.file)
-            print(WHITE)
+            print(self.c.WHITE)
 
         if self.ofile != '' and self.rport != '':
             os.system("tshark -r %s -Y udp.port=='%s' -d udp.port=='%s,rtp' -T fields -e rtp.payload -w %s" %

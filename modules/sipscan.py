@@ -14,27 +14,9 @@ import ssl
 import re
 from IPy import IP
 from lib.functions import create_message, parse_message, get_machine_default_ip, ip2long, long2ip, get_free_port, ping
+from lib.color import Color
 from itertools import product
 from concurrent.futures import ThreadPoolExecutor
-
-BRED = '\033[1;31;40m'
-RED = '\033[0;31;40m'
-BRED_BLACK = '\033[1;30;41m'
-RED_BLACK = '\033[0;30;41m'
-BGREEN = '\033[1;32;40m'
-GREEN = '\033[0;32;40m'
-BGREEN_BLACK = '\033[1;30;42m'
-GREEN_BLACK = '\033[0;30;42m'
-BYELLOW = '\033[1;33;40m'
-YELLOW = '\033[0;33;40m'
-BBLUE = '\033[1;34;40m'
-BLUE = '\033[0;34;40m'
-BMAGENTA = '\033[1;35;40m'
-MAGENTA = '\033[0;35;40m'
-BCYAN = '\033[1;36;40m'
-CYAN = '\033[0;36;40m'
-BWHITE = '\033[1;37;40m'
-WHITE = '\033[0;37;40m'
 
 
 class SipScan:
@@ -56,11 +38,14 @@ class SipScan:
         self.verbose = '0'
         self.ping = 'False'
         self.file = ''
+        self.nocolor = ''
 
         self.found = []
         self.line = ['-', '\\', '|', '/']
         self.pos = 0
         self.quit = False
+
+        self.c = Color()
 
     # def __del__(self):
     #     print('SIPScan destruido')
@@ -68,6 +53,9 @@ class SipScan:
     def start(self):
         supported_protos = ['UDP', 'TCP', 'TLS']
         supported_methods = ['OPTIONS', 'REGISTER', 'INVITE']
+
+        if self.nocolor == 1:
+            self.c.ansy()
 
         self.method = self.method.upper()
         self.proto = self.proto.upper()
@@ -80,12 +68,12 @@ class SipScan:
 
         # check method
         if self.method not in supported_methods:
-            print(BRED + 'Method %s is not supported' % self.method)
+            print(self.c.BRED + 'Method %s is not supported' % self.method)
             sys.exit()
 
         # check protocol
         if self.proto != 'ALL' and self.proto not in supported_protos:
-            print(BRED + 'Protocol %s is not supported' % self.proto)
+            print(self.c.BRED + 'Protocol %s is not supported' % self.proto)
             sys.exit()
 
         # my IP address
@@ -146,12 +134,12 @@ class SipScan:
                                 if self.ping == 'False':
                                     ips.append(long2ip(i))
                                 else:
-                                    print(YELLOW + '[+] Ping %s ...' %
-                                          str(long2ip(i)) + WHITE, end='\r')
+                                    print(self.c.YELLOW + '[+] Ping %s ...' %
+                                          str(long2ip(i)) + self.c.WHITE, end='\r')
 
                                     if ping(long2ip(i), '0.1') == True:
-                                        print(GREEN + '\n   [-] ... Pong %s' %
-                                              str(long2ip(i)) + WHITE)
+                                        print(self.c.GREEN + '\n   [-] ... Pong %s' %
+                                              str(long2ip(i)) + self.c.WHITE)
                                         ips.append(long2ip(i))
 
                         line = f.readline()
@@ -178,12 +166,12 @@ class SipScan:
                     if self.ping == 'False':
                         ips.append(long2ip(i))
                     else:
-                        print(YELLOW + '[+] Ping %s ...' %
-                              str(long2ip(i)) + WHITE, end='\r')
+                        print(self.c.YELLOW + '[+] Ping %s ...' %
+                              str(long2ip(i)) + self.c.WHITE, end='\r')
 
                         if ping(long2ip(i), '0.1') == True:
-                            print(GREEN + '\n   [-] ... Pong %s' %
-                                  str(long2ip(i)) + WHITE)
+                            print(self.c.GREEN + '\n   [-] ... Pong %s' %
+                                  str(long2ip(i)) + self.c.WHITE)
                             ips.append(long2ip(i))
 
         # threads to use
@@ -194,49 +182,55 @@ class SipScan:
         if nthreads < 1:
             nthreads = 1
 
-        print(BWHITE + '[!] IP/Network: ' + GREEN + '%s' % str(self.ip))
+        print(self.c.BWHITE + '[!] IP/Network: ' +
+              self.c.GREEN + '%s' % str(self.ip))
 
-        print(BWHITE + '[!] Port range: ' + GREEN + '%s' % self.rport)
+        print(self.c.BWHITE + '[!] Port range: ' +
+              self.c.GREEN + '%s' % self.rport)
         if self.proto == 'ALL':
-            print(BWHITE + '[!] Protocols: ' + GREEN + 'UDP, TCP, TLS')
+            print(self.c.BWHITE + '[!] Protocols: ' +
+                  self.c.GREEN + 'UDP, TCP, TLS')
         else:
-            print(BWHITE + '[!] Protocol: ' + GREEN + '%s' %
+            print(self.c.BWHITE + '[!] Protocol: ' + self.c.GREEN + '%s' %
                   self.proto.upper())
 
-        print(BWHITE + '[!] Method to scan: ' + GREEN + '%s' % self.method)
+        print(self.c.BWHITE + '[!] Method to scan: ' +
+              self.c.GREEN + '%s' % self.method)
 
         if self.domain != '' and self.domain != str(self.ip):
-            print(BWHITE + '[!] Customized Domain: ' +
-                  GREEN + '%s' % self.domain)
+            print(self.c.BWHITE + '[!] Customized Domain: ' +
+                  self.c.GREEN + '%s' % self.domain)
         if self.contact_domain != '':
-            print(BWHITE + '[!] Customized Contact Domain: ' + GREEN + '%s' %
+            print(self.c.BWHITE + '[!] Customized Contact Domain: ' + self.c.GREEN + '%s' %
                   self.contact_domain)
         if self.from_name != '':
-            print(BWHITE + '[!] Customized From Name: ' +
-                  GREEN + '%s' % self.from_name)
+            print(self.c.BWHITE + '[!] Customized From Name: ' +
+                  self.c.GREEN + '%s' % self.from_name)
         if self.from_user != '100':
-            print(BWHITE + '[!] Customized From User: ' +
-                  GREEN + '%s' % self.from_user)
+            print(self.c.BWHITE + '[!] Customized From User: ' +
+                  self.c.GREEN + '%s' % self.from_user)
         if self.from_domain != '':
-            print(BWHITE + '[!] Customized From Domain: ' +
-                  GREEN + '%s' % self.from_domain)
+            print(self.c.BWHITE + '[!] Customized From Domain: ' +
+                  self.c.GREEN + '%s' % self.from_domain)
         if self.to_name != '':
-            print(BWHITE + '[!] Customized To Name: ' +
-                  GREEN + '%s' % self.to_name)
+            print(self.c.BWHITE + '[!] Customized To Name: ' +
+                  self.c.GREEN + '%s' % self.to_name)
         if self.to_user != '100':
-            print(BWHITE + '[!] Customized To User:' +
-                  GREEN + ' %s' % self.to_user)
+            print(self.c.BWHITE + '[!] Customized To User:' +
+                  self.c.GREEN + ' %s' % self.to_user)
         if self.to_domain != '':
-            print(BWHITE + '[!] Customized To Domain: ' +
-                  GREEN + '%s' % self.to_domain)
+            print(self.c.BWHITE + '[!] Customized To Domain: ' +
+                  self.c.GREEN + '%s' % self.to_domain)
         if self.user_agent != 'pplsip':
-            print(BWHITE + '[!] Customized User-Agent: ' +
-                  GREEN + '%s' % self.user_agent)
+            print(self.c.BWHITE + '[!] Customized User-Agent: ' +
+                  self.c.GREEN + '%s' % self.user_agent)
 
-        print(BWHITE + '[!] Used threads: ' + GREEN + '%d' % nthreads)
+        print(self.c.BWHITE + '[!] Used threads: ' +
+              self.c.GREEN + '%d' % nthreads)
         if nthreads > 200:
-            print(BRED + '[x] More than 200 threads can cause socket problems')
-        print(WHITE)
+            print(self.c.BRED +
+                  '[x] More than 200 threads can cause socket problems')
+        print(self.c.WHITE)
 
         values = product(ips, ports, protos)
 
@@ -258,7 +252,7 @@ class SipScan:
                         executor.submit(self.scan_host, val_ipaddr,
                                         val_port, val_proto)
         except KeyboardInterrupt:
-            print(RED + '\nYou pressed Ctrl+C!' + WHITE)
+            print(self.c.RED + '\nYou pressed Ctrl+C!' + self.c.WHITE)
             self.quit = True
 
         self.found.sort()
@@ -266,7 +260,7 @@ class SipScan:
 
     def scan_host(self, ipaddr, port, proto):
         if self.quit == False:
-            print(BYELLOW + '[%s] Scanning %s:%d/%s'.ljust(100) %
+            print(self.c.BYELLOW + '[%s] Scanning %s:%d/%s'.ljust(100) %
                   (self.line[self.pos], ipaddr, port, proto), end='\r')
 
             self.pos += 1
@@ -279,7 +273,7 @@ class SipScan:
                 else:
                     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             except socket.error:
-                print(RED + 'Failed to create socket')
+                print(self.c.RED + 'Failed to create socket')
                 sys.exit(1)
 
             bind = '0.0.0.0'
@@ -319,9 +313,9 @@ class SipScan:
                     sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
                 if self.verbose == 2:
-                    print(BWHITE + '[+] Sending to %s:%d/%s ...' %
+                    print(self.c.BWHITE + '[+] Sending to %s:%d/%s ...' %
                           (ipaddr, port, proto))
-                    print(YELLOW + msg)
+                    print(self.c.YELLOW + msg)
 
                 if proto == 'TLS':
                     resp = sock_ssl.recv(4096)
@@ -331,9 +325,9 @@ class SipScan:
                     (ip, rport) = addr
 
                 if self.verbose == 2:
-                    print(BWHITE + '[+] Receiving from %s:%d ...' %
+                    print(self.c.BWHITE + '[+] Receiving from %s:%d ...' %
                           (ip, rport))
-                    print(GREEN + resp.decode())
+                    print(self.c.GREEN + resp.decode())
 
                 headers = parse_message(resp.decode())
 
@@ -346,10 +340,10 @@ class SipScan:
 
                     if self.verbose == 1:
                         if headers['ua'] != '':
-                            print(WHITE + 'Response <%s %s> from %s:%d/%s with User-Agent %s' %
+                            print(self.c.WHITE + 'Response <%s %s> from %s:%d/%s with User-Agent %s' %
                                   (headers['response_code'], headers['response_text'], ip, rport, proto, headers['ua']))
                         else:
-                            print(WHITE + 'Response <%s %s> from %s:%d/%s without User-Agent' %
+                            print(self.c.WHITE + 'Response <%s %s> from %s:%d/%s without User-Agent' %
                                   (headers['response_code'], headers['response_text'], ip, rport, proto))
 
                 return headers
@@ -381,27 +375,28 @@ class SipScan:
                 ualen = len(ua)
 
         tlen = iplen+polen+prlen+relen+ualen+14
-        print(WHITE + ' ' + '-' * tlen)
-        print(WHITE +
-              '| ' + BWHITE + 'IP address'.ljust(iplen) + WHITE +
-              ' | ' + BWHITE + 'Port'.ljust(polen) + WHITE +
-              ' | ' + BWHITE + 'Proto'.ljust(prlen) + WHITE +
-              ' | ' + BWHITE + 'Response'.ljust(relen) + WHITE +
-              ' | ' + BWHITE + 'User-Agent'.ljust(ualen) + WHITE + ' |')
-        print(WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE +
+              '| ' + self.c.BWHITE + 'IP address'.ljust(iplen) + self.c.WHITE +
+              ' | ' + self.c.BWHITE + 'Port'.ljust(polen) + self.c.WHITE +
+              ' | ' + self.c.BWHITE + 'Proto'.ljust(prlen) + self.c.WHITE +
+              ' | ' + self.c.BWHITE + 'Response'.ljust(relen) + self.c.WHITE +
+              ' | ' + self.c.BWHITE + 'User-Agent'.ljust(ualen) + self.c.WHITE + ' |')
+        print(self.c.WHITE + ' ' + '-' * tlen)
 
         if len(self.found) == 0:
-            print(WHITE + '| ' + WHITE + 'Nothing found'.ljust(tlen-2) + ' |')
+            print(self.c.WHITE + '| ' + self.c.WHITE +
+                  'Nothing found'.ljust(tlen-2) + ' |')
         else:
             for x in self.found:
                 (ip, port, proto, res, ua) = x.split('###')
 
-                print(WHITE +
-                      '| ' + BGREEN + '%s' % ip.ljust(iplen) + WHITE +
-                      ' | ' + GREEN + '%s' % port.ljust(polen) + WHITE +
-                      ' | ' + GREEN + '%s' % proto.ljust(prlen) + WHITE +
-                      ' | ' + BLUE + '%s' % res.ljust(relen) + WHITE +
-                      ' | ' + YELLOW + '%s' % ua.ljust(ualen) + WHITE + ' |')
+                print(self.c.WHITE +
+                      '| ' + self.c.BGREEN + '%s' % ip.ljust(iplen) + self.c.WHITE +
+                      ' | ' + self.c.GREEN + '%s' % port.ljust(polen) + self.c.WHITE +
+                      ' | ' + self.c.GREEN + '%s' % proto.ljust(prlen) + self.c.WHITE +
+                      ' | ' + self.c.BLUE + '%s' % res.ljust(relen) + self.c.WHITE +
+                      ' | ' + self.c.YELLOW + '%s' % ua.ljust(ualen) + self.c.WHITE + ' |')
 
-        print(WHITE + ' ' + '-' * tlen)
-        print(WHITE)
+        print(self.c.WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE)

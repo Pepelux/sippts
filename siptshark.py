@@ -12,13 +12,14 @@ from lib.params import get_tshark_args
 
 
 def main():
-    file, filter, rport, ofile = get_tshark_args()
+    file, filter, rport, ofile, nocolor = get_tshark_args()
 
     s = SipShark()
     s.file = file
     s.filter = filter
     s.rport = rport
     s.ofile = ofile
+    s.nocolor = nocolor
 
     s.start()
 

@@ -11,25 +11,7 @@ import socket
 import sys
 import ssl
 from lib.functions import create_message, get_free_port
-
-BRED = '\033[1;31;40m'
-RED = '\033[0;31;40m'
-BRED_BLACK = '\033[1;30;41m'
-RED_BLACK = '\033[0;30;41m'
-BGREEN = '\033[1;32;40m'
-GREEN = '\033[0;32;40m'
-BGREEN_BLACK = '\033[1;30;42m'
-GREEN_BLACK = '\033[0;30;42m'
-BYELLOW = '\033[1;33;40m'
-YELLOW = '\033[0;33;40m'
-BBLUE = '\033[1;34;40m'
-BLUE = '\033[0;34;40m'
-BMAGENTA = '\033[1;35;40m'
-MAGENTA = '\033[0;35;40m'
-BCYAN = '\033[1;36;40m'
-CYAN = '\033[0;36;40m'
-BWHITE = '\033[1;37;40m'
-WHITE = '\033[0;37;40m'
+from lib.color import Color
 
 
 class SipSend:
@@ -54,6 +36,9 @@ class SipSend:
         self.callid = ''
         self.cseq = '1'
         self.sdp = 0
+        self.nocolor = ''
+
+        self.c = Color()
 
     def start(self):
         supported_protos = ['UDP', 'TCP', 'TLS']
@@ -62,6 +47,9 @@ class SipSend:
 
         self.method = self.method.upper()
         self.proto = self.proto.upper()
+
+        if self.nocolor == 1:
+            self.c.ansy()
 
         if self.sdp == None:
             self.sdp = 0
@@ -74,12 +62,12 @@ class SipSend:
 
         # check method
         if self.method not in supported_methods:
-            print(BRED + 'Method %s is not supported' % self.method)
+            print(self.c.BRED + 'Method %s is not supported' % self.method)
             sys.exit()
 
         # check protocol
         if self.proto not in supported_protos:
-            print(BRED + 'Protocol %s is not supported' % self.proto)
+            print(self.c.BRED + 'Protocol %s is not supported' % self.proto)
             sys.exit()
 
         try:
@@ -88,7 +76,7 @@ class SipSend:
             else:
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         except socket.error:
-            print(RED + 'Failed to create socket')
+            print(self.c.RED + 'Failed to create socket')
             sys.exit(1)
 
         bind = '0.0.0.0'
@@ -128,17 +116,18 @@ class SipSend:
             else:
                 sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
-            print(BWHITE + '[+] Sending to %s:%s ...' % (self.ip, self.rport))
-            print(YELLOW + msg + WHITE)
+            print(self.c.BWHITE + '[+] Sending to %s:%s ...' %
+                  (self.ip, self.rport))
+            print(self.c.YELLOW + msg + self.c.WHITE)
 
             if self.proto == 'TLS':
                 resp = sock_ssl.recv(4096)
             else:
                 resp = sock.recv(4096)
 
-            print(BWHITE + '[+] Receiving from %s:%s ...' %
+            print(self.c.BWHITE + '[+] Receiving from %s:%s ...' %
                   (self.ip, self.rport))
-            print(GREEN + resp.decode() + WHITE)
+            print(self.c.GREEN + resp.decode() + self.c.WHITE)
         except socket.timeout:
             pass
         except:
