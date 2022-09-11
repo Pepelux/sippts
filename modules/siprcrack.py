@@ -17,6 +17,8 @@ import signal
 from lib.functions import create_message, parse_message, parse_digest, ip2long, long2ip, generate_random_string, get_free_port, calculateHash
 from lib.color import Color
 from itertools import product
+from concurrent.futures import ThreadPoolExecutor
+
 
 
 class SipRemoteCrack:
