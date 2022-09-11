@@ -331,8 +331,11 @@ class SipRemoteCrack:
 
         if self.run == True:
             with open(self.wordlist, 'rb') as f:
-                while (pwd := f.readline()):
+                # while pwd := f.readline():
+                pwd = 'x'
+                while pwd:
                     try:
+                        pwd = f.readline()
                         pwd = pwd.decode()
                         pwd = pwd.replace('\n', '')
                         pwd = pwd.replace('\'', '')
