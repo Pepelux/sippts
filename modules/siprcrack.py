@@ -20,7 +20,6 @@ from itertools import product
 from concurrent.futures import ThreadPoolExecutor
 
 
-
 class SipRemoteCrack:
     def __init__(self):
         self.ip = ''
@@ -331,60 +330,52 @@ class SipRemoteCrack:
         data = dict()
 
         if self.run == True:
-            with open(self.wordlist) as f:
-                pwd = f.readline()
-                pwd = pwd.replace('\n', '')
-                pwd = pwd.replace('\'', '')
-                pwd = pwd.replace('"', '')
-                pwd = pwd.replace('<', '')
-                pwd = pwd.replace('>', '')
-                pwd = pwd.strip()
-                pwd = pwd[0:50]
+            with open(self.wordlist, 'rb') as f:
+                while (pwd := f.readline()):
+                    try:
+                        pwd = pwd.decode()
+                        pwd = pwd.replace('\n', '')
+                        pwd = pwd.replace('\'', '')
+                        pwd = pwd.replace('"', '')
+                        pwd = pwd.replace('<', '')
+                        pwd = pwd.replace('>', '')
+                        pwd = pwd.strip()
+                        pwd = pwd[0:50]
 
-                if pwd != '':
-                    while pwd and self.run == True:
-                        try:
-                            # print(BYELLOW+'[%s] Scanning %s:%s/%s => Exten/Pass: %s/%s'.ljust(150) %
-                            #       (self.line[self.pos], ipaddr, self.rport, self.proto, to_user, pwd), end="\r")
-                            self.pos += 1
-                            if self.pos > 3:
-                                self.pos = 0
+                        if pwd != '':
+                            if self.run == True:
+                                try:
+                                    self.pos += 1
+                                    if self.pos > 3:
+                                        self.pos = 0
 
-                            if self.domain == '':
-                                self.domain = ipaddr
+                                    if self.domain == '':
+                                        self.domain = ipaddr
 
-                            if self.contact_domain == '':
-                                self.contact_domain = '10.0.0.1'
+                                    if self.contact_domain == '':
+                                        self.contact_domain = '10.0.0.1'
 
-                            data = self.register(ipaddr, to_user, pwd)
+                                    data = self.register(ipaddr, to_user, pwd)
 
-                            str = self.c.BYELLOW+'[%s] ' % self.line[self.pos] + self.c.BWHITE+'Scanning ' + self.c.BYELLOW+'%s:%s/%s' % (
-                                ipaddr, self.rport, self.proto) + self.c.BWHITE + ' => Exten/Pass: ' + self.c.BGREEN + '%s/%s' % (to_user, pwd) + self.c.BBLUE + ' - %s %s' % (data['code'], data['text'])
-                            print(str.ljust(200), end="\r")
+                                    str = self.c.BYELLOW+'[%s] ' % self.line[self.pos] + self.c.BWHITE+'Scanning ' + self.c.BYELLOW+'%s:%s/%s' % (
+                                        ipaddr, self.rport, self.proto) + self.c.BWHITE + ' => Exten/Pass: ' + self.c.BGREEN + '%s/%s' % (to_user, pwd) + self.c.BBLUE + ' - %s %s' % (data['code'], data['text'])
+                                    print(str.ljust(200), end="\r")
 
-                            if data and data['code'] == '200':
-                                print(self.c.WHITE)
-                                pre = ''
-                                print(self.c.BWHITE + '%s' % pre + self.c.WHITE+'Password for user ' + self.c.BBLUE + '%s' %
-                                      to_user + self.c.WHITE + ' found: ' + self.c.BRED + '%s' % pwd + self.c.WHITE)
-                                line = '%s###%s###%s###%s###%s' % (
-                                    ipaddr, self.rport, self.proto, to_user, pwd)
-                                self.found.append(line)
+                                    if data and data['code'] == '200':
+                                        print(self.c.WHITE)
+                                        pre = ''
+                                        print(self.c.BWHITE + '%s' % pre + self.c.WHITE+'Password for user ' + self.c.BBLUE + '%s' %
+                                            to_user + self.c.WHITE + ' found: ' + self.c.BRED + '%s' % pwd + self.c.WHITE)
+                                        line = '%s###%s###%s###%s###%s' % (
+                                            ipaddr, self.rport, self.proto, to_user, pwd)
+                                        self.found.append(line)
 
-                                f.close()
-                                return
-
-                            pwd = f.readline()
-                            if pwd != '\n':
-                                pwd = pwd.replace('\n', '')
-                                pwd = pwd.replace('\'', '')
-                                pwd = pwd.replace('"', '')
-                                pwd = pwd.replace('<', '')
-                                pwd = pwd.replace('>', '')
-                                pwd = pwd.strip()
-                                pwd = pwd[0:50]
-                        except:
-                            print('error')
+                                        f.close()
+                                        return
+                                except:
+                                    print('error')
+                    except:
+                        pass
 
         f.close()
 
