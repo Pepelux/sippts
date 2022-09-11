@@ -288,6 +288,9 @@ class SipRemoteCrack:
                   self.c.GREEN + '%s' % self.prefix)
         print(self.c.BWHITE+'[!] Exten range: ' +
               self.c.GREEN + '%s' % self.exten)
+        if self.user != '':
+            print(self.c.BWHITE+'[!] From/To User: ' +
+                  self.c.GREEN + '%s' % self.user)
         print(self.c.BWHITE+'[!] Protocol: ' +
               self.c.GREEN + '%s' % self.proto.upper())
 
