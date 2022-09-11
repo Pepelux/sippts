@@ -2,7 +2,9 @@ devel version
 - sipsend: added params from_tag, to_tag, branch, callid, cseq, sdp
 - sipinvite: added param --no-sdp to send the INVITE without SDP
 - sipenumerate: added verbose mode
-- siprcrack: added param lenght to force the size of extensions
+- siprcrack: 
+  - added param lenght to force the size of extensions
+  - added param user to set the From and To user (by default is prefix+extension). If is set, the prefix only will be applied to Auth User
 - siptshark: new module to extract info from a PCAP file
 - added class Color and para nocolor to show console responses in ansii
 - bug fixes

@@ -102,7 +102,7 @@ def generate_random_string(len, only_hex):
 
 
 def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser, toname, todomain, proto, domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, referto, withsdp):
-    if method == 'NOTIFY':
+    if method == 'REGISTER' or method == 'NOTIFY':
         starting_line = '%s sip:%s SIP/2.0' % (method, domain)
     else:
         starting_line = '%s sip:%s@%s SIP/2.0' % (method, touser, domain)

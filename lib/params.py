@@ -206,7 +206,8 @@ passwords for several users using bruteforce.
     parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
     parser.add_argument('-r', '--remote_port', type=int, help='Remote port (default: 5060)', dest='remote_port', default=5060)
     parser.add_argument('-e', '--exten', type=str, help='Extensions to attack. Ex: 100 | 100,102,105 | 100-200 | 100,102,200-300', dest='exten', required=True)
-    parser.add_argument('-pr', '--prefix', type=str, help='Prefix for extensions, used for authentication', dest='prefix', default='')
+    parser.add_argument('--user', type=str, help='Force From and To User. Use prefix only for Auth User (not in extension)', dest='user', default="")
+    parser.add_argument('-pr', '--prefix', type=str, help='Prefix for auth user, used for authentication', dest='prefix', default='')
     parser.add_argument('-l', '--lenght', type=str, help='Lenght of the extensions (if sett, left padding with 0\'s', dest='lenght', default='')
     parser.add_argument('-p', '--proto', type=str, help='Protocol: udp|tcp|tls (default: udp)', dest='proto', default='udp')
     parser.add_argument('-d', '--domain', type=str, help='SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)', dest='domain', default='')
@@ -214,6 +215,7 @@ passwords for several users using bruteforce.
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
     parser.add_argument('-w', '--wordlist', help='Wordlist for bruteforce', dest='wordlist', default="", required=True)
     parser.add_argument('-th', '--threads', type=int, help='Number of threads (default: 10)', dest='threads', default=10)
+    parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
     parser.add_argument('--nocolor', help='Show result without colors', dest='nocolor', action="count")
 
     # Array for all arguments passed to script
@@ -228,6 +230,7 @@ passwords for several users using bruteforce.
         RPORT = args.remote_port
         EXTEN = args.exten
         PREFIX = args.prefix
+        USER = args.user
         LENGHT = args.lenght
         PROTO = args.proto
         DOMAIN = args.domain
@@ -235,9 +238,10 @@ passwords for several users using bruteforce.
         UA = args.user_agent
         WORDLIST = args.wordlist
         THREADS = args.threads
+        VERBOSE = args.verbose
         NOCOLOR = args.nocolor
 
-        return IPADDR, RPORT, EXTEN, PREFIX, LENGHT, PROTO, DOMAIN, CONTACTDOMAIN, UA, WORDLIST, THREADS, NOCOLOR
+        return IPADDR, RPORT, EXTEN, PREFIX, USER, LENGHT, PROTO, DOMAIN, CONTACTDOMAIN, UA, WORDLIST, THREADS, VERBOSE, NOCOLOR
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)

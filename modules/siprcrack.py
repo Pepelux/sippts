@@ -28,12 +28,14 @@ class SipRemoteCrack:
         self.proto = 'UDP'
         self.exten = ''
         self.prefix = ''
+        self.user = ''
         self.ext_len = ''
         self.domain = ''
         self.contact_domain = ''
         self.wordlist = ''
         self.user_agent = 'pplsip'
         self.threads = '10'
+        self.verbose = '0'
         self.nocolor = ''
 
         self.run = True
@@ -71,8 +73,17 @@ class SipRemoteCrack:
 
             data = dict()
 
-            msg = create_message('REGISTER', self.contact_domain, to_user, '', self.domain,
-                                 to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', '', '', 0)
+            if self.user != '':
+                msg = create_message('REGISTER', self.contact_domain, self.user, '', self.domain,
+                                    self.user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', '', '', 0)
+            else:
+                msg = create_message('REGISTER', self.contact_domain, to_user, '', self.domain,
+                                    to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', '', '', 0)
+
+            if self.verbose == 1:
+                print(self.c.BWHITE + '[+] Sending to %s:%d/%s ...' %
+                    (ip, self.rport, self.proto))
+                print(self.c.YELLOW + msg)
 
             try:
                 sock.settimeout(5)
@@ -92,6 +103,11 @@ class SipRemoteCrack:
                     resp = sock_ssl.recv(4096)
                 else:
                     resp = sock.recv(4096)
+
+                if self.verbose == 1:
+                    print(self.c.BWHITE + '[+] Receiving from %s:%d ...' %
+                          (ip, self.rport))
+                    print(self.c.GREEN + resp.decode())
 
                 headers = parse_message(resp.decode())
 
@@ -135,8 +151,17 @@ class SipRemoteCrack:
                         if nc != '':
                             digest += ', nc=%s' % nc
 
-                        msg = create_message('REGISTER', self.contact_domain, username, '', self.domain,
-                                             to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', callid, '', '1', '', digest, '', 0)
+                        if self.user != '':
+                            msg = create_message('REGISTER', self.contact_domain, self.user, '', self.domain,
+                                                self.user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', callid, '', '1', '', digest, '', 0)
+                        else:
+                            msg = create_message('REGISTER', self.contact_domain, username, '', self.domain,
+                                                to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', callid, '', '1', '', digest, '', 0)
+
+                        if self.verbose == 1:
+                            print(self.c.BWHITE + '[+] Sending to %s:%d/%s ...' %
+                                (ip, self.rport, self.proto))
+                            print(self.c.YELLOW + msg)
 
                         if self.proto == 'TLS':
                             sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
@@ -147,6 +172,11 @@ class SipRemoteCrack:
                             resp = sock_ssl.recv(4096)
                         else:
                             resp = sock.recv(4096)
+
+                        if self.verbose == 1:
+                            print(self.c.BWHITE + '[+] Receiving from %s:%d ...' %
+                                (ip, self.rport))
+                            print(self.c.GREEN + resp.decode())
 
                     headers = parse_message(resp.decode())
                     data['code'] = headers['response_code']
@@ -285,7 +315,6 @@ class SipRemoteCrack:
                 if self.run == True:
                     for i, val in enumerate(values):
                         val_ipaddr = val[0]
-                        # val_exten = int(val[1])
                         val_exten = val[1]
                         to_user = '%s%s' % (self.prefix, val_exten)
                         if not self.domain or self.domain == '':
