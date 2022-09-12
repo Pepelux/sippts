@@ -101,7 +101,7 @@ def generate_random_string(len, only_hex):
     return(result_str)
 
 
-def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser, toname, todomain, proto, domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, referto, withsdp):
+def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser, toname, todomain, proto, domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, auth_type, referto, withsdp):
     if method == 'REGISTER' or method == 'NOTIFY':
         starting_line = '%s sip:%s SIP/2.0' % (method, domain)
     else:
@@ -142,7 +142,10 @@ def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser
     headers['Call-ID'] = '%s' % callid
 
     if digest != '':
-        headers['Authorization'] = '%s' % digest
+        if auth_type == 2:
+            headers['Proxy-Authorization'] = '%s' % digest
+        else:
+            headers['Authorization'] = '%s' % digest
 
     headers['CSeq'] = '%s %s' % (cseq, method)
     headers['Max-Forwards'] = '70'
@@ -356,14 +359,17 @@ def parse_message(buffer):
         m = re.search('^Authorization:\s(.+)', header)
         if m:
             data['auth'] = '%s' % (m.group(1))
+            data['auth-type'] = 1
         else:
             m = re.search('^WWW-Authenticate:\s(.+)', header)
             if m:
                 data['auth'] = '%s' % (m.group(1))
+                data['auth-type'] = 1
             else:
                 m = re.search('^Proxy-Authenticate:\s(.+)', header)
                 if m:
                     data['auth'] = '%s' % (m.group(1))
+                    data['auth-type'] = 2
 
         m = re.search('^CSeq:\s([0-9]+)\s.*', header)
         if m:

@@ -272,7 +272,7 @@ possible and can recover most passwords based on the challenge response.
 ''')
 
     # Add arguments
-    parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=False)
+    parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
     parser.add_argument('-r', '--remote_port', type=int, help='Remote port (default: 5060)', dest='rport', default=5060)
     parser.add_argument('-p', '--proto', type=str, help='Protocol: udp|tcp (default: udp)', dest='proto', default='udp')
     parser.add_argument('-d', '--domain', type=str, help='SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)', dest='domain', default='')
@@ -288,11 +288,6 @@ possible and can recover most passwords based on the challenge response.
 
     # Array for all arguments passed to script
     args = parser.parse_args()
-
-    if not args.ipaddr and not args.calldb and not args.calldb_local:
-        print(
-            'error: one of the following arguments are required: -i/--ip, -calldb, -calldblocal')
-        sys.exit()
 
     try:
         if args.ipaddr:

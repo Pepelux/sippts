@@ -108,7 +108,7 @@ class SipDigestLeak:
         tag = generate_random_string(8, 1)
 
         msg = create_message(method, self.contact_domain, self.from_user, self.from_name, self.from_domain, 
-                             self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, '1', '', '', '', 0)
+                             self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, '1', '', '', 1, '', 0)
 
         print(YELLOW + '[=>] Request %s' % method + WHITE)
 
@@ -142,7 +142,7 @@ class SipDigestLeak:
                 # send ACK
                 print(YELLOW + '[=>] Request ACK')
                 msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                                     self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, '1', totag, '', '', 0)
+                                     self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, '1', totag, '', 1, '', 0)
 
                 sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
