@@ -31,7 +31,7 @@ import socket
 import sys
 import ipaddress
 import ssl
-from tkinter.font import NORMAL
+# from tkinter.font import NORMAL
 from tracemalloc import DomainFilter
 from lib.functions import create_message, create_response_ok, parse_message, generate_random_string, get_machine_default_ip, parse_digest, calculateHash, get_free_port
 from lib.color import Color
