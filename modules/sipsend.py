@@ -38,6 +38,7 @@ class SipSend:
         self.callid = ''
         self.cseq = '1'
         self.sdp = 0
+        self.sdes = 0
         self.nocolor = ''
 
         self.c = Color()
@@ -62,6 +63,8 @@ class SipSend:
 
         if self.sdp == None:
             self.sdp = 0
+        if self.sdes == 1:
+            self.sdp = 2
         if self.cseq == None or self.cseq == '':
             self.cseq = '1'
 

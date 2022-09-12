@@ -55,6 +55,7 @@ class SipInvite:
         self.auth_user = ''
         self.auth_pwd = ''
         self.nosdp = 0
+        self.sdes = 0
         self.nocolor = ''
 
         self.sdp = 1
@@ -65,6 +66,9 @@ class SipInvite:
         supported_protos = ['UDP', 'TCP', 'TLS']
 
         self.proto = self.proto.upper()
+
+        if self.sdes == 1:
+            self.sdp = 2
 
         if self.nocolor == 1:
             self.c.ansy()
@@ -93,8 +97,6 @@ class SipInvite:
             self.contact_domain = local_ip
         if self.nosdp != None and self.nosdp == 1:
             self.sdp = 0
-
-        print(self.sdp)
 
         print(self.c.BWHITE + '[!] Target: ' + self.c.YELLOW + '%s' % self.ip + self.c.WHITE + ':' +
               self.c.YELLOW + '%s' % self.rport + self.c.WHITE + '/' + self.c.YELLOW + '%s' % self.proto)

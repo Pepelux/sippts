@@ -2,7 +2,10 @@ devel version
 - sipsend: 
   - added params from_tag, to_tag, branch, callid, cseq, sdp
   - added params user and pass to send a second message with auth if we obtain a code 401/407
-- sipinvite: added param --no-sdp to send the INVITE without SDP
+  - added param --sdes to send cipher keys in SDP
+- sipinvite: 
+  - added param --no-sdp to send the INVITE without SDP
+  - added param --sdes to send cipher keys in SDP
 - sipenumerate: added verbose mode
 - siprcrack: 
   - added param lenght to force the size of extensions

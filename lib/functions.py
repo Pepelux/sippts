@@ -184,6 +184,31 @@ def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser
         sdp += 'a=rtpmap:0 PCMU/8000\r\n'
         sdp += 'a=rtpmap:8 PCMA/8000\r\n'
 
+    if withsdp == 2:
+        # Use SRTP
+        sdp = '\r\n'
+        sdp += 'v=0\r\n'
+        sdp += 'o=anonymous 1312841870 1312841870 IN IP4 %s\r\n' % contactdomain
+        sdp += 's=SIP Call\r\n'
+        sdp += 'c=IN IP4 %s\r\n' % contactdomain
+        sdp += 't=0 0\r\n'
+        sdp += 'm=audio 2362 RTP/AVP 0\r\n'
+        sdp += 'a=sendrecv\r\n'
+        sdp += 'a=rtpmap:18 G729/8000\r\n'
+        sdp += 'a=fmtp:18 annexb=no\r\n'
+        sdp += 'a=ptime:20\r\n'
+        sdp += 'a=rtpmap:8 PCMA/8000\r\n'
+        sdp += 'a=rtpmap:4 G723/8000\r\n'
+        sdp += 'a=rtpmap:9 G722/8000\r\n'
+        sdp += 'a=rtpmap:97 iLBC/8000\r\n'
+        sdp += 'a=fmtp:97 mode=30\r\n'
+        sdp += 'a=rtpmap:2 G726-32/8000\r\n'
+        sdp += 'a=rtpmap:123 opus/48000/2\r\n'
+        sdp += 'a=rtpmap:101 telephone-event/8000\r\n'
+        sdp += 'a=fmtp:101 0-15\r\n'
+        sdp += 'a=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:4EvYRd22P8n36wRrlWCMZIWegovyv7iWm464D4Pt\r\n'
+        sdp += 'a=crypto:2 AES_CM_128_HMAC_SHA1_32 inline:mWQ4cakWKOnfH9Tji2pEF87JtVFUqBAMPqub9roe\r\n'
+
     msg += 'Content-Length: ' + str(len(sdp)) + '\r\n'
     msg += sdp
 

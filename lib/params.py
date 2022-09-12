@@ -363,6 +363,7 @@ the call to a second external number.
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
     parser.add_argument('--no-sdp', help='Do not send SDP (by default is included)', dest='nosdp', action="count")
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
+    parser.add_argument('--sdes', help='Use SDES in SDP protocol', dest='sdes', action="count")
     parser.add_argument('--nocolor', help='Show result without colors', dest='nocolor', action="count")
 
     # Array for all arguments passed to script
@@ -390,9 +391,10 @@ the call to a second external number.
         UA = args.user_agent
         NOSDP = args.nosdp
         VERBOSE = args.verbose
+        SDES = args.sdes
         NOCOLOR = args.nocolor
 
-        return IPADDR, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, TRANSFER, USER, PWD, UA, NOSDP, VERBOSE, NOCOLOR
+        return IPADDR, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, TRANSFER, USER, PWD, UA, NOSDP, VERBOSE, SDES, NOCOLOR
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -511,6 +513,7 @@ SIP Send allow us to send a customized SIP message and analyze the response.
     parser.add_argument('-cid', '--callid', type=str, help='Customize CallID header', dest='callid', default='')
     parser.add_argument('--cseq', type=str, help='Customize Seq number', dest='cseq', default='')
     parser.add_argument('--sdp', help='Include SDP', dest='sdp', action="count")
+    parser.add_argument('--sdes', help='Use SDES in SDP protocol', dest='sdes', action="count")
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
     parser.add_argument('--nocolor', help='Show result without colors', dest='nocolor', action="count")
 
@@ -540,10 +543,11 @@ SIP Send allow us to send a customized SIP message and analyze the response.
         CALLID = args.callid
         CSEQ = args.cseq
         SDP = args.sdp
+        SDES = args.sdes
         UA = args.user_agent
         NOCOLOR = args.nocolor
 
-        return IPADDR, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, SDP, UA, NOCOLOR
+        return IPADDR, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, SDP, SDES, UA, NOCOLOR
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
