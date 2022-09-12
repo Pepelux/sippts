@@ -504,10 +504,12 @@ SIP Send allow us to send a customized SIP message and analyze the response.
     parser.add_argument('-tu', '--to_user', type=str, help='To User (default: 100)', dest='to_user', default='100')
     parser.add_argument('-td', '--to_domain', type=str, help='To Domain. Ex: 10.0.0.1', dest='to_domain', default='')
     parser.add_argument('-tt', '--to_tag', type=str, help='To Tag', dest='to_tag', default='')
-    parser.add_argument('--digest', type=str, help='Digest', dest='digest', default='')
-    parser.add_argument('--branch', type=str, help='Branch', dest='branch', default='')
-    parser.add_argument('-cid', '--callid', type=str, help='CallID', dest='callid', default='')
-    parser.add_argument('--cseq', type=str, help='Seq number', dest='cseq', default='')
+    parser.add_argument('--user', type=str, help='Authentication user', dest='user', default='')
+    parser.add_argument('--pass', type=str, help='Authentication password', dest='pwd', default='')
+    parser.add_argument('--digest', type=str, help='Add a customized Digest header', dest='digest', default='')
+    parser.add_argument('--branch', type=str, help='Customize Branch header', dest='branch', default='')
+    parser.add_argument('-cid', '--callid', type=str, help='Customize CallID header', dest='callid', default='')
+    parser.add_argument('--cseq', type=str, help='Customize Seq number', dest='cseq', default='')
     parser.add_argument('--sdp', help='Include SDP', dest='sdp', action="count")
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
     parser.add_argument('--nocolor', help='Show result without colors', dest='nocolor', action="count")
@@ -531,6 +533,8 @@ SIP Send allow us to send a customized SIP message and analyze the response.
         TOUSER = args.to_user
         TOTAG = args.to_tag
         TODOMAIN = args.to_domain
+        USER = args.user
+        PWD = args.pwd
         DIGEST = args.digest
         BRANCH = args.branch
         CALLID = args.callid
@@ -539,7 +543,7 @@ SIP Send allow us to send a customized SIP message and analyze the response.
         UA = args.user_agent
         NOCOLOR = args.nocolor
 
-        return IPADDR, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, DIGEST, BRANCH, CALLID, CSEQ, SDP, UA, NOCOLOR
+        return IPADDR, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, SDP, UA, NOCOLOR
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)

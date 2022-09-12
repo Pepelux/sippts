@@ -10,7 +10,7 @@ __email__ = "pepeluxx@gmail.com"
 import socket
 import sys
 import ssl
-from lib.functions import create_message, get_free_port
+from lib.functions import create_message, get_free_port, parse_message, parse_digest, generate_random_string, calculateHash
 from lib.color import Color
 
 
@@ -30,6 +30,8 @@ class SipSend:
         self.to_name = ''
         self.to_domain = ''
         self.to_tag = ''
+        self.user = ''
+        self.pwd = ''
         self.user_agent = 'pplsip'
         self.digest = ''
         self.branch = ''
@@ -128,6 +130,65 @@ class SipSend:
             print(self.c.BWHITE + '[+] Receiving from %s:%s ...' %
                   (self.ip, self.rport))
             print(self.c.GREEN + resp.decode() + self.c.WHITE)
+
+            headers = parse_message(resp.decode())
+
+            if self.user != '' and self.pwd != '' and (headers['response_code'] == '401' or headers['response_code'] == '407'):
+                totag = ''
+                branch = generate_random_string(71, 0)
+                
+                if headers['auth'] != '':
+                    auth = headers['auth']
+                    headers = parse_digest(auth)
+                    realm = headers['realm']
+                    nonce = headers['nonce']
+                    uri = 'sip:%s@%s' % (self.to_user, self.domain)
+                    algorithm = headers['algorithm']
+                    cnonce = headers['cnonce']
+                    nc = headers['nc']
+                    qop = headers['qop']
+
+                    if qop != '' and cnonce == '':
+                        cnonce = generate_random_string(8, 0)
+                    if qop != '' and nc == '':
+                        nc = '00000001'
+
+                    response = calculateHash(
+                        self.user, realm, self.pwd, self.method, uri, nonce, algorithm, cnonce, nc, qop, 0, '')
+
+                    digest = 'Digest username="%s", realm="%s", nonce="%s", uri="%s", response="%s", algorithm=%s' % (
+                        self.user, realm, nonce, uri, response, algorithm)
+                    if qop != '':
+                        digest += ', qop=%s' % qop
+                    if cnonce != '':
+                        digest += ', cnonce="%s"' % cnonce
+                    if nc != '':
+                        digest += ', nc=%s' % nc
+
+                    msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
+                                        self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, self.to_tag, digest, '', self.sdp)
+
+                    try:
+                        if self.proto == 'TLS':
+                            sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
+                        else:
+                            sock.sendto(bytes(msg[:8192], 'utf-8'), host)
+
+                        print(self.c.BWHITE + '[+] Sending to %s:%s ...' %
+                            (self.ip, self.rport))
+                        print(self.c.YELLOW + msg + self.c.WHITE)
+
+                        if self.proto == 'TLS':
+                            resp = sock_ssl.recv(4096)
+                        else:
+                            resp = sock.recv(4096)
+
+                        print(self.c.BWHITE + '[+] Receiving from %s:%s ...' %
+                            (self.ip, self.rport))
+                        print(self.c.GREEN + resp.decode() + self.c.WHITE)
+                    except:
+                        print('Error')
+
         except socket.timeout:
             pass
         except:
