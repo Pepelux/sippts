@@ -225,15 +225,6 @@ class SipSend:
                                 print(self.c.BWHITE + '[+] Receiving from %s:%s/%s ...' %
                                     (self.ip, self.rport, self.proto))
                                 print(self.c.GREEN + resp.decode() + self.c.WHITE)
-
-                        if self.proto == 'TLS':
-                            resp = sock_ssl.recv(4096)
-                        else:
-                            resp = sock.recv(4096)
-
-                        print(self.c.BWHITE + '[+] Receiving from %s:%s/%s ...' %
-                            (self.ip, self.rport, self.proto))
-                        print(self.c.GREEN + resp.decode() + self.c.WHITE)
                     except:
                         print('Error')
 
