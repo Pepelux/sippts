@@ -50,6 +50,13 @@ class SipSend:
         self.method = self.method.upper()
         self.proto = self.proto.upper()
 
+        if self.branch == '':
+            self.branch = generate_random_string(71, 0)
+        if self.callid == '':
+            self.callid = generate_random_string(32, 1)
+        if self.from_tag == '':
+            self.from_tag = generate_random_string(8, 1)
+
         if self.nocolor == 1:
             self.c.ansy()
 
@@ -118,25 +125,44 @@ class SipSend:
             else:
                 sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
-            print(self.c.BWHITE + '[+] Sending to %s:%s ...' %
-                  (self.ip, self.rport))
+            print(self.c.BWHITE + '[+] Sending to %s:%s/%s ...' %
+                  (self.ip, self.rport, self.proto))
             print(self.c.YELLOW + msg + self.c.WHITE)
 
-            if self.proto == 'TLS':
-                resp = sock_ssl.recv(4096)
-            else:
-                resp = sock.recv(4096)
+            rescode = '100'
 
-            print(self.c.BWHITE + '[+] Receiving from %s:%s ...' %
-                  (self.ip, self.rport))
-            print(self.c.GREEN + resp.decode() + self.c.WHITE)
+            while rescode[:1] == '1':
+                # receive temporary code
+                if self.proto == 'TLS':
+                    resp = sock_ssl.recv(4096)
+                else:
+                    resp = sock.recv(4096)
 
-            headers = parse_message(resp.decode())
+                headers = parse_message(resp.decode())
+
+                if headers:
+                    response = '%s %s' % (
+                        headers['response_code'], headers['response_text'])
+                    rescode = headers['response_code']
+                    print(self.c.BWHITE + '[+] Receiving from %s:%s/%s ...' %
+                        (self.ip, self.rport, self.proto))
+                    print(self.c.GREEN + resp.decode() + self.c.WHITE)
+
+                    totag = headers['totag']
 
             if self.user != '' and self.pwd != '' and (headers['response_code'] == '401' or headers['response_code'] == '407'):
-                totag = ''
-                branch = generate_random_string(71, 0)
-                
+                # send ACK
+                print(self.c.BWHITE + '[+] Request ACK')
+                msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name, self.from_domain,
+                                        self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, totag, '', '', 0)
+
+                print(self.c.YELLOW + msg)
+
+                if self.proto == 'TLS':
+                    sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
+                else:
+                    sock.sendto(bytes(msg[:8192], 'utf-8'), host)
+
                 if headers['auth'] != '':
                     auth = headers['auth']
                     headers = parse_digest(auth)
@@ -165,6 +191,9 @@ class SipSend:
                     if nc != '':
                         digest += ', nc=%s' % nc
 
+                    self.branch = generate_random_string(71, 0)
+                    self.cseq = str(int(self.cseq) + 1)
+
                     msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
                                         self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, self.to_tag, digest, '', self.sdp)
 
@@ -174,17 +203,36 @@ class SipSend:
                         else:
                             sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
-                        print(self.c.BWHITE + '[+] Sending to %s:%s ...' %
-                            (self.ip, self.rport))
+                        print(self.c.BWHITE + '[+] Sending to %s:%s/%s ...' %
+                            (self.ip, self.rport, self.proto))
                         print(self.c.YELLOW + msg + self.c.WHITE)
+
+                        rescode = '100'
+
+                        while rescode[:1] == '1':
+                            # receive temporary code
+                            if self.proto == 'TLS':
+                                resp = sock_ssl.recv(4096)
+                            else:
+                                resp = sock.recv(4096)
+
+                            headers = parse_message(resp.decode())
+
+                            if headers:
+                                response = '%s %s' % (
+                                    headers['response_code'], headers['response_text'])
+                                rescode = headers['response_code']
+                                print(self.c.BWHITE + '[+] Receiving from %s:%s/%s ...' %
+                                    (self.ip, self.rport, self.proto))
+                                print(self.c.GREEN + resp.decode() + self.c.WHITE)
 
                         if self.proto == 'TLS':
                             resp = sock_ssl.recv(4096)
                         else:
                             resp = sock.recv(4096)
 
-                        print(self.c.BWHITE + '[+] Receiving from %s:%s ...' %
-                            (self.ip, self.rport))
+                        print(self.c.BWHITE + '[+] Receiving from %s:%s/%s ...' %
+                            (self.ip, self.rport, self.proto))
                         print(self.c.GREEN + resp.decode() + self.c.WHITE)
                     except:
                         print('Error')

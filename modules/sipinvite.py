@@ -31,6 +31,7 @@ import socket
 import sys
 import ipaddress
 import ssl
+from tkinter.font import NORMAL
 from tracemalloc import DomainFilter
 from lib.functions import create_message, create_response_ok, parse_message, generate_random_string, get_machine_default_ip, parse_digest, calculateHash, get_free_port
 from lib.color import Color
@@ -137,9 +138,9 @@ class SipInvite:
         msg = create_message('INVITE', self.contact_domain, self.from_user, self.from_name, self.from_domain,
                              self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '1', '', '', '', self.sdp)
 
-        print(self.c.YELLOW + '[+] Request INVITE')
+        print(self.c.BWHITE + '[+] Request INVITE')
         if self.verbose == 1:
-            print(self.c.WHITE + msg)
+            print(self.c.YELLOW + msg)
 
         try:
             sock.settimeout(15)
@@ -173,12 +174,25 @@ class SipInvite:
                     rescode = headers['response_code']
                     print(self.c.BWHITE + '[-] Response %s' % response)
                     if self.verbose == 1:
-                        print(self.c.WHITE + resp.decode())
+                        print(self.c.GREEN + resp.decode())
 
                     totag = headers['totag']
 
             # receive 401/407 Unauthorized
             if self.auth_user != '' and self.auth_pwd != '' and (headers['response_code'] == '401' or headers['response_code'] == '407'):
+                # send ACK
+                print(self.c.BWHITE + '[+] Request ACK')
+                msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name, self.from_domain,
+                                        self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '1', totag, '', '', 0)
+
+                if self.verbose == 1:
+                    print(self.c.YELLOW + msg)
+
+                if self.proto == 'TLS':
+                    sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
+                else:
+                    sock.sendto(bytes(msg[:8192], 'utf-8'), host)
+
                 # send INVITE with Digest
                 totag = ''
                 branch = generate_random_string(71, 0)
@@ -211,29 +225,18 @@ class SipInvite:
                     if nc != '':
                         digest += ', nc=%s' % nc
 
-                    print(self.c.BYELLOW + '[+] Request INVITE')
+                    print(self.c.BWHITE + '[+] Request INVITE')
                     msg = create_message('INVITE', self.contact_domain, self.from_user, self.from_name, self.from_domain,
                                             self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '2', totag, digest, '', self.sdp)
 
 
                     if self.verbose == 1:
-                        print(self.c.WHITE + msg)
+                        print(self.c.YELLOW + msg)
 
                     if self.proto == 'TLS':
                         sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
                     else:
                         sock.sendto(bytes(msg[:8192], 'utf-8'), host)
-
-                    # receive response
-                    headers = parse_message(resp.decode())
-
-                    if headers:
-                        response = '%s %s' % (
-                            headers['response_code'], headers['response_text'])
-                        rescode = headers['response_code']
-                        print(self.c.BYELLOW + '[-] Response %s' % response)
-                        if self.verbose == 1:
-                            print(self.c.WHITE + resp.decode())
 
                     rescode = '100'
 
@@ -250,22 +253,22 @@ class SipInvite:
                             response = '%s %s' % (
                                 headers['response_code'], headers['response_text'])
                             rescode = headers['response_code']
-                            print(self.c.BYELLOW +
+                            print(self.c.BWHITE +
                                     '[-] Response %s' % response)
                             if self.verbose == 1:
-                                print(self.c.WHITE + resp.decode())
+                                print(self.c.GREEN + resp.decode())
 
                             totag = headers['totag']
 
             # receive 200 Ok - call answered
             if headers['response_code'] == '200':
                 # send ACK
-                print(self.c.YELLOW + '[+] Request ACK')
+                print(self.c.BWHITE + '[+] Request ACK')
                 msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                                        self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '2', totag, local_ip, '', '', 0)
+                                        self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '2', totag, '', '', 0)
 
                 if self.verbose == 1:
-                    print(self.c.WHITE + msg)
+                    print(self.c.YELLOW + msg)
 
                 if self.proto == 'TLS':
                     sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
@@ -274,12 +277,12 @@ class SipInvite:
 
                 if self.transfer != '':
                     # send REFER
-                    print(self.c.YELLOW + '[+] Request REFER')
+                    print(self.c.BWHITE + '[+] Request REFER')
                     msg = create_message('REFER', self.contact_domain, self.from_user, self.from_name, self.from_domain,
                                             self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '3', totag, local_ip, '', self.transfer, 0)
 
                     if self.verbose == 1:
-                        print(self.c.WHITE + msg)
+                        print(self.c.YELLOW + msg)
 
                     if self.proto == 'TLS':
                         sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
@@ -293,9 +296,9 @@ class SipInvite:
                         response = '%s %s' % (
                             headers['response_code'], headers['response_text'])
                         rescode = headers['response_code']
-                        print(self.c.YELLOW + '[-] Response %s' % response)
+                        print(self.c.BWHITE + '[-] Response %s' % response)
                         if self.verbose == 1:
-                            print(self.c.WHITE + resp.decode())
+                            print(self.c.GREEN + resp.decode())
 
                 bye = ''
 
@@ -311,7 +314,7 @@ class SipInvite:
                         bye = headers['method']
                         print(self.c.BWHITE + '[-] Response %s' % bye)
                         if self.verbose == 1:
-                            print(self.c.WHITE + resp.decode())
+                            print(self.c.GREEN + resp.decode())
                     except:
                         pass
 
@@ -320,7 +323,7 @@ class SipInvite:
                 msg = create_response_ok(self.from_user, self.to_user, self.proto, self.domain, lport, int(
                     cseq), branch, callid, tag, totag)
 
-                print(self.c.YELLOW+'[+] Sending 200 Ok\n')
+                print(self.c.BWHITE+'[+] Sending 200 Ok\n')
 
                 if self.proto == 'TLS':
                     sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
@@ -328,7 +331,9 @@ class SipInvite:
                     sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
                 if self.verbose == 1:
-                    print(self.c.WHITE + msg)
+                    print(self.c.YELLOW + msg)
+
+                print(NORMAL)
         except socket.timeout:
             pass
         except:
