@@ -332,7 +332,7 @@ class SipInvite:
                 if self.verbose == 1:
                     print(self.c.YELLOW + msg)
 
-                print(NORMAL)
+                print(self.NORMAL)
         except socket.timeout:
             pass
         except:
