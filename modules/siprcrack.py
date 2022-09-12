@@ -27,7 +27,7 @@ class SipRemoteCrack:
         self.proto = 'UDP'
         self.exten = ''
         self.prefix = ''
-        self.user = ''
+        self.authuser = ''
         self.ext_len = ''
         self.domain = ''
         self.contact_domain = ''
@@ -72,12 +72,8 @@ class SipRemoteCrack:
 
             data = dict()
 
-            if self.user != '':
-                msg = create_message('REGISTER', self.contact_domain, self.user, '', self.domain,
-                                    self.user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', '', '', 0)
-            else:
-                msg = create_message('REGISTER', self.contact_domain, to_user, '', self.domain,
-                                    to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', '', '', 0)
+            msg = create_message('REGISTER', self.contact_domain, to_user, '', self.domain,
+                                to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', '', '', 0)
 
             if self.verbose == 1:
                 print(self.c.BWHITE + '[+] Sending to %s:%d/%s ...' %
@@ -125,7 +121,12 @@ class SipRemoteCrack:
                         data['ua'] = headers['ua']
 
                         headers = parse_digest(auth)
-                        username = to_user
+
+                        if self.authuser == '':
+                            auth_user = to_user
+                        else:
+                            auth_user = self.authuser
+
                         realm = headers['realm']
                         nonce = headers['nonce']
                         uri = 'sip:%s' % (self.domain)
@@ -140,9 +141,9 @@ class SipRemoteCrack:
                             nc = '00000001'
 
                         response = calculateHash(
-                            username, realm, pwd, method, uri, nonce, algorithm, cnonce, nc, qop, 0, '')
+                            auth_user, realm, pwd, method, uri, nonce, algorithm, cnonce, nc, qop, 0, '')
                         digest = 'Digest username="%s",realm="%s",nonce="%s",uri="%s",response="%s",algorithm=%s' % (
-                            username, realm, nonce, uri, response, algorithm)
+                            auth_user, realm, nonce, uri, response, algorithm)
                         if qop != '':
                             digest += ', qop=%s' % qop
                         if cnonce != '':
@@ -150,12 +151,8 @@ class SipRemoteCrack:
                         if nc != '':
                             digest += ', nc=%s' % nc
 
-                        if self.user != '':
-                            msg = create_message('REGISTER', self.contact_domain, self.user, '', self.domain,
-                                                self.user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', callid, '', '1', '', digest, '', 0)
-                        else:
-                            msg = create_message('REGISTER', self.contact_domain, username, '', self.domain,
-                                                to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', callid, '', '1', '', digest, '', 0)
+                        msg = create_message('REGISTER', self.contact_domain, to_user, '', self.domain,
+                                            to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', callid, '', '1', '', digest, '', 0)
 
                         if self.verbose == 1:
                             print(self.c.BWHITE + '[+] Sending to %s:%d/%s ...' %
@@ -288,9 +285,9 @@ class SipRemoteCrack:
                   self.c.GREEN + '%s' % self.prefix)
         print(self.c.BWHITE+'[!] Exten range: ' +
               self.c.GREEN + '%s' % self.exten)
-        if self.user != '':
-            print(self.c.BWHITE+'[!] From/To User: ' +
-                  self.c.GREEN + '%s' % self.user)
+        if self.authuser != '':
+            print(self.c.BWHITE+'[!] Auth User: ' +
+                  self.c.GREEN + '%s' % self.authuser)
         print(self.c.BWHITE+'[!] Protocol: ' +
               self.c.GREEN + '%s' % self.proto.upper())
 
@@ -361,19 +358,24 @@ class SipRemoteCrack:
                                     if self.contact_domain == '':
                                         self.contact_domain = '10.0.0.1'
 
+                                    if self.authuser == '':
+                                        auth_user = to_user
+                                    else:
+                                        auth_user = self.authuser
+
                                     data = self.register(ipaddr, to_user, pwd)
 
                                     str = self.c.BYELLOW+'[%s] ' % self.line[self.pos] + self.c.BWHITE+'Scanning ' + self.c.BYELLOW+'%s:%s/%s' % (
-                                        ipaddr, self.rport, self.proto) + self.c.BWHITE + ' => Exten/Pass: ' + self.c.BGREEN + '%s/%s' % (to_user, pwd) + self.c.BBLUE + ' - %s %s' % (data['code'], data['text'])
+                                        ipaddr, self.rport, self.proto) + self.c.BWHITE + ' => Exten/Pass: ' + self.c.BGREEN + '%s/%s' % (auth_user, pwd) + self.c.BBLUE + ' - %s %s' % (data['code'], data['text'])
                                     print(str.ljust(200), end="\r")
 
                                     if data and data['code'] == '200':
                                         print(self.c.WHITE)
                                         pre = ''
                                         print(self.c.BWHITE + '%s' % pre + self.c.WHITE+'Password for user ' + self.c.BBLUE + '%s' %
-                                            to_user + self.c.WHITE + ' found: ' + self.c.BRED + '%s' % pwd + self.c.WHITE)
+                                            auth_user + self.c.WHITE + ' found: ' + self.c.BRED + '%s' % pwd + self.c.WHITE)
                                         line = '%s###%s###%s###%s###%s' % (
-                                            ipaddr, self.rport, self.proto, to_user, pwd)
+                                            ipaddr, self.rport, self.proto, auth_user, pwd)
                                         self.found.append(line)
 
                                         f.close()
