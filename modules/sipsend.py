@@ -112,7 +112,7 @@ class SipSend:
             self.contact_domain = '10.0.0.1'
 
         msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
-                             self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, self.to_tag, self.digest, 1, '', self.sdp)
+                             self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, self.to_tag, self.digest, 1, '', self.sdp, '', '')
 
         try:
             sock.settimeout(5)
@@ -144,6 +144,8 @@ class SipSend:
                 headers = parse_message(resp.decode())
 
                 if headers:
+                    via = headers['via']
+
                     response = '%s %s' % (
                         headers['response_code'], headers['response_text'])
                     rescode = headers['response_code']
@@ -157,7 +159,7 @@ class SipSend:
                 # send ACK
                 print(self.c.BWHITE + '[+] Request ACK')
                 msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                                        self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, totag, '', 1, '', 0)
+                                        self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, totag, '', 1, '', 0, via, '')
 
                 print(self.c.YELLOW + msg)
 
@@ -199,7 +201,7 @@ class SipSend:
                     self.cseq = str(int(self.cseq) + 1)
 
                     msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
-                                        self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, self.to_tag, digest, auth_type, '', self.sdp)
+                                        self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, self.to_tag, digest, auth_type, '', self.sdp, via, '')
 
                     try:
                         if self.proto == 'TLS':

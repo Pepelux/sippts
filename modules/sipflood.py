@@ -135,7 +135,7 @@ class SipFlood:
             self.contact_domain = '10.0.0.1'
 
         msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                             self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0)
+                             self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', '')
 
         line = ['-', '\\', '|', '/']
         pos = 0

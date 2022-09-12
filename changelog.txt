@@ -11,6 +11,7 @@ devel version
   - added param lenght to force the size of extensions
   - added param user to set the From and To user (by default is prefix+extension). If is set, the prefix only will be applied to Auth User
 - siptshark: new module to extract info from a PCAP file
+- sipdigestleak: added tls support
 - added class Color and para nocolor to show console responses in ansii
 - bug fixes
 

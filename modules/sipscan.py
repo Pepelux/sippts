@@ -296,7 +296,7 @@ class SipScan:
                 contact_domain = '10.0.0.1'
 
             msg = create_message(self.method, contact_domain, self.from_user, self.from_name, self.from_domain,
-                                 self.to_user, self.to_name, self.to_domain, proto, domain, self.user_agent, lport, '', '', '', '1', '', '', 1, '', 0)
+                                 self.to_user, self.to_name, self.to_domain, proto, domain, self.user_agent, lport, '', '', '', '1', '', '', 1, '', 0, '', '')
 
             try:
                 sock.settimeout(2)

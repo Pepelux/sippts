@@ -109,7 +109,7 @@ class SipEnumerate:
 
         for method in supported_methods:
             msg = create_message(method, self.contact_domain, self.from_user, self.from_name, self.domain,
-                                 self.to_user, self.to_name, self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0)
+                                 self.to_user, self.to_name, self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', '')
 
 
             if self.verbose == 1:

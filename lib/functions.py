@@ -101,8 +101,8 @@ def generate_random_string(len, only_hex):
     return(result_str)
 
 
-def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser, toname, todomain, proto, domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, auth_type, referto, withsdp):
-    if method == 'REGISTER' or method == 'NOTIFY':
+def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser, toname, todomain, proto, domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, auth_type, referto, withsdp, via, rr):
+    if method == 'REGISTER' or method == 'NOTIFY' or method == 'ACK':
         starting_line = '%s sip:%s SIP/2.0' % (method, domain)
     else:
         starting_line = '%s sip:%s@%s SIP/2.0' % (method, touser, domain)
@@ -118,8 +118,21 @@ def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser
         referto = '999'
 
     headers = dict()
-    headers['Via'] = 'SIP/2.0/%s %s:%s;branch=%s' % (
-        proto.upper(), contactdomain, fromport, branch)
+    if via == '':
+        headers['Via'] = 'SIP/2.0/%s %s:%s;branch=%s' % (
+            proto.upper(), contactdomain, fromport, branch)
+    else:
+        headers['Via'] = via
+
+    if rr != '':
+        rrs = rr.split("#")
+        count = 0
+
+        # for rr in rrs:
+        for rr in rrs[::-1]:
+            count += 1
+            headers['Route %s' % str(count)] = rr
+
     headers['From'] = '%s <sip:%s@%s>;tag=%s' % (
         fromname, fromuser, fromdomain, tag)
 
@@ -135,7 +148,7 @@ def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser
             headers['To'] = '%s <sip:%s@%s>;tag=%s' % (
                 toname, touser, todomain, totag)
 
-    if method != 'CANCEL':
+    if method != 'CANCEL' and method != 'ACK':
         headers['Contact'] = '<sip:%s@%s:%d;transport=%s>' % (
             fromuser, contactdomain, fromport, proto)
 
@@ -172,7 +185,14 @@ def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser
 
     msg = starting_line+'\r\n'
     for h in headers.items():
-        msg += '%s: %s\r\n' % h
+        # msg += '%s: %s\r\n' % h
+        name = h[0]
+        value = h[1]
+
+        m = re.search('^Route', name)
+        if m:
+            name = 'Route'
+        msg += '%s: %s\r\n' % (name, value)
 
     sdp = ''
     if withsdp == 1:
@@ -275,6 +295,9 @@ def parse_message(buffer):
     data['sipuser'] = ''
     data['sipdomain'] = ''
     data['ua'] = ''
+    data['via'] = ''
+    data['rr'] = ''
+    data['route'] = ''
 
     for header in headers:
         m = re.search('^SIP\/[0-9|\.]+\s([0-9]+)\s(.+)', header)
@@ -316,6 +339,17 @@ def parse_message(buffer):
             except:
                 data['fromtag'] = ''
 
+        m = re.search('^Via:\s(.*)', header)
+        if m:
+            data['via'] = '%s' % (m.group(1))
+
+        m = re.search('^Record-Route:\s(.*)', header)
+        if m:
+            if data['rr'] == '':
+                data['rr'] = '%s' % (m.group(1))
+            else:
+                data['rr'] = data['rr'] +'#' + '%s' % (m.group(1))
+
         m = re.search('^Call-ID:\s(.*)', header)
         if m:
             data['callid'] = '%s' % (m.group(1))
@@ -341,11 +375,21 @@ def parse_message(buffer):
             except:
                 data['totag'] = ''
 
-        m = re.search(
-            '^Contact:\s.*\<sip:([a-z|A-z|0-9|_]*)\@([0-9|\.]*):*.*\>.*', header)
+        m = re.search('^Contact:\s(.+)', header)
         if m:
-            data['contactuser'] = '%s' % (m.group(1))
-            data['contactdomain'] = '%s' % (m.group(2))
+            m = re.search('\@', header)
+            if m:
+                m = re.search(
+                    '^Contact:\s.*\<sip:([a-z|A-z|0-9|_]*)\@([0-9|\.]*):*.*\>.*', header)
+                if m:
+                    data['contactuser'] = '%s' % (m.group(1))
+                    data['contactdomain'] = '%s' % (m.group(2))
+            else:
+                m = re.search(
+                    '^Contact:\s.*\<sip:(.*)\>.*', header)
+                if m:
+                    data['contactuser'] = ''
+                    data['contactdomain'] = '%s' % (m.group(1))
 
         m = re.search('^Via:\s(.+)', header)
         if m:
