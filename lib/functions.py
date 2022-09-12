@@ -240,7 +240,7 @@ def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser
     return(msg)
 
 
-def create_response_error(message, fromuser, touser, proto, domain, fromport, cseq, method, branch, callid, tag, totag, iplocal):
+def create_response_error(message, fromuser, touser, proto, domain, fromport, cseq, method, branch, callid, tag, totag, iplocal, via):
     realm = 'asterisk'
     nonce = generate_random_string(8, 0)
     digest = 'Digest algorithm=MD5, realm="%s", nonce="%s\"' % (realm, nonce)
@@ -248,8 +248,11 @@ def create_response_error(message, fromuser, touser, proto, domain, fromport, cs
     starting_line = 'SIP/2.0 %s' % message
 
     headers = dict()
-    headers['Via'] = 'SIP/2.0/%s %s:%s;branch=%s' % (
-        proto.upper(), domain, fromport, branch)
+    if via == '':
+        headers['Via'] = 'SIP/2.0/%s %s:%s;branch=%s' % (
+            proto.upper(), domain, fromport, branch)
+    else:
+        headers['Via'] = via
     headers['From'] = '<sip:%s@%s>;tag=%s' % (fromuser, domain, totag)
     headers['To'] = '<sip:%s@%s>;tag=%s' % (touser, iplocal, tag)
     headers['Call-ID'] = '%s' % callid
@@ -380,7 +383,8 @@ def parse_message(buffer):
             m = re.search('\@', header)
             if m:
                 m = re.search(
-                    '^Contact:\s.*\<sip:([a-z|A-z|0-9|_]*)\@([0-9|\.]*):*.*\>.*', header)
+                    '^Contact:\s.*\<sip:([a-z|A-z|0-9|_]*)\@(.*)\>.*', header)
+                    # '^Contact:\s.*\<sip:([a-z|A-z|0-9|_]*)\@([0-9|\.]*):*.*\>.*', header)
                 if m:
                     data['contactuser'] = '%s' % (m.group(1))
                     data['contactdomain'] = '%s' % (m.group(2))
