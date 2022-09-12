@@ -11,7 +11,7 @@ from modules.siprcrack import SipRemoteCrack
 from lib.params import get_sipremotecrack_args
 
 def main():
-    ip, rport, rexten, prefix, user, ext_len, proto, domain, contact_domain, user_agent, wordlist, nthreads, verbose, nocolor = get_sipremotecrack_args()
+    ip, rport, rexten, prefix, authuser, ext_len, proto, domain, contact_domain, user_agent, wordlist, nthreads, verbose, nocolor = get_sipremotecrack_args()
 
     s = SipRemoteCrack()
     s.ip = ip
@@ -21,7 +21,7 @@ def main():
     s.contact_domain = contact_domain
     s.exten = rexten
     s.prefix = prefix
-    s.user = user
+    s.authuser = authuser
     s.ext_len = ext_len
     s.user_agent = user_agent
     s.threads = nthreads
