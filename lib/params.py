@@ -206,7 +206,7 @@ passwords for several users using bruteforce.
     parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
     parser.add_argument('-r', '--remote_port', type=int, help='Remote port (default: 5060)', dest='remote_port', default=5060)
     parser.add_argument('-e', '--exten', type=str, help='Extensions to attack. Ex: 100 | 100,102,105 | 100-200 | 100,102,200-300', dest='exten', required=True)
-    parser.add_argument('--user', type=str, help='Force From and To User. Use prefix only for Auth User (not in extension)', dest='user', default="")
+    parser.add_argument('-au', '--auth-user', type=str, help='Use a custom SIP Auth User instead the extension', dest='authuser', default="")
     parser.add_argument('-pr', '--prefix', type=str, help='Prefix for auth user, used for authentication', dest='prefix', default='')
     parser.add_argument('-l', '--lenght', type=str, help='Lenght of the extensions (if sett, left padding with 0\'s', dest='lenght', default='')
     parser.add_argument('-p', '--proto', type=str, help='Protocol: udp|tcp|tls (default: udp)', dest='proto', default='udp')
@@ -230,7 +230,7 @@ passwords for several users using bruteforce.
         RPORT = args.remote_port
         EXTEN = args.exten
         PREFIX = args.prefix
-        USER = args.user
+        AUTHUSER = args.authuser
         LENGHT = args.lenght
         PROTO = args.proto
         DOMAIN = args.domain
@@ -241,7 +241,7 @@ passwords for several users using bruteforce.
         VERBOSE = args.verbose
         NOCOLOR = args.nocolor
 
-        return IPADDR, RPORT, EXTEN, PREFIX, USER, LENGHT, PROTO, DOMAIN, CONTACTDOMAIN, UA, WORDLIST, THREADS, VERBOSE, NOCOLOR
+        return IPADDR, RPORT, EXTEN, PREFIX, AUTHUSER, LENGHT, PROTO, DOMAIN, CONTACTDOMAIN, UA, WORDLIST, THREADS, VERBOSE, NOCOLOR
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)

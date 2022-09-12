@@ -31,6 +31,7 @@ import socket
 import sys
 import ipaddress
 import ssl
+from tracemalloc import DomainFilter
 from lib.functions import create_message, create_response_ok, parse_message, generate_random_string, get_machine_default_ip, parse_digest, calculateHash, get_free_port
 from lib.color import Color
 
@@ -85,13 +86,11 @@ class SipInvite:
         if self.domain == '':
             self.domain = self.ip
         if self.from_domain == '':
-            self.from_domain = self.ip
+            self.from_domain = self.domain
         if self.to_domain == '':
-            self.to_domain = self.ip
+            self.to_domain = self.domain
         if self.contact_domain == '':
             self.contact_domain = local_ip
-        if self.auth_user != '':
-            self.from_user = self.auth_user
         if self.nosdp != None and self.nosdp == 1:
             self.sdp = 0
 
@@ -185,6 +184,7 @@ class SipInvite:
                 branch = generate_random_string(71, 0)
 
                 if headers['auth'] != '':
+                    method = 'INVITE'
                     auth = headers['auth']
                     headers = parse_digest(auth)
                     realm = headers['realm']
@@ -201,7 +201,7 @@ class SipInvite:
                         nc = '00000001'
 
                     response = calculateHash(
-                        self.auth_user, realm, self.auth_pwd, 'INVITE', uri, nonce, algorithm, cnonce, nc, qop, self.verbose, '')
+                        self.auth_user, realm, self.auth_pwd, method, uri, nonce, algorithm, cnonce, nc, qop, self.verbose, '')
                     digest = 'Digest username="%s", realm="%s", nonce="%s", uri="%s", response="%s", algorithm=%s' % (
                         self.auth_user, realm, nonce, uri, response, algorithm)
                     if qop != '':
@@ -212,13 +212,17 @@ class SipInvite:
                         digest += ', nc=%s' % nc
 
                     print(self.c.BYELLOW + '[+] Request INVITE')
-                    msg = create_message('INVITE', self. contact_domain, self.from_user, self.from_name, self.from_domain,
-                                         self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '2', totag, local_ip, digest, '', self.sdp)
+                    msg = create_message('INVITE', self.contact_domain, self.from_user, self.from_name, self.from_domain,
+                                            self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '2', totag, digest, '', self.sdp)
+
 
                     if self.verbose == 1:
                         print(self.c.WHITE + msg)
 
-                    sock.sendto(bytes(msg[:8192], 'utf-8'), host)
+                    if self.proto == 'TLS':
+                        sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
+                    else:
+                        sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
                     # receive response
                     headers = parse_message(resp.decode())
@@ -247,7 +251,7 @@ class SipInvite:
                                 headers['response_code'], headers['response_text'])
                             rescode = headers['response_code']
                             print(self.c.BYELLOW +
-                                  '[-] Response %s' % response)
+                                    '[-] Response %s' % response)
                             if self.verbose == 1:
                                 print(self.c.WHITE + resp.decode())
 
@@ -258,23 +262,29 @@ class SipInvite:
                 # send ACK
                 print(self.c.YELLOW + '[+] Request ACK')
                 msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                                     self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '2', totag, local_ip, '', '', 0)
+                                        self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '2', totag, local_ip, '', '', 0)
 
                 if self.verbose == 1:
                     print(self.c.WHITE + msg)
 
-                sock.sendto(bytes(msg[:8192], 'utf-8'), host)
+                if self.proto == 'TLS':
+                    sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
+                else:
+                    sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
                 if self.transfer != '':
                     # send REFER
                     print(self.c.YELLOW + '[+] Request REFER')
                     msg = create_message('REFER', self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                                         self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '3', totag, local_ip, '', self.transfer, 0)
+                                            self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '3', totag, local_ip, '', self.transfer, 0)
 
                     if self.verbose == 1:
                         print(self.c.WHITE + msg)
 
-                    sock.sendto(bytes(msg[:8192], 'utf-8'), host)
+                    if self.proto == 'TLS':
+                        sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
+                    else:
+                        sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
                     # receive response
                     headers = parse_message(resp.decode())
@@ -311,7 +321,11 @@ class SipInvite:
                     cseq), branch, callid, tag, totag)
 
                 print(self.c.YELLOW+'[+] Sending 200 Ok\n')
-                sock.sendto(bytes(msg[:8192], 'utf-8'), host)
+
+                if self.proto == 'TLS':
+                    sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
+                else:
+                    sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
                 if self.verbose == 1:
                     print(self.c.WHITE + msg)

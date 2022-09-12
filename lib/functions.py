@@ -335,6 +335,10 @@ def parse_message(buffer):
             m = re.search('^WWW-Authenticate:\s(.+)', header)
             if m:
                 data['auth'] = '%s' % (m.group(1))
+            else:
+                m = re.search('^Proxy-Authenticate:\s(.+)', header)
+                if m:
+                    data['auth'] = '%s' % (m.group(1))
 
         m = re.search('^CSeq:\s([0-9]+)\s.*', header)
         if m:
