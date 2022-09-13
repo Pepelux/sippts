@@ -87,6 +87,10 @@ class SipFlood:
         print(BYELLOW + '\nPress Ctrl+C to stop\n')
         print(WHITE)
 
+        print(BWHITE + '[!] Target: ' + GREEN + '%s:%s/%s' %
+              (self.ip, self.rport, self.proto))
+        print(WHITE)
+
         threads = list()
         t = threading.Thread(target=self.flood, daemon=True)
         threads.append(t)
@@ -137,8 +141,7 @@ class SipFlood:
         msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain,
                              self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', '')
 
-        line = ['-', '\\', '|', '/']
-        pos = 0
+        count = 1
 
         try:
             sock.settimeout(1)
@@ -166,11 +169,9 @@ class SipFlood:
                           (self.ip, self.rport))
                     print(YELLOW + msg)
                 elif self.verbose == 1:
-                    print(BWHITE + '[%s] Sending %s to %s:%s/%s ...' % (line[pos],
+                    print(BWHITE + '[%s] Sending %s to %s:%s/%s ...' % (str(count),
                           self.method.upper(), self.ip, self.rport, self.proto), end="\r")
-                    pos += 1
-                    if pos > 3:
-                        pos = 0
+                    count += 1
 
             except socket.timeout:
                 pass
