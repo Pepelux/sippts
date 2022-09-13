@@ -90,6 +90,8 @@ class RTCPBleed:
             except KeyboardInterrupt:
                 print(YELLOW + '\nYou pressed Ctrl+C!')
                 exit()
+            except:
+                pass
 
             port += 2
             if port > self.end_port:
