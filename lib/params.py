@@ -495,7 +495,7 @@ SIP Send allow us to send a customized SIP message and analyze the response.
     # Add arguments
     parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
     parser.add_argument('-r', '--port', type=int, help='Remote port (default: 5060)', dest='rport', default=5060)
-    parser.add_argument('-p', '--proto', type=str, help='Protocol: udp|tcp (default: udp)', dest='proto', default='udp')
+    parser.add_argument('-p', '--proto', type=str, help='Protocol: udp|tcp|tls (default: udp)', dest='proto', default='udp')
     parser.add_argument('-m', '--method', type=str, help='SIP Method: options|invite|register|subscribe|cancel|bye|...', dest='method', required=True)
     parser.add_argument('-d', '--domain', type=str, help='SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)', dest='domain', default='')
     parser.add_argument('-cd', '--contact_domain', type=str, help='Domain or IP address for Contact header. Ex: 10.0.1.2', dest='contact_domain', default='')

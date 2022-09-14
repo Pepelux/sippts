@@ -137,7 +137,7 @@ class SipRemoteCrack:
                         qop = headers['qop']
 
                         if qop != '' and cnonce == '':
-                            cnonce = generate_random_string(8, 0)
+                            cnonce = generate_random_string(8, 'ascii')
                         if qop != '' and nc == '':
                             nc = '00000001'
 

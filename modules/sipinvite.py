@@ -132,9 +132,9 @@ class SipInvite:
 
         host = (self.ip, int(self.rport))
 
-        branch = generate_random_string(71, 0)
-        callid = generate_random_string(32, 1)
-        tag = generate_random_string(8, 1)
+        branch = generate_random_string(71, 'ascii')
+        callid = generate_random_string(32, 'hex')
+        tag = generate_random_string(8, 'hex')
 
         msg = create_message('INVITE', self.contact_domain, self.from_user, self.from_name, self.from_domain,
                              self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '1', '', '', 1, '', self.sdp, '', '')
@@ -198,7 +198,7 @@ class SipInvite:
 
                 # send INVITE with Digest
                 totag = ''
-                branch = generate_random_string(71, 0)
+                branch = generate_random_string(71, 'ascii')
 
                 if headers['auth'] != '':
                     method = 'INVITE'
@@ -214,7 +214,7 @@ class SipInvite:
                     qop = headers['qop']
 
                     if qop != '' and cnonce == '':
-                        cnonce = generate_random_string(8, 0)
+                        cnonce = generate_random_string(8, 'ascii')
                     if qop != '' and nc == '':
                         nc = '00000001'
 

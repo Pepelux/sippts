@@ -90,11 +90,11 @@ def long2ip(ip):
     return str(socket.inet_ntoa(struct.pack('!L', ip)))
 
 
-def generate_random_string(len, only_hex):
-    if only_hex == 0:
+def generate_random_string(len, type):
+    if type == 'ascii':
         result_str = ''.join(random.choice(
             '0123456789abcdefghijklmnopqqrstuvwxyz') for i in range(len))
-    else:
+    if type == 'hex':
         result_str = ''.join(random.choice('0123456789abcdef')
                              for i in range(len))
 

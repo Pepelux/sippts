@@ -52,11 +52,11 @@ class SipSend:
         self.proto = self.proto.upper()
 
         if self.branch == '':
-            self.branch = generate_random_string(71, 0)
+            self.branch = generate_random_string(71, 'ascii')
         if self.callid == '':
-            self.callid = generate_random_string(32, 1)
+            self.callid = generate_random_string(32, 'hex')
         if self.from_tag == '':
-            self.from_tag = generate_random_string(8, 1)
+            self.from_tag = generate_random_string(8, 'hex')
 
         if self.nocolor == 1:
             self.c.ansy()
@@ -181,7 +181,7 @@ class SipSend:
                     qop = headers['qop']
 
                     if qop != '' and cnonce == '':
-                        cnonce = generate_random_string(8, 0)
+                        cnonce = generate_random_string(8, 'ascii')
                     if qop != '' and nc == '':
                         nc = '00000001'
 
@@ -197,7 +197,7 @@ class SipSend:
                     if nc != '':
                         digest += ', nc=%s' % nc
 
-                    self.branch = generate_random_string(71, 0)
+                    self.branch = generate_random_string(71, 'ascii')
                     self.cseq = str(int(self.cseq) + 1)
 
                     msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
