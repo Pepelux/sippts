@@ -112,9 +112,9 @@ class SipDigestLeak:
 
         host = (str(ip), int(port))
 
-        branch = generate_random_string(71, 'ascii')
-        callid = generate_random_string(32, 'hex')
-        tag = generate_random_string(8, 'hex')
+        branch = generate_random_string(71, 71, 'ascii')
+        callid = generate_random_string(32, 32, 'hex')
+        tag = generate_random_string(8, 8, 'hex')
 
         msg = create_message('INVITE', self.contact_domain, self.from_user, self.from_name, self.from_domain,
                              self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, cseq, '', '', 1, '', 0, '', '')
@@ -197,7 +197,7 @@ class SipDigestLeak:
                     qop = headers['qop']
 
                     if qop != '' and cnonce == '':
-                        cnonce = generate_random_string(8, 'ascii')
+                        cnonce = generate_random_string(8, 8, 'ascii')
                     if qop != '' and nc == '':
                         nc = '00000001'
 
@@ -213,7 +213,7 @@ class SipDigestLeak:
                     if nc != '':
                         digest += ', nc=%s' % nc
 
-                    branch = generate_random_string(71, 'ascii')
+                    branch = generate_random_string(71, 71, 'ascii')
                     cseq = str(int(cseq) + 1)
 
                     print(YELLOW + '[=>] Request INVITE' + WHITE)

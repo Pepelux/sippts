@@ -1,4 +1,5 @@
 import random
+from random import randint
 import re
 import netifaces
 import socket
@@ -7,6 +8,7 @@ import struct
 import os
 import hashlib
 import platform
+
 
 BRED = '\033[1;31;40m'
 RED = '\033[0;31;40m'
@@ -90,15 +92,28 @@ def long2ip(ip):
     return str(socket.inet_ntoa(struct.pack('!L', ip)))
 
 
-def generate_random_string(len, type):
-    if type == 'ascii':
+def generate_random_string(len_ini, len_end, type):
+    len = generate_random_integer(len_ini, len_end)
+
+    if type == 'all':
+        str = ''.join(chr(i) for i in range(128))
+        result_str = ''.join(random.choice(str) for i in range(len))
+    elif type == 'printable':
+        result_str = ''.join(random.choice(
+            '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r\x0b\x0c') for i in range(len))
+    elif type == 'ascii':
         result_str = ''.join(random.choice(
             '0123456789abcdefghijklmnopqqrstuvwxyz') for i in range(len))
-    if type == 'hex':
+    else:
+        # By default use 'hex'
         result_str = ''.join(random.choice('0123456789abcdef')
                              for i in range(len))
 
-    return(result_str)
+    return result_str
+
+
+def generate_random_integer(len_ini, len_end):
+    return randint(len_ini, len_end)
 
 
 def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser, toname, todomain, proto, domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, auth_type, referto, withsdp, via, rr):
@@ -108,11 +123,11 @@ def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser
         starting_line = '%s sip:%s@%s SIP/2.0' % (method, touser, domain)
 
     if branch == '':
-        branch = generate_random_string(71, 0)
+        branch = generate_random_string(71, 71, 'ascii')
     if callid == '':
-        callid = generate_random_string(32, 1)
+        callid = generate_random_string(32, 32, 'hex')
     if tag == '':
-        tag = generate_random_string(8, 1)
+        tag = generate_random_string(8, 8, 'hex')
 
     if method == 'REFER' and referto == '':
         referto = '999'
@@ -242,7 +257,7 @@ def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser
 
 def create_response_error(message, fromuser, touser, proto, domain, fromport, cseq, method, branch, callid, tag, totag, iplocal, via):
     realm = 'asterisk'
-    nonce = generate_random_string(8, 0)
+    nonce = generate_random_string(8, 8, 'ascii')
     digest = 'Digest algorithm=MD5, realm="%s", nonce="%s\"' % (realm, nonce)
 
     starting_line = 'SIP/2.0 %s' % message
@@ -405,9 +420,7 @@ def parse_message(buffer):
                 data['branch'] = ''
 
         m = re.search('^Authorization:\s(.+)', header)
-        if m:
-            data['auth'] = '%s' % (m.group(1))
-            data['auth-type'] = 1
+        if m:generate_random_string(min, max, 'all')
         else:
             m = re.search('^WWW-Authenticate:\s(.+)', header)
             if m:
