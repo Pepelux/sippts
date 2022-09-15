@@ -248,9 +248,9 @@ class SipScan:
                         if not self.domain or self.domain == '':
                             self.domain = val_ipaddr
                         if not self.from_domain or self.from_domain == '':
-                            self.from_domain = val_ipaddr
+                            self.from_domain = self.domain
                         if not self.to_domain or self.to_domain == '':
-                            self.to_domain = val_ipaddr
+                            self.to_domain = self.domain
 
                         executor.submit(self.scan_host, val_ipaddr,
                                         val_port, val_proto)

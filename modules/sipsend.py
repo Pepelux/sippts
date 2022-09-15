@@ -105,9 +105,9 @@ class SipSend:
         if self.domain == '':
             self.domain = self.ip
         if self.from_domain == '':
-            self.from_domain = self.ip
+            self.from_domain = self.domain
         if self.to_domain == '':
-            self.to_domain = self.ip
+            self.to_domain = self.domain
         if self.contact_domain == '':
             self.contact_domain = '10.0.0.1'
 

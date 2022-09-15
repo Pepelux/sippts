@@ -86,9 +86,9 @@ class SipDigestLeak:
         if self.domain == '':
             self.domain = ip
         if self.from_domain == '':
-            self.from_domain = ip
+            self.from_domain = self.domain
         if self.to_domain == '':
-            self.to_domain = ip
+            self.to_domain = self.domain
         if self.contact_domain == '':
             self.contact_domain = local_ip
 
