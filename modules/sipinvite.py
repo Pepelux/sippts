@@ -24,8 +24,11 @@ __email__ = "pepeluxx@gmail.com"
 #                                                             <--->  RTP Session <--->
 #                                                               (Phone 1 && phone 2)
 
-__author__ = 'Jose Luis Verdeguer <verdeguer@zoonsuite.com>'
-__version__ = '3.0.0'
+__author__ = 'Jose Luis Verdeguer'
+__version__ = '3.1.1'
+__license__ = "GPL"
+__copyright__ = "Copyright (C) 2015-2022, SIPPTS"
+__email__ = "pepeluxx@gmail.com"
 
 import socket
 import sys
