@@ -597,8 +597,10 @@ Enumerate available methods of a SIP service/server.
     parser.add_argument('-cd', '--contact_domain', type=str, help='Domain or IP address for Contact header. Ex: 10.0.1.2', dest='contact_domain', default='')
     parser.add_argument('-fn', '--from_name', type=str, help='From Name. Ex: Bob', dest='from_name', default='')
     parser.add_argument('-fu', '--from_user', type=str, help='From User (default: 100)', dest='from_user', default='100')
+    parser.add_argument('-fd', '--from_domain', type=str, help='From Domain. Ex: 10.0.0.1', dest='from_domain', default='')
     parser.add_argument('-tn', '--to_name', type=str, help='To Name. Ex: Alice', dest='to_name', default='')
     parser.add_argument('-tu', '--to_user', type=str, help='To User (default: 100)', dest='to_user', default='100')
+    parser.add_argument('-td', '--to_domain', type=str, help='To Domain. Ex: 10.0.0.1', dest='to_domain', default='')
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
 
@@ -618,12 +620,14 @@ Enumerate available methods of a SIP service/server.
         CONTACTDOMAIN = args.contact_domain
         FROMNAME = args.from_name
         FROMUSER = args.from_user
+        FROMDOMAIN = args.from_domain
         TONAME = args.to_name
         TOUSER = args.to_user
+        TODOMAIN = args.to_domain
         UA = args.user_agent
         VERBOSE = args.verbose
 
-        return IPADDR, HOST, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, TONAME, TOUSER, UA, VERBOSE
+        return IPADDR, HOST, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, VERBOSE
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)

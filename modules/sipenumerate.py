@@ -43,8 +43,10 @@ class SipEnumerate:
         self.contact_domain = ''
         self.from_user = '100'
         self.from_name = ''
+        self.from_domain = ''
         self.to_user = '100'
         self.to_name = ''
+        self.to_domain = ''
         self.user_agent = 'pplsip'
         self.digest = ''
         self.verbose = '0'
@@ -85,17 +87,50 @@ class SipEnumerate:
 
         host = (str(self.ip), int(self.rport))
 
+        print(BWHITE + '[!] IP address: ' + GREEN + '%s' % str(self.ip) + WHITE +
+              ':' + GREEN + '%s' % self.rport + WHITE + '/' + GREEN + '%s' % self.proto)
+
+        if self.domain != '':
+            print(BWHITE + '[!] Customized Domain: ' +
+                  GREEN + '%s' % self.domain)
+        if self.contact_domain != '':
+            print(BWHITE + '[!] Customized Contact Domain: ' + GREEN + '%s' %
+                  self.contact_domain)
+        if self.from_name != '':
+            print(BWHITE + '[!] Customized From Name: ' +
+                  GREEN + '%s' % self.from_name)
+        if self.from_user != '100':
+            print(BWHITE + '[!] Customized From User: ' +
+                  GREEN + '%s' % self.from_user)
+        if self.from_domain != '':
+            print(BWHITE + '[!] Customized From Domain: ' +
+                  GREEN + '%s' % self.from_domain)
+        if self.to_name != '':
+            print(BWHITE + '[!] Customized To Name: ' +
+                  GREEN + '%s' % self.to_name)
+        if self.to_user != '100':
+            print(BWHITE + '[!] Customized To User:' +
+                  GREEN + ' %s' % self.to_user)
+        if self.to_domain != '':
+            print(BWHITE + '[!] Customized To Domain: ' +
+                  GREEN + '%s' % self.to_domain)
+        if self.user_agent != 'pplsip':
+            print(BWHITE + '[!] Customized User-Agent: ' +
+                  GREEN + '%s' % self.user_agent)
+
+        print(WHITE)
+
         if self.host != '' and self.domain == '':
             self.domain = self.host
         if self.domain == '':
             self.domain = self.ip
+        if not self.from_domain or self.from_domain == '':
+            self.from_domain = self.domain
+        if not self.to_domain or self.to_domain == '':
+            self.to_domain = self.domain
 
         if self.contact_domain == '':
             self.contact_domain = '10.0.0.1'
-
-        print(BWHITE + '[!] IP address: ' + GREEN + '%s' % str(self.ip) + WHITE +
-              ':' + GREEN + '%s' % self.rport + WHITE + '/' + GREEN + '%s' % self.proto)
-        print(WHITE)
 
         try:
             sock.settimeout(5)
@@ -114,7 +149,6 @@ class SipEnumerate:
         for method in supported_methods:
             msg = create_message(method, self.contact_domain, self.from_user, self.from_name, self.domain,
                                  self.to_user, self.to_name, self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', '')
-
 
             if self.verbose == 1:
                 print(BWHITE + '[+] Sending to %s:%s/%s ...' % (self.ip, self.rport, self.proto))
