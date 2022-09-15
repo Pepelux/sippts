@@ -85,7 +85,7 @@ class SipScan:
             self.rport = '5060-5061'
 
         if self.rport.upper() == 'ALL':
-            self.rport ='1-65536'
+            self.rport = '1-65536'
 
         # create a list of protocols
         protos = []

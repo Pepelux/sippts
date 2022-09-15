@@ -74,11 +74,11 @@ class SipRemoteCrack:
             data = dict()
 
             msg = create_message('REGISTER', self.contact_domain, to_user, '', self.domain,
-                                to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', '', 1, '', 0, '', '')
+                                 to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', '', 1, '', 0, '', '')
 
             if self.verbose == 1:
                 print(self.c.BWHITE + '[+] Sending to %s:%d/%s ...' %
-                    (ip, self.rport, self.proto))
+                      (ip, self.rport, self.proto))
                 print(self.c.YELLOW + msg)
 
             try:
@@ -154,11 +154,11 @@ class SipRemoteCrack:
                             digest += ', nc=%s' % nc
 
                         msg = create_message('REGISTER', self.contact_domain, to_user, '', self.domain,
-                                            to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', callid, '', '1', '', digest, auth_type, '', 0, '', '')
+                                             to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', callid, '', '1', '', digest, auth_type, '', 0, '', '')
 
                         if self.verbose == 1:
                             print(self.c.BWHITE + '[+] Sending to %s:%d/%s ...' %
-                                (ip, self.rport, self.proto))
+                                  (ip, self.rport, self.proto))
                             print(self.c.YELLOW + msg)
 
                         if self.proto == 'TLS':
@@ -173,7 +173,7 @@ class SipRemoteCrack:
 
                         if self.verbose == 1:
                             print(self.c.BWHITE + '[+] Receiving from %s:%d ...' %
-                                (ip, self.rport))
+                                  (ip, self.rport))
                             print(self.c.GREEN + resp.decode())
 
                     headers = parse_message(resp.decode())
@@ -375,7 +375,7 @@ class SipRemoteCrack:
                                         print(self.c.WHITE)
                                         pre = ''
                                         print(self.c.BWHITE + '%s' % pre + self.c.WHITE+'Password for user ' + self.c.BBLUE + '%s' %
-                                            auth_user + self.c.WHITE + ' found: ' + self.c.BRED + '%s' % pwd + self.c.WHITE)
+                                              auth_user + self.c.WHITE + ' found: ' + self.c.BRED + '%s' % pwd + self.c.WHITE)
                                         line = '%s###%s###%s###%s###%s' % (
                                             ipaddr, self.rport, self.proto, auth_user, pwd)
                                         self.found.append(line)

@@ -151,7 +151,8 @@ class SipEnumerate:
                                  self.to_user, self.to_name, self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', '')
 
             if self.verbose == 1:
-                print(BWHITE + '[+] Sending to %s:%s/%s ...' % (self.ip, self.rport, self.proto))
+                print(BWHITE + '[+] Sending to %s:%s/%s ...' %
+                      (self.ip, self.rport, self.proto))
                 print(YELLOW + msg)
 
             try:
@@ -181,7 +182,8 @@ class SipEnumerate:
                             '%s %s' % (rescode, restext)
 
                 if self.verbose == 1:
-                    print(BWHITE + '[+] Receiving from %s:%d ...' % (self.ip, self.rport))
+                    print(BWHITE + '[+] Receiving from %s:%d ...' %
+                          (self.ip, self.rport))
                     print(GREEN + resp.decode())
                 else:
                     print(BCYAN + '%s' % method + WHITE + ' => %s' % resdata)
