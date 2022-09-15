@@ -12,10 +12,11 @@ from lib.params import get_sipflood_args
 
 
 def main():
-    ip, rport, proto, method, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, digest, user_agent, verbose = get_sipflood_args()
+    ip, host, rport, proto, method, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, digest, user_agent, verbose = get_sipflood_args()
 
     s = SipFlood()
     s.ip = ip
+    s.host = host
     s.rport = rport
     s.proto = proto
     s.method = method

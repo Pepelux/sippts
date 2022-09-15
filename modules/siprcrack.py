@@ -23,6 +23,7 @@ from concurrent.futures import ThreadPoolExecutor
 class SipRemoteCrack:
     def __init__(self):
         self.ip = ''
+        self.host = ''
         self.rport = '5060'
         self.proto = 'UDP'
         self.exten = ''
@@ -225,6 +226,11 @@ class SipRemoteCrack:
             print(self.c.BRED + 'Protocol %s is not supported' % self.proto)
             sys.exit()
 
+        if self.host != '' and self.domain == '':
+            self.domain = self.host
+        if self.domain == '':
+            self.domain = self.ip
+
         # create a list of IP addresses
         self.ips = []
         hosts = list(ipaddress.ip_network(str(self.ip)).hosts())
@@ -292,7 +298,7 @@ class SipRemoteCrack:
         print(self.c.BWHITE+'[!] Protocol: ' +
               self.c.GREEN + '%s' % self.proto.upper())
 
-        if self.domain != '':
+        if self.domain != '' and self.domain != str(self.ip) and self.domain != self.host:
             print(self.c.BWHITE + '[!] Customized Domain: ' +
                   self.c.GREEN + '%s' % self.domain)
         if self.contact_domain != '':
@@ -317,8 +323,6 @@ class SipRemoteCrack:
                         val_ipaddr = val[0]
                         val_exten = val[1]
                         to_user = '%s%s' % (self.prefix, val_exten)
-                        if not self.domain or self.domain == '':
-                            self.domain = val_ipaddr
 
                         executor.submit(self.scan_host, val_ipaddr, to_user)
         except:
@@ -352,9 +356,6 @@ class SipRemoteCrack:
                                     self.pos += 1
                                     if self.pos > 3:
                                         self.pos = 0
-
-                                    if self.domain == '':
-                                        self.domain = ipaddr
 
                                     if self.contact_domain == '':
                                         self.contact_domain = '10.0.0.1'

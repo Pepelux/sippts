@@ -36,6 +36,7 @@ WHITE = '\033[0;37;40m'
 class SipEnumerate:
     def __init__(self):
         self.ip = ''
+        self.host = ''
         self.rport = '5060'
         self.proto = 'UDP'
         self.domain = ''
@@ -84,8 +85,11 @@ class SipEnumerate:
 
         host = (str(self.ip), int(self.rport))
 
+        if self.host != '' and self.domain == '':
+            self.domain = self.host
         if self.domain == '':
             self.domain = self.ip
+
         if self.contact_domain == '':
             self.contact_domain = '10.0.0.1'
 

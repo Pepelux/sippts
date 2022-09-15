@@ -22,6 +22,7 @@ from concurrent.futures import ThreadPoolExecutor
 class SipScan:
     def __init__(self):
         self.ip = ''
+        self.host = ''
         self.rport = '5060'
         self.proto = 'UDP'
         self.method = 'OPTIONS'
@@ -85,6 +86,15 @@ class SipScan:
 
         if self.rport.upper() == 'ALL':
             self.rport ='1-65536'
+
+        if self.host != '' and self.domain == '':
+            self.domain = self.host
+        if self.domain == '':
+            self.domain = self.ip
+        if not self.from_domain or self.from_domain == '':
+            self.from_domain = self.domain
+        if not self.to_domain or self.to_domain == '':
+            self.to_domain = self.domain
 
         # create a list of protocols
         protos = []
@@ -200,7 +210,7 @@ class SipScan:
         print(self.c.BWHITE + '[!] Method to scan: ' +
               self.c.GREEN + '%s' % self.method)
 
-        if self.domain != '' and self.domain != str(self.ip):
+        if self.domain != '' and self.domain != str(self.ip) and self.domain != self.host:
             print(self.c.BWHITE + '[!] Customized Domain: ' +
                   self.c.GREEN + '%s' % self.domain)
         if self.contact_domain != '':
@@ -244,13 +254,6 @@ class SipScan:
                         val_ipaddr = val[0]
                         val_port = int(val[1])
                         val_proto = val[2]
-
-                        if not self.domain or self.domain == '':
-                            self.domain = val_ipaddr
-                        if not self.from_domain or self.from_domain == '':
-                            self.from_domain = self.domain
-                        if not self.to_domain or self.to_domain == '':
-                            self.to_domain = self.domain
 
                         executor.submit(self.scan_host, val_ipaddr,
                                         val_port, val_proto)

@@ -21,6 +21,7 @@ from concurrent.futures import ThreadPoolExecutor
 class SipExten:
     def __init__(self):
         self.ip = ''
+        self.host = ''
         self.rport = '5060'
         self.proto = 'UDP'
         self.exten = '100-300'
@@ -62,6 +63,11 @@ class SipExten:
         if self.proto != 'ALL' and self.proto not in supported_protos:
             print(self.c.BRED + 'Protocol %s is not supported' % self.proto)
             sys.exit()
+
+        if self.host != '' and self.domain == '':
+            self.domain = self.host
+        if self.domain == '':
+            self.domain = self.ip
 
         # create a list of IP addresses
         ips = []
@@ -111,7 +117,7 @@ class SipExten:
         print(self.c.BWHITE + '[!] Method to scan: ' +
               self.c.GREEN + '%s' % self.method)
 
-        if self.domain != '':
+        if self.domain != '' and self.domain != str(self.ip) and self.domain != self.host:
             print(self.c.BWHITE + '[!] Customized Domain: ' +
                   self.c.GREEN + '%s' % self.domain)
         if self.contact_domain != '':
@@ -140,8 +146,6 @@ class SipExten:
                             to_user = '%s%s' % (self.prefix, val_exten)
                         else:
                             to_user = '%s' % self.prefix
-                        if not self.domain or self.domain == '':
-                            self.domain = val_ipaddr
 
                         executor.submit(self.scan_host, val_ipaddr, to_user)
         except KeyboardInterrupt:
@@ -180,10 +184,6 @@ class SipExten:
 
             host = (str(ipaddr), int(self.rport))
 
-            domain = self.domain
-            if domain == '':
-                domain = ipaddr
-
             contact_domain = self.contact_domain
             if contact_domain == '':
                 contact_domain = '10.0.0.1'
@@ -192,7 +192,7 @@ class SipExten:
                 self.from_user = to_user
 
             msg = create_message(self.method, contact_domain, self.from_user, '', self.domain,
-                                 to_user, '', self.domain, self.proto, domain, self.user_agent, lport, '', '', '', '1', '', '', 1, '', 0, '', '')
+                                 to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', '', 1, '', 0, '', '')
 
             try:
                 sock.settimeout(5)

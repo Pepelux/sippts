@@ -17,6 +17,7 @@ from lib.color import Color
 class SipSend:
     def __init__(self):
         self.ip = ''
+        self.host = ''
         self.rport = '5060'
         self.proto = 'UDP'
         self.method = ''
@@ -94,7 +95,7 @@ class SipSend:
 
         print(self.c.BWHITE + '[!] Target: ' + self.c.YELLOW + '%s' % self.ip + self.c.WHITE + ':' +
               self.c.YELLOW + '%s' % self.rport + self.c.WHITE + '/' + self.c.YELLOW + '%s' % self.proto)
-        if self.domain != '' and self.domain != str(self.ip):
+        if self.domain != '' and self.domain != str(self.ip) and self.domain != self.host:
             print(self.c.BWHITE + '[!] Customized Domain: ' +
                   self.c.GREEN + '%s' % self.domain)
         if self.contact_domain != '':
@@ -137,7 +138,7 @@ class SipSend:
             fw = open(self.ofile, 'w')
 
             fw.write('[!] Target: %s:%s/%s\n' % (self.ip, self.rport, self.proto))
-            if self.domain != '' and self.domain != str(self.ip):
+            if self.domain != '' and self.domain != str(self.ip) and self.domain != self.host:
                 fw.write('[!] Customized Domain: %s\n' % self.domain)
             if self.contact_domain != '':
                 fw.write('[!] Customized Contact Domain: %s\n' % self.contact_domain)
@@ -173,12 +174,15 @@ class SipSend:
 
         host = (str(self.ip), int(self.rport))
 
+        if self.host != '' and self.domain == '':
+            self.domain = self.host
         if self.domain == '':
             self.domain = self.ip
-        if self.from_domain == '':
+        if not self.from_domain or self.from_domain == '':
             self.from_domain = self.domain
-        if self.to_domain == '':
+        if not self.to_domain or self.to_domain == '':
             self.to_domain = self.domain
+
         if self.contact_domain == '':
             self.contact_domain = '10.0.0.1'
 

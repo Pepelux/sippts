@@ -39,6 +39,7 @@ from lib.color import Color
 class SipInvite:
     def __init__(self):
         self.ip = ''
+        self.host = ''
         self.rport = '5060'
         self.proto = 'UDP'
         self.domain = ''
@@ -89,6 +90,8 @@ class SipInvite:
 
         # SIP headers
         if self.domain == '':
+            self.domain = self.host
+        if self.domain == '':
             self.domain = self.ip
         if self.from_domain == '':
             self.from_domain = self.domain
@@ -110,7 +113,7 @@ class SipInvite:
 
         print(self.c.BWHITE + '[!] Target: ' + self.c.YELLOW + '%s' % self.ip + self.c.WHITE + ':' +
               self.c.YELLOW + '%s' % self.rport + self.c.WHITE + '/' + self.c.YELLOW + '%s' % self.proto)
-        if self.domain != '' and self.domain != str(self.ip):
+        if self.domain != '' and self.domain != str(self.ip) and self.domain != self.host:
             print(self.c.BWHITE + '[!] Customized Domain: ' +
                   self.c.GREEN + '%s' % self.domain)
         if self.contact_domain != '':
@@ -141,7 +144,7 @@ class SipInvite:
             fw = open(self.ofile, 'w')
 
             fw.write('[!] Target: %s:%s/%s\n' % (self.ip, self.rport, self.proto))
-            if self.domain != '' and self.domain != str(self.ip):
+            if self.domain != '' and self.domain != str(self.ip) and self.domain != self.host:
                 fw.write('[!] Customized Domain: %s\n' % self.domain)
             if self.contact_domain != '':
                 fw.write('[!] Customized Contact Domain: %s\n' % self.contact_domain)

@@ -84,6 +84,7 @@ UDP, TCP and TLS protocols.
                 IPADDR = IP(args.ipaddr)
         else:
             IPADDR = ''
+        HOST = args.ipaddr
         PORT = args.remote_port
         PROTO = args.proto
         METHOD = args.method
@@ -105,7 +106,7 @@ UDP, TCP and TLS protocols.
         FILE = args.file
         NOCOLOR = args.nocolor
 
-        return IPADDR, PORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, THREADS, VERBOSE, PING, FILE, NOCOLOR
+        return IPADDR, HOST, PORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, THREADS, VERBOSE, PING, FILE, NOCOLOR
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -158,6 +159,7 @@ or not. Sipexten uses multithread and can check several IPs and port ranges.
             IPADDR = IP(ip)
         except:
             IPADDR = IP(args.ipaddr)
+        HOST = args.ipaddr
         RPORT = args.remote_port
         EXTEN = args.exten
         PREFIX = args.prefix
@@ -174,7 +176,7 @@ or not. Sipexten uses multithread and can check several IPs and port ranges.
             VERBOSE = 2
         NOCOLOR = args.nocolor
 
-        return IPADDR, RPORT, EXTEN, PREFIX, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMUSER, UA, THREADS, VERBOSE, NOCOLOR
+        return IPADDR, HOST, RPORT, EXTEN, PREFIX, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMUSER, UA, THREADS, VERBOSE, NOCOLOR
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -227,6 +229,7 @@ passwords for several users using bruteforce.
             IPADDR = IP(ip)
         except:
             IPADDR = IP(args.ipaddr)
+        HOST = args.ipaddr
         RPORT = args.remote_port
         EXTEN = args.exten
         PREFIX = args.prefix
@@ -241,7 +244,7 @@ passwords for several users using bruteforce.
         VERBOSE = args.verbose
         NOCOLOR = args.nocolor
 
-        return IPADDR, RPORT, EXTEN, PREFIX, AUTHUSER, LENGHT, PROTO, DOMAIN, CONTACTDOMAIN, UA, WORDLIST, THREADS, VERBOSE, NOCOLOR
+        return IPADDR, HOST, RPORT, EXTEN, PREFIX, AUTHUSER, LENGHT, PROTO, DOMAIN, CONTACTDOMAIN, UA, WORDLIST, THREADS, VERBOSE, NOCOLOR
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -301,6 +304,7 @@ possible and can recover most passwords based on the challenge response.
                 IPADDR = IP(args.ipaddr)
         else:
             IPADDR = ''
+        HOST = args.ipaddr
         RPORT = args.rport
         PROTO = args.proto
         DOMAIN = args.domain
@@ -317,7 +321,7 @@ possible and can recover most passwords based on the challenge response.
         PWD = args.pwd
         VERBOSE = args.verbose
 
-        return IPADDR, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, OFILE, USER, PWD, VERBOSE
+        return IPADDR, HOST, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, OFILE, USER, PWD, VERBOSE
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -377,6 +381,7 @@ the call to a second external number.
             IPADDR = IP(ip)
         except:
             IPADDR = IP(args.ipaddr)
+        HOST = args.ipaddr
         RPORT = args.rport
         PROTO = args.proto
         DOMAIN = args.domain
@@ -398,7 +403,7 @@ the call to a second external number.
         OFILE = args.ofile
 
 
-        return IPADDR, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, TRANSFER, USER, PWD, UA, NOSDP, VERBOSE, SDES, NOCOLOR, OFILE
+        return IPADDR, HOST, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, TRANSFER, USER, PWD, UA, NOSDP, VERBOSE, SDES, NOCOLOR, OFILE
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -526,8 +531,12 @@ SIP Send allow us to send a customized SIP message and analyze the response.
     args = parser.parse_args()
 
     try:
-        ip = socket.gethostbyname(args.ipaddr)
-        IPADDR = IP(ip)
+        try:
+            ip = socket.gethostbyname(args.ipaddr)
+            IPADDR = IP(ip)
+        except:
+            IPADDR = IP(args.ipaddr)
+        HOST = args.ipaddr
         RPORT = args.rport
         PROTO = args.proto
         METHOD = args.method
@@ -553,7 +562,7 @@ SIP Send allow us to send a customized SIP message and analyze the response.
         NOCOLOR = args.nocolor
         OFILE = args.ofile
 
-        return IPADDR, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, SDP, SDES, UA, NOCOLOR, OFILE
+        return IPADDR, HOST, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, SDP, SDES, UA, NOCOLOR, OFILE
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -597,8 +606,12 @@ Enumerate available methods of a SIP service/server.
     args = parser.parse_args()
 
     try:
-        ip = socket.gethostbyname(args.ipaddr)
-        IPADDR = IP(ip)
+        try:
+            ip = socket.gethostbyname(args.ipaddr)
+            IPADDR = IP(ip)
+        except:
+            IPADDR = IP(args.ipaddr)
+        HOST = args.ipaddr
         RPORT = args.rport
         PROTO = args.proto
         DOMAIN = args.domain
@@ -610,7 +623,7 @@ Enumerate available methods of a SIP service/server.
         UA = args.user_agent
         VERBOSE = args.verbose
 
-        return IPADDR, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, TONAME, TOUSER, UA, VERBOSE
+        return IPADDR, HOST, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, TONAME, TOUSER, UA, VERBOSE
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -697,8 +710,12 @@ SIP Flood send messages with a selected method
     args = parser.parse_args()
 
     try:
-        ip = socket.gethostbyname(args.ipaddr)
-        IPADDR = IP(ip)
+        try:
+            ip = socket.gethostbyname(args.ipaddr)
+            IPADDR = IP(ip)
+        except:
+            IPADDR = IP(args.ipaddr)
+        HOST = args.ipaddr
         RPORT = args.rport
         PROTO = args.proto
         METHOD = args.method
@@ -717,7 +734,7 @@ SIP Flood send messages with a selected method
         if MORE_VERBOSE == 1:
             VERBOSE = 2
 
-        return IPADDR, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, DIGEST, UA, VERBOSE
+        return IPADDR, HOST, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, DIGEST, UA, VERBOSE
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)

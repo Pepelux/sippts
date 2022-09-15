@@ -12,10 +12,11 @@ from lib.params import get_sipdigestleak_args
 
 
 def main():
-    ip, rport, proto, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, user_agent, ofile, user, pwd, verbose = get_sipdigestleak_args()
+    ip, host, rport, proto, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, user_agent, ofile, user, pwd, verbose = get_sipdigestleak_args()
 
     s = SipDigestLeak()
     s.ip = ip
+    s.host = host
     s.rport = rport
     s.proto = proto
     s.domain = domain

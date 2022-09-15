@@ -38,6 +38,7 @@ WHITE = '\033[0;37;40m'
 class SipDigestLeak:
     def __init__(self):
         self.ip = ''
+        self.host = ''
         self.rport = '5060'
         self.proto = 'UDP'
         self.domain = ''
@@ -83,12 +84,15 @@ class SipDigestLeak:
         local_ip = get_machine_default_ip()
 
         # SIP headers
+        if self.host != '' and self.domain == '':
+            self.domain = self.host
         if self.domain == '':
-            self.domain = ip
-        if self.from_domain == '':
+            self.domain = self.ip
+        if not self.from_domain or self.from_domain == '':
             self.from_domain = self.domain
-        if self.to_domain == '':
+        if not self.to_domain or self.to_domain == '':
             self.to_domain = self.domain
+
         if self.contact_domain == '':
             self.contact_domain = local_ip
 
