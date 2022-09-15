@@ -109,6 +109,9 @@ class SipSend:
         if self.from_domain != '':
             print(self.c.BWHITE + '[!] Customized From Domain: ' +
                   self.c.GREEN + '%s' % self.from_domain)
+        if self.from_tag != '':
+            print(self.c.BWHITE + '[!] Customized From Tag: ' +
+                  self.c.GREEN + '%s' % self.from_tag)
         if self.to_name != '':
             print(self.c.BWHITE + '[!] Customized To Name: ' +
                   self.c.GREEN + '%s' % self.to_name)
@@ -118,6 +121,9 @@ class SipSend:
         if self.to_domain != '':
             print(self.c.BWHITE + '[!] Customized To Domain: ' +
                   self.c.GREEN + '%s' % self.to_domain)
+        if self.to_tag != '':
+            print(self.c.BWHITE + '[!] Customized To Tag: ' +
+                  self.c.GREEN + '%s' % self.to_tag)
         if self.user_agent != 'pplsip':
             print(self.c.BWHITE + '[!] Customized User-Agent: ' +
                   self.c.GREEN + '%s' % self.user_agent)
@@ -141,12 +147,16 @@ class SipSend:
                 fw.write('[!] Customized From User: %s\n' % self.from_user)
             if self.from_domain != '':
                 fw.write('[!] Customized From Domain: %s\n' % self.from_domain)
+            if self.from_tag != '':
+                fw.write('[!] Customized From Tag: %s\n' % self.from_tag)
             if self.to_name != '':
                 fw.write('[!] Customized To Name: %s\n' % self.to_name)
             if self.to_user != '100':
                 fw.write('[!] Customized To User: %s\n' % self.to_user)
             if self.to_domain != '':
                 fw.write('[!] Customized To Domain: %s\n' % self.to_domain)
+            if self.to_tag != '':
+                fw.write('[!] Customized To Tag: %s\n' % self.to_tag)
             if self.user_agent != 'pplsip':
                 fw.write('[!] Customized User-Agent: %s\n' % self.user_agent)
             fw.write('\n')
