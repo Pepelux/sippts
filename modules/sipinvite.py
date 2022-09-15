@@ -29,9 +29,7 @@ __version__ = '3.0.0'
 
 import socket
 import sys
-import ipaddress
 import ssl
-from tracemalloc import DomainFilter
 from lib.functions import create_message, create_response_ok, parse_message, generate_random_string, get_machine_default_ip, parse_digest, calculateHash, get_free_port
 from lib.color import Color
 
