@@ -366,6 +366,7 @@ the call to a second external number.
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
     parser.add_argument('--sdes', help='Use SDES in SDP protocol', dest='sdes', action="count")
     parser.add_argument('--nocolor', help='Show result without colors', dest='nocolor', action="count")
+    parser.add_argument('-o', '--output-file', type=str, help='Save data into a log file', dest='ofile', default='')
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -394,8 +395,10 @@ the call to a second external number.
         VERBOSE = args.verbose
         SDES = args.sdes
         NOCOLOR = args.nocolor
+        OFILE = args.ofile
 
-        return IPADDR, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, TRANSFER, USER, PWD, UA, NOSDP, VERBOSE, SDES, NOCOLOR
+
+        return IPADDR, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, TRANSFER, USER, PWD, UA, NOSDP, VERBOSE, SDES, NOCOLOR, OFILE
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -517,6 +520,7 @@ SIP Send allow us to send a customized SIP message and analyze the response.
     parser.add_argument('--sdes', help='Use SDES in SDP protocol', dest='sdes', action="count")
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
     parser.add_argument('--nocolor', help='Show result without colors', dest='nocolor', action="count")
+    parser.add_argument('-o', '--output-file', type=str, help='Save data into a log file', dest='ofile', default='')
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -547,8 +551,9 @@ SIP Send allow us to send a customized SIP message and analyze the response.
         SDES = args.sdes
         UA = args.user_agent
         NOCOLOR = args.nocolor
+        OFILE = args.ofile
 
-        return IPADDR, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, SDP, SDES, UA, NOCOLOR
+        return IPADDR, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, SDP, SDES, UA, NOCOLOR, OFILE
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)

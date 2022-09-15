@@ -57,6 +57,7 @@ class SipInvite:
         self.nosdp = 0
         self.sdes = 0
         self.nocolor = ''
+        self.ofile = ''
 
         self.sdp = 1
 
@@ -98,14 +99,6 @@ class SipInvite:
         if self.nosdp != None and self.nosdp == 1:
             self.sdp = 0
 
-        print(self.c.BWHITE + '[!] Target: ' + self.c.YELLOW + '%s' % self.ip + self.c.WHITE + ':' +
-              self.c.YELLOW + '%s' % self.rport + self.c.WHITE + '/' + self.c.YELLOW + '%s' % self.proto)
-        print(self.c.BWHITE + '[!] Call From: ' +
-              self.c.YELLOW + '%s' % self.from_user)
-        print(self.c.BWHITE + '[!] Call To: ' +
-              self.c.YELLOW + '%s' % self.to_user)
-        print(self.c.WHITE)
-
         try:
             if self.proto == 'UDP':
                 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -114,6 +107,57 @@ class SipInvite:
         except socket.error:
             print(self.c.RED+'Failed to create socket')
             sys.exit(1)
+
+        print(self.c.BWHITE + '[!] Target: ' + self.c.YELLOW + '%s' % self.ip + self.c.WHITE + ':' +
+              self.c.YELLOW + '%s' % self.rport + self.c.WHITE + '/' + self.c.YELLOW + '%s' % self.proto)
+        if self.domain != '' and self.domain != str(self.ip):
+            print(self.c.BWHITE + '[!] Customized Domain: ' +
+                  self.c.GREEN + '%s' % self.domain)
+        if self.contact_domain != '':
+            print(self.c.BWHITE + '[!] Customized Contact Domain: ' + self.c.GREEN + '%s' %
+                  self.contact_domain)
+        if self.from_name != '':
+            print(self.c.BWHITE + '[!] Customized From Name: ' +
+                  self.c.GREEN + '%s' % self.from_name)
+        if self.from_domain != '':
+            print(self.c.BWHITE + '[!] Customized From Domain: ' +
+                  self.c.GREEN + '%s' % self.from_domain)
+        if self.to_name != '':
+            print(self.c.BWHITE + '[!] Customized To Name: ' +
+                  self.c.GREEN + '%s' % self.to_name)
+        if self.to_domain != '':
+            print(self.c.BWHITE + '[!] Customized To Domain: ' +
+                  self.c.GREEN + '%s' % self.to_domain)
+        if self.user_agent != 'pplsip':
+            print(self.c.BWHITE + '[!] Customized User-Agent: ' +
+                  self.c.GREEN + '%s' % self.user_agent)
+        print(self.c.BWHITE + '[!] Call From: ' +
+              self.c.YELLOW + '%s' % self.from_user)
+        print(self.c.BWHITE + '[!] Call To: ' +
+              self.c.YELLOW + '%s' % self.to_user)
+        print(self.c.WHITE)
+
+        if self.ofile != '':
+            fw = open(self.ofile, 'w')
+
+            fw.write('[!] Target: %s:%s/%s\n' % (self.ip, self.rport, self.proto))
+            if self.domain != '' and self.domain != str(self.ip):
+                fw.write('[!] Customized Domain: %s\n' % self.domain)
+            if self.contact_domain != '':
+                fw.write('[!] Customized Contact Domain: %s\n' % self.contact_domain)
+            if self.from_name != '':
+                fw.write('[!] Customized From Name: %s\n' % self.from_name)
+            if self.from_domain != '':
+                fw.write('[!] Customized From Domain: %s\n' % self.from_domain)
+            if self.to_name != '':
+                fw.write('[!] Customized To Name: %s\n' % self.to_name)
+            if self.to_domain != '':
+                fw.write('[!] Customized To Domain: %s\n' % self.to_domain)
+            if self.user_agent != 'pplsip':
+                fw.write('[!] Customized User-Agent: %s\n' % self.user_agent)
+            fw.write('[!] Call From: %s\n' % self.from_user)
+            fw.write('[!] Call To: %s\n' % self.to_user)
+            fw.write('\n')
 
         bind = '0.0.0.0'
         lport = 5060
@@ -140,8 +184,13 @@ class SipInvite:
                              self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '1', '', '', 1, '', self.sdp, '', '')
 
         print(self.c.BWHITE + '[+] Request INVITE')
-        if self.verbose == 1:
+        if self.verbose == 1 and self.ofile == '':
             print(self.c.YELLOW + msg)
+
+        if self.ofile != '':
+            fw.write('[+] Request INVITE\n')
+            if self.verbose == 1:
+                fw.write(msg + '\n')
 
         try:
             sock.settimeout(15)
@@ -176,8 +225,13 @@ class SipInvite:
                         headers['response_code'], headers['response_text'])
                     rescode = headers['response_code']
                     print(self.c.BWHITE + '[-] Response %s' % response)
-                    if self.verbose == 1:
+                    if self.verbose == 1 and self.ofile == '':
                         print(self.c.GREEN + resp.decode())
+
+                    if self.ofile != '':
+                        fw.write('[-] Response %s\n' % response)
+                        if self.verbose == 1:
+                            fw.write(resp.decode() + '\n')
 
                     totag = headers['totag']
 
@@ -188,8 +242,13 @@ class SipInvite:
                 msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name, self.from_domain,
                                         self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '1', totag, '', 1, '', 0, via, '')
 
-                if self.verbose == 1:
+                if self.verbose == 1 and self.ofile == '':
                     print(self.c.YELLOW + msg)
+
+                if self.ofile != '':
+                    fw.write('[+] Request ACK\n')
+                    if self.verbose == 1:
+                        fw.write(msg + '\n')
 
                 if self.proto == 'TLS':
                     sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
@@ -233,9 +292,13 @@ class SipInvite:
                     msg = create_message('INVITE', self.contact_domain, self.from_user, self.from_name, self.from_domain,
                                             self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '2', totag, digest, auth_type, '', self.sdp, via, '')
 
-
-                    if self.verbose == 1:
+                    if self.verbose == 1 and self.ofile == '':
                         print(self.c.YELLOW + msg)
+
+                    if self.ofile != '':
+                        fw.write('[+] Request INVITE\n')
+                        if self.verbose == 1:
+                            fw.write(msg + '\n')
 
                     if self.proto == 'TLS':
                         sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
@@ -259,8 +322,13 @@ class SipInvite:
                             rescode = headers['response_code']
                             print(self.c.BWHITE +
                                     '[-] Response %s' % response)
-                            if self.verbose == 1:
+                            if self.verbose == 1 and self.ofile == '':
                                 print(self.c.GREEN + resp.decode())
+
+                            if self.ofile != '':
+                                fw.write('[-] Response %s\n' % response)
+                                if self.verbose == 1:
+                                    fw.write(resp.code() + '\n')
 
                             totag = headers['totag']
 
@@ -271,8 +339,13 @@ class SipInvite:
                 msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name, self.from_domain,
                                         self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '2', totag, digest, auth_type, '', 0, via, '')
 
-                if self.verbose == 1:
+                if self.verbose == 1 and self.ofile == '':
                     print(self.c.YELLOW + msg)
+
+                if self.ofile != '':
+                    fw.write('[+] Request ACK\n')
+                    if self.verbose == 1:
+                        fw.write(msg + '\n')
 
                 if self.proto == 'TLS':
                     sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
@@ -285,8 +358,13 @@ class SipInvite:
                     msg = create_message('REFER', self.contact_domain, self.from_user, self.from_name, self.from_domain,
                                             self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '3', totag, '', 1, self.transfer, 0, '', '')
 
-                    if self.verbose == 1:
+                    if self.verbose == 1 and self.ofile == '':
                         print(self.c.YELLOW + msg)
+
+                    if self.ofile != '':
+                        fw.write('[+] Request REFER\n')
+                        if self.verbose == 1:
+                            fw.write(msg + '\n')
 
                     if self.proto == 'TLS':
                         sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
@@ -301,8 +379,13 @@ class SipInvite:
                             headers['response_code'], headers['response_text'])
                         rescode = headers['response_code']
                         print(self.c.BWHITE + '[-] Response %s' % response)
-                        if self.verbose == 1:
+                        if self.verbose == 1 and self.ofile == '':
                             print(self.c.GREEN + resp.decode())
+
+                        if self.ofile != '':
+                            fw.write('[-] Response %s\n' % response)
+                            if self.verbose == 1:
+                                fw.write(resp.decode() + '\n')
 
                 bye = ''
 
@@ -317,8 +400,13 @@ class SipInvite:
                         headers = parse_message(resp.decode())
                         bye = headers['method']
                         print(self.c.BWHITE + '[-] Response %s' % bye)
-                        if self.verbose == 1:
+                        if self.verbose == 1 and self.ofile == '':
                             print(self.c.GREEN + resp.decode())
+
+                        if self.ofile != '':
+                            fw.write('[-] Response %s\n' % response)
+                            if self.verbose == 1:
+                                fw.write(resp.decode() + '\n')
                     except:
                         pass
 
@@ -329,15 +417,20 @@ class SipInvite:
 
                 print(self.c.BWHITE+'[+] Sending 200 Ok\n')
 
+                if self.verbose == 1 and self.ofile == '':
+                    print(self.c.YELLOW + msg)
+
+                print(self.NORMAL)
+
+                if self.ofile != '':
+                    fw.write('[+] Sending 200 Ok\\n')
+                    if self.verbose == 1:
+                        fw.write(msg + '\n')
+
                 if self.proto == 'TLS':
                     sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
                 else:
                     sock.sendto(bytes(msg[:8192], 'utf-8'), host)
-
-                if self.verbose == 1:
-                    print(self.c.YELLOW + msg)
-
-                print(self.NORMAL)
         except socket.timeout:
             pass
         except:
@@ -345,4 +438,7 @@ class SipInvite:
         finally:
             sock.close()
 
+        if self.ofile != '':
+            fw.close()
+            
         return

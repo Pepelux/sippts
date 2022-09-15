@@ -40,6 +40,7 @@ class SipSend:
         self.sdp = 0
         self.sdes = 0
         self.nocolor = ''
+        self.ofile = ''
 
         self.c = Color()
 
@@ -91,6 +92,66 @@ class SipSend:
             print(self.c.RED + 'Failed to create socket')
             sys.exit(1)
 
+        print(self.c.BWHITE + '[!] Target: ' + self.c.YELLOW + '%s' % self.ip + self.c.WHITE + ':' +
+              self.c.YELLOW + '%s' % self.rport + self.c.WHITE + '/' + self.c.YELLOW + '%s' % self.proto)
+        if self.domain != '' and self.domain != str(self.ip):
+            print(self.c.BWHITE + '[!] Customized Domain: ' +
+                  self.c.GREEN + '%s' % self.domain)
+        if self.contact_domain != '':
+            print(self.c.BWHITE + '[!] Customized Contact Domain: ' + self.c.GREEN + '%s' %
+                  self.contact_domain)
+        if self.from_name != '':
+            print(self.c.BWHITE + '[!] Customized From Name: ' +
+                  self.c.GREEN + '%s' % self.from_name)
+        if self.from_user != '100':
+            print(self.c.BWHITE + '[!] Customized From User: ' +
+                  self.c.GREEN + '%s' % self.from_user)
+        if self.from_domain != '':
+            print(self.c.BWHITE + '[!] Customized From Domain: ' +
+                  self.c.GREEN + '%s' % self.from_domain)
+        if self.to_name != '':
+            print(self.c.BWHITE + '[!] Customized To Name: ' +
+                  self.c.GREEN + '%s' % self.to_name)
+        if self.to_user != '100':
+            print(self.c.BWHITE + '[!] Customized To User: ' +
+                  self.c.GREEN + '%s' % self.to_user)
+        if self.to_domain != '':
+            print(self.c.BWHITE + '[!] Customized To Domain: ' +
+                  self.c.GREEN + '%s' % self.to_domain)
+        if self.user_agent != 'pplsip':
+            print(self.c.BWHITE + '[!] Customized User-Agent: ' +
+                  self.c.GREEN + '%s' % self.user_agent)
+        print(self.c.BWHITE + '[!] Call From: ' +
+              self.c.YELLOW + '%s' % self.from_user)
+        print(self.c.BWHITE + '[!] Call To: ' +
+              self.c.YELLOW + '%s' % self.to_user)
+        print(self.c.WHITE)
+
+        if self.ofile != '':
+            fw = open(self.ofile, 'w')
+
+            fw.write('[!] Target: %s:%s/%s\n' % (self.ip, self.rport, self.proto))
+            if self.domain != '' and self.domain != str(self.ip):
+                fw.write('[!] Customized Domain: %s\n' % self.domain)
+            if self.contact_domain != '':
+                fw.write('[!] Customized Contact Domain: %s\n' % self.contact_domain)
+            if self.from_name != '':
+                fw.write('[!] Customized From Name: %s\n' % self.from_name)
+            if self.from_user != '100':
+                fw.write('[!] Customized From User: %s\n' % self.from_user)
+            if self.from_domain != '':
+                fw.write('[!] Customized From Domain: %s\n' % self.from_domain)
+            if self.to_name != '':
+                fw.write('[!] Customized To Name: %s\n' % self.to_name)
+            if self.to_user != '100':
+                fw.write('[!] Customized To User: %s\n' % self.to_user)
+            if self.to_domain != '':
+                fw.write('[!] Customized To Domain: %s\n' % self.to_domain)
+            if self.user_agent != 'pplsip':
+                fw.write('[!] Customized User-Agent: %s\n' % self.user_agent)
+            fw.write('\n')
+
+
         bind = '0.0.0.0'
         lport = get_free_port()
 
@@ -132,6 +193,10 @@ class SipSend:
                   (self.ip, self.rport, self.proto))
             print(self.c.YELLOW + msg + self.c.WHITE)
 
+            if self.ofile != '':
+                fw.write('[+] Sending to %s:%s/%s ...\n' % (self.ip, self.rport, self.proto))
+                fw.write(msg + '\n')
+
             rescode = '100'
 
             while rescode[:1] == '1':
@@ -149,9 +214,13 @@ class SipSend:
                     response = '%s %s' % (
                         headers['response_code'], headers['response_text'])
                     rescode = headers['response_code']
-                    print(self.c.BWHITE + '[+] Receiving from %s:%s/%s ...' %
+                    print(self.c.BWHITE + '[-] Receiving from %s:%s/%s ...' %
                         (self.ip, self.rport, self.proto))
                     print(self.c.GREEN + resp.decode() + self.c.WHITE)
+
+                    if self.ofile != '':
+                        fw.write('[-] Receiving from %s:%s/%s ...\n' % (self.ip, self.rport, self.proto))
+                        fw.write(resp.decode() + '\n')
 
                     totag = headers['totag']
 
@@ -162,6 +231,10 @@ class SipSend:
                                         self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, totag, '', 1, '', 0, via, '')
 
                 print(self.c.YELLOW + msg)
+
+                if self.ofile != '':
+                    fw.write('[+] Request ACK\n')
+                    fw.write(msg + '\n')
 
                 if self.proto == 'TLS':
                     sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
@@ -209,9 +282,14 @@ class SipSend:
                         else:
                             sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
+                        # Send AUTH
                         print(self.c.BWHITE + '[+] Sending to %s:%s/%s ...' %
                             (self.ip, self.rport, self.proto))
                         print(self.c.YELLOW + msg + self.c.WHITE)
+
+                        if self.ofile != '':
+                            fw.write('[+] Sending to %s:%s/%s ...\n' % (self.ip, self.rport, self.proto))
+                            fw.write(msg + '\n')
 
                         rescode = '100'
 
@@ -228,9 +306,13 @@ class SipSend:
                                 response = '%s %s' % (
                                     headers['response_code'], headers['response_text'])
                                 rescode = headers['response_code']
-                                print(self.c.BWHITE + '[+] Receiving from %s:%s/%s ...' %
+                                print(self.c.BWHITE + '[-] Receiving from %s:%s/%s ...' %
                                     (self.ip, self.rport, self.proto))
                                 print(self.c.GREEN + resp.decode() + self.c.WHITE)
+
+                                if self.ofile != '':
+                                    fw.write('[-] Receiving from %s:%s/%s ...\n' % (self.ip, self.rport, self.proto))
+                                    fw.write(resp.decode() + '\n')
                     except:
                         print(self.c.NORMAL)
 
@@ -240,3 +322,7 @@ class SipSend:
             pass
         finally:
             sock.close()
+
+        if self.ofile != '':
+            fw.close()
+            
