@@ -357,15 +357,16 @@ the call to a second external number.
     parser.add_argument('-d', '--domain', type=str, help='SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)', dest='domain', default='')
     parser.add_argument('-cd', '--contact_domain', type=str, help='Domain or IP address for Contact header. Ex: 10.0.1.2', dest='contact_domain', default='')
     parser.add_argument('-fn', '--from_name', type=str, help='From Name. Ex: Bob', dest='from_name', default='')
-    parser.add_argument('-fu', '--from_user', type=str, help='From User (default: 100)', dest='from_user', default='100')
+    parser.add_argument('-fu', '--from-user', type=str, help='Origin numbers to call (From). Ex: 100 | 100,102,105 | 100000000-199999999', dest="from_user", default='100')
     parser.add_argument('-fd', '--from_domain', type=str, help='From Domain. Ex: 10.0.0.1', dest='from_domain', default='')
     parser.add_argument('-tn', '--to_name', type=str, help='To Name. Ex: Alice', dest='to_name', default='')
-    parser.add_argument('-tu', '--to_user', type=str, help='To User (default: 100)', dest='to_user', default='100')
+    parser.add_argument('-tu', '--to-user', type=str, help='Destination numbers to call (To). Ex: 100 | 100,102,105 | 100000000-199999999', dest="to_user", default='100')
     parser.add_argument('-td', '--to_domain', type=str, help='To Domain. Ex: 10.0.0.1', dest='to_domain', default='')
     parser.add_argument('-t', '--transfer', type=str, help='Phone number to transfer the call', dest='transfer_number', default='')
     parser.add_argument('--user', type=str, help='Authentication user', dest='user', default='')
     parser.add_argument('--pass', type=str, help='Authentication password', dest='pwd', default='')
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
+    parser.add_argument('-th', '--threads', type=int, help='Number of threads (default: 100)', dest='threads', default=100)
     parser.add_argument('--no-sdp', help='Do not send SDP (by default is included)', dest='nosdp', action="count")
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
     parser.add_argument('--sdes', help='Use SDES in SDP protocol', dest='sdes', action="count")
@@ -396,6 +397,7 @@ the call to a second external number.
         USER = args.user
         PWD = args.pwd
         UA = args.user_agent
+        THREADS = args.threads
         NOSDP = args.nosdp
         VERBOSE = args.verbose
         SDES = args.sdes
@@ -403,7 +405,7 @@ the call to a second external number.
         OFILE = args.ofile
 
 
-        return IPADDR, HOST, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, TRANSFER, USER, PWD, UA, NOSDP, VERBOSE, SDES, NOCOLOR, OFILE
+        return IPADDR, HOST, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, TRANSFER, USER, PWD, UA, THREADS, NOSDP, VERBOSE, SDES, NOCOLOR, OFILE
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)

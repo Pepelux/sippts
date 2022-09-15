@@ -6,6 +6,7 @@ devel version
 - sipinvite: 
   - added param --no-sdp to send the INVITE without SDP
   - added param --sdes to send cipher keys in SDP
+  - now it is possible to send to a range of callers (To-User) and a range of callees (From-User)
 - sipenumerate: added verbose mode
 - siprcrack: 
   - added param lenght to force the size of extensions
