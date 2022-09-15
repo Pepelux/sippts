@@ -79,6 +79,9 @@ class SipDigestLeak:
 
     def call(self, ip, port, proto):
         cseq = '1'
+        auth_type = 1
+        rr = ''
+        digest = ''
 
         # my IP address
         local_ip = get_machine_default_ip()

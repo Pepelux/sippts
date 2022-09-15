@@ -316,6 +316,7 @@ def parse_message(buffer):
     data['via'] = ''
     data['rr'] = ''
     data['route'] = ''
+    data['auth-type'] = 1
 
     for header in headers:
         m = re.search('^SIP\/[0-9|\.]+\s([0-9]+)\s(.+)', header)
@@ -419,8 +420,13 @@ def parse_message(buffer):
             else:
                 data['branch'] = ''
 
+        m = re.search('^CSeq:\s([0-9]+)\s.*', header)
+        if m:
+            data['cseq'] = '%s' % (m.group(1))
+
         m = re.search('^Authorization:\s(.+)', header)
-        if m:generate_random_string(min, max, 'all')
+        if m:
+            data['auth'] = '%s' % (m.group(1))
         else:
             m = re.search('^WWW-Authenticate:\s(.+)', header)
             if m:
