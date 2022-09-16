@@ -10,7 +10,7 @@ __email__ = "pepeluxx@gmail.com"
 import socket
 import sys
 import ssl
-from lib.functions import create_message, get_free_port, parse_message, parse_digest, generate_random_string, calculateHash
+from lib.functions import create_message, get_free_port, parse_message, parse_digest, generate_random_string, calculateHash, get_machine_default_ip
 from lib.color import Color
 
 
@@ -40,6 +40,7 @@ class SipSend:
         self.cseq = '1'
         self.sdp = 0
         self.sdes = 0
+        self.localip = ''
         self.nocolor = ''
         self.ofile = ''
 
@@ -69,6 +70,11 @@ class SipSend:
             self.sdp = 2
         if self.cseq == None or self.cseq == '':
             self.cseq = '1'
+
+        # my IP address
+        local_ip = self.localip
+        if self.localip == '':
+            local_ip = get_machine_default_ip()
 
         # if rport is by default but we want to scan TLS protocol, use port 5061
         if self.rport == 5060 and self.proto == 'TLS':
@@ -185,7 +191,7 @@ class SipSend:
             self.to_domain = self.domain
 
         if self.contact_domain == '':
-            self.contact_domain = '10.0.0.1'
+            self.contact_domain = local_ip
 
         msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
                              self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, self.to_tag, self.digest, 1, '', self.sdp, '', '')

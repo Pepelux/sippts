@@ -56,6 +56,7 @@ class SipInvite:
         self.to_name = ''
         self.to_domain = ''
         self.user_agent = 'pplsip'
+        self.localip = ''
         self.transfer = ''
         self.verbose = '0'
         self.auth_user = ''
@@ -402,7 +403,9 @@ class SipInvite:
             self.rport = 5061
 
         # my IP address
-        local_ip = get_machine_default_ip()
+        local_ip = self.localip
+        if self.localip == '':
+            local_ip = get_machine_default_ip()
 
         self.ip = str(self.ip)
 

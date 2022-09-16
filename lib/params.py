@@ -368,6 +368,7 @@ the call to a second external number.
     parser.add_argument('--user', type=str, help='Authentication user', dest='user', default='')
     parser.add_argument('--pass', type=str, help='Authentication password', dest='pwd', default='')
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
+    parser.add_argument('--local-ip', type=str, help='Set local IP address (by default try to get it)', dest='localip', default='')
     parser.add_argument('-th', '--threads', type=int, help='Number of threads (default: 100)', dest='threads', default=100)
     parser.add_argument('--no-sdp', help='Do not send SDP (by default is included)', dest='nosdp', action="count")
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
@@ -399,6 +400,7 @@ the call to a second external number.
         USER = args.user
         PWD = args.pwd
         UA = args.user_agent
+        LOCALIP = args.localip
         THREADS = args.threads
         NOSDP = args.nosdp
         VERBOSE = args.verbose
@@ -407,7 +409,7 @@ the call to a second external number.
         OFILE = args.ofile
 
 
-        return IPADDR, HOST, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, TRANSFER, USER, PWD, UA, THREADS, NOSDP, VERBOSE, SDES, NOCOLOR, OFILE
+        return IPADDR, HOST, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, TRANSFER, USER, PWD, UA, LOCALIP, THREADS, NOSDP, VERBOSE, SDES, NOCOLOR, OFILE
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -528,6 +530,7 @@ SIP Send allow us to send a customized SIP message and analyze the response.
     parser.add_argument('--sdp', help='Include SDP', dest='sdp', action="count")
     parser.add_argument('--sdes', help='Use SDES in SDP protocol', dest='sdes', action="count")
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
+    parser.add_argument('--local-ip', type=str, help='Set local IP address (by default try to get it)', dest='localip', default='')
     parser.add_argument('--nocolor', help='Show result without colors', dest='nocolor', action="count")
     parser.add_argument('-o', '--output-file', type=str, help='Save data into a log file', dest='ofile', default='')
 
@@ -563,10 +566,11 @@ SIP Send allow us to send a customized SIP message and analyze the response.
         SDP = args.sdp
         SDES = args.sdes
         UA = args.user_agent
+        LOCALIP = args.localip
         NOCOLOR = args.nocolor
         OFILE = args.ofile
 
-        return IPADDR, HOST, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, SDP, SDES, UA, NOCOLOR, OFILE
+        return IPADDR, HOST, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, SDP, SDES, UA, LOCALIP, NOCOLOR, OFILE
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)

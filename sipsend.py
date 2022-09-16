@@ -12,7 +12,7 @@ from lib.params import get_sipsend_args
 
 
 def main():
-    ip, host, rport, proto, method, domain, contact_domain, from_name, from_user, from_domain, from_tag, to_name, to_user, to_domain, to_tag, user, pwd, digest, branch, callid, cseq, sdp, sdes, user_agent, nocolor, ofile = get_sipsend_args()
+    ip, host, rport, proto, method, domain, contact_domain, from_name, from_user, from_domain, from_tag, to_name, to_user, to_domain, to_tag, user, pwd, digest, branch, callid, cseq, sdp, sdes, user_agent, localip, nocolor, ofile = get_sipsend_args()
 
     s = SipSend()
     s.ip = ip
@@ -33,6 +33,7 @@ def main():
     s.user = user
     s.pwd = pwd
     s.user_agent = user_agent
+    s.localip = localip
     s.digest = digest
     s.branch = branch
     s.callid = callid
