@@ -3,18 +3,25 @@ devel version
   - added params from_tag, to_tag, branch, callid, cseq, sdp
   - added params user and pass to send a second message with auth if we obtain a code 401/407
   - added param --sdes to send cipher keys in SDP
+  - added param --local-ip to force it in case of multiple IP addresses
 - sipinvite: 
   - added param --no-sdp to send the INVITE without SDP
   - added param --sdes to send cipher keys in SDP
   - now it is possible to send to a range of callers (To-User) and a range of callees (From-User)
-- sipenumerate: added verbose mode
+  - added param --local-ip to force it in case of multiple IP addresses
+- sipenumerate:
+  - added verbose mode
 - siprcrack: 
   - added param lenght to force the size of extensions
   - added param user to set the From and To user (by default is prefix+extension). If is set, the prefix only will be applied to Auth User
-- siptshark: new module to extract info from a PCAP file
-- sipdigestleak: added tls support
-- added class Color and para nocolor to show console responses in ansii
-- bug fixes
+- siptshark:
+  - new module to extract info from a PCAP file
+- sipdigestleak:
+  - added tls support
+  - added param --local-ip to force it in case of multiple IP addresses
+- global:
+  - added class Color and para nocolor to show console responses in ansii
+  - bug fixes
 
 v3.1.0 (Sep/2022)
 - Added parameter From Domain and To Domain to SipScan, SipSend, SipInvite, SipFlood and SipDigestLeak
