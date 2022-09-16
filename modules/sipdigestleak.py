@@ -50,6 +50,7 @@ class SipDigestLeak:
         self.to_name = ''
         self.to_domain = ''
         self.user_agent = 'pplsip'
+        self.localip = ''
         self.ofile = ''
         self.user = ''
         self.pwd = ''
@@ -84,7 +85,9 @@ class SipDigestLeak:
         digest = ''
 
         # my IP address
-        local_ip = get_machine_default_ip()
+        local_ip = self.localip
+        if self.localip == '':
+            local_ip = get_machine_default_ip()
 
         # SIP headers
         if self.host != '' and self.domain == '':
@@ -275,19 +278,17 @@ class SipDigestLeak:
                                     print(YELLOW + '[=>] Request ACK')
 
                                     msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                                                         self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, cseq, totag, '', 1, '', 0, via, rr)
+                                                        self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, cseq, totag, '', 1, '', 0, via, rr)
 
                                     if self.verbose == 1:
                                         print(BWHITE + '[+] Sending to %s:%s/%s ...' %
-                                              (self.ip, self.rport, self.proto))
+                                            (self.ip, self.rport, self.proto))
                                         print(YELLOW + msg + WHITE)
 
                                     if self.proto == 'TLS':
-                                        sock_ssl.sendall(
-                                            bytes(msg[:8192], 'utf-8'))
+                                        sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
                                     else:
-                                        sock.sendto(
-                                            bytes(msg[:8192], 'utf-8'), host)
+                                        sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
                     except:
                         print(WHITE)

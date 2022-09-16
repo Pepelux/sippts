@@ -288,6 +288,7 @@ possible and can recover most passwords based on the challenge response.
     parser.add_argument('-td', '--to_domain', type=str, help='To Domain. Ex: 10.0.0.1', dest='to_domain', default='')
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
     parser.add_argument('-o', '--output-file', type=str, help='Save digest to file in SipCrack format', dest='ofile', default='')
+    parser.add_argument('--local-ip', type=str, help='Set local IP address (by default try to get it)', dest='localip', default='')
     parser.add_argument('--user', type=str, help='Authentication user', dest='user', default='')
     parser.add_argument('--pass', type=str, help='Authentication password', dest='pwd', default='')
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
@@ -317,11 +318,12 @@ possible and can recover most passwords based on the challenge response.
         TODOMAIN = args.to_domain
         UA = args.user_agent
         OFILE = args.ofile
+        LOCALIP = args.localip
         USER = args.user
         PWD = args.pwd
         VERBOSE = args.verbose
 
-        return IPADDR, HOST, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, OFILE, USER, PWD, VERBOSE
+        return IPADDR, HOST, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, LOCALIP, OFILE, USER, PWD, VERBOSE
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
