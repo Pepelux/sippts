@@ -161,7 +161,7 @@ class SipDigestLeak:
                     resp = sock.recv(4096)
 
                 headers = parse_message(resp.decode())
-
+                
                 if headers:
                     via = headers['via']
                     rr = headers['rr']
@@ -337,7 +337,8 @@ class SipDigestLeak:
                         headers = parse_message(resp.decode())
                         branch = headers['branch']
                         cseq = headers['cseq']
-                        via = headers['via']
+                        # via = headers['via2'] + '#SIP/2.0/UDP 192.168.100.100:59955;branch=8cpr2dbkdjb1js2t45gsipytqz1517y4dvia44q0qz3b5znrvy21fuojxw1aivg6ay6hgbl'
+                        via = headers['via2']
                     else:
                         print(CYAN + '[<=] Response %s' % response)
 
@@ -347,7 +348,7 @@ class SipDigestLeak:
                         print(GREEN + resp.decode() + WHITE)
 
                 # send 407 with digest
-                cseq = int(cseq) + 1
+                cseq = int(cseq)
                 msg = create_response_error('407 Proxy Authentication Required', self.from_user,
                                             self.to_user, proto, self.domain, lport, cseq, 'BYE', branch, callid, tag, totag, local_ip, via)
 

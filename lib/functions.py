@@ -267,7 +267,13 @@ def create_response_error(message, fromuser, touser, proto, domain, fromport, cs
         headers['Via'] = 'SIP/2.0/%s %s:%s;branch=%s' % (
             proto.upper(), domain, fromport, branch)
     else:
-        headers['Via'] = via
+        vias = via.split("#")
+        count = 0
+
+        for via in vias[::-1]:
+            count += 1
+            headers['Via %s' % str(count)] = via
+
     headers['From'] = '<sip:%s@%s>;tag=%s' % (fromuser, domain, totag)
     headers['To'] = '<sip:%s@%s>;tag=%s' % (touser, iplocal, tag)
     headers['Call-ID'] = '%s' % callid
@@ -278,7 +284,16 @@ def create_response_error(message, fromuser, touser, proto, domain, fromport, cs
 
     msg = starting_line+'\r\n'
     for h in headers.items():
-        msg += '%s: %s\r\n' % h
+        #     msg += '%s: %s\r\n' % h
+        print(h)
+
+        name = h[0]
+        value = h[1]
+
+        m = re.search('^Via', name)
+        if m:
+            name = 'Via'
+        msg += '%s: %s\r\n' % (name, value)
 
     msg += '\r\n'
 
@@ -314,6 +329,7 @@ def parse_message(buffer):
     data['sipdomain'] = ''
     data['ua'] = ''
     data['via'] = ''
+    data['via2'] = ''
     data['rr'] = ''
     data['route'] = ''
     data['auth-type'] = 1
@@ -358,16 +374,27 @@ def parse_message(buffer):
             except:
                 data['fromtag'] = ''
 
-        m = re.search('^Via:\s(.*)', header)
-        if m:
-            data['via'] = '%s' % (m.group(1))
-
         m = re.search('^Record-Route:\s(.*)', header)
         if m:
             if data['rr'] == '':
                 data['rr'] = '%s' % (m.group(1))
             else:
-                data['rr'] = data['rr'] +'#' + '%s' % (m.group(1))
+                data['rr'] = data['rr'] + '#' + '%s' % (m.group(1))
+
+        m = re.search('^Via:\s(.*)', header)
+        if m:
+            data['via'] = '%s' % (m.group(1))
+
+            if data['via2'] == '':
+                data['via2'] = '%s' % (m.group(1))
+            else:
+                data['via2'] = '%s' % (m.group(1)) + '#' + data['via2']
+
+            n = re.search('.+;branch=(.+);*.*', data['via'])
+            if n:
+                data['branch'] = '%s' % (n.group(1))
+            else:
+                data['branch'] = ''
 
         m = re.search('^Call-ID:\s(.*)', header)
         if m:
@@ -400,7 +427,7 @@ def parse_message(buffer):
             if m:
                 m = re.search(
                     '^Contact:\s.*\<sip:([a-z|A-z|0-9|_]*)\@(.*)\>.*', header)
-                    # '^Contact:\s.*\<sip:([a-z|A-z|0-9|_]*)\@([0-9|\.]*):*.*\>.*', header)
+                # '^Contact:\s.*\<sip:([a-z|A-z|0-9|_]*)\@([0-9|\.]*):*.*\>.*', header)
                 if m:
                     data['contactuser'] = '%s' % (m.group(1))
                     data['contactdomain'] = '%s' % (m.group(2))
@@ -410,15 +437,6 @@ def parse_message(buffer):
                 if m:
                     data['contactuser'] = ''
                     data['contactdomain'] = '%s' % (m.group(1))
-
-        m = re.search('^Via:\s(.+)', header)
-        if m:
-            via = '%s' % (m.group(1))
-            n = re.search('.+;branch=(.+);*.*', via)
-            if n:
-                data['branch'] = '%s' % (n.group(1))
-            else:
-                data['branch'] = ''
 
         m = re.search('^CSeq:\s([0-9]+)\s.*', header)
         if m:
