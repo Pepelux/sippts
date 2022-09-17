@@ -410,8 +410,9 @@ class SipDigestLeak:
                         data = '%s"%s"%s"%s"BYE"%s"%s"%s"%s"%s"MD5"%s' % (
                             ip, local_ip, headers['username'], headers['realm'], headers['uri'], headers['nonce'], headers['cnonce'], headers['nc'], headers['qop'], headers['response'])
 
-                        f = open(self.ofile, 'w')
+                        f = open(self.ofile, 'a+')
                         f.write(data)
+                        f.write('\n')
                         f.close()
 
                         print(WHITE+'Auth data saved in file %s' % self.ofile)
