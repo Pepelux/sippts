@@ -337,7 +337,6 @@ class SipDigestLeak:
                         headers = parse_message(resp.decode())
                         branch = headers['branch']
                         cseq = headers['cseq']
-                        # via = headers['via2'] + '#SIP/2.0/UDP 192.168.100.100:59955;branch=8cpr2dbkdjb1js2t45gsipytqz1517y4dvia44q0qz3b5znrvy21fuojxw1aivg6ay6hgbl'
                         via = headers['via2']
                     else:
                         print(CYAN + '[<=] Response %s' % response)

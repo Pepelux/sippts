@@ -285,8 +285,6 @@ def create_response_error(message, fromuser, touser, proto, domain, fromport, cs
     msg = starting_line+'\r\n'
     for h in headers.items():
         #     msg += '%s: %s\r\n' % h
-        print(h)
-
         name = h[0]
         value = h[1]
 
