@@ -340,8 +340,8 @@ class SipScan:
                 if headers:
                     response = '%s %s' % (
                         headers['response_code'], headers['response_text'])
-                    line = '%s###%d###%s###%s###%s' % (
-                        ip, rport, proto, response, headers['ua'])
+                    line = '%s###%d###%s###%s###%s###%s' % (
+                        ip, rport, proto, response, headers['ua'], self.fingerprinting(headers['totag']))
                     self.found.append(line)
 
                     if self.verbose == 1:
@@ -360,15 +360,41 @@ class SipScan:
             finally:
                 sock.close()
 
+    def fingerprinting(self, tag):
+        fingerprint = '-'
+
+        m = re.search('^(as[0-9a-f]{8})', tag)
+        if m:
+            fingerprint = 'Asterisk PBX'
+        if fingerprint == '-':
+            m = re.search('([a-fA-F0-9]{16}i0)', tag)
+            if m:
+                fingerprint = 'Sipura/Linksys SPA'
+        if fingerprint == '-':
+            m = re.search('([a-fA-F0-9]{6,8}-[a-fA-F0-9]{2,4})', tag)
+            if m:
+                fingerprint = 'Cisco VoIP Gateway'
+        if fingerprint == '-':
+            m = re.search('([a-f0-9]{32}.[a-f0-9]{2,4})', tag)
+            if m:
+                fingerprint = 'Kamailio SIP Proxy'
+        if fingerprint == '-':
+            m = re.search('([0-9]{9})', tag)
+            if m:
+                fingerprint = 'Grandstream Phone or Gateway'
+
+        return fingerprint
+
     def print(self):
         iplen = len('IP address')
         polen = len('Port')
         prlen = len('Proto')
         relen = len('Response')
         ualen = len('User-Agent')
+        fplen = len('Fingerprinting')
 
         for x in self.found:
-            (ip, port, proto, res, ua) = x.split('###')
+            (ip, port, proto, res, ua, fp) = x.split('###')
             if len(ip) > iplen:
                 iplen = len(ip)
             if len(port) > polen:
@@ -379,15 +405,18 @@ class SipScan:
                 relen = len(res)
             if len(ua) > ualen:
                 ualen = len(ua)
+            if len(fp) > fplen:
+                fplen = len(fp)
 
-        tlen = iplen+polen+prlen+relen+ualen+14
+        tlen = iplen+polen+prlen+relen+ualen+fplen+18
         print(self.c.WHITE + ' ' + '-' * tlen)
         print(self.c.WHITE +
               '| ' + self.c.BWHITE + 'IP address'.ljust(iplen) + self.c.WHITE +
               ' | ' + self.c.BWHITE + 'Port'.ljust(polen) + self.c.WHITE +
               ' | ' + self.c.BWHITE + 'Proto'.ljust(prlen) + self.c.WHITE +
               ' | ' + self.c.BWHITE + 'Response'.ljust(relen) + self.c.WHITE +
-              ' | ' + self.c.BWHITE + 'User-Agent'.ljust(ualen) + self.c.WHITE + ' |')
+              ' | ' + self.c.BWHITE + 'User-Agent'.ljust(ualen) + self.c.WHITE +
+              ' | ' + self.c.BWHITE + 'Fingerprinting'.ljust(fplen) + self.c.WHITE + ' |')
         print(self.c.WHITE + ' ' + '-' * tlen)
 
         if len(self.found) == 0:
@@ -395,14 +424,15 @@ class SipScan:
                   'Nothing found'.ljust(tlen-2) + ' |')
         else:
             for x in self.found:
-                (ip, port, proto, res, ua) = x.split('###')
+                (ip, port, proto, res, ua, fp) = x.split('###')
 
                 print(self.c.WHITE +
                       '| ' + self.c.BGREEN + '%s' % ip.ljust(iplen) + self.c.WHITE +
                       ' | ' + self.c.GREEN + '%s' % port.ljust(polen) + self.c.WHITE +
                       ' | ' + self.c.GREEN + '%s' % proto.ljust(prlen) + self.c.WHITE +
                       ' | ' + self.c.BLUE + '%s' % res.ljust(relen) + self.c.WHITE +
-                      ' | ' + self.c.YELLOW + '%s' % ua.ljust(ualen) + self.c.WHITE + ' |')
+                      ' | ' + self.c.YELLOW + '%s' % ua.ljust(ualen) + self.c.WHITE +
+                      ' | ' + self.c.YELLOW + '%s' % fp.ljust(fplen) + self.c.WHITE + ' |')
 
         print(self.c.WHITE + ' ' + '-' * tlen)
         print(self.c.WHITE)
