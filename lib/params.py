@@ -291,6 +291,8 @@ possible and can recover most passwords based on the challenge response.
     parser.add_argument('--local-ip', type=str, help='Set local IP address (by default try to get it)', dest='localip', default='')
     parser.add_argument('--user', type=str, help='Authentication user', dest='user', default='')
     parser.add_argument('--pass', type=str, help='Authentication password', dest='pwd', default='')
+    parser.add_argument('--sdp', help='Send SDP in INVITE messages', dest='sdp', action="count")
+    parser.add_argument('--sdes', help='Send SDES in SDP', dest='sdes', action="count")
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
 
     # Array for all arguments passed to script
@@ -321,9 +323,11 @@ possible and can recover most passwords based on the challenge response.
         LOCALIP = args.localip
         USER = args.user
         PWD = args.pwd
+        SDP = args.sdp
+        SDES = args.sdes
         VERBOSE = args.verbose
 
-        return IPADDR, HOST, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, LOCALIP, OFILE, USER, PWD, VERBOSE
+        return IPADDR, HOST, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, LOCALIP, OFILE, USER, PWD, VERBOSE, SDP, SDES
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)

