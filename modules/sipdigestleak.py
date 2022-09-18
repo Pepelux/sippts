@@ -54,6 +54,7 @@ class SipDigestLeak:
         self.ofile = ''
         self.user = ''
         self.pwd = ''
+        self.auth_code = 'www'
         self.sdp = 0
         self.sdes = 0
         self.verbose = 0
@@ -68,6 +69,11 @@ class SipDigestLeak:
 
         if self.sdp == None:
             self.sdp = 0
+
+        if self.auth_code == 'proxy':
+            self.auth_code = 'Proxy-Authenticate'
+        else:
+            self.auth_code = 'WWW-Authenticate'
 
         # check protocol
         if self.proto not in supported_protos:
@@ -359,7 +365,7 @@ class SipDigestLeak:
                 # send 407 with digest
                 cseq = int(cseq)
                 msg = create_response_error('407 Proxy Authentication Required', self.from_user,
-                                            self.to_user, proto, self.domain, lport, cseq, 'BYE', branch, callid, tag, totag, local_ip, via)
+                                            self.to_user, proto, self.domain, lport, cseq, 'BYE', branch, callid, tag, totag, local_ip, via, self.auth_code)
 
                 print(
                     YELLOW + '[=>] Request 407 Proxy Authentication Required')

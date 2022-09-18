@@ -255,7 +255,7 @@ def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser
     return(msg)
 
 
-def create_response_error(message, fromuser, touser, proto, domain, fromport, cseq, method, branch, callid, tag, totag, iplocal, via):
+def create_response_error(message, fromuser, touser, proto, domain, fromport, cseq, method, branch, callid, tag, totag, iplocal, via, auth_code):
     realm = 'asterisk'
     nonce = generate_random_string(8, 8, 'ascii')
     digest = 'Digest algorithm=MD5, realm="%s", nonce="%s\"' % (realm, nonce)
@@ -279,7 +279,9 @@ def create_response_error(message, fromuser, touser, proto, domain, fromport, cs
     headers['Call-ID'] = '%s' % callid
     headers['CSeq'] = '%d %s' % (cseq, method)
     if method == 'BYE':
-        headers['WWW-Authenticate'] = '%s' % digest
+        headers[auth_code] = '%s' % digest
+        # headers['WWW-Authenticate'] = '%s' % digest
+        # headers['Proxy-Authenticate'] = '%s' % digest
     headers['Content-Length'] = '0'
 
     msg = starting_line+'\r\n'
