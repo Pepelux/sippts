@@ -382,6 +382,10 @@ class SipScan:
             m = re.search('([0-9]{9})', tag)
             if m:
                 fingerprint = 'Grandstream Phone or Gateway'
+        if fingerprint == '-':
+            m = re.search('([a-f0-9]{8})', tag)
+            if m:
+                fingerprint = 'Cisco IP Phone'
 
         return fingerprint
 
