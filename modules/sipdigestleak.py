@@ -405,7 +405,7 @@ class SipDigestLeak:
                 msg = create_response_ok(
                     self.from_user, self.to_user, proto, self.domain, lport, cseq, branch, callid, tag, totag)
 
-                print(YELLOW + '[=>] Request 200 Ok\n')
+                print(YELLOW + '[=>] Request 200 Ok')
 
                 if self.verbose == 1:
                     print(BWHITE + '[+] Sending to %s:%s/%s ...' %
