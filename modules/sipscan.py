@@ -437,7 +437,7 @@ class SipScan:
             if len(fp) > fplen:
                 fplen = len(fp)
 
-        tlen = iplen+polen+prlen+relen+ualen+fplen+18
+        tlen = iplen+polen+prlen+relen+ualen+fplen+17
         
         print(self.c.WHITE + ' ' + '-' * tlen)
         print(self.c.WHITE +
