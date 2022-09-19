@@ -491,13 +491,14 @@ class SipScan:
                                 ' | %s' % ua.ljust(ualen) + 
                                 ' | %s' % fp.ljust(fplen) + ' |')
                         f.write('\n')
-            if self.ofile != '':
-                f.write(' ' + '-' * tlen)
-                f.write('\n\n')
-
-                f.close()
 
         print(self.c.WHITE + ' ' + '-' * tlen)
         print(self.c.WHITE)
+
+        if self.ofile != '':
+            f.write(' ' + '-' * tlen)
+            f.write('\n\n')
+
+            f.close()
 
         self.found.clear()
