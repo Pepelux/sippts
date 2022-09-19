@@ -40,6 +40,7 @@ class SipScan:
         self.ping = 'False'
         self.file = ''
         self.nocolor = ''
+        self.ofile = ''
 
         self.found = []
         self.line = ['-', '\\', '|', '/']
@@ -107,52 +108,56 @@ class SipScan:
                 ports.append(p)
 
         # create a list of IP addresses
-        ips = []
-
         if self.file != '':
             try:
                 with open(self.file) as f:
                     line = f.readline()
+                    line = line.replace('\n', '')
 
                     while(line):
-                        try:
-                            ip = socket.gethostbyname(line)
-                            line = IP(ip)
-                        except:
-                            line = IP(line)
+                        if self.quit == False:
+                            try:
+                                ip = socket.gethostbyname(line)
+                                self.ip = IP(ip)
+                            except:
+                                self.ip = IP(line)
 
-                        hosts = list(ipaddress.ip_network(str(line)).hosts())
+                            ips = []
+                            hosts = list(ipaddress.ip_network(str(self.ip)).hosts())
 
-                        if hosts == []:
-                            hosts.append(self.ip)
+                            if hosts == []:
+                                hosts.append(self.ip)
 
-                        last = len(hosts)-1
-                        start_ip = hosts[0]
-                        end_ip = hosts[last]
+                            last = len(hosts)-1
+                            start_ip = hosts[0]
+                            end_ip = hosts[last]
 
-                        ipini = int(ip2long(str(start_ip)))
-                        ipend = int(ip2long(str(end_ip)))
+                            ipini = int(ip2long(str(start_ip)))
+                            ipend = int(ip2long(str(end_ip)))
 
-                        for i in range(ipini, ipend+1):
-                            if i != local_ip:
-                                if self.ping == 'False':
-                                    ips.append(long2ip(i))
-                                else:
-                                    print(self.c.YELLOW + '[+] Ping %s ...' %
-                                          str(long2ip(i)) + self.c.WHITE, end='\r')
-
-                                    if ping(long2ip(i), '0.1') == True:
-                                        print(self.c.GREEN + '\n   [-] ... Pong %s' %
-                                              str(long2ip(i)) + self.c.WHITE)
+                            for i in range(ipini, ipend+1):
+                                if i != local_ip:
+                                    if self.ping == 'False':
                                         ips.append(long2ip(i))
+                                    else:
+                                        print(self.c.YELLOW + '[+] Ping %s ...' %
+                                            str(long2ip(i)) + self.c.WHITE, end='\r')
+
+                                        if ping(long2ip(i), '0.1') == True:
+                                            print(self.c.GREEN + '\n   [-] ... Pong %s' %
+                                                str(long2ip(i)) + self.c.WHITE)
+                                            ips.append(long2ip(i))
+
+                            self.prepare_scan(ips, ports, protos)
 
                         line = f.readline()
 
                 f.close()
             except:
-                print('Error opening file %s' % self.file)
+                print('Error reading file %s' % self.file)
                 exit()
         else:
+            ips = []
             hosts = list(ipaddress.ip_network(str(self.ip)).hosts())
 
             if hosts == []:
@@ -171,13 +176,17 @@ class SipScan:
                         ips.append(long2ip(i))
                     else:
                         print(self.c.YELLOW + '[+] Ping %s ...' %
-                              str(long2ip(i)) + self.c.WHITE, end='\r')
+                                str(long2ip(i)) + self.c.WHITE, end='\r')
 
                         if ping(long2ip(i), '0.1') == True:
                             print(self.c.GREEN + '\n   [-] ... Pong %s' %
-                                  str(long2ip(i)) + self.c.WHITE)
+                                    str(long2ip(i)) + self.c.WHITE)
                             ips.append(long2ip(i))
 
+            self.prepare_scan(ips, ports, protos)
+
+
+    def prepare_scan(self, ips, ports, protos):
         # threads to use
         nthreads = int(self.threads)
         total = len(list(product(ips, ports, protos)))
@@ -235,6 +244,23 @@ class SipScan:
             print(self.c.BRED +
                   '[x] More than 200 threads can cause socket problems')
         print(self.c.WHITE)
+
+        if self.ofile != '':
+            f = open(self.ofile, 'a+')
+
+            f.write('[!] IP/Network: %s' % str(self.ip))
+            f.write('\n')
+            f.write('[!] Port range: %s' % self.rport)
+            f.write('\n')
+            if self.proto == 'ALL':
+                f.write('[!] Protocols: UDP, TCP, TLS')
+            else:
+                f.write('[!] Protocol: %s' % self.proto.upper())
+            f.write('\n')
+            f.write('[!] Method to scan: %s' % self.method)
+            f.write('\n\n')
+
+            f.close()
 
         values = product(ips, ports, protos)
 
@@ -365,27 +391,26 @@ class SipScan:
 
         m = re.search('^(as[0-9a-f]{8})', tag)
         if m:
-            fingerprint = 'Asterisk PBX'
-        if fingerprint == '-':
-            m = re.search('([a-fA-F0-9]{16}i0)', tag)
-            if m:
-                fingerprint = 'Sipura/Linksys SPA'
-        if fingerprint == '-':
-            m = re.search('([a-fA-F0-9]{6,8}-[a-fA-F0-9]{2,4})', tag)
-            if m:
-                fingerprint = 'Cisco VoIP Gateway'
-        if fingerprint == '-':
-            m = re.search('([a-f0-9]{32}.[a-f0-9]{2,4})', tag)
-            if m:
-                fingerprint = 'Kamailio SIP Proxy'
-        if fingerprint == '-':
-            m = re.search('([0-9]{9})', tag)
-            if m:
-                fingerprint = 'Grandstream Phone or Gateway'
-        if fingerprint == '-':
-            m = re.search('([a-f0-9]{8})', tag)
-            if m:
-                fingerprint = 'Cisco IP Phone'
+            fingerprint += '/Asterisk PBX'
+        m = re.search('([a-f0-9]{32}.[a-f0-9]{2,4})', tag)
+        if m:
+            fingerprint += '/Kamailio SIP Proxy'
+
+        # m = re.search('([a-fA-F0-9]{16}i0)', tag)
+        # if m:
+        #     fingerprint += '/Sipura/Linksys SPA'
+        # m = re.search('([a-fA-F0-9]{6,8}-[a-fA-F0-9]{2,4})', tag)
+        # if m:
+        #     fingerprint += '/Cisco VoIP Gateway'
+        # m = re.search('([0-9]{5,10})', tag)
+        # if m:
+        #     fingerprint += '/Grandstream Phone or Gateway'
+        # m = re.search('([a-f0-9]{8})', tag)
+        # if m:
+        #     fingerprint += '/Cisco IP Phone'
+
+        if fingerprint[0:2] == '-/':
+            fingerprint = fingerprint[2:]
 
         return fingerprint
 
@@ -413,6 +438,7 @@ class SipScan:
                 fplen = len(fp)
 
         tlen = iplen+polen+prlen+relen+ualen+fplen+18
+        
         print(self.c.WHITE + ' ' + '-' * tlen)
         print(self.c.WHITE +
               '| ' + self.c.BWHITE + 'IP address'.ljust(iplen) + self.c.WHITE +
@@ -423,9 +449,28 @@ class SipScan:
               ' | ' + self.c.BWHITE + 'Fingerprinting'.ljust(fplen) + self.c.WHITE + ' |')
         print(self.c.WHITE + ' ' + '-' * tlen)
 
+        if self.ofile != '':
+            f = open(self.ofile, 'a+')
+
+            f.write(' ' + '-' * tlen)
+            f.write('\n')
+            f.write('| IP address'.ljust(iplen) + 
+                    ' | Port'.ljust(polen) + 
+                    ' | Proto'.ljust(prlen) + 
+                    ' | Response'.ljust(relen) + 
+                    ' | User-Agent'.ljust(ualen) + 
+                    ' | Fingerprinting'.ljust(fplen) + ' |')
+            f.write('\n')
+            f.write(' ' + '-' * tlen)
+            f.write('\n')
+
         if len(self.found) == 0:
             print(self.c.WHITE + '| ' + self.c.WHITE +
                   'Nothing found'.ljust(tlen-2) + ' |')
+
+            if self.ofile != '':
+                f.write('| Nothing found'.ljust(tlen-2) + ' |')
+                f.write('\n')
         else:
             for x in self.found:
                 (ip, port, proto, res, ua, fp) = x.split('###')
@@ -438,5 +483,21 @@ class SipScan:
                       ' | ' + self.c.YELLOW + '%s' % ua.ljust(ualen) + self.c.WHITE +
                       ' | ' + self.c.YELLOW + '%s' % fp.ljust(fplen) + self.c.WHITE + ' |')
 
+                if self.ofile != '':
+                        f.write('| %s' % ip.ljust(iplen) + 
+                                ' | %s' % port.ljust(polen) + 
+                                ' | %s' % proto.ljust(prlen) +
+                                ' | %s' % res.ljust(relen) + 
+                                ' | %s' % ua.ljust(ualen) + 
+                                ' | %s' % fp.ljust(fplen) + ' |')
+                        f.write('\n')
+            if self.ofile != '':
+                f.write(' ' + '-' * tlen)
+                f.write('\n\n')
+
+                f.close()
+
         print(self.c.WHITE + ' ' + '-' * tlen)
         print(self.c.WHITE)
+
+        self.found.clear()

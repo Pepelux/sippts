@@ -19,6 +19,8 @@ devel version
 - sipdigestleak:
   - added tls support
   - added param --local-ip to force it in case of multiple IP addresses
+- sipscan:
+  - added param --output-file to save results
 - global:
   - added class Color and para nocolor to show console responses in ansii
   - bug fixes
