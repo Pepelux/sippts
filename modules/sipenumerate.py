@@ -176,11 +176,14 @@ class SipEnumerate:
                         rescode = headers['response_code']
                         restext = headers['response_text']
 
+                        ua = headers['ua']
+                        if ua == '':
+                            ua = 'Not found'
+
                         if resdata != '':
                             resdata = resdata + WHITE + ' / '
-                        resdata = resdata + YELLOW + \
-                            '%s %s' % (rescode, restext)
-
+                        resdata = resdata + YELLOW + '%s %s' % (rescode, restext) + WHITE + ' (User-Agent: %s)' % ua
+                        
                 if self.verbose == 1:
                     print(BWHITE + '[+] Receiving from %s:%d ...' %
                           (self.ip, self.rport))
