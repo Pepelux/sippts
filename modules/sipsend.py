@@ -54,23 +54,6 @@ class SipSend:
         self.method = self.method.upper()
         self.proto = self.proto.upper()
 
-        if self.branch == '':
-            self.branch = generate_random_string(71, 71, 'ascii')
-        if self.callid == '':
-            self.callid = generate_random_string(32, 32, 'hex')
-        if self.from_tag == '':
-            self.from_tag = generate_random_string(8, 8, 'hex')
-
-        if self.nocolor == 1:
-            self.c.ansy()
-
-        if self.sdp == None:
-            self.sdp = 0
-        if self.sdes == 1:
-            self.sdp = 2
-        if self.cseq == None or self.cseq == '':
-            self.cseq = '1'
-
         # my IP address
         local_ip = self.localip
         if self.localip == '':
@@ -169,6 +152,23 @@ class SipSend:
             if self.user_agent != 'pplsip':
                 fw.write('[!] Customized User-Agent: %s\n' % self.user_agent)
             fw.write('\n')
+
+        if self.branch == '':
+            self.branch = generate_random_string(71, 71, 'ascii')
+        if self.callid == '':
+            self.callid = generate_random_string(32, 32, 'hex')
+        if self.from_tag == '':
+            self.from_tag = generate_random_string(8, 8, 'hex')
+
+        if self.nocolor == 1:
+            self.c.ansy()
+
+        if self.sdp == None:
+            self.sdp = 0
+        if self.sdes == 1:
+            self.sdp = 2
+        if self.cseq == None or self.cseq == '':
+            self.cseq = '1'
 
         bind = '0.0.0.0'
         lport = get_free_port()
