@@ -433,7 +433,7 @@ class SipScan:
                 fplen = len(fp)
 
         if self.fp == 1:
-            tlen = iplen+polen+prlen+relen+ualen+tplen+fplen+19
+            tlen = iplen+polen+prlen+relen+ualen+tplen+fplen+20
         else:
             tlen = iplen+polen+prlen+relen+ualen+tplen+17
 

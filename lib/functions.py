@@ -672,6 +672,9 @@ def fingerprinting(method, msg, headers):
     if fp == []:
         return(['Unknown'])
 
+    if len(fp) > 3:
+        return ['Too many matches']
+
     clearfp = []
 
     for f in fp:
