@@ -13,7 +13,7 @@ import ipaddress
 import ssl
 import re
 from IPy import IP
-from lib.functions import create_message, parse_message, get_machine_default_ip, ip2long, long2ip, get_free_port, ping
+from lib.functions import create_message, parse_message, get_machine_default_ip, ip2long, long2ip, get_free_port, ping, fingerprinting
 from lib.color import Color
 from itertools import product
 from concurrent.futures import ThreadPoolExecutor
@@ -41,6 +41,7 @@ class SipScan:
         self.file = ''
         self.nocolor = ''
         self.ofile = ''
+        self.fp = '0'
 
         self.found = []
         self.line = ['-', '\\', '|', '/']
@@ -123,7 +124,8 @@ class SipScan:
                                 self.ip = IP(line)
 
                             ips = []
-                            hosts = list(ipaddress.ip_network(str(self.ip)).hosts())
+                            hosts = list(ipaddress.ip_network(
+                                str(self.ip)).hosts())
 
                             if hosts == []:
                                 hosts.append(self.ip)
@@ -141,11 +143,11 @@ class SipScan:
                                         ips.append(long2ip(i))
                                     else:
                                         print(self.c.YELLOW + '[+] Ping %s ...' %
-                                            str(long2ip(i)) + self.c.WHITE, end='\r')
+                                              str(long2ip(i)) + self.c.WHITE, end='\r')
 
                                         if ping(long2ip(i), '0.1') == True:
                                             print(self.c.GREEN + '\n   [-] ... Pong %s' %
-                                                str(long2ip(i)) + self.c.WHITE)
+                                                  str(long2ip(i)) + self.c.WHITE)
                                             ips.append(long2ip(i))
 
                             self.prepare_scan(ips, ports, protos)
@@ -176,15 +178,14 @@ class SipScan:
                         ips.append(long2ip(i))
                     else:
                         print(self.c.YELLOW + '[+] Ping %s ...' %
-                                str(long2ip(i)) + self.c.WHITE, end='\r')
+                              str(long2ip(i)) + self.c.WHITE, end='\r')
 
                         if ping(long2ip(i), '0.1') == True:
                             print(self.c.GREEN + '\n   [-] ... Pong %s' %
-                                    str(long2ip(i)) + self.c.WHITE)
+                                  str(long2ip(i)) + self.c.WHITE)
                             ips.append(long2ip(i))
 
             self.prepare_scan(ips, ports, protos)
-
 
     def prepare_scan(self, ips, ports, protos):
         # threads to use
@@ -370,8 +371,23 @@ class SipScan:
 
                     response = '%s %s' % (
                         headers['response_code'], headers['response_text'])
-                    line = '%s###%d###%s###%s###%s###%s' % (
-                        ip, rport, proto, response, headers['ua'], sip_type)
+                    if self.fp == 1:
+                        fps = fingerprinting(self.method, resp.decode(), headers)
+
+                        fp = ''
+                        for f in fps:
+                            if f == '':
+                                fp = '%s' % f
+                            else:
+                                fp += '/%s' % f
+                    else:
+                        fp = ''
+
+                    if fp[0:1] == '/':
+                        fp = fp[1:]
+
+                    line = '%s###%d###%s###%s###%s###%s###%s' % (
+                        ip, rport, proto, response, headers['ua'], sip_type, fp)
                     self.found.append(line)
 
                     if self.verbose == 1:
@@ -396,10 +412,11 @@ class SipScan:
         prlen = len('Proto')
         relen = len('Response')
         ualen = len('User-Agent')
-        fplen = len('Type')
+        tplen = len('Type')
+        fplen = len('Fingerprinting')
 
         for x in self.found:
-            (ip, port, proto, res, ua, fp) = x.split('###')
+            (ip, port, proto, res, ua, type, fp) = x.split('###')
             if len(ip) > iplen:
                 iplen = len(ip)
             if len(port) > polen:
@@ -410,19 +427,34 @@ class SipScan:
                 relen = len(res)
             if len(ua) > ualen:
                 ualen = len(ua)
-            if len(fp) > fplen:
+            if len(type) > tplen:
+                tplen = len(type)
+            if self.fp == 1 and len(fp) > fplen:
                 fplen = len(fp)
 
-        tlen = iplen+polen+prlen+relen+ualen+fplen+17
-        
+        if self.fp == 1:
+            tlen = iplen+polen+prlen+relen+ualen+tplen+fplen+19
+        else:
+            tlen = iplen+polen+prlen+relen+ualen+tplen+17
+
         print(self.c.WHITE + ' ' + '-' * tlen)
-        print(self.c.WHITE +
-              '| ' + self.c.BWHITE + 'IP address'.ljust(iplen) + self.c.WHITE +
-              ' | ' + self.c.BWHITE + 'Port'.ljust(polen) + self.c.WHITE +
-              ' | ' + self.c.BWHITE + 'Proto'.ljust(prlen) + self.c.WHITE +
-              ' | ' + self.c.BWHITE + 'Response'.ljust(relen) + self.c.WHITE +
-              ' | ' + self.c.BWHITE + 'User-Agent'.ljust(ualen) + self.c.WHITE +
-              ' | ' + self.c.BWHITE + 'Type'.ljust(fplen) + self.c.WHITE + ' |')
+        if self.fp == 1:
+            print(self.c.WHITE +
+                  '| ' + self.c.BWHITE + 'IP address'.ljust(iplen) + self.c.WHITE +
+                  ' | ' + self.c.BWHITE + 'Port'.ljust(polen) + self.c.WHITE +
+                  ' | ' + self.c.BWHITE + 'Proto'.ljust(prlen) + self.c.WHITE +
+                  ' | ' + self.c.BWHITE + 'Response'.ljust(relen) + self.c.WHITE +
+                  ' | ' + self.c.BWHITE + 'User-Agent'.ljust(ualen) + self.c.WHITE +
+                  ' | ' + self.c.BWHITE + 'Type'.ljust(tplen) + self.c.WHITE +
+                  ' | ' + self.c.BWHITE + 'Fingerprinting'.ljust(fplen) + self.c.WHITE + ' |')
+        else:
+            print(self.c.WHITE +
+                  '| ' + self.c.BWHITE + 'IP address'.ljust(iplen) + self.c.WHITE +
+                  ' | ' + self.c.BWHITE + 'Port'.ljust(polen) + self.c.WHITE +
+                  ' | ' + self.c.BWHITE + 'Proto'.ljust(prlen) + self.c.WHITE +
+                  ' | ' + self.c.BWHITE + 'Response'.ljust(relen) + self.c.WHITE +
+                  ' | ' + self.c.BWHITE + 'User-Agent'.ljust(ualen) + self.c.WHITE +
+                  ' | ' + self.c.BWHITE + 'Type'.ljust(tplen) + self.c.WHITE + ' |')
         print(self.c.WHITE + ' ' + '-' * tlen)
 
         if self.ofile != '':
@@ -430,12 +462,21 @@ class SipScan:
 
             f.write(' ' + '-' * tlen)
             f.write('\n')
-            f.write('| IP address'.ljust(iplen) + 
-                    ' | Port'.ljust(polen) + 
-                    ' | Proto'.ljust(prlen) + 
-                    ' | Response'.ljust(relen) + 
-                    ' | User-Agent'.ljust(ualen) + 
-                    ' | Type'.ljust(fplen) + ' |')
+            if self.fp == 1:
+                f.write('| IP address'.ljust(iplen) +
+                        ' | Port'.ljust(polen) +
+                        ' | Proto'.ljust(prlen) +
+                        ' | Response'.ljust(relen) +
+                        ' | User-Agent'.ljust(ualen) +
+                        ' | Type'.ljust(tplen) +
+                        ' | Fingerprinting'.ljust(fplen) + ' |')
+            else:
+                f.write('| IP address'.ljust(iplen) +
+                        ' | Port'.ljust(polen) +
+                        ' | Proto'.ljust(prlen) +
+                        ' | Response'.ljust(relen) +
+                        ' | User-Agent'.ljust(ualen) +
+                        ' | Type'.ljust(tplen) + ' |')
             f.write('\n')
             f.write(' ' + '-' * tlen)
             f.write('\n')
@@ -449,23 +490,43 @@ class SipScan:
                 f.write('\n')
         else:
             for x in self.found:
-                (ip, port, proto, res, ua, fp) = x.split('###')
+                (ip, port, proto, res, ua, type, fp) = x.split('###')
 
-                print(self.c.WHITE +
-                      '| ' + self.c.BGREEN + '%s' % ip.ljust(iplen) + self.c.WHITE +
-                      ' | ' + self.c.GREEN + '%s' % port.ljust(polen) + self.c.WHITE +
-                      ' | ' + self.c.GREEN + '%s' % proto.ljust(prlen) + self.c.WHITE +
-                      ' | ' + self.c.BLUE + '%s' % res.ljust(relen) + self.c.WHITE +
-                      ' | ' + self.c.YELLOW + '%s' % ua.ljust(ualen) + self.c.WHITE +
-                      ' | ' + self.c.CYAN + '%s' % fp.ljust(fplen) + self.c.WHITE + ' |')
+                if self.fp == 1:
+                    print(self.c.WHITE +
+                          '| ' + self.c.BGREEN + '%s' % ip.ljust(iplen) + self.c.WHITE +
+                          ' | ' + self.c.GREEN + '%s' % port.ljust(polen) + self.c.WHITE +
+                          ' | ' + self.c.GREEN + '%s' % proto.ljust(prlen) + self.c.WHITE +
+                          ' | ' + self.c.BLUE + '%s' % res.ljust(relen) + self.c.WHITE +
+                          ' | ' + self.c.YELLOW + '%s' % ua.ljust(ualen) + self.c.WHITE +
+                          ' | ' + self.c.CYAN + '%s' % type.ljust(tplen) + self.c.WHITE +
+                          ' | ' + self.c.GREEN + '%s' % fp.ljust(fplen) + self.c.WHITE + ' |')
 
-                if self.ofile != '':
-                        f.write('| %s' % ip.ljust(iplen) + 
-                                ' | %s' % port.ljust(polen) + 
+                    if self.ofile != '':
+                        f.write('| %s' % ip.ljust(iplen) +
+                                ' | %s' % port.ljust(polen) +
                                 ' | %s' % proto.ljust(prlen) +
-                                ' | %s' % res.ljust(relen) + 
-                                ' | %s' % ua.ljust(ualen) + 
+                                ' | %s' % res.ljust(relen) +
+                                ' | %s' % ua.ljust(ualen) +
+                                ' | %s' % type.ljust(tplen) +
                                 ' | %s' % fp.ljust(fplen) + ' |')
+                        f.write('\n')
+                else:
+                    print(self.c.WHITE +
+                          '| ' + self.c.BGREEN + '%s' % ip.ljust(iplen) + self.c.WHITE +
+                          ' | ' + self.c.GREEN + '%s' % port.ljust(polen) + self.c.WHITE +
+                          ' | ' + self.c.GREEN + '%s' % proto.ljust(prlen) + self.c.WHITE +
+                          ' | ' + self.c.BLUE + '%s' % res.ljust(relen) + self.c.WHITE +
+                          ' | ' + self.c.YELLOW + '%s' % ua.ljust(ualen) + self.c.WHITE +
+                          ' | ' + self.c.CYAN + '%s' % type.ljust(tplen) + self.c.WHITE + ' |')
+
+                    if self.ofile != '':
+                        f.write('| %s' % ip.ljust(iplen) +
+                                ' | %s' % port.ljust(polen) +
+                                ' | %s' % proto.ljust(prlen) +
+                                ' | %s' % res.ljust(relen) +
+                                ' | %s' % ua.ljust(ualen) +
+                                ' | %s' % type.ljust(tplen) + ' |')
                         f.write('\n')
 
         print(self.c.WHITE + ' ' + '-' * tlen)
