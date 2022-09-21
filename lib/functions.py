@@ -333,6 +333,7 @@ def parse_message(buffer):
     data['rr'] = ''
     data['route'] = ''
     data['auth-type'] = 1
+    data['type'] = 'Unknown'
 
     for header in headers:
         m = re.search('^SIP\/[0-9|\.]+\s([0-9]+)\s(.+)', header)
@@ -403,10 +404,12 @@ def parse_message(buffer):
         m = re.search('^Server:\s(.+)', header)
         if m:
             data['ua'] = '%s' % (m.group(1))
+            data['type'] = 'Server'
         else:
             m = re.search('^User-Agent:\s(.+)', header)
             if m:
                 data['ua'] = '%s' % (m.group(1))
+                data['type'] = 'Device'
 
         m = re.search('^To:\s(.+)', header)
         if m:

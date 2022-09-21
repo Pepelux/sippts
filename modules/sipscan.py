@@ -367,7 +367,7 @@ class SipScan:
                     response = '%s %s' % (
                         headers['response_code'], headers['response_text'])
                     line = '%s###%d###%s###%s###%s###%s' % (
-                        ip, rport, proto, response, headers['ua'], self.fingerprinting(headers['totag']))
+                        ip, rport, proto, response, headers['ua'], headers['type'])
                     self.found.append(line)
 
                     if self.verbose == 1:
@@ -386,41 +386,13 @@ class SipScan:
             finally:
                 sock.close()
 
-    def fingerprinting(self, tag):
-        fingerprint = '-'
-
-        m = re.search('^(as[0-9a-f]{8})', tag)
-        if m:
-            fingerprint += '/Asterisk PBX'
-        m = re.search('([a-f0-9]{32}.[a-f0-9]{2,4})', tag)
-        if m:
-            fingerprint += '/Kamailio SIP Proxy'
-
-        # m = re.search('([a-fA-F0-9]{16}i0)', tag)
-        # if m:
-        #     fingerprint += '/Sipura/Linksys SPA'
-        # m = re.search('([a-fA-F0-9]{6,8}-[a-fA-F0-9]{2,4})', tag)
-        # if m:
-        #     fingerprint += '/Cisco VoIP Gateway'
-        # m = re.search('([0-9]{5,10})', tag)
-        # if m:
-        #     fingerprint += '/Grandstream Phone or Gateway'
-        # m = re.search('([a-f0-9]{8})', tag)
-        # if m:
-        #     fingerprint += '/Cisco IP Phone'
-
-        if fingerprint[0:2] == '-/':
-            fingerprint = fingerprint[2:]
-
-        return fingerprint
-
     def print(self):
         iplen = len('IP address')
         polen = len('Port')
         prlen = len('Proto')
         relen = len('Response')
         ualen = len('User-Agent')
-        fplen = len('Fingerprinting')
+        fplen = len('Type')
 
         for x in self.found:
             (ip, port, proto, res, ua, fp) = x.split('###')
@@ -446,7 +418,7 @@ class SipScan:
               ' | ' + self.c.BWHITE + 'Proto'.ljust(prlen) + self.c.WHITE +
               ' | ' + self.c.BWHITE + 'Response'.ljust(relen) + self.c.WHITE +
               ' | ' + self.c.BWHITE + 'User-Agent'.ljust(ualen) + self.c.WHITE +
-              ' | ' + self.c.BWHITE + 'Fingerprinting'.ljust(fplen) + self.c.WHITE + ' |')
+              ' | ' + self.c.BWHITE + 'Type'.ljust(fplen) + self.c.WHITE + ' |')
         print(self.c.WHITE + ' ' + '-' * tlen)
 
         if self.ofile != '':
@@ -459,7 +431,7 @@ class SipScan:
                     ' | Proto'.ljust(prlen) + 
                     ' | Response'.ljust(relen) + 
                     ' | User-Agent'.ljust(ualen) + 
-                    ' | Fingerprinting'.ljust(fplen) + ' |')
+                    ' | Type'.ljust(fplen) + ' |')
             f.write('\n')
             f.write(' ' + '-' * tlen)
             f.write('\n')
@@ -481,7 +453,7 @@ class SipScan:
                       ' | ' + self.c.GREEN + '%s' % proto.ljust(prlen) + self.c.WHITE +
                       ' | ' + self.c.BLUE + '%s' % res.ljust(relen) + self.c.WHITE +
                       ' | ' + self.c.YELLOW + '%s' % ua.ljust(ualen) + self.c.WHITE +
-                      ' | ' + self.c.YELLOW + '%s' % fp.ljust(fplen) + self.c.WHITE + ' |')
+                      ' | ' + self.c.CYAN + '%s' % fp.ljust(fplen) + self.c.WHITE + ' |')
 
                 if self.ofile != '':
                         f.write('| %s' % ip.ljust(iplen) + 
