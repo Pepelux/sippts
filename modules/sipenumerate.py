@@ -7,7 +7,6 @@ __license__ = "GPL"
 __copyright__ = "Copyright (C) 2015-2022, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
 
-from re import S
 import socket
 import sys
 import ssl
