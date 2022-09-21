@@ -364,10 +364,14 @@ class SipScan:
                 headers = parse_message(resp.decode())
 
                 if headers:
+                    sip_type = headers['type']
+                    if self.method == 'REGISTER' and headers['response_code'] == '405' and sip_type == 'Server':
+                        sip_type = 'Unknown'
+
                     response = '%s %s' % (
                         headers['response_code'], headers['response_text'])
                     line = '%s###%d###%s###%s###%s###%s' % (
-                        ip, rport, proto, response, headers['ua'], headers['type'])
+                        ip, rport, proto, response, headers['ua'], sip_type)
                     self.found.append(line)
 
                     if self.verbose == 1:
