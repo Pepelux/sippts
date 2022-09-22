@@ -596,23 +596,64 @@ def fingerprinting(method, msg, headers):
         if code == '401':
             type = 'Server'
 
-    # Server or Unknown
-    if type != 'Device':
-        m = re.search('^(as[0-9a-f]{8})$', tag)
+    # Device or Unknown
+    if type != 'Server':
+        m = re.search('^[a-fA-F0-9]{6,8}-[a-fA-F0-9]{2,4}$', tag)
+        if m:
+            fp.append('Cisco VoIP Gateway')
+        m = re.search('^[a-fA-F0-9]{16}i0$', tag)
+        if m:
+            fp.append('Sipura/Linksys SPA')
+        m = re.search('^[0-9]{5,10}$', tag)
+        if m:
+            fp.append('Grandstream')
+            fp.append('Aastra')
+        m = re.search('^[a-f0-9]{8}$', tag)
+        if m:
+            fp.append('Cisco IP Phone')
+            fp.append('3CX Phone')
+        m = re.search('^[a-z0-9]{10}$', tag)
+        if m:
+            fp.append('Panasonic')
+        m = re.search('^[a-z]{8}$', tag)
+        if m:
+            fp.append('Ozeki VoIP SIP SDK')
+        m = re.search('^[a-f0-9]{16}$', tag)
+        if m:
+            fp.append('Grandtream')
+            fp.append('Tandberg')
+        m = re.search('^[a-f0-9]{32}$', tag)
+        if m:
+            fp.append('Comrex')
+
+        if tag == '123456':
+            fp.append('Alcatel')
+
+        hdr = msg.split('\r\n')
+        for h in hdr:
+            if h.lower().find('x-grandstream-pbx:') == 0:
+                fp.append('Grandstream ')
+
+    # Server or Unknown or not found in Device
+    if type != 'Device' or fp == []:
+        m = re.search('^as[0-9a-f]{8}$', tag)
         if m:
             fp.append('Asterisk PBX')
-        m = re.search('^([a-f0-9]{32}.[a-f0-9]{2,8})$', tag)
+        m = re.search('^[a-f0-9]{32}.[a-f0-9]{2,8}$', tag)
         if m:
             fp.append('Kamailio SIP Proxy')
-        m = re.search('^([a-fA-F0-9]{6,8}-[a-fA-F0-9]{2,4})$', tag)
+        m = re.search('^[a-fA-F0-9]{6,8}-[a-fA-F0-9]{2,4}$', tag)
         if m:
             fp.append('Cisco SIP Gateway')
-        m = re.search('^([a-f0-9]{8})$', tag)
+        m = re.search('^[a-f0-9]{8}$', tag)
         if m:
             fp.append('Mitel Border Gateway')
-        m = re.search('^([a-f0-9]{16})$', tag)
+        m = re.search('^[a-f0-9]{16}$', tag)
         if m:
             fp.append('Tandberg')
+        m = re.search('^DL[a-f0-9]{10}$', tag)
+        if m:
+            fp.append('LifeSize Media Server')
 
         if tag == '12345678':
             fp.append('Alcatel')
@@ -626,43 +667,6 @@ def fingerprinting(method, msg, headers):
                 fp.append('Avaya Session Manager')
             if h.lower().find('www-authenticate:') == 0 and h.lower().find('realm="asterisk"') > 0:
                 fp.append('Asterisk PBX')
-
-    # Device or Unknown
-    if type != 'Server':
-        m = re.search('^([a-fA-F0-9]{6,8}-[a-fA-F0-9]{2,4})$', tag)
-        if m:
-            fp.append('Cisco VoIP Gateway')
-        m = re.search('^([a-fA-F0-9]{16}i0)$', tag)
-        if m:
-            fp.append('Sipura/Linksys SPA')
-        m = re.search('^([0-9]{5,10})$', tag)
-        if m:
-            fp.append('Grandstream')
-            fp.append('Aastra')
-        m = re.search('^([a-f0-9]{8})$', tag)
-        if m:
-            fp.append('Cisco IP Phone')
-            fp.append('3CX Phone')
-        m = re.search('^([a-z0-9]{10})$', tag)
-        if m:
-            fp.append('Panasonic')
-        m = re.search('^([a-z]{8})$', tag)
-        if m:
-            fp.append('Ozeki VoIP SIP SDK')
-        m = re.search('^([a-f0-9]{16})$', tag)
-        if m:
-            fp.append('Tandberg')
-        m = re.search('^([a-f0-9]{32})$', tag)
-        if m:
-            fp.append('Comrex')
-
-        if tag == '123456':
-            fp.append('Alcatel')
-
-        hdr = msg.split('\r\n')
-        for h in hdr:
-            if h.lower().find('x-grandstream-pbx:') == 0:
-                fp.append('Grandstream ')
 
     if ua != '':
         for f in fp:

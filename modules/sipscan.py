@@ -366,8 +366,11 @@ class SipScan:
 
                 if headers:
                     sip_type = headers['type']
-                    if self.method == 'REGISTER' and headers['response_code'] == '405' and sip_type == 'Server':
-                        sip_type = 'Unknown'
+                    if self.method == 'REGISTER':
+                        if headers['response_code'] == '400' or headers['response_code'] == '405':
+                            sip_type = 'Device'
+                        if headers['response_code'] == '401':
+                            sip_type = 'Server'
 
                     response = '%s %s' % (
                         headers['response_code'], headers['response_text'])
