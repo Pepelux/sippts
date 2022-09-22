@@ -21,6 +21,7 @@ devel version
   - added param --local-ip to force it in case of multiple IP addresses
 - sipscan:
   - added param --output-file to save results
+  - added param -fp to fingerprinting
 - global:
   - added class Color and para nocolor to show console responses in ansii
   - bug fixes

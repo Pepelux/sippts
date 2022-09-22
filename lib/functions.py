@@ -612,6 +612,7 @@ def fingerprinting(method, msg, headers):
         if m:
             fp.append('Cisco IP Phone')
             fp.append('3CX Phone')
+            fp.append('Mitel Border GW')
         m = re.search('^[a-z0-9]{10}$', tag)
         if m:
             fp.append('Panasonic')
@@ -645,9 +646,6 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[a-fA-F0-9]{6,8}-[a-fA-F0-9]{2,4}$', tag)
         if m:
             fp.append('Cisco SIP Gateway')
-        m = re.search('^[a-f0-9]{8}$', tag)
-        if m:
-            fp.append('Mitel Border Gateway')
         m = re.search('^[a-f0-9]{16}$', tag)
         if m:
             fp.append('Tandberg')
