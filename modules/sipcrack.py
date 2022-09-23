@@ -138,7 +138,7 @@ class SipDigestCrack:
                     row = '%s#%s#%s#%s' % (ipsrc, ipdst, username, realm)
 
                     if row in rows:
-                        print('username %s already checked' % username)
+                        print('username %s@%s already checked' % (username, ipdst))
                     else:
                         print(BYELLOW+'[+] Trying to crack hash %s of the user %s ...' %
                             (response, username))
