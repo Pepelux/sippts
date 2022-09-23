@@ -7,10 +7,13 @@ __license__ = "GPL"
 __copyright__ = "Copyright (C) 2015-2022, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
 
+from curses.ascii import isascii
 import io
 import base64
-from string import printable
-from itertools import product, count
+from nis import cat
+# from string import printable
+# from itertools import product, count
+import re
 from lib.functions import calculateHash
 import itertools
 import string
@@ -101,38 +104,44 @@ class SipDigestCrack:
         # File format:
         # ipsrc"ipdst"username"realm"method"uri"nonce"cnonce"nc"qop"auth"response
 
-        try:
-            with open(self.file) as f:
-                if self.run == True:
-                    line = f.readline()
+        with open(self.file) as f:
+            if self.run == True:
+                line = f.readline()
 
-                    print(BWHITE + '[!]' + WHITE + ' Using wordlist: ' +
-                          GREEN + '%s' % self.wordlist + WHITE)
-                    print(BWHITE + '[!]' + WHITE + ' Hashes file: ' +
-                          GREEN + '%s' % self.file + WHITE)
+                print(BWHITE + '[!]' + WHITE + ' Using wordlist: ' +
+                        GREEN + '%s' % self.wordlist + WHITE)
+                print(BWHITE + '[!]' + WHITE + ' Hashes file: ' +
+                        GREEN + '%s' % self.file + WHITE)
+                
+                rows = []
 
-                    while line:
-                        if self.run == False:
-                            f.close()
-                            return
-                        line = line.replace('\n', '')
-                        values = line.split('"')
+                while line:
+                    if self.run == False:
+                        f.close()
+                        return
+                    line = line.replace('\n', '')
+                    values = line.split('"')
 
-                        ipsrc = values[0]
-                        ipdst = values[1]
-                        username = values[2]
-                        realm = values[3]
-                        method = values[4]
-                        uri = values[5]
-                        nonce = values[6]
-                        cnonce = values[7]
-                        nc = values[8]
-                        qop = values[9]
-                        algorithm = values[10]
-                        response = values[11]
+                    ipsrc = values[0]
+                    ipdst = values[1]
+                    username = values[2]
+                    realm = values[3]
+                    method = values[4]
+                    uri = values[5]
+                    nonce = values[6]
+                    cnonce = values[7]
+                    nc = values[8]
+                    qop = values[9]
+                    algorithm = values[10]
+                    response = values[11]
 
+                    row = '%s#%s#%s#%s' % (ipsrc, ipdst, username, realm)
+
+                    if row in rows:
+                        print('username %s already checked' % username)
+                    else:
                         print(BYELLOW+'[+] Trying to crack hash %s of the user %s ...' %
-                              (response, username))
+                            (response, username))
 
                         word_start = ''
 
@@ -157,24 +166,22 @@ class SipDigestCrack:
                             pass
 
                         pwd = self.crack(response, username, realm, method,
-                                         uri, nonce, algorithm, cnonce, nc, qop, word_start)
+                                        uri, nonce, algorithm, cnonce, nc, qop, word_start)
 
                         if pwd != '':
                             print(GREEN+'[-] Cleartext password for user %s is %s' %
-                                  (username, pwd))
+                                (username, pwd))
                         else:
                             print(
                                 RED+'[-] Password not found. Try with another wordlist')
 
-                        line = f.readline()
-                else:
-                    f.close()
-                    return
+                    rows.append(row)
+                    line = f.readline()
+            else:
+                f.close()
+                return
 
-            f.close()
-        except:
-            print(RED + '%s: File not found or incorrect format\n' %
-                  self.file + WHITE)
+        f.close()
 
         exit()
 
@@ -274,35 +281,52 @@ class SipDigestCrack:
             except:
                 pass
         else:
-            with io.open(self.wordlist, "r", newline=None, encoding="latin-1") as fd:
-                for line in fd:
+            with open(self.wordlist, 'rb') as fd:
+                pwd = '#'
+                while pwd != '':
                     if self.run == False:
                         return ''
 
                     try:
-                        pwd = line.replace('\n', '')
+                        pwd = fd.readline()
+
+                        try:
+                            x = pwd.decode('ascii')
+                            isascii = 1
+                        except:
+                            isascii = 0
+                            pwd = '#'
+
+                        pwd = pwd.decode()
                         pwd = pwd.replace('\'', '')
                         pwd = pwd.replace('"', '')
                         pwd = pwd.replace('<', '')
                         pwd = pwd.replace('>', '')
+
+                        try:
+                            m = re.search('^\n$', pwd.replace(' ', ''))
+                            if m:
+                                pwd = '#'
+                        except:
+                            pass
+
+                        pwd = pwd.replace('\n', '')
                         pwd = pwd.strip()
                         pwd = pwd[0:50]
 
-                        # only check ascii
-                        # pwd = ascii(pwd)
+                        if pwd != '' and pwd != '#' and isascii == 1:
+                            print(
+                                BWHITE + '   [-] Trying pass ' + YELLOW + '%s'.ljust(50) % pwd + WHITE, end="\r")
 
-                        print(
-                            BWHITE + '   [-] Trying pass ' + YELLOW + '%s'.ljust(50) % pwd + WHITE, end="\r")
-
-                        if word_start == '' or word_start == pwd:
-                            word_start = ''
-                            if self.verbose == 1:
-                                print(WHITE+'Password: %s' % (pwd))
-                                print(WHITE+'Expected hash: %s' % (response))
-                            if response == calculateHash(username, realm, pwd, method, uri, nonce, algorithm, cnonce, nc, qop, self.verbose, ''):
-                                fd.close()
-                                self.save_file(self.wordlist, username, pwd)
-                                return pwd
+                            if word_start == '' or word_start == pwd:
+                                word_start = ''
+                                if self.verbose == 1:
+                                    print(WHITE+'Password: %s' % pwd.ljust(50))
+                                    print(WHITE+'Expected hash: %s' % (response))
+                                if response == calculateHash(username, realm, pwd, method, uri, nonce, algorithm, cnonce, nc, qop, self.verbose, ''):
+                                    fd.close()
+                                    self.save_file(self.wordlist, username, pwd)
+                                    return pwd
                     except KeyboardInterrupt:
                         fd.close()
                         self.save_file(self.wordlist, username, pwd)
@@ -310,11 +334,11 @@ class SipDigestCrack:
                         self.stop()
                         return ''
                     except:
-                        fd.close()
-                        self.save_file(self.wordlist, username, pwd)
-                        return ''
+                        pass
 
+            self.save_file(self.wordlist, username, pwd)
             fd.close()
+            return ''
 
         self.save_file(self.wordlist, username, pwd)
         return ''

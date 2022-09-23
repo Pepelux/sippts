@@ -336,21 +336,36 @@ class SipRemoteCrack:
 
         if self.run == True:
             with open(self.wordlist, 'rb') as f:
-                # while pwd := f.readline():
-                pwd = 'x'
+                pwd = '#'
                 while pwd:
                     try:
                         pwd = f.readline()
+
+                        try:
+                            x = pwd.decode('ascii')
+                            isascii = 1
+                        except:
+                            isascii = 0
+                            pwd = '#'
+
                         pwd = pwd.decode()
-                        pwd = pwd.replace('\n', '')
                         pwd = pwd.replace('\'', '')
                         pwd = pwd.replace('"', '')
                         pwd = pwd.replace('<', '')
                         pwd = pwd.replace('>', '')
+
+                        try:
+                            m = re.search('^\n$', pwd.replace(' ', ''))
+                            if m:
+                                pwd = '#'
+                        except:
+                            pass
+
+                        pwd = pwd.replace('\n', '')
                         pwd = pwd.strip()
                         pwd = pwd[0:50]
 
-                        if pwd != '':
+                        if pwd != '' and pwd != '#' and isascii == 1:
                             if self.run == True:
                                 try:
                                     self.pos += 1
