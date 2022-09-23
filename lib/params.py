@@ -442,7 +442,7 @@ def get_sipcrack_args():
 ''' + BWHITE + '''BY ''' + GREEN + ''' █▀▀ ██▄ █▀▀ ██▄ █▄▄ █▄█ █░█''' + BWHITE + '''
 
 ''' + BLUE + ''' -= SIP digest authentication cracking =-''' + WHITE,
-        epilog=WHITE + '''Bruteforce charsets
+        epilog=BWHITE + '''Bruteforce charsets
 -------------------
 ascii_letters             # The ascii_lowercase and ascii_uppercase constants
 alphabet=ascii_lowercase  # The lowercase letters: abcdefghijklmnopqrstuvwxyz
@@ -937,7 +937,7 @@ def get_tshark_args():
 ''' + BWHITE + '''BY ''' + GREEN + ''' █▀▀ ██▄ █▀▀ ██▄ █▄▄ █▄█ █░█''' + BWHITE + '''
 
 ''' + BLUE + ''' -= TShark filters =-''' + WHITE,
-        epilog=WHITE + '''
+        epilog=BWHITE + '''
 Filters:
 -------
 stats               SIP packet statistics
@@ -992,3 +992,93 @@ rtp                 Show all RTP streams
         print('[-] Error')
         sys.exit(1)
 
+
+def get_spoof_args():
+    parser = argparse.ArgumentParser(
+        formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
+            prog, max_help_position=50),
+        description= RED + u'''
+░█████╗░██████╗░██████╗░  ░██████╗██████╗░░█████╗░░█████╗░███████╗
+██╔══██╗██╔══██╗██╔══██╗  ██╔════╝██╔══██╗██╔══██╗██╔══██╗██╔════╝
+███████║██████╔╝██████╔╝  ╚█████╗░██████╔╝██║░░██║██║░░██║█████╗░░
+██╔══██║██╔══██╗██╔═══╝░  ░╚═══██╗██╔═══╝░██║░░██║██║░░██║██╔══╝░░
+██║░░██║██║░░██║██║░░░░░  ██████╔╝██║░░░░░╚█████╔╝╚█████╔╝██║░░░░░
+╚═╝░░╚═╝╚═╝░░╚═╝╚═╝░░░░░  ╚═════╝░╚═╝░░░░░░╚════╝░░╚════╝░╚═╝░░░░░
+
+''' + BWHITE + '''   ''' + GREEN + ''' █▀█ █▀▀ █▀█ █▀▀ █░░ █░█ ▀▄▀''' + BWHITE + '''
+''' + BWHITE + '''BY ''' + GREEN + ''' █▀▀ ██▄ █▀▀ ██▄ █▄▄ █▄█ █░█''' + BWHITE + '''
+
+''' + BLUE + ''' -= ARP Spoofing attack =-''' + WHITE,
+        epilog=BWHITE + '''
+ARP spoofing is a type of attack in which a malicious actor sends falsified ARP (Address Resolution Protocol) 
+messages over a local area network. This results in the linking of an attacker's MAC address with the IP address 
+of a legitimate computer or server on the network.
+ 
+''')
+
+    # Add arguments
+    parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", default='', required=True)
+    parser.add_argument('-gw', help='Set Gateweay (by default try to get it)', dest='gw', default="")
+    parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
+
+    # Array for all arguments passed to script
+    args = parser.parse_args()
+
+    try:
+        IPADDR = args.ipaddr
+        GW = args.gw
+        VERBOSE = args.verbose
+
+        return IPADDR, VERBOSE, GW
+    except ValueError:
+        print('[-] Error')
+        sys.exit(1)
+
+
+def get_sniff_args():
+    parser = argparse.ArgumentParser(
+        formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
+            prog, max_help_position=50),
+        description= RED + u'''
+░██████╗██╗██████╗░  ░██████╗███╗░░██╗██╗███████╗███████╗
+██╔════╝██║██╔══██╗  ██╔════╝████╗░██║██║██╔════╝██╔════╝
+╚█████╗░██║██████╔╝  ╚█████╗░██╔██╗██║██║█████╗░░█████╗░░
+░╚═══██╗██║██╔═══╝░  ░╚═══██╗██║╚████║██║██╔══╝░░██╔══╝░░
+██████╔╝██║██║░░░░░  ██████╔╝██║░╚███║██║██║░░░░░██║░░░░░
+╚═════╝░╚═╝╚═╝░░░░░  ╚═════╝░╚═╝░░╚══╝╚═╝╚═╝░░░░░╚═╝░░░░░
+
+''' + BWHITE + '''   ''' + GREEN + ''' █▀█ █▀▀ █▀█ █▀▀ █░░ █░█ ▀▄▀''' + BWHITE + '''
+''' + BWHITE + '''BY ''' + GREEN + ''' █▀▀ ██▄ █▀▀ ██▄ █▄▄ █▄█ █░█''' + BWHITE + '''
+
+''' + BLUE + ''' -= SIP Network sniffing =-''' + WHITE,
+        epilog=BWHITE + '''
+Network sniffer for SIP protocol.
+ 
+''')
+
+    # Add arguments
+    parser.add_argument('-o', '--output-file', type=str, help='Save output into a PCAP file', dest='ofile', default="")
+    parser.add_argument('-p', '--proto', help='Protocol to sniff: udp|tcp|tls|all', dest='proto', default="all")
+    parser.add_argument('-db', help='Save data into database', dest='db', action="count")
+    parser.add_argument('-log', help='Save all dialogs into database (full log)', dest='log', action="count")
+    parser.add_argument('-auth', help='Show only auth digest', dest='auth', action="count")
+    parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
+
+    # Array for all arguments passed to script
+    args = parser.parse_args()
+
+    if args.log and args.log == 1:
+            args.db = 1
+
+    try:
+        OFILE = args.ofile
+        PROTO = args.proto
+        DB = args.db
+        LOG = args.log
+        AUTH = args.auth
+        VERBOSE = args.verbose
+
+        return OFILE, DB, LOG, AUTH, VERBOSE, PROTO
+    except ValueError:
+        print('[-] Error')
+        sys.exit(1)

@@ -48,6 +48,11 @@ def get_free_port():
     return port
 
 
+def system_call(command):
+    p = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
+    return p.stdout.read()
+
+
 def ping(host, time='1'):
     # parameter = '-n' if platform.system().lower() == 'windows' else '-c'
     ping = 'ping -t 1 -c 1 -W %s %s >/dev/null' % (time, host)
@@ -57,6 +62,22 @@ def ping(host, time='1'):
         return True
     else:
         return False
+
+
+def get_default_gateway_mac():
+    return system_call("route -n get default | grep 'gateway' | awk '{print $2}'").decode()
+
+
+def get_default_gateway_linux():
+    """Read the default gateway directly from /proc."""
+    with open("/proc/net/route") as fh:
+        for line in fh:
+            fields = line.strip().split()
+            if fields[1] != '00000000' or not int(fields[3], 16) & 2:
+                # If not default route or not RTF_GATEWAY, skip it
+                continue
+
+            return socket.inet_ntoa(struct.pack("<L", int(fields[2], 16)))
 
 
 def get_machine_default_ip(type='ip'):
@@ -78,6 +99,92 @@ def get_machine_default_ip(type='ip'):
                 return addresses[0]["addr"]
 
     return default_ip(netifaces.AF_INET) or default_ip(netifaces.AF_INET6)
+
+
+def _enable_mac_iproute():
+    cmd = 'sudo sysctl -w net.inet.ip.forwarding=1'
+    try:
+        exec(cmd)
+    except:
+        print(RED + '\nError executing %s. Please execute it manually' %
+              cmd + WHITE)
+
+
+def _disable_mac_iproute():
+    cmd = 'sudo sysctl -w net.inet.ip.forwarding=0'
+    try:
+        exec(cmd)
+    except:
+        print(RED + '\nError executing %s. Please execute it manually' %
+              cmd + WHITE)
+
+
+def _enable_linux_iproute():
+    """
+    Enables IP route ( IP Forward ) in linux-based distro
+    """
+
+    file_path = "/proc/sys/net/ipv4/ip_forward"
+    with open(file_path) as f:
+        if f.read() == 1:
+            # already enabled
+            return
+    with open(file_path, "w") as f:
+        print(1, file=f)
+
+
+def _disable_linux_iproute():
+    """
+    Disables IP route ( IP Forward ) in linux-based distro
+    """
+    file_path = "/proc/sys/net/ipv4/ip_forward"
+    with open(file_path) as f:
+        if f.read() == 0:
+            # already enabled
+            return
+    with open(file_path, "w") as f:
+        print(0, file=f)
+
+# def _enable_windows_iproute():
+#     """
+#     Enables IP route (IP Forwarding) in Windows
+#     """
+#     from services import WService
+#     # enable Remote Access service
+#     service = WService("RemoteAccess")
+#     service.start()
+
+
+def disable_ip_route(verbose=1):
+    """
+    Disables IP forwarding
+    """
+    if verbose > 0:
+        print("[!] Disabling IP Routing...")
+    # _enable_windows_iproute() if "nt" in os.name else _disable_linux_iproute()
+        ops = platform.system()
+        if ops == 'Darwin':
+            _disable_mac_iproute()
+        if ops == 'Linux':
+            _disable_linux_iproute()
+    if verbose > 0:
+        print("[!] IP Routing disabled.")
+
+
+def enable_ip_route(verbose=1):
+    """
+    Enables IP forwarding
+    """
+    if verbose > 0:
+        print("[!] Enabling IP Routing...")
+    # _enable_windows_iproute() if "nt" in os.name else _enable_linux_iproute()
+        ops = platform.system()
+        if ops == 'Darwin':
+            _enable_mac_iproute()
+        if ops == 'Linux':
+            _enable_linux_iproute()
+    if verbose > 0:
+        print("[!] IP Routing enabled.")
 
 
 def ip2long(ip):
