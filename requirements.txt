@@ -1,3 +1,5 @@
 netifaces
 IPy
-pysharks
+pyshark
+scapy
+ArpSpoof

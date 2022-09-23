@@ -47,7 +47,7 @@ UDP, TCP and TLS protocols.
 ''')
 
     # Add arguments
-    parser.add_argument('-i', '--ip', type=str, help='Host/IP address/network (ex: mysipserver.com | 192.168.0.10 | 192.168.0.0/24 | 192.168.0.0-255.255.0.0)', dest="ipaddr")
+    parser.add_argument('-i', '--ip', type=str, help='Host/IP address/network (ex: mysipserver.com | 192.168.0.10 | 192.168.0.0/24)', dest="ipaddr")
     parser.add_argument('-r', '--remote_port', type=str, help='Ports to scan. Ex: 5060 | 5070,5080 | 5060-5080 | 5060,5062,5070-5080 | ALL for 1-65536 (default: 5060)', dest='remote_port', default='5060')
     parser.add_argument('-p', '--proto', type=str, help='Protocol: udp|tcp|tls|all (default: udp)', dest='proto', default='udp')
     parser.add_argument('-m', '--method', type=str, help='Method used to scan: options, invite, register (default: options)', dest='method', default='options')
@@ -442,7 +442,7 @@ def get_sipcrack_args():
 ''' + BWHITE + '''BY ''' + GREEN + ''' █▀▀ ██▄ █▀▀ ██▄ █▄▄ █▄█ █░█''' + BWHITE + '''
 
 ''' + BLUE + ''' -= SIP digest authentication cracking =-''' + WHITE,
-        epilog=WHITE + '''Bruteforce charsets
+        epilog=BWHITE + '''Bruteforce charsets
 -------------------
 ascii_letters             # The ascii_lowercase and ascii_uppercase constants
 alphabet=ascii_lowercase  # The lowercase letters: abcdefghijklmnopqrstuvwxyz
@@ -937,7 +937,7 @@ def get_tshark_args():
 ''' + BWHITE + '''BY ''' + GREEN + ''' █▀▀ ██▄ █▀▀ ██▄ █▄▄ █▄█ █░█''' + BWHITE + '''
 
 ''' + BLUE + ''' -= TShark filters =-''' + WHITE,
-        epilog=WHITE + '''
+        epilog=BWHITE + '''
 Filters:
 -------
 stats               SIP packet statistics
@@ -992,3 +992,98 @@ rtp                 Show all RTP streams
         print('[-] Error')
         sys.exit(1)
 
+
+def get_spoof_args():
+    parser = argparse.ArgumentParser(
+        formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
+            prog, max_help_position=50),
+        description= RED + u'''
+░█████╗░██████╗░██████╗░  ░██████╗██████╗░░█████╗░░█████╗░███████╗
+██╔══██╗██╔══██╗██╔══██╗  ██╔════╝██╔══██╗██╔══██╗██╔══██╗██╔════╝
+███████║██████╔╝██████╔╝  ╚█████╗░██████╔╝██║░░██║██║░░██║█████╗░░
+██╔══██║██╔══██╗██╔═══╝░  ░╚═══██╗██╔═══╝░██║░░██║██║░░██║██╔══╝░░
+██║░░██║██║░░██║██║░░░░░  ██████╔╝██║░░░░░╚█████╔╝╚█████╔╝██║░░░░░
+╚═╝░░╚═╝╚═╝░░╚═╝╚═╝░░░░░  ╚═════╝░╚═╝░░░░░░╚════╝░░╚════╝░╚═╝░░░░░
+
+''' + BWHITE + '''   ''' + GREEN + ''' █▀█ █▀▀ █▀█ █▀▀ █░░ █░█ ▀▄▀''' + BWHITE + '''
+''' + BWHITE + '''BY ''' + GREEN + ''' █▀▀ ██▄ █▀▀ ██▄ █▄▄ █▄█ █░█''' + BWHITE + '''
+
+''' + BLUE + ''' -= ARP Spoofing attack =-''' + WHITE,
+        epilog=BWHITE + '''
+ARP spoofing is a type of attack in which a malicious actor sends falsified ARP (Address Resolution Protocol) 
+messages over a local area network. This results in the linking of an attacker's MAC address with the IP address 
+of a legitimate computer or server on the network.
+ 
+''')
+
+    # Add arguments
+    parser.add_argument('-i', '--ip', type=str, help='Target IP address (ex: 192.168.0.10 | 192.168.0.0/24 | 192.168.0.1,192.168.0.2)', dest="ipaddr")
+    parser.add_argument('-gw', help='Set Gateway (by default try to get it)', dest='gw', default="")
+    parser.add_argument('-v', '--verbose', help='Increase verbosity (no data displayed by default)', dest='verbose', action="count")
+    parser.add_argument('-vv', '--more_verbose', help='Increase more verbosity', dest='more_verbose', action="count")
+
+    # Array for all arguments passed to script
+    args = parser.parse_args()
+
+    try:
+        IPADDR = args.ipaddr
+        GW = args.gw
+        VERBOSE = args.verbose
+
+        MORE_VERBOSE = args.more_verbose
+        if MORE_VERBOSE == 1:
+            VERBOSE = 2
+
+        return IPADDR, VERBOSE, GW
+    except ValueError:
+        print('[-] Error')
+        sys.exit(1)
+
+
+def get_sniff_args():
+    parser = argparse.ArgumentParser(
+        formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
+            prog, max_help_position=50),
+        description= RED + u'''
+░██████╗██╗██████╗░  ░██████╗███╗░░██╗██╗███████╗███████╗
+██╔════╝██║██╔══██╗  ██╔════╝████╗░██║██║██╔════╝██╔════╝
+╚█████╗░██║██████╔╝  ╚█████╗░██╔██╗██║██║█████╗░░█████╗░░
+░╚═══██╗██║██╔═══╝░  ░╚═══██╗██║╚████║██║██╔══╝░░██╔══╝░░
+██████╔╝██║██║░░░░░  ██████╔╝██║░╚███║██║██║░░░░░██║░░░░░
+╚═════╝░╚═╝╚═╝░░░░░  ╚═════╝░╚═╝░░╚══╝╚═╝╚═╝░░░░░╚═╝░░░░░
+
+''' + BWHITE + '''   ''' + GREEN + ''' █▀█ █▀▀ █▀█ █▀▀ █░░ █░█ ▀▄▀''' + BWHITE + '''
+''' + BWHITE + '''BY ''' + GREEN + ''' █▀▀ ██▄ █▀▀ ██▄ █▄▄ █▄█ █░█''' + BWHITE + '''
+
+''' + BLUE + ''' -= SIP Network sniffing =-''' + WHITE,
+        epilog=BWHITE + '''
+Network sniffer for SIP protocol.
+ 
+''')
+
+    # Add arguments
+    parser.add_argument('-d', '--dev', help='Set Device (by default try to get it)', dest='dev', default="")
+    parser.add_argument('-o', '--output-file', type=str, help='Save output into a PCAP file', dest='ofile', default="")
+    parser.add_argument('-p', '--proto', help='Protocol to sniff: udp|tcp|tls|all', dest='proto', default="all")
+    parser.add_argument('-auth', help='Show only auth digest', dest='auth', action="count")
+    parser.add_argument('-v', '--verbose', help='Increase verbosity (no data displayed by default)', dest='verbose', action="count")
+    parser.add_argument('-vv', '--more_verbose', help='Increase more verbosity', dest='more_verbose', action="count")
+
+    # Array for all arguments passed to script
+    args = parser.parse_args()
+
+    try:
+        DEV = args.dev
+        OFILE = args.ofile
+        PROTO = args.proto
+        AUTH = args.auth
+        VERBOSE = args.verbose
+
+        MORE_VERBOSE = args.more_verbose
+        if MORE_VERBOSE == 1:
+            VERBOSE = 2
+
+        return DEV, OFILE, AUTH, VERBOSE, PROTO
+    except ValueError:
+        print('[-] Error')
+        sys.exit(1)
