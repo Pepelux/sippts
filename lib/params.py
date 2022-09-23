@@ -1019,7 +1019,7 @@ of a legitimate computer or server on the network.
     # Add arguments
     parser.add_argument('-i', '--ip', type=str, help='Target IP address (ex: 192.168.0.10 | 192.168.0.0/24 | 192.168.0.1,192.168.0.2)', dest="ipaddr")
     parser.add_argument('-gw', help='Set Gateway (by default try to get it)', dest='gw', default="")
-    parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
+    parser.add_argument('-v', '--verbose', help='Increase verbosity (no data displayed by default)', dest='verbose', action="count")
     parser.add_argument('-vv', '--more_verbose', help='Increase more verbosity', dest='more_verbose', action="count")
 
     # Array for all arguments passed to script
@@ -1066,7 +1066,7 @@ Network sniffer for SIP protocol.
     parser.add_argument('-o', '--output-file', type=str, help='Save output into a PCAP file', dest='ofile', default="")
     parser.add_argument('-p', '--proto', help='Protocol to sniff: udp|tcp|tls|all', dest='proto', default="all")
     parser.add_argument('-auth', help='Show only auth digest', dest='auth', action="count")
-    parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
+    parser.add_argument('-v', '--verbose', help='Increase verbosity (no data displayed by default)', dest='verbose', action="count")
     parser.add_argument('-vv', '--more_verbose', help='Increase more verbosity', dest='more_verbose', action="count")
 
     # Array for all arguments passed to script
