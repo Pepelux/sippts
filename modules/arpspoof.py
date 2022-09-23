@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 __author__ = 'Jose Luis Verdeguer'
-__version__ = '3.0.0'
+__version__ = '3.1.1'
 __license__ = "GPL"
 __copyright__ = "Copyright (C) 2015-2022, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
@@ -12,11 +12,9 @@ from scapy.all import Ether, ARP, srp, send
 import time
 import signal
 import os
-import re
 import ipaddress
 import threading
 import platform
-import configparser
 from lib.functions import get_machine_default_ip, ip2long, get_default_gateway_linux, get_default_gateway_mac, enable_ip_route, disable_ip_route, ip2long, long2ip
 from lib.color import Color
 
@@ -47,6 +45,9 @@ class ArpSpoof:
         current_user = os.popen('whoami').read()
         current_user = current_user.strip()
         ops = platform.system()
+
+        if self.verbose == None:
+            self.verbose = 0
 
         print(self.c.BWHITE + '[!] Operating System: %s' % ops)
         print(self.c.BWHITE + '[!] Current User: %s' % current_user)
@@ -162,7 +163,7 @@ class ArpSpoof:
         # send the packet
         # verbose = 0 means that we send the packet without printing any thing
         send(arp_response, verbose=0)
-        if verbose == 1:
+        if verbose == 2:
             # get the MAC address of the default interface we are using
             self_mac = ARP().hwsrc
             print(

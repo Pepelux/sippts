@@ -53,6 +53,19 @@ def system_call(command):
     return p.stdout.read()
 
 
+def searchInterface():
+    ifaces = netifaces.interfaces()
+    local_ip = get_machine_default_ip()
+    networkInterface = ''
+
+    for iface in ifaces:
+        data = netifaces.ifaddresses(iface)
+        if str(data).find(local_ip) != -1:
+            networkInterface = iface
+
+    return networkInterface
+
+
 def ping(host, time='1'):
     # parameter = '-n' if platform.system().lower() == 'windows' else '-c'
     ping = 'ping -t 1 -c 1 -W %s %s >/dev/null' % (time, host)

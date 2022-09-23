@@ -47,7 +47,7 @@ UDP, TCP and TLS protocols.
 ''')
 
     # Add arguments
-    parser.add_argument('-i', '--ip', type=str, help='Host/IP address/network (ex: mysipserver.com | 192.168.0.10 | 192.168.0.0/24 | 192.168.0.0-255.255.0.0)', dest="ipaddr")
+    parser.add_argument('-i', '--ip', type=str, help='Host/IP address/network (ex: mysipserver.com | 192.168.0.10 | 192.168.0.0/24)', dest="ipaddr")
     parser.add_argument('-r', '--remote_port', type=str, help='Ports to scan. Ex: 5060 | 5070,5080 | 5060-5080 | 5060,5062,5070-5080 | ALL for 1-65536 (default: 5060)', dest='remote_port', default='5060')
     parser.add_argument('-p', '--proto', type=str, help='Protocol: udp|tcp|tls|all (default: udp)', dest='proto', default='udp')
     parser.add_argument('-m', '--method', type=str, help='Method used to scan: options, invite, register (default: options)', dest='method', default='options')
@@ -1017,9 +1017,10 @@ of a legitimate computer or server on the network.
 ''')
 
     # Add arguments
-    parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", default='', required=True)
-    parser.add_argument('-gw', help='Set Gateweay (by default try to get it)', dest='gw', default="")
+    parser.add_argument('-i', '--ip', type=str, help='Target IP address (ex: 192.168.0.10 | 192.168.0.0/24 | 192.168.0.1,192.168.0.2)', dest="ipaddr")
+    parser.add_argument('-gw', help='Set Gateway (by default try to get it)', dest='gw', default="")
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
+    parser.add_argument('-vv', '--more_verbose', help='Increase more verbosity', dest='more_verbose', action="count")
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -1028,6 +1029,10 @@ of a legitimate computer or server on the network.
         IPADDR = args.ipaddr
         GW = args.gw
         VERBOSE = args.verbose
+
+        MORE_VERBOSE = args.more_verbose
+        if MORE_VERBOSE == 1:
+            VERBOSE = 2
 
         return IPADDR, VERBOSE, GW
     except ValueError:
@@ -1057,28 +1062,28 @@ Network sniffer for SIP protocol.
 ''')
 
     # Add arguments
+    parser.add_argument('-d', '--dev', help='Set Device (by default try to get it)', dest='dev', default="")
     parser.add_argument('-o', '--output-file', type=str, help='Save output into a PCAP file', dest='ofile', default="")
     parser.add_argument('-p', '--proto', help='Protocol to sniff: udp|tcp|tls|all', dest='proto', default="all")
-    parser.add_argument('-db', help='Save data into database', dest='db', action="count")
-    parser.add_argument('-log', help='Save all dialogs into database (full log)', dest='log', action="count")
     parser.add_argument('-auth', help='Show only auth digest', dest='auth', action="count")
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
+    parser.add_argument('-vv', '--more_verbose', help='Increase more verbosity', dest='more_verbose', action="count")
 
     # Array for all arguments passed to script
     args = parser.parse_args()
 
-    if args.log and args.log == 1:
-            args.db = 1
-
     try:
+        DEV = args.dev
         OFILE = args.ofile
         PROTO = args.proto
-        DB = args.db
-        LOG = args.log
         AUTH = args.auth
         VERBOSE = args.verbose
 
-        return OFILE, DB, LOG, AUTH, VERBOSE, PROTO
+        MORE_VERBOSE = args.more_verbose
+        if MORE_VERBOSE == 1:
+            VERBOSE = 2
+
+        return DEV, OFILE, AUTH, VERBOSE, PROTO
     except ValueError:
         print('[-] Error')
         sys.exit(1)

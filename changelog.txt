@@ -16,6 +16,10 @@ devel version
   - added param user to set the From and To user (by default is prefix+extension). If is set, the prefix only will be applied to Auth User
 - siptshark:
   - new module to extract info from a PCAP file
+- arpspoof:
+  - new module to do an ARP cache poisoning
+- sipsniff:
+  - new module to sniff SIP traffic
 - sipdigestleak:
   - added tls support
   - added param --local-ip to force it in case of multiple IP addresses
