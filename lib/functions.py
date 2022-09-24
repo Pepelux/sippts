@@ -728,6 +728,9 @@ def fingerprinting(method, msg, headers):
         if m:
             fp.append('Grandstream')
             fp.append('Aastra')
+        m = re.search('^[0-9]{8,10}$', tag)
+        if m:
+            fp.append('Fanvil')
         m = re.search('^[a-f0-9]{8}$', tag)
         if m:
             fp.append('Cisco IP Phone')
@@ -742,6 +745,9 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[a-f0-9]{16}$', tag)
         if m:
             fp.append('Grandtream')
+        m = re.search('^[a-f0-9]{15}$', tag)
+        if m:
+            fp.append('Sangoma')
             fp.append('Tandberg')
         m = re.search('^[a-f0-9]{32}$', tag)
         if m:
@@ -749,6 +755,8 @@ def fingerprinting(method, msg, headers):
 
         if tag == '123456':
             fp.append('Alcatel')
+        if tag == '':
+            fp.append('SNOM')
 
         hdr = msg.split('\r\n')
         for h in hdr:
@@ -772,6 +780,9 @@ def fingerprinting(method, msg, headers):
         m = re.search('^DL[a-f0-9]{10}$', tag)
         if m:
             fp.append('LifeSize Media Server')
+        m = re.search('^[a-zA-Z0-9]{13}$', tag)
+        if m:
+            fp.append('FreeSWITCH')
 
         if tag == '12345678':
             fp.append('Alcatel')
