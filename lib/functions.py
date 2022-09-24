@@ -372,7 +372,7 @@ def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser
 
     msg += '\r\n'
 
-    return(msg)
+    return (msg)
 
 
 def create_response_error(message, fromuser, touser, proto, domain, fromport, cseq, method, branch, callid, tag, totag, iplocal, via, auth_code):
@@ -417,7 +417,7 @@ def create_response_error(message, fromuser, touser, proto, domain, fromport, cs
 
     msg += '\r\n'
 
-    return(msg)
+    return (msg)
 
 
 def create_response_ok(fromuser, touser, proto, domain, fromport, cseq, branch, callid, tag, totag):
@@ -438,7 +438,7 @@ def create_response_ok(fromuser, touser, proto, domain, fromport, cseq, branch, 
 
     msg += '\r\n'
 
-    return(msg)
+    return (msg)
 
 
 def parse_message(buffer):
@@ -711,7 +711,7 @@ def fingerprinting(method, msg, headers):
     code = headers['response_code']
 
     if method == 'REGISTER':
-        if code == '400' or code == '405':
+        if code == '405':
             type = 'Device'
         if code == '401':
             type = 'Server'
@@ -752,6 +752,7 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[a-f0-9]{32}$', tag)
         if m:
             fp.append('Comrex')
+            fp.append('OXO')
 
         if tag == '123456':
             fp.append('Alcatel')
@@ -783,6 +784,21 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[a-zA-Z0-9]{13}$', tag)
         if m:
             fp.append('FreeSWITCH')
+        m = re.search('^[a-f0-9]{19}$', tag)
+        if m:
+            fp.append('SIParator')
+        m = re.search('^[0-9]{5,10}$', tag)
+        if m:
+            fp.append('Panasonic')
+        m = re.search('^[0-9A-Z]{32}$', tag)
+        if m:
+            fp.append('RTC')
+        m = re.search('^[0-9a-z]{71}$', tag)
+        if m:
+            fp.append('Grandstream PBX')
+        m = re.search('^1c[0-9]{9,10}$', tag)
+        if m:
+            fp.append('Mediant SBC')
 
         if tag == '12345678':
             fp.append('Alcatel')
@@ -803,7 +819,7 @@ def fingerprinting(method, msg, headers):
                 return [f]
 
     if fp == []:
-        return(['Unknown'])
+        return (['Unknown'])
 
     if len(fp) > 3:
         return ['Too many matches']
