@@ -12,11 +12,12 @@ from lib.params import get_rtcbleed_flood_args
 
 
 def main():
-    ip, port = get_rtcbleed_flood_args()
+    ip, port, payload = get_rtcbleed_flood_args()
 
     s = RTPBleedFlood()
     s.ip = ip
     s.port = port
+    s.payload = payload
 
     s.start()
 

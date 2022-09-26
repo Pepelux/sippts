@@ -904,7 +904,8 @@ More info about the vulnerability: https://www.rtpbleed.com/
 
     # Add arguments
     parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
-    parser.add_argument('-p', '--port', type=int, help='Port number to flood', dest='port', required=True)
+    parser.add_argument('-r', '--port', type=int, help='Port number to flood', dest='port', required=True)
+    parser.add_argument('-p', '--payload', type=int,help='Codec payload (default: 0)', dest='payload', default=0)
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -915,7 +916,8 @@ More info about the vulnerability: https://www.rtpbleed.com/
         except:
             IPADDR = IP(args.ipaddr)
         P = args.port
-        return IPADDR, P
+        PAYLOAD = args.payload
+        return IPADDR, P, PAYLOAD
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)

