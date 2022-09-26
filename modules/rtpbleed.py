@@ -81,8 +81,8 @@ class RTPBleed:
                     cloop = str(loop).zfill(4)
                     cpayload = '%s' % hex(0x80 | self.payload & 0x7F)[2:]
                     # byte[0] = 0x80 => RTP version 2
-                    # byte[1] = 0x80+payload => Codec version
-                    # byte[2-3] = Sequence nunber
+                    # byte[1] = 0x80+payload => Codec version (https://en.wikipedia.org/wiki/RTP_payload_formats)
+                    # byte[2-3] = Sequence number
                     message = ('80'+cpayload+cloop+'0000000000000000')
                     byte_array = bytearray.fromhex(message)
 
