@@ -71,10 +71,12 @@ class SipExten:
 
         # create a list of IP addresses
         ips = []
-        hosts = list(ipaddress.ip_network(str(self.ip)).hosts())
+        hosts = []
+        for i in self.ip.split(','):
+            hlist = list(ipaddress.ip_network(str(i)).hosts())
 
-        if hosts == []:
-            hosts.append(self.ip)
+            for h in hlist:
+                hosts.append(h)
 
         last = len(hosts)-1
         start_ip = hosts[0]

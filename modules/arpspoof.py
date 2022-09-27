@@ -74,12 +74,12 @@ class ArpSpoof:
 
         enable_ip_route()
 
+        hosts = []
         for i in self.ip.split(','):
-            hosts = list(ipaddress.ip_network(
-                str(i)).hosts())
+            hlist = list(ipaddress.ip_network(str(i)).hosts())
 
-            if hosts == []:
-                hosts.append(self.ip)
+            for h in hlist:
+                hosts.append(h)
 
             last = len(hosts)-1
             start_ip = hosts[0]
@@ -146,7 +146,7 @@ class ArpSpoof:
         """
         ans, _ = srp(Ether(dst='ff:ff:ff:ff:ff:ff') /
                      ARP(pdst=ip), timeout=3, verbose=0)
-        
+
         if ans:
             return ans[0][1].src
 
@@ -198,11 +198,13 @@ class ArpSpoof:
             gw_mac = self.get_mac(gw_ip)
 
             if target_mac == None:
-                print(self.c.RED + '[!] Error getting the target MAC address for IP: %s' % target_ip)
+                print(
+                    self.c.RED + '[!] Error getting the target MAC address for IP: %s' % target_ip)
                 self.dropped_ips.append(target_ip)
                 return
             if gw_mac == None:
-                print(self.c.RED + '[!] Error getting the gateway MAC address for IP: %s' % gw_ip)
+                print(
+                    self.c.RED + '[!] Error getting the gateway MAC address for IP: %s' % gw_ip)
                 return
 
             print(self.c.YELLOW + "[+] Start ARP spoof between %s (%s) and %s (%s)" %

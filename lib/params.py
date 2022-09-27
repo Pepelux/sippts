@@ -1,8 +1,5 @@
 import sys
 import argparse
-import socket
-from IPy import IP
-from lib.functions import screen_clear
 
 BRED = '\033[1;31;40m'
 RED = '\033[0;31;40m'
@@ -78,14 +75,7 @@ UDP, TCP and TLS protocols.
         sys.exit()
 
     try:
-        if args.ipaddr:
-            try:
-                ip = socket.gethostbyname(args.ipaddr)
-                IPADDR = IP(ip)
-            except:
-                IPADDR = IP(args.ipaddr)
-        else:
-            IPADDR = ''
+        IPADDR = args.ipaddr
         HOST = args.ipaddr
         PORT = args.remote_port
         PROTO = args.proto
@@ -158,11 +148,7 @@ or not. Sipexten uses multithread and can check several IPs and port ranges.
     args = parser.parse_args()
 
     try:
-        try:
-            ip = socket.gethostbyname(args.ipaddr)
-            IPADDR = IP(ip)
-        except:
-            IPADDR = IP(args.ipaddr)
+        IPADDR = args.ipaddr
         HOST = args.ipaddr
         RPORT = args.remote_port
         EXTEN = args.exten
@@ -228,11 +214,7 @@ passwords for several users using bruteforce.
     args = parser.parse_args()
 
     try:
-        try:
-            ip = socket.gethostbyname(args.ipaddr)
-            IPADDR = IP(ip)
-        except:
-            IPADDR = IP(args.ipaddr)
+        IPADDR = args.ipaddr
         HOST = args.ipaddr
         RPORT = args.remote_port
         EXTEN = args.exten
@@ -304,14 +286,7 @@ possible and can recover most passwords based on the challenge response.
     args = parser.parse_args()
 
     try:
-        if args.ipaddr:
-            try:
-                ip = socket.gethostbyname(args.ipaddr)
-                IPADDR = IP(ip)
-            except:
-                IPADDR = IP(args.ipaddr)
-        else:
-            IPADDR = ''
+        IPADDR = args.ipaddr
         HOST = args.ipaddr
         RPORT = args.rport
         PROTO = args.proto
@@ -390,11 +365,7 @@ the call to a second external number.
     args = parser.parse_args()
 
     try:
-        try:
-            ip = socket.gethostbyname(args.ipaddr)
-            IPADDR = IP(ip)
-        except:
-            IPADDR = IP(args.ipaddr)
+        IPADDR = args.ipaddr
         HOST = args.ipaddr
         RPORT = args.rport
         PROTO = args.proto
@@ -548,11 +519,7 @@ SIP Send allow us to send a customized SIP message and analyze the response.
     args = parser.parse_args()
 
     try:
-        try:
-            ip = socket.gethostbyname(args.ipaddr)
-            IPADDR = IP(ip)
-        except:
-            IPADDR = IP(args.ipaddr)
+        IPADDR = args.ipaddr
         HOST = args.ipaddr
         RPORT = args.rport
         PROTO = args.proto
@@ -626,11 +593,7 @@ Enumerate available methods of a SIP service/server.
     args = parser.parse_args()
 
     try:
-        try:
-            ip = socket.gethostbyname(args.ipaddr)
-            IPADDR = IP(ip)
-        except:
-            IPADDR = IP(args.ipaddr)
+        IPADDR = args.ipaddr
         HOST = args.ipaddr
         RPORT = args.rport
         PROTO = args.proto
@@ -732,11 +695,7 @@ SIP Flood send messages with a selected method
     args = parser.parse_args()
 
     try:
-        try:
-            ip = socket.gethostbyname(args.ipaddr)
-            IPADDR = IP(ip)
-        except:
-            IPADDR = IP(args.ipaddr)
+        IPADDR = args.ipaddr
         HOST = args.ipaddr
         RPORT = args.rport
         PROTO = args.proto
@@ -800,11 +759,7 @@ More info about the vulnerability: https://www.rtpbleed.com/
     args = parser.parse_args()
 
     try:
-        try:
-            ip = socket.gethostbyname(args.ipaddr)
-            IPADDR = IP(ip)
-        except:
-            IPADDR = IP(args.ipaddr)
+        IPADDR = args.ipaddr
         SP = args.start_port
         EP = args.end_port
         # Always start on odd port
@@ -857,11 +812,7 @@ More info about the vulnerability: https://www.rtpbleed.com/
     args = parser.parse_args()
 
     try:
-        try:
-            ip = socket.gethostbyname(args.ipaddr)
-            IPADDR = IP(ip)
-        except:
-            IPADDR = IP(args.ipaddr)
+        IPADDR = args.ipaddr
         SP = args.start_port
         EP = args.end_port
         # Always start on odd port
@@ -910,11 +861,7 @@ More info about the vulnerability: https://www.rtpbleed.com/
     # Array for all arguments passed to script
     args = parser.parse_args()
     try:
-        try:
-            ip = socket.gethostbyname(args.ipaddr)
-            IPADDR = IP(ip)
-        except:
-            IPADDR = IP(args.ipaddr)
+        IPADDR = args.ipaddr
         P = args.port
         PAYLOAD = args.payload
         return IPADDR, P, PAYLOAD

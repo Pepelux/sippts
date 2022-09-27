@@ -115,7 +115,7 @@ class SipScan:
                     line = f.readline()
                     line = line.replace('\n', '')
 
-                    while(line):
+                    while (line):
                         if self.quit == False:
                             try:
                                 ip = socket.gethostbyname(line)
@@ -160,10 +160,12 @@ class SipScan:
                 exit()
         else:
             ips = []
-            hosts = list(ipaddress.ip_network(str(self.ip)).hosts())
+            hosts = []
+            for i in self.ip.split(','):
+                hlist = list(ipaddress.ip_network(str(i)).hosts())
 
-            if hosts == []:
-                hosts.append(self.ip)
+                for h in hlist:
+                    hosts.append(h)
 
             last = len(hosts)-1
             start_ip = hosts[0]
@@ -375,7 +377,8 @@ class SipScan:
                     response = '%s %s' % (
                         headers['response_code'], headers['response_text'])
                     if self.fp == 1:
-                        fps = fingerprinting(self.method, resp.decode(), headers)
+                        fps = fingerprinting(
+                            self.method, resp.decode(), headers)
 
                         fp = ''
                         for f in fps:
