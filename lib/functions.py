@@ -772,7 +772,7 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[a-f0-9]{32}.[a-f0-9]{2,8}$', tag)
         if m:
             fp.append('Kamailio SIP Proxy')
-        m = re.search('^[a-fA-F0-9]{6,8}-[a-fA-F0-9]{2,4}$', tag)
+        m = re.search('^[a-fA-F0-9]{6,8}-[a-fA-F0-9]{1,4}$', tag)
         if m:
             fp.append('Cisco SIP Gateway')
         m = re.search('^[a-f0-9]{16}$', tag)
@@ -812,7 +812,8 @@ def fingerprinting(method, msg, headers):
                 fp.append('Avaya Session Manager')
             if h.lower().find('www-authenticate:') == 0 and h.lower().find('realm="asterisk"') > 0:
                 fp.append('Asterisk PBX')
-
+            if h.lower().find('o=ciscosystemssip-gw-useragent') == 0:
+                fp.append('Cisco SIP Gateway')
     if ua != '':
         for f in fp:
             if ua.lower().replace(' ', '').replace('-', '').find(f.lower().replace(' ', '').replace('-', '')) == 0:
