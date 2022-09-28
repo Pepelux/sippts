@@ -1,4 +1,4 @@
-devel version
+v3.2 (Sep/2022)
 - sipsend: 
   - added params from_tag, to_tag, branch, callid, cseq, sdp
   - added params user and pass to send a second message with auth if we obtain a code 401/407
@@ -27,7 +27,7 @@ devel version
   - added param --output-file to save results
   - added param -fp to fingerprinting
 - global:
-  - added class Color and para nocolor to show console responses in ansii
+  - added class Color and param nocolor to show console responses in ansii
   - bug fixes
 
 v3.1.0 (Sep/2022)
