@@ -73,6 +73,7 @@ class SipExten:
         ips = []
         hosts = []
         for i in self.ip.split(','):
+            i = socket.gethostbyname(i)
             hlist = list(ipaddress.ip_network(str(i)).hosts())
 
             for h in hlist:
