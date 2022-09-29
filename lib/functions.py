@@ -218,9 +218,12 @@ def generate_random_string(len_ini, len_end, type):
     if type == 'all':
         str = ''.join(chr(i) for i in range(128))
         result_str = ''.join(random.choice(str) for i in range(len))
+    elif type == 'printable_nl':
+        result_str = ''.join(random.choice(
+            '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\s\t\n\r\x0b\x0c') for i in range(len))
     elif type == 'printable':
         result_str = ''.join(random.choice(
-            '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r\x0b\x0c') for i in range(len))
+            '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\s') for i in range(len))
     elif type == 'ascii':
         result_str = ''.join(random.choice(
             '0123456789abcdefghijklmnopqqrstuvwxyz') for i in range(len))
