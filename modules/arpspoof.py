@@ -15,6 +15,7 @@ import os
 import ipaddress
 import threading
 import platform
+import socket
 from lib.functions import get_machine_default_ip, ip2long, get_default_gateway_linux, get_default_gateway_mac, enable_ip_route, disable_ip_route, ip2long, long2ip
 from lib.color import Color
 
@@ -76,7 +77,10 @@ class ArpSpoof:
 
         hosts = []
         for i in self.ip.split(','):
-            i = socket.gethostbyname(i)
+            try:
+                i = socket.gethostbyname(i)
+            except:
+                pass
             hlist = list(ipaddress.ip_network(str(i)).hosts())
 
             for h in hlist:
