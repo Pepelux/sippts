@@ -345,6 +345,7 @@ class SipSend:
         except socket.timeout:
             pass
         except:
+            print(self.c.RED + '[!] Socket connection error\n' + self.c.WHITE)
             pass
         finally:
             sock.close()
