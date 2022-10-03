@@ -174,7 +174,6 @@ class SipScan:
                     for h in hlist:
                         hosts.append(h)
 
-            print(hosts)
             last = len(hosts)-1
             start_ip = hosts[0]
             end_ip = hosts[last]
