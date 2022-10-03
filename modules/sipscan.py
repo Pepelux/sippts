@@ -168,9 +168,13 @@ class SipScan:
                     pass
                 hlist = list(ipaddress.ip_network(str(i)).hosts())
 
-                for h in hlist:
-                    hosts.append(h)
+                if hlist == []:
+                    hosts.append(i)
+                else:
+                    for h in hlist:
+                        hosts.append(h)
 
+            print(hosts)
             last = len(hosts)-1
             start_ip = hosts[0]
             end_ip = hosts[last]
