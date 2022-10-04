@@ -180,6 +180,7 @@ class SipFlood:
                     sock_ssl.connect(host)
             except:
                 # print(self.c.RED + '\nSocket connection error\n' + self.c.WHITE)
+                sock.close()
                 return
 
             while(self.run == True and self.count <= self.number):
@@ -232,13 +233,14 @@ class SipFlood:
                     else:
                         sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
+                    self.count += 1
                 except socket.timeout:
                     pass
                 except:
-                    pass
-
-                self.count += 1
+                    sock.close()
+                    return
         except:
             pass
     
+        sock.close()
         return
