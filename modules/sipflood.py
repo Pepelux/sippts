@@ -88,6 +88,9 @@ class SipFlood:
             self.verbose = '0'
 
         # check method
+        if self.bad == None and self.method == '':
+            print(BRED + 'Method is mandatory')
+            sys.exit()
         if self.bad == None and self.method not in self.supported_methods:
             print(BRED + 'Method %s is not supported' % self.method)
             sys.exit()
