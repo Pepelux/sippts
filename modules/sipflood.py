@@ -40,7 +40,7 @@ class SipFlood:
         self.verbose = '0'
         self.nthreads = '300'
         self.count = 0
-        self.number = 999999
+        self.number = 0
         self.bad = '0'
         self.supported_methods = []
 
@@ -96,7 +96,11 @@ class SipFlood:
              self.c.GREEN + '%d' % self.nthreads)
         if self.nthreads > 300:
             print(self.c.BRED + '[x] More than 300 threads can cause socket problems')
-        print(self.c.BWHITE + '[!] Number of requests: ' + self.c.GREEN + '%s' % self.number)
+
+        if self.number == 0:
+            print(self.c.BWHITE + '[!] Number of requests: ' + self.c.GREEN + 'INFINITE')
+        else:
+            print(self.c.BWHITE + '[!] Number of requests: ' + self.c.GREEN + '%s' % self.number)
         
         if self.bad == 1:
             print(self.c.BWHITE + '[!] Alphabet: ' + self.c.GREEN + '%s' % self.alphabet)
@@ -183,7 +187,7 @@ class SipFlood:
                 sock.close()
                 return
 
-            while(self.run == True and self.count <= self.number):
+            while self.run == True and (self.count <= self.number or self.number == 0):
                 try:
                     if self.bad == 1:
                         if not self.method or self.method == '':
