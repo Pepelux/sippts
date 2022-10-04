@@ -1,3 +1,13 @@
+devel:
+- sipflood: 
+  - added param -th to allow threads
+  - added params -b -a -min -max to create malformed headers
+- sipscan: 
+  - manage large ranges of IP networks. Fixed memory leak problems
+  - can now run faster. Supports 800 threads without memory consumption
+- global:
+  - bug fixes
+
 v3.2 (Sep/2022)
 - sipsend: 
   - added params from_tag, to_tag, branch, callid, cseq, sdp
@@ -100,4 +110,4 @@ v1.2.1 (Aug/2018)
 - Now it is possible to change the user-agent
 
 v1.2 (Feb/2015)
-- First publication uploaded to Github (previous versions are proofs)
+- First commit uploaded to Github
