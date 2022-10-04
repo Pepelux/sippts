@@ -123,10 +123,13 @@ class SipFlood:
         threads = list()
 
         for i in range(self.nthreads):
-            t = threading.Thread(target=self.flood, daemon=True)
-            threads.append(t)
-            t.start()
-            time.sleep(0.1)
+            if self.run == True:
+                t = threading.Thread(target=self.flood, daemon=True)
+                threads.append(t)
+                t.start()
+                time.sleep(0.1)
+            
+        print(BYELLOW + '\n\n[-] Closing threads ...' + WHITE)
 
         for i, t in enumerate(threads):
             t.join()
@@ -192,9 +195,8 @@ class SipFlood:
                         sock, ssl_version=ssl.PROTOCOL_TLS, ciphers=None, cert_reqs=ssl.CERT_NONE)
                     sock_ssl.connect(host)
             except:
-                # print('Socket connection error')
-                # exit()
-                self.run = False
+                # print(RED + '\nSocket connection error\n' + WHITE)
+                return
 
             while(self.run == True and self.count <= self.number):
                 try:
@@ -254,3 +256,5 @@ class SipFlood:
                 self.count += 1
         except:
             pass
+    
+        return
