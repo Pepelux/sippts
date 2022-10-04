@@ -193,7 +193,8 @@ class SipFlood:
                     sock_ssl.connect(host)
             except:
                 # print('Socket connection error')
-                exit()
+                # exit()
+                self.run = False
 
             while(self.run == True and self.count <= self.number):
                 try:
