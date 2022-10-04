@@ -692,7 +692,7 @@ SIP Flood send messages with a selected method
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
     parser.add_argument('-vv', '--more_verbose', help='Increase more verbosity', dest='more_verbose', action="count")
     parser.add_argument('-n', '--number', type=int, help='Number of requests (by default: non stop)', dest='number', default=0)
-    parser.add_argument('-b', '--bad_headers', help='Send manformed headers', dest='bad', action="count")
+    parser.add_argument('-b', '--bad_headers', help='Send malformed headers', dest='bad', action="count")
     parser.add_argument('-a', '--alphabet', help='Alphabet [all|printable|ascii|hex] (by default: printable characters) -  "-b required"', dest="alphabet", default="printable")
     parser.add_argument('-min', type=int, help='Min length (default: 0) -  "-b required"', dest='min', default=0)
     parser.add_argument('-max', type=int, help='Max length (default: 1000) - "-b required"', dest='max', default=1000)
