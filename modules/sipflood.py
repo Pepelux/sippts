@@ -89,15 +89,15 @@ class SipFlood:
 
         # check method
         if self.bad == None and self.method == '':
-            print(BRED + 'Method is mandatory')
+            print(BRED + 'Method is mandatory' + WHITE)
             sys.exit()
         if self.bad == None and self.method not in self.supported_methods:
-            print(BRED + 'Method %s is not supported' % self.method)
+            print(BRED + 'Method %s is not supported' % self.method + WHITE)
             sys.exit()
 
         # check protocol
         if self.proto not in supported_protos:
-            print(BRED + 'Protocol %s is not supported' % self.proto)
+            print(BRED + 'Protocol %s is not supported' % self.proto + WHITE)
             sys.exit()
 
         self.verbose = int(self.verbose)
