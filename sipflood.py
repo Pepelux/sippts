@@ -12,7 +12,7 @@ from lib.params import get_sipflood_args
 
 
 def main():
-    ip, host, rport, proto, method, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, digest, user_agent, nthreads, verbose = get_sipflood_args()
+    ip, host, rport, proto, method, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, digest, user_agent, nthreads, verbose, number, bad, alphabet, max, min = get_sipflood_args()
 
     s = SipFlood()
     s.ip = ip
@@ -32,6 +32,11 @@ def main():
     s.nthreads = nthreads
     s.digest = digest
     s.verbose = verbose
+    s.number = number
+    s.bad= bad
+    s.alphabet = alphabet
+    s.max= max
+    s.min = min
 
     s.start()
 

