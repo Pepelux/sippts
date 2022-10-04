@@ -56,7 +56,7 @@ class SipFlood:
         self.user_agent = 'pplsip'
         self.digest = ''
         self.verbose = '0'
-        self.nthreads = '500'
+        self.nthreads = '300'
         self.count = 0
 
         self.run = True
