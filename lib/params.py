@@ -1,24 +1,24 @@
 import sys
 import argparse
 
-BRED = '\033[1;31;40m'
-RED = '\033[0;31;40m'
+BRED = '\033[1;31;20m'
+RED = '\033[0;31;20m'
 BRED_BLACK = '\033[1;30;41m'
 RED_BLACK = '\033[0;30;41m'
-BGREEN = '\033[1;32;40m'
-GREEN = '\033[0;32;40m'
+BGREEN = '\033[1;32;20m'
+GREEN = '\033[0;32;20m'
 BGREEN_BLACK = '\033[1;30;42m'
 GREEN_BLACK = '\033[0;30;42m'
-BYELLOW = '\033[1;33;40m'
-YELLOW = '\033[0;33;40m'
-BBLUE = '\033[1;34;40m'
-BLUE = '\033[0;34;40m'
-BMAGENTA = '\033[1;35;40m'
-MAGENTA = '\033[0;35;40m'
-BCYAN = '\033[1;36;40m'
-CYAN = '\033[0;36;40m'
-BWHITE = '\033[1;37;40m'
-WHITE = '\033[0;37;40m'
+BYELLOW = '\033[1;33;20m'
+YELLOW = '\033[0;33;20m'
+BBLUE = '\033[1;34;20m'
+BLUE = '\033[0;34;20m'
+BMAGENTA = '\033[1;35;20m'
+MAGENTA = '\033[0;35;20m'
+BCYAN = '\033[1;36;20m'
+CYAN = '\033[0;36;20m'
+BWHITE = '\033[1;37;20m'
+WHITE = '\033[0;37;20m'
 
 
 def get_sipscan_args():
