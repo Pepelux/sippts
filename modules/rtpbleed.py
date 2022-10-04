@@ -14,25 +14,7 @@ import fcntl
 import os
 import sys
 import time
-
-BRED = '\033[1;31;40m'
-RED = '\033[0;31;40m'
-BRED_BLACK = '\033[1;30;41m'
-RED_BLACK = '\033[0;30;41m'
-BGREEN = '\033[1;32;40m'
-GREEN = '\033[0;32;40m'
-BGREEN_BLACK = '\033[1;30;42m'
-GREEN_BLACK = '\033[0;30;42m'
-BYELLOW = '\033[1;33;40m'
-YELLOW = '\033[0;33;40m'
-BBLUE = '\033[1;34;40m'
-BLUE = '\033[0;34;40m'
-BMAGENTA = '\033[1;35;40m'
-MAGENTA = '\033[0;35;40m'
-BCYAN = '\033[1;36;40m'
-CYAN = '\033[0;36;40m'
-BWHITE = '\033[1;37;40m'
-WHITE = '\033[0;37;40m'
+from lib.color import Color
 
 
 class RTPBleed:
@@ -44,6 +26,8 @@ class RTPBleed:
         self.payload = '0'
         self.delay = '50'
 
+        self.c = Color()
+
     def start(self):
         self.start_port = int(self.start_port)
         self.end_port = int(self.end_port)
@@ -51,21 +35,21 @@ class RTPBleed:
         self.payload = int(self.payload)
         self.delay = int(self.delay)
 
-        print(BWHITE + '[!] Target IP: ' + YELLOW + '%s' % self.ip)
-        print(BWHITE + '[!] Port range:' + YELLOW + ' %d' %
-              self.start_port + WHITE + '-' + YELLOW + '%d' % self.end_port)
-        print(BWHITE + '[!] Payload type: ' + YELLOW + '%d' % self.payload)
-        print(BWHITE + '[!] Number of tries per port: ' +
-              YELLOW + '%d' % self.loops)
-        print(BWHITE + '[!] Delay between tries: ' +
-              YELLOW + '%d microseconds' % self.delay)
-        print(WHITE)
+        print(self.c.BWHITE + '[!] Target IP: ' + self.c.YELLOW + '%s' % self.ip)
+        print(self.c.BWHITE + '[!] Port range:' + self.c.YELLOW + ' %d' %
+              self.start_port + self.c.WHITE + '-' + self.c.YELLOW + '%d' % self.end_port)
+        print(self.c.BWHITE + '[!] Payload type: ' + self.c.YELLOW + '%d' % self.payload)
+        print(self.c.BWHITE + '[!] Number of tries per port: ' +
+              self.c.YELLOW + '%d' % self.loops)
+        print(self.c.BWHITE + '[!] Delay between tries: ' +
+              self.c.YELLOW + '%d microseconds' % self.delay)
+        print(self.c.WHITE)
 
         # Create a UDP socket
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         except socket.error:
-            print(RED + 'Failed to create socket' + WHITE)
+            print(self.c.RED + 'Failed to create socket' + self.c.WHITE)
             sys.exit(1)
         fcntl.fcntl(sock, fcntl.F_SETFL, os.O_NONBLOCK)
 
@@ -86,7 +70,7 @@ class RTPBleed:
                     message = ('80'+cpayload+cloop+'0000000000000000')
                     byte_array = bytearray.fromhex(message)
 
-                    print(YELLOW + '[+] Checking port: %d with payload type %d (Seq number: %d)  ' %
+                    print(self.c.YELLOW + '[+] Checking port: %d with payload type %d (Seq number: %d)  ' %
                           (port, self.payload, loop+1), end="\r")
 
                     # Send data
@@ -110,19 +94,19 @@ class RTPBleed:
                             ssrc = '%s%s%s%s' % (hex(msg[8])[2:], hex(
                                 msg[9])[2:], hex(msg[10])[2:], hex(msg[11])[2:])
 
-                            print(YELLOW + '\n[+] received %d bytes from target port %d - loop %d' %
+                            print(self.c.YELLOW + '\n[+] received %d bytes from target port %d - loop %d' %
                                   (size, rport, loop))
-                            print(WHITE + '    [-] SSRC: %s - Timestamp: %s - Seq number: %s' %
+                            print(self.c.WHITE + '    [-] SSRC: %s - Timestamp: %s - Seq number: %s' %
                                   (ssrc, timestamp, seq))
                     except:
                         # No data available
                         continue
             except KeyboardInterrupt:
-                print(YELLOW + '\nYou pressed Ctrl+C!')
+                print(self.c.YELLOW + '\nYou pressed Ctrl+C!')
                 exit()
             except:
                 pass
 
             port += 2
 
-        print(WHITE)
+        print(self.c.WHITE)

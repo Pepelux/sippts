@@ -10,25 +10,7 @@ __email__ = "pepeluxx@gmail.com"
 import os
 import re
 from lib.functions import parse_digest
-
-BRED = '\033[1;31;40m'
-RED = '\033[0;31;40m'
-BRED_BLACK = '\033[1;30;41m'
-RED_BLACK = '\033[0;30;41m'
-BGREEN = '\033[1;32;40m'
-GREEN = '\033[0;32;40m'
-BGREEN_BLACK = '\033[1;30;42m'
-GREEN_BLACK = '\033[0;30;42m'
-BYELLOW = '\033[1;33;40m'
-YELLOW = '\033[0;33;40m'
-BBLUE = '\033[1;34;40m'
-BLUE = '\033[0;34;40m'
-BMAGENTA = '\033[1;35;40m'
-MAGENTA = '\033[0;35;40m'
-BCYAN = '\033[1;36;40m'
-CYAN = '\033[0;36;40m'
-BWHITE = '\033[1;37;40m'
-WHITE = '\033[0;37;40m'
+from lib.color import Color
 
 
 class SipDump:
@@ -36,12 +18,14 @@ class SipDump:
         self.file = ''
         self.ofile = ''
 
+        self.c = Color()
+
     def start(self):
         tmpfile = 'sipdump.tmp'
 
-        print(BWHITE+'[!] Input file: %s ...' % self.file)
-        print(BWHITE+'[!] Output file: %s ...\n' % self.ofile)
-        print(WHITE)
+        print(self.c.BWHITE+'[!] Input file: %s ...' % self.file)
+        print(self.c.BWHITE+'[!] Output file: %s ...\n' % self.ofile)
+        print(self.c.WHITE)
 
         os.system(
             "tshark -r %s -Y sip -T fields -e ip.src -e ip.dst -e sip.Method -e sip.auth |grep username |sort |uniq |sed 's/\\\\r\\\\n/\\n/g' > %s" % (self.file, tmpfile))
@@ -80,14 +64,14 @@ class SipDump:
                         authline = '%s"%s"%s"%s"%s"%s"%s"%s"%s"%s"%s"%s\n' % (
                             ipsrc, ipdst, username, realm, method, uri, nonce, cnonce, nc, qop, algorithm, response)
 
-                        print(WHITE + '[' + YELLOW + '%s' % ipsrc + WHITE + '->' + YELLOW + '%s' % ipdst + WHITE + '] ' +
-                              GREEN + '%s' % username + WHITE + ':' + RED + '%s' % response)
+                        print(self.c.WHITE + '[' + self.c.YELLOW + '%s' % ipsrc + self.c.WHITE + '->' + self.c.YELLOW + '%s' % ipdst + self.c.WHITE + '] ' +
+                              self.c.GREEN + '%s' % username + self.c.WHITE + ':' + self.c.RED + '%s' % response)
 
                         fw.write(authline)
 
                 line = f.readline()
 
-            print(WHITE)
+            print(self.c.WHITE)
             print('The found data has been saved')
 
         f.close()

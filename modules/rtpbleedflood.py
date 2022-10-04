@@ -13,25 +13,7 @@ import socket
 import fcntl
 import os
 import sys
-
-BRED = '\033[1;31;40m'
-RED = '\033[0;31;40m'
-BRED_BLACK = '\033[1;30;41m'
-RED_BLACK = '\033[0;30;41m'
-BGREEN = '\033[1;32;40m'
-GREEN = '\033[0;32;40m'
-BGREEN_BLACK = '\033[1;30;42m'
-GREEN_BLACK = '\033[0;30;42m'
-BYELLOW = '\033[1;33;40m'
-YELLOW = '\033[0;33;40m'
-BBLUE = '\033[1;34;40m'
-BLUE = '\033[0;34;40m'
-BMAGENTA = '\033[1;35;40m'
-MAGENTA = '\033[0;35;40m'
-BCYAN = '\033[1;36;40m'
-CYAN = '\033[0;36;40m'
-BWHITE = '\033[1;37;40m'
-WHITE = '\033[0;37;40m'
+from lib.color import Color
 
 
 class RTPBleedFlood:
@@ -40,23 +22,25 @@ class RTPBleedFlood:
         self.port = ''
         self.payload = '0'
 
+        self.c = Color()
+
     def start(self):
         self.port = int(self.port)
         self.payload = int(self.payload)
 
-        print(BWHITE + '[!] Target IP: ' + YELLOW + '%s' % self.ip)
-        print(BWHITE + '[!] Target port:' + YELLOW + ' %d' % self.port)
-        print(BWHITE + '[!] Payload type: ' + YELLOW + '%d' % self.payload)
-        print(WHITE)
+        print(self.c.BWHITE + '[!] Target IP: ' + self.c.YELLOW + '%s' % self.ip)
+        print(self.c.BWHITE + '[!] Target port:' + self.c.YELLOW + ' %d' % self.port)
+        print(self.c.BWHITE + '[!] Payload type: ' + self.c.YELLOW + '%d' % self.payload)
+        print(self.c.WHITE)
 
-        print(YELLOW + '[+] Sending RTP packets to %s:%d' %
-              (self.ip, self.port) + WHITE)
+        print(self.c.YELLOW + '[+] Sending RTP packets to %s:%d' %
+              (self.ip, self.port) + self.c.WHITE)
 
         # Create a UDP socket
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         except socket.error:
-            print(RED + 'Failed to create socket' + WHITE)
+            print(self.c.RED + 'Failed to create socket' + self.c.WHITE)
             sys.exit(1)
         fcntl.fcntl(sock, fcntl.F_SETFL, os.O_NONBLOCK)
 
@@ -95,13 +79,13 @@ class RTPBleedFlood:
                         ssrc = '%s%s%s%s' % (hex(msg[8])[2:], hex(
                             msg[9])[2:], hex(msg[10])[2:], hex(msg[11])[2:])
 
-                        print(WHITE + 'received %d bytes from target port %d Seq number %s' %
+                        print(self.c.WHITE + 'received %d bytes from target port %d Seq number %s' %
                               (size, rport, seq))
                 except:
                     # No data available
                     continue
             except KeyboardInterrupt:
-                print(YELLOW + 'You pressed Ctrl+C!')
+                print(self.c.YELLOW + 'You pressed Ctrl+C!')
                 exit()
             except:
                 pass

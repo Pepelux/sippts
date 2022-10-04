@@ -16,26 +16,8 @@ import ssl
 import fcntl
 import threading
 import time
+from lib.color import Color
 from lib.functions import create_message, get_free_port, generate_random_integer, generate_random_string
-
-BRED = '\033[1;31;40m'
-RED = '\033[0;31;40m'
-BRED_BLACK = '\033[1;30;41m'
-RED_BLACK = '\033[0;30;41m'
-BGREEN = '\033[1;32;40m'
-GREEN = '\033[0;32;40m'
-BGREEN_BLACK = '\033[1;30;42m'
-GREEN_BLACK = '\033[0;30;42m'
-BYELLOW = '\033[1;33;40m'
-YELLOW = '\033[0;33;40m'
-BBLUE = '\033[1;34;40m'
-BLUE = '\033[0;34;40m'
-BMAGENTA = '\033[1;35;40m'
-MAGENTA = '\033[0;35;40m'
-BCYAN = '\033[1;36;40m'
-CYAN = '\033[0;36;40m'
-BWHITE = '\033[1;37;40m'
-WHITE = '\033[0;37;40m'
 
 
 class SipFlood:
@@ -66,6 +48,8 @@ class SipFlood:
         self.min = 0
         self.max = 1000
 
+        self.c = Color()
+
         self.run = True
 
     def start(self):
@@ -89,36 +73,36 @@ class SipFlood:
 
         # check method
         if self.bad == None and self.method == '':
-            print(BRED + 'Method is mandatory' + WHITE)
+            print(self.c.BRED + 'Method is mandatory' + self.c.WHITE)
             sys.exit()
         if self.bad == None and self.method not in self.supported_methods:
-            print(BRED + 'Method %s is not supported' % self.method + WHITE)
+            print(self.c.BRED + 'Method %s is not supported' % self.method + self.c.WHITE)
             sys.exit()
 
         # check protocol
         if self.proto not in supported_protos:
-            print(BRED + 'Protocol %s is not supported' % self.proto + WHITE)
+            print(self.c.BRED + 'Protocol %s is not supported' % self.proto + self.c.WHITE)
             sys.exit()
 
         self.verbose = int(self.verbose)
 
         signal.signal(signal.SIGINT, self.signal_handler)
-        print(BYELLOW + '\nPress Ctrl+C to stop\n')
-        print(WHITE)
+        print(self.c.BYELLOW + '\nPress Ctrl+C to stop\n')
+        print(self.c.WHITE)
 
-        print(BWHITE + '[!] Target: ' + GREEN + '%s:%s/%s' %
+        print(self.c.BWHITE + '[!] Target: ' + self.c.GREEN + '%s:%s/%s' %
               (self.ip, self.rport, self.proto))
-        print(BWHITE + '[!] Used threads: ' +
-             GREEN + '%d' % self.nthreads)
+        print(self.c.BWHITE + '[!] Used threads: ' +
+             self.c.GREEN + '%d' % self.nthreads)
         if self.nthreads > 300:
-            print(BRED + '[x] More than 300 threads can cause socket problems')
-        print(BWHITE + '[!] Number of requests: ' + GREEN + '%s' % self.number)
+            print(self.c.BRED + '[x] More than 300 threads can cause socket problems')
+        print(self.c.BWHITE + '[!] Number of requests: ' + self.c.GREEN + '%s' % self.number)
         
         if self.bad == 1:
-            print(BWHITE + '[!] Alphabet: ' + GREEN + '%s' % self.alphabet)
-            print(BWHITE + '[!] Min length: ' + GREEN + '%d' % self.min)
-            print(BWHITE + '[!] Max length: ' + GREEN + '%d' % self.max)
-        print(WHITE)
+            print(self.c.BWHITE + '[!] Alphabet: ' + self.c.GREEN + '%s' % self.alphabet)
+            print(self.c.BWHITE + '[!] Min length: ' + self.c.GREEN + '%d' % self.min)
+            print(self.c.BWHITE + '[!] Max length: ' + self.c.GREEN + '%d' % self.max)
+        print(self.c.WHITE)
 
         threads = list()
 
@@ -129,19 +113,19 @@ class SipFlood:
                 t.start()
                 time.sleep(0.1)
             
-        print(BYELLOW + '\n\n[-] Closing threads ...' + WHITE)
+        print(self.c.BYELLOW + '\n\n[-] Closing threads ...' + self.c.WHITE)
 
         for i, t in enumerate(threads):
             t.join()
  
-        print(WHITE)
+        print(self.c.WHITE)
 
     def signal_handler(self, sig, frame):
         self.stop()
         time.sleep(0.1)
-        print(BYELLOW + '\nYou pressed Ctrl+C!')
-        print(BWHITE + '\nStopping flood ... wait a moment\n')
-        print(WHITE)
+        print(self.c.BYELLOW + '\nYou pressed Ctrl+C!')
+        print(self.c.BWHITE + '\nStopping flood ... wait a moment\n')
+        print(self.c.WHITE)
 
     def stop(self):
         self.run = False
@@ -153,7 +137,7 @@ class SipFlood:
             else:
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         except socket.error:
-            print(RED + 'Failed to create socket')
+            print(self.c.RED + 'Failed to create socket')
             sys.exit(1)
         fcntl.fcntl(sock, fcntl.F_SETFL, os.O_NONBLOCK)
 
@@ -195,7 +179,7 @@ class SipFlood:
                         sock, ssl_version=ssl.PROTOCOL_TLS, ciphers=None, cert_reqs=ssl.CERT_NONE)
                     sock_ssl.connect(host)
             except:
-                # print(RED + '\nSocket connection error\n' + WHITE)
+                # print(self.c.RED + '\nSocket connection error\n' + self.c.WHITE)
                 return
 
             while(self.run == True and self.count <= self.number):
@@ -236,11 +220,11 @@ class SipFlood:
                         msg = create_message(method, contactdomain, fromuser, fromname, fromdomain, touser, toname, todomain, proto, domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, auth_type, referto, withsdp, via, rr)
 
                     if self.verbose == 2:
-                        print(BWHITE + '[+] Sending %s to %s:%s ...' %
+                        print(self.c.BWHITE + '[+] Sending %s to %s:%s ...' %
                             (method_label, self.ip, self.rport))
-                        print(YELLOW + msg)
+                        print(self.c.YELLOW + msg)
                     elif self.verbose == 1:
-                        print(BWHITE + '[%s] Sending %s to %s:%s/%s ...' % (str(self.count),
+                        print(self.c.BWHITE + '[%s] Sending %s to %s:%s/%s ...' % (str(self.count),
                             method_label, self.ip, self.rport, self.proto)+ " ".ljust(100), end="\r")
 
                     if self.proto == 'TLS':

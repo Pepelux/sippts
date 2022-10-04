@@ -11,25 +11,7 @@ import socket
 import sys
 import ssl
 from lib.functions import create_message, get_free_port, parse_message
-
-BRED = '\033[1;31;40m'
-RED = '\033[0;31;40m'
-BRED_BLACK = '\033[1;30;41m'
-RED_BLACK = '\033[0;30;41m'
-BGREEN = '\033[1;32;40m'
-GREEN = '\033[0;32;40m'
-BGREEN_BLACK = '\033[1;30;42m'
-GREEN_BLACK = '\033[0;30;42m'
-BYELLOW = '\033[1;33;40m'
-YELLOW = '\033[0;33;40m'
-BBLUE = '\033[1;34;40m'
-BLUE = '\033[0;34;40m'
-BMAGENTA = '\033[1;35;40m'
-MAGENTA = '\033[0;35;40m'
-BCYAN = '\033[1;36;40m'
-CYAN = '\033[0;36;40m'
-BWHITE = '\033[1;37;40m'
-WHITE = '\033[0;37;40m'
+from lib.color import Color
 
 
 class SipEnumerate:
@@ -50,6 +32,8 @@ class SipEnumerate:
         self.digest = ''
         self.verbose = '0'
 
+        self.c = Color()
+
     def start(self):
         supported_protos = ['UDP', 'TCP', 'TLS']
         supported_methods = ['REGISTER', 'SUBSCRIBE', 'NOTIFY', 'PUBLISH', 'MESSAGE', 'INVITE',
@@ -63,7 +47,7 @@ class SipEnumerate:
 
         # check protocol
         if self.proto not in supported_protos:
-            print(BRED + 'Protocol %s is not supported' % self.proto)
+            print(self.c.BRED + 'Protocol %s is not supported' % self.proto)
             sys.exit()
 
         try:
@@ -72,7 +56,7 @@ class SipEnumerate:
             else:
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         except socket.error:
-            print(RED + 'Failed to create socket')
+            print(self.c.RED + 'Failed to create socket')
             sys.exit(1)
 
         bind = '0.0.0.0'
@@ -86,38 +70,38 @@ class SipEnumerate:
 
         host = (str(self.ip), int(self.rport))
 
-        print(BWHITE + '[!] IP address: ' + GREEN + '%s' % str(self.ip) + WHITE +
-              ':' + GREEN + '%s' % self.rport + WHITE + '/' + GREEN + '%s' % self.proto)
+        print(self.c.BWHITE + '[!] IP address: ' + self.c.GREEN + '%s' % str(self.ip) + self.c.WHITE +
+              ':' + self.c.GREEN + '%s' % self.rport + self.c.WHITE + '/' + self.c.GREEN + '%s' % self.proto)
 
         if self.domain != '':
-            print(BWHITE + '[!] Customized Domain: ' +
-                  GREEN + '%s' % self.domain)
+            print(self.c.BWHITE + '[!] Customized Domain: ' +
+                  self.c.GREEN + '%s' % self.domain)
         if self.contact_domain != '':
-            print(BWHITE + '[!] Customized Contact Domain: ' + GREEN + '%s' %
+            print(self.c.BWHITE + '[!] Customized Contact Domain: ' + self.c.GREEN + '%s' %
                   self.contact_domain)
         if self.from_name != '':
-            print(BWHITE + '[!] Customized From Name: ' +
-                  GREEN + '%s' % self.from_name)
+            print(self.c.BWHITE + '[!] Customized From Name: ' +
+                  self.c.GREEN + '%s' % self.from_name)
         if self.from_user != '100':
-            print(BWHITE + '[!] Customized From User: ' +
-                  GREEN + '%s' % self.from_user)
+            print(self.c.BWHITE + '[!] Customized From User: ' +
+                  self.c.GREEN + '%s' % self.from_user)
         if self.from_domain != '':
-            print(BWHITE + '[!] Customized From Domain: ' +
-                  GREEN + '%s' % self.from_domain)
+            print(self.c.BWHITE + '[!] Customized From Domain: ' +
+                  self.c.GREEN + '%s' % self.from_domain)
         if self.to_name != '':
-            print(BWHITE + '[!] Customized To Name: ' +
-                  GREEN + '%s' % self.to_name)
+            print(self.c.BWHITE + '[!] Customized To Name: ' +
+                  self.c.GREEN + '%s' % self.to_name)
         if self.to_user != '100':
-            print(BWHITE + '[!] Customized To User:' +
-                  GREEN + ' %s' % self.to_user)
+            print(self.c.BWHITE + '[!] Customized To User:' +
+                  self.c.GREEN + ' %s' % self.to_user)
         if self.to_domain != '':
-            print(BWHITE + '[!] Customized To Domain: ' +
-                  GREEN + '%s' % self.to_domain)
+            print(self.c.BWHITE + '[!] Customized To Domain: ' +
+                  self.c.GREEN + '%s' % self.to_domain)
         if self.user_agent != 'pplsip':
-            print(BWHITE + '[!] Customized User-Agent: ' +
-                  GREEN + '%s' % self.user_agent)
+            print(self.c.BWHITE + '[!] Customized User-Agent: ' +
+                  self.c.GREEN + '%s' % self.user_agent)
 
-        print(WHITE)
+        print(self.c.WHITE)
 
         if self.host != '' and self.domain == '':
             self.domain = self.host
@@ -150,9 +134,9 @@ class SipEnumerate:
                                  self.to_user, self.to_name, self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', '')
 
             if self.verbose == 1:
-                print(BWHITE + '[+] Sending to %s:%s/%s ...' %
+                print(self.c.BWHITE + '[+] Sending to %s:%s/%s ...' %
                       (self.ip, self.rport, self.proto))
-                print(YELLOW + msg)
+                print(self.c.YELLOW + msg)
 
             try:
                 if self.proto == 'TLS':
@@ -180,22 +164,22 @@ class SipEnumerate:
                             ua = 'Not found'
 
                         if resdata != '':
-                            resdata = resdata + WHITE + ' / '
-                        resdata = resdata + YELLOW + '%s %s' % (rescode, restext) + WHITE + ' (User-Agent: %s)' % ua
+                            resdata = resdata + self.c.WHITE + ' / '
+                        resdata = resdata + self.c.YELLOW + '%s %s' % (rescode, restext) + self.c.WHITE + ' (User-Agent: %s)' % ua
                         
                 if self.verbose == 1:
-                    print(BWHITE + '[+] Receiving from %s:%d ...' %
+                    print(self.c.BWHITE + '[+] Receiving from %s:%d ...' %
                           (self.ip, self.rport))
-                    print(GREEN + resp.decode())
+                    print(self.c.GREEN + resp.decode())
                 else:
-                    print(BCYAN + '%s' % method + WHITE + ' => %s' % resdata)
+                    print(self.c.BCYAN + '%s' % method + self.c.WHITE + ' => %s' % resdata)
             except socket.timeout:
-                print(BGREEN + '%s' % method + RED + ' => Timeout error')
+                print(self.c.BGREEN + '%s' % method + self.c.RED + ' => Timeout error')
                 pass
             except:
-                print(BGREEN + '%s' % method + RED + ' => Error')
+                print(self.c.BGREEN + '%s' % method + self.c.RED + ' => Error')
                 pass
 
-        print(WHITE)
+        print(self.c.WHITE)
 
         sock.close()
