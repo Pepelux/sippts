@@ -116,8 +116,9 @@ class SipFlood:
                 threads.append(t)
                 t.start()
                 time.sleep(0.1)
-            
-        print(self.c.BYELLOW + '\n\n[-] Closing threads ...' + self.c.WHITE)
+
+        if self.run == False or self.count >= self.number:
+            print(self.c.BYELLOW + '\n\n[-] Closing threads ...' + self.c.WHITE)
 
         for i, t in enumerate(threads):
             t.join()
