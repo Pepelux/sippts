@@ -427,7 +427,7 @@ class SipRemoteCrack:
                                             f.close()
                                             return
                                     except:
-                                        print('error')
+                                        pass
                     except:
                         pass
 

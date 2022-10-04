@@ -253,9 +253,9 @@ class SipScan:
 
         print(self.c.BWHITE + '[!] Used threads: ' +
               self.c.GREEN + '%d' % nthreads)
-        if nthreads > 500:
+        if nthreads > 800:
             print(self.c.BRED +
-                  '[x] More than 500 threads can cause socket problems')
+                  '[x] More than 800 threads can cause socket problems')
         print(self.c.WHITE)
 
         if self.ofile != '':

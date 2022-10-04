@@ -141,8 +141,11 @@ class SipExten:
             print(self.c.BWHITE + '[!] Customized User-Agent: ' +
                   self.c.GREEN + '%s' % self.user_agent)
 
-        print(self.c.BWHITE+'[!] Total threads: ' +
+        print(self.c.BWHITE + '[!] Used threads: ' +
               self.c.GREEN + '%d' % nthreads)
+        if nthreads > 800:
+            print(self.c.BRED +
+                  '[x] More than 800 threads can cause socket problems')
         print(self.c.WHITE)
 
         values = product(ips, extens)
