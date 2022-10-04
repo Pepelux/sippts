@@ -34,7 +34,7 @@ class SipRemoteCrack:
         self.contact_domain = ''
         self.wordlist = ''
         self.user_agent = 'pplsip'
-        self.threads = '10'
+        self.threads = '100'
         self.verbose = '0'
         self.nocolor = ''
 

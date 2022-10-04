@@ -36,7 +36,7 @@ class SipScan:
         self.to_name = ''
         self.to_domain = ''
         self.user_agent = 'pplsip'
-        self.threads = '100'
+        self.threads = '500'
         self.verbose = '0'
         self.ping = 'False'
         self.file = ''

@@ -57,7 +57,7 @@ UDP, TCP and TLS protocols.
     parser.add_argument('-tu', '--to_user', type=str, help='To User (default: 100)', dest='to_user', default='100')
     parser.add_argument('-td', '--to_domain', type=str, help='To Domain. Ex: 10.0.0.1', dest='to_domain', default='')
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
-    parser.add_argument('-th', '--threads', type=int, help='Number of threads (default: 100)', dest='threads', default=500)
+    parser.add_argument('-th', '--threads', type=int, help='Number of threads (default: 500)', dest='threads', default=500)
     parser.add_argument('-ping', help='Ping host before scan', dest='ping', action="count")
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
     parser.add_argument('-vv', '--more_verbose', help='Increase more verbosity', dest='more_verbose', action="count")
@@ -139,7 +139,7 @@ or not. Sipexten uses multithread and can check several IPs and port ranges.
     parser.add_argument('-cd', '--contact_domain', type=str, help='Domain or IP address for Contact header. Ex: 10.0.1.2', dest='contact_domain', default='')
     parser.add_argument('-fu', '--from_user', type=str, help='From User (default: 100)', dest='from_user', default='100')
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
-    parser.add_argument('-th', '--threads', type=int, help='Number of threads (default: 100)', dest='threads', default=500)
+    parser.add_argument('-th', '--threads', type=int, help='Number of threads (default: 500)', dest='threads', default=500)
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
     parser.add_argument('-vv', '--more_verbose', help='Increase more verbosity', dest='more_verbose', action="count")
     parser.add_argument('--nocolor', help='Show result without colors', dest='nocolor', action="count")
@@ -354,7 +354,7 @@ the call to a second external number.
     parser.add_argument('--pass', type=str, help='Authentication password', dest='pwd', default='')
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
     parser.add_argument('--local-ip', type=str, help='Set local IP address (by default try to get it)', dest='localip', default='')
-    parser.add_argument('-th', '--threads', type=int, help='Number of threads (default: 100)', dest='threads', default=500)
+    parser.add_argument('-th', '--threads', type=int, help='Number of threads (default: 500)', dest='threads', default=500)
     parser.add_argument('--no-sdp', help='Do not send SDP (by default is included)', dest='nosdp', action="count")
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
     parser.add_argument('--sdes', help='Use SDES in SDP protocol', dest='sdes', action="count")
@@ -688,6 +688,7 @@ SIP Flood send messages with a selected method
     parser.add_argument('-td', '--to_domain', type=str, help='To Domain. Ex: 10.0.0.1', dest='to_domain', default='')
     parser.add_argument('--digest', type=str, help='Digest', dest='digest', default='')
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
+    parser.add_argument('-th', '--threads', type=int, help='Number of threads (default: 200)', dest='threads', default=200)
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
     parser.add_argument('-vv', '--more_verbose', help='Increase more verbosity', dest='more_verbose', action="count")
 
@@ -710,12 +711,13 @@ SIP Flood send messages with a selected method
         TODOMAIN = args.to_domain
         DIGEST = args.digest
         UA = args.user_agent
+        THREADS = args.threads
         VERBOSE = args.verbose
         MORE_VERBOSE = args.more_verbose
         if MORE_VERBOSE == 1:
             VERBOSE = 2
 
-        return IPADDR, HOST, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, DIGEST, UA, VERBOSE
+        return IPADDR, HOST, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, DIGEST, UA, THREADS, VERBOSE
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
