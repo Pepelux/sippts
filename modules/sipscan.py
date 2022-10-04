@@ -12,6 +12,7 @@ import sys
 import ipaddress
 import ssl
 import re
+import time
 from IPy import IP
 from lib.functions import create_message, parse_message, get_machine_default_ip, ip2long, long2ip, get_free_port, ping, fingerprinting
 from lib.color import Color
@@ -197,6 +198,8 @@ class SipScan:
             self.prepare_scan(ips, ports, protos)
 
     def prepare_scan(self, ips, ports, protos):
+        max_values = 100000
+
         # threads to use
         nthreads = int(self.threads)
         total = len(list(product(ips, ports, protos)))
@@ -250,9 +253,9 @@ class SipScan:
 
         print(self.c.BWHITE + '[!] Used threads: ' +
               self.c.GREEN + '%d' % nthreads)
-        if nthreads > 200:
+        if nthreads > 500:
             print(self.c.BRED +
-                  '[x] More than 200 threads can cause socket problems')
+                  '[x] More than 500 threads can cause socket problems')
         print(self.c.WHITE)
 
         if self.ofile != '':
@@ -273,29 +276,54 @@ class SipScan:
             f.close()
 
         values = product(ips, ports, protos)
+        values2 = []
+        count = 0
 
-        try:
-            with ThreadPoolExecutor(max_workers=nthreads) as executor:
-                if self.quit == False:
-                    for i, val in enumerate(values):
-                        val_ipaddr = val[0]
-                        val_port = int(val[1])
-                        val_proto = val[2]
+        iter = (a for a in enumerate(values))
+        total = sum(1 for _ in iter)
 
-                        if self.host != '' and self.domain == '':
-                            self.domain = self.host
-                        if self.domain == '':
-                            self.domain = val_ipaddr
-                        if not self.from_domain or self.from_domain == '':
-                            self.from_domain = self.domain
-                        if not self.to_domain or self.to_domain == '':
-                            self.to_domain = self.domain
+        values = product(ips, ports, protos)
 
-                        executor.submit(self.scan_host, val_ipaddr,
-                                        val_port, val_proto)
-        except KeyboardInterrupt:
-            print(self.c.RED + '\nYou pressed Ctrl+C!' + self.c.WHITE)
-            self.quit = True
+        for i, val in enumerate(values):
+            if self.quit == False:
+                if count < max_values:
+                    values2.append(val)
+                    count += 1
+
+                if count == max_values or i+1 == total:
+                    try:
+                        with ThreadPoolExecutor(max_workers=nthreads) as executor:
+                            if self.quit == False:
+                                for j, val2 in enumerate(values2):
+                                    val_ipaddr = val2[0]
+                                    val_port = int(val2[1])
+                                    val_proto = val2[2]
+                                    scan = 1
+
+                                    if self.proto == 'ALL' and self.rport == '5060-5061':
+                                        if val_port == 5060 and val_proto == 'TLS':
+                                            scan = 0
+                                        elif val_port == 5061 and (val_proto == 'UDP' or val_proto == 'TCP'):
+                                            scan = 0
+
+                                    if scan == 1:
+                                        if self.host != '' and self.domain == '':
+                                            self.domain = self.host
+                                        if self.domain == '':
+                                            self.domain = val_ipaddr
+                                        if not self.from_domain or self.from_domain == '':
+                                            self.from_domain = self.domain
+                                        if not self.to_domain or self.to_domain == '':
+                                            self.to_domain = self.domain
+
+                                        executor.submit(self.scan_host, val_ipaddr,
+                                                        val_port, val_proto)
+                    except KeyboardInterrupt:
+                        print(self.c.RED + '\nYou pressed Ctrl+C!' + self.c.WHITE)
+                        self.quit = True
+
+                    values2.clear()
+                    count = 0
 
         self.found.sort()
         self.print()
@@ -304,7 +332,6 @@ class SipScan:
         if self.quit == False:
             print(self.c.BYELLOW + '[%s] Scanning %s:%d/%s'.ljust(100) %
                   (self.line[self.pos], ipaddr, port, proto), end='\r')
-
             self.pos += 1
             if self.pos > 3:
                 self.pos = 0
