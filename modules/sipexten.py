@@ -43,6 +43,8 @@ class SipExten:
         self.c = Color()
 
     def start(self):
+        max_values = 100000
+
         supported_protos = ['UDP', 'TCP', 'TLS']
         supported_methods = ['OPTIONS', 'REGISTER', 'INVITE']
 
@@ -144,22 +146,39 @@ class SipExten:
         print(self.c.WHITE)
 
         values = product(ips, extens)
+        values2 = []
+        count = 0
 
-        try:
-            with ThreadPoolExecutor(max_workers=nthreads) as executor:
-                if self.quit == False:
-                    for i, val in enumerate(values):
-                        val_ipaddr = val[0]
-                        val_exten = int(val[1])
-                        if val_exten != 0:
-                            to_user = '%s%s' % (self.prefix, val_exten)
-                        else:
-                            to_user = '%s' % self.prefix
+        iter = (a for a in enumerate(values))
+        total = sum(1 for _ in iter)
 
-                        executor.submit(self.scan_host, val_ipaddr, to_user)
-        except KeyboardInterrupt:
-            print(self.c.RED + '\nYou pressed Ctrl+C!' + self.c.WHITE)
-            self.quit = True
+        values = product(ips, extens)
+
+        for i, val in enumerate(values):
+            if self.quit == False:
+                if count < max_values:
+                    values2.append(val)
+                    count += 1
+
+                if count == max_values or i+1 == total:
+                    try:
+                        with ThreadPoolExecutor(max_workers=nthreads) as executor:
+                            if self.quit == False:
+                                for i, val2 in enumerate(values2):
+                                    val_ipaddr = val2[0]
+                                    val_exten = int(val2[1])
+                                    if val_exten != 0:
+                                        to_user = '%s%s' % (self.prefix, val_exten)
+                                    else:
+                                        to_user = '%s' % self.prefix
+
+                                    executor.submit(self.scan_host, val_ipaddr, to_user)
+                    except KeyboardInterrupt:
+                        print(self.c.RED + '\nYou pressed Ctrl+C!' + self.c.WHITE)
+                        self.quit = True
+
+                    values2.clear()
+                    count = 0
 
         self.found.sort()
         self.print()

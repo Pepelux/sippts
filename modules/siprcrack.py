@@ -285,6 +285,8 @@ class SipRemoteCrack:
         t.join()
 
     def crack(self):
+        max_values = 100000
+
         # threads to use
         nthreads = int(self.threads)
         total = len(list(product(self.ips, self.extens)))
@@ -324,18 +326,35 @@ class SipRemoteCrack:
         print(self.c.WHITE)
 
         values = product(self.ips, self.extens)
+        values2 = []
+        count = 0
 
-        try:
-            with ThreadPoolExecutor(max_workers=nthreads) as executor:
-                if self.run == True:
-                    for i, val in enumerate(values):
-                        val_ipaddr = val[0]
-                        val_exten = val[1]
-                        to_user = '%s%s' % (self.prefix, val_exten)
+        iter = (a for a in enumerate(values))
+        total = sum(1 for _ in iter)
 
-                        executor.submit(self.scan_host, val_ipaddr, to_user)
-        except:
-            pass
+        values = product(self.ips, self.extens)
+
+        for i, val in enumerate(values):
+            if self.run == True:
+                if count < max_values:
+                    values2.append(val)
+                    count += 1
+
+                if count == max_values or i+1 == total:
+                    try:
+                        with ThreadPoolExecutor(max_workers=nthreads) as executor:
+                            if self.run == True:
+                                for i, val2 in enumerate(values2):
+                                    val_ipaddr = val2[0]
+                                    val_exten = val2[1]
+                                    to_user = '%s%s' % (self.prefix, val_exten)
+
+                                    executor.submit(self.scan_host, val_ipaddr, to_user)
+                    except:
+                        pass
+
+                    values2.clear()
+                    count = 0
 
         self.found.sort()
         self.print()
@@ -350,64 +369,65 @@ class SipRemoteCrack:
                     try:
                         pwd = f.readline()
 
-                        try:
-                            x = pwd.decode('ascii')
-                            isascii = 1
-                        except:
-                            isascii = 0
-                            pwd = '#'
-
-                        pwd = pwd.decode()
-                        pwd = pwd.replace('\'', '')
-                        pwd = pwd.replace('"', '')
-                        pwd = pwd.replace('<', '')
-                        pwd = pwd.replace('>', '')
-
-                        try:
-                            m = re.search('^\n$', pwd.replace(' ', ''))
-                            if m:
+                        if self.run == True:
+                            try:
+                                x = pwd.decode('ascii')
+                                isascii = 1
+                            except:
+                                isascii = 0
                                 pwd = '#'
-                        except:
-                            pass
 
-                        pwd = pwd.replace('\n', '')
-                        pwd = pwd.strip()
-                        pwd = pwd[0:50]
+                            pwd = pwd.decode()
+                            pwd = pwd.replace('\'', '')
+                            pwd = pwd.replace('"', '')
+                            pwd = pwd.replace('<', '')
+                            pwd = pwd.replace('>', '')
 
-                        if pwd != '' and pwd != '#' and isascii == 1:
-                            if self.run == True:
-                                try:
-                                    self.pos += 1
-                                    if self.pos > 3:
-                                        self.pos = 0
+                            try:
+                                m = re.search('^\n$', pwd.replace(' ', ''))
+                                if m:
+                                    pwd = '#'
+                            except:
+                                pass
 
-                                    if self.contact_domain == '':
-                                        self.contact_domain = '10.0.0.1'
+                            pwd = pwd.replace('\n', '')
+                            pwd = pwd.strip()
+                            pwd = pwd[0:50]
 
-                                    if self.authuser == '':
-                                        auth_user = to_user
-                                    else:
-                                        auth_user = self.authuser
+                            if pwd != '' and pwd != '#' and isascii == 1:
+                                if self.run == True:
+                                    try:
+                                        self.pos += 1
+                                        if self.pos > 3:
+                                            self.pos = 0
 
-                                    data = self.register(ipaddr, to_user, pwd)
+                                        if self.contact_domain == '':
+                                            self.contact_domain = '10.0.0.1'
 
-                                    str = self.c.BYELLOW+'[%s] ' % self.line[self.pos] + self.c.BWHITE+'Scanning ' + self.c.BYELLOW+'%s:%s/%s' % (
-                                        ipaddr, self.rport, self.proto) + self.c.BWHITE + ' => Exten/Pass: ' + self.c.BGREEN + '%s/%s' % (auth_user, pwd) + self.c.BBLUE + ' - %s %s' % (data['code'], data['text'])
-                                    print(str.ljust(200), end="\r")
+                                        if self.authuser == '':
+                                            auth_user = to_user
+                                        else:
+                                            auth_user = self.authuser
 
-                                    if data and data['code'] == '200':
-                                        print(self.c.WHITE)
-                                        pre = ''
-                                        print(self.c.BWHITE + '%s' % pre + self.c.WHITE+'Password for user ' + self.c.BBLUE + '%s' %
-                                              auth_user + self.c.WHITE + ' found: ' + self.c.BRED + '%s' % pwd + self.c.WHITE)
-                                        line = '%s###%s###%s###%s###%s' % (
-                                            ipaddr, self.rport, self.proto, auth_user, pwd)
-                                        self.found.append(line)
+                                        data = self.register(ipaddr, to_user, pwd)
 
-                                        f.close()
-                                        return
-                                except:
-                                    print('error')
+                                        str = self.c.BYELLOW+'[%s] ' % self.line[self.pos] + self.c.BWHITE+'Scanning ' + self.c.BYELLOW+'%s:%s/%s' % (
+                                            ipaddr, self.rport, self.proto) + self.c.BWHITE + ' => Exten/Pass: ' + self.c.BGREEN + '%s/%s' % (auth_user, pwd) + self.c.BBLUE + ' - %s %s' % (data['code'], data['text'])
+                                        print(str.ljust(200), end="\r")
+
+                                        if data and data['code'] == '200':
+                                            print(self.c.WHITE)
+                                            pre = ''
+                                            print(self.c.BWHITE + '%s' % pre + self.c.WHITE+'Password for user ' + self.c.BBLUE + '%s' %
+                                                auth_user + self.c.WHITE + ' found: ' + self.c.BRED + '%s' % pwd + self.c.WHITE)
+                                            line = '%s###%s###%s###%s###%s' % (
+                                                ipaddr, self.rport, self.proto, auth_user, pwd)
+                                            self.found.append(line)
+
+                                            f.close()
+                                            return
+                                    except:
+                                        print('error')
                     except:
                         pass
 
