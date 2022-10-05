@@ -518,39 +518,35 @@ SIP Send allow us to send a customized SIP message and analyze the response.
     # Array for all arguments passed to script
     args = parser.parse_args()
 
-    try:
-        IPADDR = args.ipaddr
-        HOST = args.ipaddr
-        RPORT = args.rport
-        PROTO = args.proto
-        METHOD = args.method
-        DOMAIN = args.domain
-        CONTACTDOMAIN = args.contact_domain
-        FROMNAME = args.from_name
-        FROMUSER = args.from_user
-        FROMDOMAIN = args.from_domain
-        FROMTAG = args.from_tag
-        TONAME = args.to_name
-        TOUSER = args.to_user
-        TOTAG = args.to_tag
-        TODOMAIN = args.to_domain
-        USER = args.user
-        PWD = args.pwd
-        DIGEST = args.digest
-        BRANCH = args.branch
-        CALLID = args.callid
-        CSEQ = args.cseq
-        SDP = args.sdp
-        SDES = args.sdes
-        UA = args.user_agent
-        LOCALIP = args.localip
-        NOCOLOR = args.nocolor
-        OFILE = args.ofile
+    IPADDR = args.ipaddr
+    HOST = args.ipaddr
+    RPORT = args.rport
+    PROTO = args.proto
+    METHOD = args.method
+    DOMAIN = args.domain
+    CONTACTDOMAIN = args.contact_domain
+    FROMNAME = args.from_name
+    FROMUSER = args.from_user
+    FROMDOMAIN = args.from_domain
+    FROMTAG = args.from_tag
+    TONAME = args.to_name
+    TOUSER = args.to_user
+    TOTAG = args.to_tag
+    TODOMAIN = args.to_domain
+    USER = args.user
+    PWD = args.pwd
+    DIGEST = args.digest
+    BRANCH = args.branch
+    CALLID = args.callid
+    CSEQ = args.cseq
+    SDP = args.sdp
+    SDES = args.sdes
+    UA = args.user_agent
+    LOCALIP = args.localip
+    NOCOLOR = args.nocolor
+    OFILE = args.ofile
 
-        return IPADDR, HOST, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, SDP, SDES, UA, LOCALIP, NOCOLOR, OFILE
-    except ValueError:
-        print('[-] Error: Bad IP format')
-        sys.exit(1)
+    return IPADDR, HOST, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, SDP, SDES, UA, LOCALIP, NOCOLOR, OFILE
 
 
 def get_sipenumerate_args():
@@ -1048,3 +1044,81 @@ Network sniffer for SIP protocol.
     except ValueError:
         print('[-] Error')
         sys.exit(1)
+
+def get_sipping_args():
+    parser = argparse.ArgumentParser(
+        formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
+            prog, max_help_position=50),
+        description= RED + u'''
+░██████╗██╗██████╗░██████╗░██╗███╗░░██╗░██████╗░
+██╔════╝██║██╔══██╗██╔══██╗██║████╗░██║██╔════╝░
+╚█████╗░██║██████╔╝██████╔╝██║██╔██╗██║██║░░██╗░
+░╚═══██╗██║██╔═══╝░██╔═══╝░██║██║╚████║██║░░╚██╗
+██████╔╝██║██║░░░░░██║░░░░░██║██║░╚███║╚██████╔╝
+╚═════╝░╚═╝╚═╝░░░░░╚═╝░░░░░╚═╝╚═╝░░╚══╝░╚═════╝░
+
+''' + BWHITE + '''   ''' + GREEN + ''' █▀█ █▀▀ █▀█ █▀▀ █░░ █░█ ▀▄▀''' + BWHITE + '''
+''' + BWHITE + '''BY ''' + GREEN + ''' █▀▀ ██▄ █▀▀ ██▄ █▄▄ █▄█ █░█''' + BWHITE + '''
+
+''' + BBLUE + ''' -= SIP Ping =-''' + WHITE,
+        epilog=BWHITE + '''
+Simple Ping to test if the server/device is available.
+ 
+''')
+
+    # Add arguments
+    parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
+    parser.add_argument('-r', '--port', type=int, help='Remote port (default: 5060)', dest='rport', default=5060)
+    parser.add_argument('-p', '--proto', type=str, help='Protocol: udp|tcp|tls (default: udp)', dest='proto', default='udp')
+    parser.add_argument('-m', '--method', type=str, help='SIP Method: options|invite|register|subscribe|cancel|bye|...', dest='method', default='options')
+    parser.add_argument('-d', '--domain', type=str, help='SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)', dest='domain', default='')
+    parser.add_argument('-cd', '--contact_domain', type=str, help='Domain or IP address for Contact header. Ex: 10.0.1.2', dest='contact_domain', default='')
+    parser.add_argument('-fn', '--from_name', type=str, help='From Name. Ex: Bob', dest='from_name', default='')
+    parser.add_argument('-fu', '--from_user', type=str, help='From User (default: 100)', dest='from_user', default='100')
+    parser.add_argument('-fd', '--from_domain', type=str, help='From Domain. Ex: 10.0.0.1', dest='from_domain', default='')
+    parser.add_argument('-ft', '--from_tag', type=str, help='From Tag', dest='from_tag', default='')
+    parser.add_argument('-tn', '--to_name', type=str, help='To Name. Ex: Alice', dest='to_name', default='')
+    parser.add_argument('-tu', '--to_user', type=str, help='To User (default: 100)', dest='to_user', default='100')
+    parser.add_argument('-td', '--to_domain', type=str, help='To Domain. Ex: 10.0.0.1', dest='to_domain', default='')
+    parser.add_argument('-tt', '--to_tag', type=str, help='To Tag', dest='to_tag', default='')
+    parser.add_argument('--user', type=str, help='Authentication user', dest='user', default='')
+    parser.add_argument('--pass', type=str, help='Authentication password', dest='pwd', default='')
+    parser.add_argument('--digest', type=str, help='Add a customized Digest header', dest='digest', default='')
+    parser.add_argument('--branch', type=str, help='Customize Branch header', dest='branch', default='')
+    parser.add_argument('-cid', '--callid', type=str, help='Customize CallID header', dest='callid', default='')
+    parser.add_argument('--cseq', type=str, help='Customize Seq number', dest='cseq', default='')
+    parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
+    parser.add_argument('--local-ip', type=str, help='Set local IP address (by default try to get it)', dest='localip', default='')
+    parser.add_argument('-n', '--number', type=int, help='Number of requests (by default: non stop)', dest='number', default=0)
+
+    # Array for all arguments passed to script
+    args = parser.parse_args()
+
+    IPADDR = args.ipaddr
+    HOST = args.ipaddr
+    RPORT = args.rport
+    PROTO = args.proto
+    METHOD = args.method
+    DOMAIN = args.domain
+    CONTACTDOMAIN = args.contact_domain
+    FROMNAME = args.from_name
+    FROMUSER = args.from_user
+    FROMDOMAIN = args.from_domain
+    FROMTAG = args.from_tag
+    TONAME = args.to_name
+    TOUSER = args.to_user
+    TOTAG = args.to_tag
+    TODOMAIN = args.to_domain
+    USER = args.user
+    PWD = args.pwd
+    DIGEST = args.digest
+    BRANCH = args.branch
+    CALLID = args.callid
+    CSEQ = args.cseq
+    UA = args.user_agent
+    LOCALIP = args.localip
+    NUMBER = args.number
+
+    return IPADDR, HOST, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, UA, LOCALIP, NUMBER
+
+
