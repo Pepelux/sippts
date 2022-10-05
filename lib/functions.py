@@ -731,9 +731,11 @@ def fingerprinting(method, msg, headers):
         if m:
             fp.append('Grandstream')
             fp.append('Aastra')
+            fp.append('Dahua')
         m = re.search('^[0-9]{8,10}$', tag)
         if m:
             fp.append('Fanvil')
+            fp.append('eXosip')
         m = re.search('^[a-f0-9]{8}$', tag)
         if m:
             fp.append('Cisco IP Phone')
@@ -742,6 +744,8 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[a-z0-9]{10}$', tag)
         if m:
             fp.append('Panasonic')
+            fp.append('RM')
+            fp.append('Grandstream')
         m = re.search('^[a-z]{8}$', tag)
         if m:
             fp.append('Ozeki VoIP SIP SDK')
@@ -761,6 +765,7 @@ def fingerprinting(method, msg, headers):
             fp.append('Alcatel')
         if tag == '':
             fp.append('SNOM')
+            fp.append('FortiVoice')
 
         hdr = msg.split('\r\n')
         for h in hdr:
@@ -778,9 +783,13 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[a-fA-F0-9]{6,8}-[a-fA-F0-9]{1,4}$', tag)
         if m:
             fp.append('Cisco SIP Gateway')
+        m = re.search('^[a-f0-9]{18}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$', tag)
+        if m:
+            fp.append('Quadro')
         m = re.search('^[a-f0-9]{16}$', tag)
         if m:
             fp.append('Tandberg')
+            fp.append('Algo')
         m = re.search('^DL[a-f0-9]{10}$', tag)
         if m:
             fp.append('LifeSize Media Server')
@@ -790,15 +799,23 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[a-f0-9]{19}$', tag)
         if m:
             fp.append('SIParator')
+            fp.append('StarkPBX')
         m = re.search('^[0-9]{5,10}$', tag)
         if m:
             fp.append('Panasonic')
         m = re.search('^[0-9A-Z]{32}$', tag)
         if m:
             fp.append('RTC')
+        m = re.search('^[0-9a-f]{32}$', tag)
+        if m:
+            fp.append('PhonerLite')
+        m = re.search('^[0-9a-z]{18}$', tag)
+        if m:
+            fp.append('Cisco/SPA')
         m = re.search('^[0-9a-z]{71}$', tag)
         if m:
-            fp.append('Grandstream PBX')
+            fp.append('Grandstream')
+            fp.append('TP-Link')
         m = re.search('^1c[0-9]{9,10}$', tag)
         if m:
             fp.append('Mediant SBC')
