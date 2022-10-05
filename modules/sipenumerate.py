@@ -234,6 +234,7 @@ class SipEnumerate:
 
         tlen = mlen+rlen+ualen+fplen+11
 
+        print(self.c.WHITE)
         print(self.c.WHITE + ' ' + '-' * tlen)
         print(self.c.WHITE +
                 '| ' + self.c.BWHITE + 'Method'.ljust(mlen) + self.c.WHITE +
