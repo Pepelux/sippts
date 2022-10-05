@@ -123,10 +123,6 @@ class SipPing:
         if self.user_agent != 'pplsip':
             print(self.c.BWHITE + '[!] Customized User-Agent: ' +
                   self.c.GREEN + '%s' % self.user_agent)
-        print(self.c.BWHITE + '[!] Call From: ' +
-              self.c.YELLOW + '%s' % self.from_user)
-        print(self.c.BWHITE + '[!] Call To: ' +
-              self.c.YELLOW + '%s' % self.to_user)
         print(self.c.WHITE)
 
         signal.signal(signal.SIGINT, self.signal_handler)
