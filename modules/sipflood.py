@@ -121,18 +121,18 @@ class SipFlood:
             print(self.c.BYELLOW + '\n[!] Thread %d closed ...' % (i+1) + self.c.WHITE, end="\r")
             t.join()
  
-        print(self.c.BYELLOW + '\n[+] Sent ' + self.c.BGREEN + '%d' % self.count + self.c.YELLOW + ' messages' + self.c.WHITE)
+        print(self.c.YELLOW + '\n\n[+] Sent ' + self.c.BGREEN + '%d' % self.count + self.c.YELLOW + ' messages' + self.c.WHITE)
         print(self.c.WHITE)
 
     def signal_handler(self, sig, frame):
         self.stop()
+
+    def stop(self):
+        self.run = False
         time.sleep(0.1)
         print(self.c.BYELLOW + '\nYou pressed Ctrl+C!')
         print(self.c.BWHITE + '\nStopping flood ... wait a moment\n')
         print(self.c.WHITE)
-
-    def stop(self):
-        self.run = False
 
     def flood(self):
         while self.run == True and (self.count <= self.number or self.number == 0):

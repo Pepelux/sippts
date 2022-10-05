@@ -11,6 +11,7 @@ import socket
 import sys
 import ssl
 import time
+import signal
 from lib.functions import create_message, get_free_port, parse_message, parse_digest, generate_random_string, calculateHash, get_machine_default_ip
 from lib.color import Color
 
@@ -42,6 +43,8 @@ class SipPing:
         self.localip = ''
         self.number = 0
 
+        self.run = True
+
         self.pingcount = 0
 
         self.c = Color()
@@ -52,7 +55,7 @@ class SipPing:
                              'OPTIONS', 'ACK', 'CANCEL', 'BYE', 'PRACK', 'INFO', 'REFER', 'UPDATE']
 
         if self.number == 0:
-            self.number = 3
+            self.number = 99999
 
         self.method = self.method.upper()
         self.proto = self.proto.upper()
@@ -126,6 +129,10 @@ class SipPing:
               self.c.YELLOW + '%s' % self.to_user)
         print(self.c.WHITE)
 
+        signal.signal(signal.SIGINT, self.signal_handler)
+        print(self.c.BYELLOW + 'Press Ctrl+C to stop')
+        print(self.c.WHITE)
+
         if self.branch == '':
             self.branch = generate_random_string(71, 71, 'ascii')
         if self.callid == '':
@@ -170,7 +177,8 @@ class SipPing:
                     sock, ssl_version=ssl.PROTOCOL_TLS, ciphers=None, cert_reqs=ssl.CERT_NONE)
                 sock_ssl.connect(host)
         except socket.timeout:
-            print(self.c.RED + '[!] Socket connection timeout\n' + self.c.WHITE)
+            print(self.c.RED +
+                  '[!] Socket connection timeout\n' + self.c.WHITE)
             sys.exit()
         except:
             print(self.c.RED + '[!] Socket connection error\n' + self.c.WHITE)
@@ -186,11 +194,13 @@ class SipPing:
             pass
 
         if ip != self.ip:
-            print(self.c.YELLOW + 'PING ' + self.c.BGREEN + '%s (%s)' % (self.ip, ip) + self.c.YELLOW + ' using method %s' % self.method)
+            print(self.c.YELLOW + 'PING ' + self.c.BGREEN + '%s (%s)' %
+                  (self.ip, ip) + self.c.YELLOW + ' using method %s' % self.method)
         else:
-            print(self.c.YELLOW + 'PING ' + self.c.BGREEN + '%s' % self.ip + self.c.YELLOW + ' using method %s' % self.method)
+            print(self.c.YELLOW + 'PING ' + self.c.BGREEN + '%s' %
+                  self.ip + self.c.YELLOW + ' using method %s' % self.method)
 
-        for i in range(self.number):
+        while self.run == True and self.pingcount < self.number:
             try:
                 start = time.time()
 
@@ -200,27 +210,43 @@ class SipPing:
                     sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
                 if self.proto == 'TLS':
-                    sock_ssl.recv(4096)
+                    resp = sock_ssl.recv(4096)
                 else:
-                    sock.recv(4096)
+                    resp = sock.recv(4096)
+
+                headers = parse_message(resp.decode())
+
+                if headers:
+                    response = '%s %s' % (
+                        headers['response_code'], headers['response_text'])
 
                 end = time.time()
                 totaltime = end - start
 
                 self.pingcount += 1
-                print(self.c.WHITE + 'From %s cseq=%d time=%fms' % (ip, self.pingcount, totaltime))
+                print(self.c.GREEN + '%s ' % response + self.c.WHITE + 'from ' + self.c.YELLOW + '%s' % ip + self.c.WHITE + ' cseq=' +
+                      self.c.YELLOW + '%d' % self.pingcount + self.c.WHITE + ' time=' + self.c.YELLOW + '%fms' % totaltime + self.c.WHITE)
             except socket.timeout:
                 self.pingcount += 1
-                print(self.c.WHITE + 'From %s cseq=%d Destination Host Unreachable' % (ip, self.pingcount))
+                print(self.c.WHITE + 'From ' + self.c.YELLOW + '%s' % ip + self.c.WHITE + ' cseq=' + self.c.YELLOW +
+                      '%d' % self.pingcount + self.c.WHITE + ' Destination Host Unreachable' + self.c.WHITE)
                 pass
             except KeyboardInterrupt:
                 print(self.c.RED + '\nYou pressed Ctrl+C!' + self.c.WHITE)
                 sys.exit()
             except:
                 self.pingcount += 1
-                print(self.c.WHITE + 'From %s cseq=%d Destination Host Unreachable' % (ip, self.pingcount))
+                print(self.c.WHITE + 'From ' + self.c.YELLOW + '%s' % ip + self.c.WHITE + ' cseq=' + self.c.YELLOW +
+                      '%d' % self.pingcount + self.c.WHITE + ' Destination Host Unreachable' + self.c.WHITE)
                 pass
 
             time.sleep(1)
 
         sock.close()
+
+    def signal_handler(self, sig, frame):
+        self.stop()
+
+    def stop(self):
+        self.run = False
+        print(self.c.WHITE)

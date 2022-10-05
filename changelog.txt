@@ -8,6 +8,8 @@ devel:
 - sipenumerate:
   - use threads to run faster
   - show fingerprinting to give more information
+- sipping:
+  - new module to check if a server/device is alive
 - global:
   - bug fixes
 
