@@ -343,7 +343,7 @@ class SipScan:
                     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             except socket.error:
                 print(self.c.RED + 'Failed to create socket')
-                sys.exit(1)
+                return
 
             bind = '0.0.0.0'
             lport = get_free_port()
