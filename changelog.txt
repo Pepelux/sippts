@@ -5,6 +5,9 @@ devel:
 - sipscan: 
   - manage large ranges of IP networks. Fixed memory leak problems
   - can now run faster. Supports 800 threads without memory consumption
+- sipenumerate:
+  - use threads to run faster
+  - show fingerprinting to give more information
 - global:
   - bug fixes
 

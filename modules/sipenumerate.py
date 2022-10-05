@@ -10,8 +10,9 @@ __email__ = "pepeluxx@gmail.com"
 import socket
 import sys
 import ssl
-from lib.functions import create_message, get_free_port, parse_message
+from lib.functions import create_message, get_free_port, parse_message, fingerprinting
 from lib.color import Color
+from concurrent.futures import ThreadPoolExecutor
 
 
 class SipEnumerate:
@@ -32,6 +33,10 @@ class SipEnumerate:
         self.digest = ''
         self.verbose = '0'
 
+        self.quit = False
+
+        self.found = []
+
         self.c = Color()
 
     def start(self):
@@ -49,26 +54,6 @@ class SipEnumerate:
         if self.proto not in supported_protos:
             print(self.c.BRED + 'Protocol %s is not supported' % self.proto)
             sys.exit()
-
-        try:
-            if self.proto == 'UDP':
-                sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            else:
-                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        except socket.error:
-            print(self.c.RED + 'Failed to create socket')
-            sys.exit(1)
-
-        bind = '0.0.0.0'
-        lport = get_free_port()
-
-        try:
-            sock.bind((bind, lport))
-        except:
-            lport = get_free_port()
-            sock.bind((bind, lport))
-
-        host = (str(self.ip), int(self.rport))
 
         print(self.c.BWHITE + '[!] IP address: ' + self.c.GREEN + '%s' % str(self.ip) + self.c.WHITE +
               ':' + self.c.GREEN + '%s' % self.rport + self.c.WHITE + '/' + self.c.GREEN + '%s' % self.proto)
@@ -115,27 +100,56 @@ class SipEnumerate:
         if self.contact_domain == '':
             self.contact_domain = '10.0.0.1'
 
-        try:
-            sock.settimeout(5)
+        with ThreadPoolExecutor(max_workers=20) as executor:
+            for j, method in enumerate(supported_methods):
+                if self.quit == False:
+                    executor.submit(self.send, method)
 
-            if self.proto == 'TCP':
-                sock.connect(host)
+        self.print()
 
-            if self.proto == 'TLS':
-                sock_ssl = ssl.wrap_socket(
-                    sock, ssl_version=ssl.PROTOCOL_TLS, ciphers=None, cert_reqs=ssl.CERT_NONE)
-                sock_ssl.connect(host)
-        except:
-            print('Socket connection error')
-            exit()
 
-        for method in supported_methods:
+    def send(self, method):
+        if self.quit == False:
+            try:
+                if self.proto == 'UDP':
+                    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                else:
+                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            except socket.error:
+                print(self.c.RED + 'Failed to create socket')
+                sys.exit(1)
+
+            bind = '0.0.0.0'
+            lport = get_free_port()
+
+            try:
+                sock.bind((bind, lport))
+            except:
+                lport = get_free_port()
+                sock.bind((bind, lport))
+
+            host = (str(self.ip), int(self.rport))
+
+            try:
+                sock.settimeout(5)
+
+                if self.proto == 'TCP':
+                    sock.connect(host)
+
+                if self.proto == 'TLS':
+                    sock_ssl = ssl.wrap_socket(
+                        sock, ssl_version=ssl.PROTOCOL_TLS, ciphers=None, cert_reqs=ssl.CERT_NONE)
+                    sock_ssl.connect(host)
+            except:
+                print('Socket connection error')
+                exit()
+
             msg = create_message(method, self.contact_domain, self.from_user, self.from_name, self.domain,
-                                 self.to_user, self.to_name, self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', '')
+                                    self.to_user, self.to_name, self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', '')
 
             if self.verbose == 1:
                 print(self.c.BWHITE + '[+] Sending to %s:%s/%s ...' %
-                      (self.ip, self.rport, self.proto))
+                        (self.ip, self.rport, self.proto))
                 print(self.c.YELLOW + msg)
 
             try:
@@ -169,10 +183,28 @@ class SipEnumerate:
                         
                 if self.verbose == 1:
                     print(self.c.BWHITE + '[+] Receiving from %s:%d ...' %
-                          (self.ip, self.rport))
+                            (self.ip, self.rport))
                     print(self.c.GREEN + resp.decode())
                 else:
                     print(self.c.BCYAN + '%s' % method + self.c.WHITE + ' => %s' % resdata)
+
+                fps = fingerprinting(method, resp.decode(), headers)
+
+                fp = ''
+                for f in fps:
+                    if f == '':
+                        fp = '%s' % f
+                    else:
+                        fp += '/%s' % f
+
+                if fp[0:1] == '/':
+                    fp = fp[1:]
+
+                line = '%s###%s %s###%s###%s' % (method, rescode, restext, ua, fp)
+                self.found.append(line)
+            except KeyboardInterrupt:
+                print(self.c.RED + '\nYou pressed Ctrl+C!' + self.c.WHITE)
+                self.quit = True
             except socket.timeout:
                 print(self.c.BGREEN + '%s' % method + self.c.RED + ' => Timeout error')
                 pass
@@ -180,6 +212,50 @@ class SipEnumerate:
                 print(self.c.BGREEN + '%s' % method + self.c.RED + ' => Error')
                 pass
 
+            sock.close()
+
+
+    def print(self):
+        mlen = len('Method')
+        rlen = len('Response')
+        ualen = len('User-Agent')
+        fplen = len('Fingerprinting')
+
+        for x in self.found:
+            (m, r, ua, fp) = x.split('###')
+            if len(m) > mlen:
+                mlen = len(m)
+            if len(r) > rlen:
+                rlen = len(r)
+            if len(ua) > ualen:
+                ualen = len(ua)
+            if len(fp) > fplen:
+                fplen = len(fp)
+
+        tlen = mlen+rlen+ualen+fplen+11
+
+        print(self.c.WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE +
+                '| ' + self.c.BWHITE + 'Method'.ljust(mlen) + self.c.WHITE +
+                ' | ' + self.c.BWHITE + 'Response'.ljust(rlen) + self.c.WHITE +
+                ' | ' + self.c.BWHITE + 'User-Agent'.ljust(ualen) + self.c.WHITE +
+                ' | ' + self.c.BWHITE + 'Fingerprinting'.ljust(fplen) + self.c.WHITE + ' |')
+        print(self.c.WHITE + ' ' + '-' * tlen)
+
+        if len(self.found) == 0:
+            print(self.c.WHITE + '| ' + self.c.WHITE +
+                  'Nothing found'.ljust(tlen-2) + ' |')
+        else:
+            for x in self.found:
+                (m, r, ua, fp) = x.split('###')
+
+                print(self.c.WHITE +
+                        '| ' + self.c.BCYAN + '%s' % m.ljust(mlen) + self.c.WHITE +
+                        ' | ' + self.c.GREEN + '%s' % r.ljust(rlen) + self.c.WHITE +
+                        ' | ' + self.c.YELLOW + '%s' % ua.ljust(ualen) + self.c.WHITE +
+                        ' | ' + self.c.GREEN + '%s' % fp.ljust(fplen) + self.c.WHITE + ' |')
+
+        print(self.c.WHITE + ' ' + '-' * tlen)
         print(self.c.WHITE)
 
-        sock.close()
+        self.found.clear()
