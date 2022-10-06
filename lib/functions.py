@@ -767,6 +767,7 @@ def fingerprinting(method, msg, headers):
         if tag == '':
             fp.append('SNOM')
             fp.append('FortiVoice')
+            fp.append('AddPac')
 
         hdr = msg.split('\r\n')
         for h in hdr:
