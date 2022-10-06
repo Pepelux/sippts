@@ -760,6 +760,7 @@ def fingerprinting(method, msg, headers):
         if m:
             fp.append('Comrex')
             fp.append('OXO')
+            fp.append('InterVideo')
 
         if tag == '123456':
             fp.append('Alcatel')
