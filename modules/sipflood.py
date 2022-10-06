@@ -55,11 +55,10 @@ class SipFlood:
     def start(self):
         supported_protos = ['UDP', 'TCP', 'TLS']
         self.supported_methods = ['REGISTER', 'SUBSCRIBE', 'NOTIFY', 'PUBLISH', 'MESSAGE', 'INVITE',
-                             'OPTIONS', 'ACK', 'CANCEL', 'BYE', 'PRACK', 'INFO', 'REFER', 'UPDATE']
+                                  'OPTIONS', 'ACK', 'CANCEL', 'BYE', 'PRACK', 'INFO', 'REFER', 'UPDATE']
 
         if self.bad == 1:
             self.supported_methods.append('FUZZ')
-
 
         self.method = self.method.upper()
         self.proto = self.proto.upper()
@@ -76,12 +75,14 @@ class SipFlood:
             print(self.c.BRED + 'Method is mandatory' + self.c.WHITE)
             sys.exit()
         if self.bad == None and self.method not in self.supported_methods:
-            print(self.c.BRED + 'Method %s is not supported' % self.method + self.c.WHITE)
+            print(self.c.BRED + 'Method %s is not supported' %
+                  self.method + self.c.WHITE)
             sys.exit()
 
         # check protocol
         if self.proto not in supported_protos:
-            print(self.c.BRED + 'Protocol %s is not supported' % self.proto + self.c.WHITE)
+            print(self.c.BRED + 'Protocol %s is not supported' %
+                  self.proto + self.c.WHITE)
             sys.exit()
 
         self.verbose = int(self.verbose)
@@ -93,19 +94,25 @@ class SipFlood:
         print(self.c.BWHITE + '[!] Target: ' + self.c.GREEN + '%s:%s/%s' %
               (self.ip, self.rport, self.proto))
         print(self.c.BWHITE + '[!] Used threads: ' +
-             self.c.GREEN + '%d' % self.nthreads)
+              self.c.GREEN + '%d' % self.nthreads)
         if self.nthreads > 300:
-            print(self.c.BRED + '[x] More than 300 threads can cause socket problems')
+            print(self.c.BRED +
+                  '[x] More than 300 threads can cause socket problems')
 
         if self.number == 0:
-            print(self.c.BWHITE + '[!] Number of requests: ' + self.c.GREEN + 'INFINITE')
+            print(self.c.BWHITE +
+                  '[!] Number of requests: ' + self.c.GREEN + 'INFINITE')
         else:
-            print(self.c.BWHITE + '[!] Number of requests: ' + self.c.GREEN + '%s' % self.number)
-        
+            print(self.c.BWHITE + '[!] Number of requests: ' +
+                  self.c.GREEN + '%s' % self.number)
+
         if self.bad == 1:
-            print(self.c.BWHITE + '[!] Alphabet: ' + self.c.GREEN + '%s' % self.alphabet)
-            print(self.c.BWHITE + '[!] Min length: ' + self.c.GREEN + '%d' % self.min)
-            print(self.c.BWHITE + '[!] Max length: ' + self.c.GREEN + '%d' % self.max)
+            print(self.c.BWHITE + '[!] Alphabet: ' +
+                  self.c.GREEN + '%s' % self.alphabet)
+            print(self.c.BWHITE + '[!] Min length: ' +
+                  self.c.GREEN + '%d' % self.min)
+            print(self.c.BWHITE + '[!] Max length: ' +
+                  self.c.GREEN + '%d' % self.max)
         print(self.c.WHITE)
 
         threads = list()
@@ -118,10 +125,12 @@ class SipFlood:
                 # time.sleep(0.1)
 
         for i, t in enumerate(threads):
-            print(self.c.BYELLOW + '\n[!] Thread %d closed ...' % (i+1) + self.c.WHITE, end="\r")
             t.join()
- 
-        print(self.c.YELLOW + '\n\n[+] Sent ' + self.c.BGREEN + '%d' % self.count + self.c.YELLOW + ' messages' + self.c.WHITE)
+            print(self.c.BYELLOW + '\n[!] Thread %d closed ...' %
+                  (i+1) + self.c.WHITE, end="\r")
+
+        print(self.c.YELLOW + '\n\n[+] Sent ' + self.c.BGREEN + '%d' %
+              self.count + self.c.YELLOW + ' messages' + self.c.WHITE)
         print(self.c.WHITE)
 
     def signal_handler(self, sig, frame):
@@ -167,7 +176,7 @@ class SipFlood:
                         self.contact_domain = '10.0.0.1'
 
                     msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                                        self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', '')
+                                         self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', '')
 
                     method_label = self.method
 
@@ -188,46 +197,68 @@ class SipFlood:
                 try:
                     if self.bad == 1:
                         if not self.method or self.method == '':
-                            method = (self.supported_methods[generate_random_integer(0, 13)])
+                            method = (
+                                self.supported_methods[generate_random_integer(0, 13)])
                             if method == 'FUZZ':
-                                method = generate_random_string(self.min, self.max, self.alphabet)
+                                method = generate_random_string(
+                                    self.min, self.max, self.alphabet)
                         else:
-                                method = self.method
-                        
-                        method_label = method
-                        
-                        contactdomain = generate_random_string(self.min, self.max, self.alphabet)
-                        fromuser = generate_random_string(self.min, self.max, self.alphabet)
-                        fromname = generate_random_string(self.min, self.max, self.alphabet)
-                        fromdomain = generate_random_string(self.min, self.max, self.alphabet)
-                        touser = generate_random_string(self.min, self.max, self.alphabet)
-                        toname = generate_random_string(self.min, self.max, self.alphabet)
-                        todomain = generate_random_string(self.min, self.max, self.alphabet)
-                        proto = generate_random_string(self.min, self.max, self.alphabet)
-                        domain = generate_random_string(self.min, self.max, self.alphabet)
-                        useragent = generate_random_string(self.min, self.max, self.alphabet)
-                        fromport = generate_random_integer(self.min, self.max)
-                        branch = generate_random_string(self.min, self.max, self.alphabet)
-                        callid = generate_random_string(self.min, self.max, self.alphabet)
-                        tag = generate_random_string(self.min, self.max, self.alphabet)
-                        cseq = generate_random_string(self.min, self.max, self.alphabet)
-                        totag = generate_random_string(self.min, self.max, self.alphabet)
-                        digest = generate_random_string(self.min, self.max, self.alphabet)
-                        auth_type = generate_random_integer(1, 2)
-                        referto = generate_random_string(self.min, self.max, self.alphabet)
-                        withsdp = generate_random_integer(1, 2)
-                        via = generate_random_string(self.min, self.max, self.alphabet)
-                        rr = generate_random_string(self.min, self.max, self.alphabet)
+                            method = self.method
 
-                        msg = create_message(method, contactdomain, fromuser, fromname, fromdomain, touser, toname, todomain, proto, domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, auth_type, referto, withsdp, via, rr)
+                        method_label = method
+
+                        contactdomain = generate_random_string(
+                            self.min, self.max, self.alphabet)
+                        fromuser = generate_random_string(
+                            self.min, self.max, self.alphabet)
+                        fromname = generate_random_string(
+                            self.min, self.max, self.alphabet)
+                        fromdomain = generate_random_string(
+                            self.min, self.max, self.alphabet)
+                        touser = generate_random_string(
+                            self.min, self.max, self.alphabet)
+                        toname = generate_random_string(
+                            self.min, self.max, self.alphabet)
+                        todomain = generate_random_string(
+                            self.min, self.max, self.alphabet)
+                        proto = generate_random_string(
+                            self.min, self.max, self.alphabet)
+                        domain = generate_random_string(
+                            self.min, self.max, self.alphabet)
+                        useragent = generate_random_string(
+                            self.min, self.max, self.alphabet)
+                        fromport = generate_random_integer(self.min, self.max)
+                        branch = generate_random_string(
+                            self.min, self.max, self.alphabet)
+                        callid = generate_random_string(
+                            self.min, self.max, self.alphabet)
+                        tag = generate_random_string(
+                            self.min, self.max, self.alphabet)
+                        cseq = generate_random_string(
+                            self.min, self.max, self.alphabet)
+                        totag = generate_random_string(
+                            self.min, self.max, self.alphabet)
+                        digest = generate_random_string(
+                            self.min, self.max, self.alphabet)
+                        auth_type = generate_random_integer(1, 2)
+                        referto = generate_random_string(
+                            self.min, self.max, self.alphabet)
+                        withsdp = generate_random_integer(1, 2)
+                        via = generate_random_string(
+                            self.min, self.max, self.alphabet)
+                        rr = generate_random_string(
+                            self.min, self.max, self.alphabet)
+
+                        msg = create_message(method, contactdomain, fromuser, fromname, fromdomain, touser, toname, todomain, proto,
+                                             domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, auth_type, referto, withsdp, via, rr)
 
                     if self.verbose == 2:
                         print(self.c.BWHITE + '[+] Sending %s to %s:%s ...' %
-                            (method_label, self.ip, self.rport))
+                              (method_label, self.ip, self.rport))
                         print(self.c.YELLOW + msg)
                     elif self.verbose == 1:
                         print(self.c.BWHITE + '[%s] Sending %s to %s:%s/%s ...' % (str(self.count),
-                            method_label, self.ip, self.rport, self.proto)+ " ".ljust(100), end="\r")
+                                                                                   method_label, self.ip, self.rport, self.proto) + " ".ljust(100), end="\r")
 
                     if self.proto == 'TLS':
                         sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
