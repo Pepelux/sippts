@@ -259,4 +259,6 @@ class SipEnumerate:
         print(self.c.WHITE + ' ' + '-' * tlen)
         print(self.c.WHITE)
 
+        print(self.c.YELLOW + '[!] Fingerprinting is based on `To-tag` and other header values. The result may not be correct\n' + self.c.WHITE)
+
         self.found.clear()

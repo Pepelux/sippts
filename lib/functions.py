@@ -481,11 +481,11 @@ def parse_message(buffer):
             else:
                 data['sipport'] = '5060'
 
-        m = re.search('^From:\s.*\<sip:([a-z|A-z|0-9|_]*)\@.*', header)
+        m = re.search('^From:\s*.*\<sip:([a-z|A-z|0-9|_]*)\@.*', header)
         if m:
             data['fromuser'] = '%s' % (m.group(1))
 
-        m = re.search('^From:\s(.+)', header)
+        m = re.search('^From:\s*(.+)', header)
         if m:
             hfrom = '%s' % (m.group(1))
 
@@ -498,14 +498,14 @@ def parse_message(buffer):
             except:
                 data['fromtag'] = ''
 
-        m = re.search('^Record-Route:\s(.*)', header)
+        m = re.search('^Record-Route:\s*(.*)', header)
         if m:
             if data['rr'] == '':
                 data['rr'] = '%s' % (m.group(1))
             else:
                 data['rr'] = data['rr'] + '#' + '%s' % (m.group(1))
 
-        m = re.search('^Via:\s(.*)', header)
+        m = re.search('^Via:\s*(.*)', header)
         if m:
             data['via'] = '%s' % (m.group(1))
 
@@ -520,21 +520,21 @@ def parse_message(buffer):
             else:
                 data['branch'] = ''
 
-        m = re.search('^Call-ID:\s(.*)', header)
+        m = re.search('^Call-ID:\s*(.*)', header)
         if m:
             data['callid'] = '%s' % (m.group(1))
 
-        m = re.search('^Server:\s(.+)', header)
+        m = re.search('^Server:\s*(.+)', header)
         if m:
             data['ua'] = '%s' % (m.group(1))
             data['type'] = 'Server'
         else:
-            m = re.search('^User-Agent:\s(.+)', header)
+            m = re.search('^User-Agent:\s*(.+)', header)
             if m:
                 data['ua'] = '%s' % (m.group(1))
                 data['type'] = 'Device'
 
-        m = re.search('^To:\s(.+)', header)
+        m = re.search('^To:\s*(.+)', header)
         if m:
             to = '%s' % (m.group(1))
 
@@ -547,42 +547,42 @@ def parse_message(buffer):
             except:
                 data['totag'] = ''
 
-        m = re.search('^Contact:\s(.+)', header)
+        m = re.search('^Contact:\s*(.+)', header)
         if m:
             m = re.search('\@', header)
             if m:
                 m = re.search(
-                    '^Contact:\s.*\<sip:([a-z|A-z|0-9|_]*)\@(.*)\>.*', header)
-                # '^Contact:\s.*\<sip:([a-z|A-z|0-9|_]*)\@([0-9|\.]*):*.*\>.*', header)
+                    '^Contact:\s*.*\<sip:([a-z|A-z|0-9|_]*)\@(.*)\>.*', header)
+                # '^Contact:\s*.*\<sip:([a-z|A-z|0-9|_]*)\@([0-9|\.]*):*.*\>.*', header)
                 if m:
                     data['contactuser'] = '%s' % (m.group(1))
                     data['contactdomain'] = '%s' % (m.group(2))
             else:
                 m = re.search(
-                    '^Contact:\s.*\<sip:(.*)\>.*', header)
+                    '^Contact:\s*.*\<sip:(.*)\>.*', header)
                 if m:
                     data['contactuser'] = ''
                     data['contactdomain'] = '%s' % (m.group(1))
 
-        m = re.search('^CSeq:\s([0-9]+)\s.*', header)
+        m = re.search('^CSeq:\s*([0-9]+)\s.*', header)
         if m:
             data['cseq'] = '%s' % (m.group(1))
 
-        m = re.search('^Authorization:\s(.+)', header)
+        m = re.search('^Authorization:\s*(.+)', header)
         if m:
             data['auth'] = '%s' % (m.group(1))
         else:
-            m = re.search('^WWW-Authenticate:\s(.+)', header)
+            m = re.search('^WWW-Authenticate:\s*(.+)', header)
             if m:
                 data['auth'] = '%s' % (m.group(1))
                 data['auth-type'] = 1
             else:
-                m = re.search('^Proxy-Authenticate:\s(.+)', header)
+                m = re.search('^Proxy-Authenticate:\s*(.+)', header)
                 if m:
                     data['auth'] = '%s' % (m.group(1))
                     data['auth-type'] = 2
 
-        m = re.search('^CSeq:\s([0-9]+)\s.*', header)
+        m = re.search('^CSeq:\s*([0-9]+)\s.*', header)
         if m:
             data['cseq'] = '%s' % (m.group(1))
 
