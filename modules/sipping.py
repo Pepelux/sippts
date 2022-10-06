@@ -42,6 +42,7 @@ class SipPing:
         self.cseq = '1'
         self.localip = ''
         self.number = 0
+        self.interval = 1
 
         self.run = True
 
@@ -236,7 +237,7 @@ class SipPing:
                       '%d' % self.pingcount + self.c.WHITE + ' Destination Host Unreachable' + self.c.WHITE)
                 pass
 
-            time.sleep(1)
+            time.sleep(self.interval)
 
         sock.close()
 

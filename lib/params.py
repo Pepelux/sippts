@@ -1089,7 +1089,8 @@ Simple Ping to test if the server/device is available.
     parser.add_argument('--cseq', type=str, help='Customize Seq number', dest='cseq', default='')
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
     parser.add_argument('--local-ip', type=str, help='Set local IP address (by default try to get it)', dest='localip', default='')
-    parser.add_argument('-n', '--number', type=int, help='Number of requests (by default: non stop)', dest='number', default=0)
+    parser.add_argument('-n', '--number', type=int, help='Number of requests (default: non stop)', dest='number', default=0)
+    parser.add_argument('-in', '--interval', type=int, help='Wait interval seconds between sending each packet (default: 1 sec)', dest='interval', default=1)
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -1118,7 +1119,8 @@ Simple Ping to test if the server/device is available.
     UA = args.user_agent
     LOCALIP = args.localip
     NUMBER = args.number
+    INTERVAL = args.interval
 
-    return IPADDR, HOST, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, UA, LOCALIP, NUMBER
+    return IPADDR, HOST, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, UA, LOCALIP, NUMBER, INTERVAL
 
 
