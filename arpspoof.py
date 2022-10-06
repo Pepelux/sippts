@@ -12,12 +12,13 @@ from lib.params import get_spoof_args
 
 
 def main():
-    ip, verbose, gw = get_spoof_args()
+    ip, verbose, gw, file = get_spoof_args()
 
     s = ArpSpoof()
     s.ip = ip
     s.verbose = verbose
     s.gw = gw
+    s.file = file
 
     s.start()
 

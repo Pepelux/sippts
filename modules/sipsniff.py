@@ -67,7 +67,7 @@ class SipSniff:
         self.verbose = int(self.verbose)
 
         signal.signal(signal.SIGINT, self.signal_handler)
-        print(self.c.BYELLOW + '\nPress Ctrl+C to stop\n')
+        print(self.c.BYELLOW + '\nPress Ctrl+C to stop')
         print(self.c.WHITE)
 
         # define capture object
@@ -76,12 +76,12 @@ class SipSniff:
         else:
             networkInterface = self.dev
 
-        print(self.c.BWHITE + '[!] Listening on: ' + self.c.WHITE + '%s' % networkInterface)
+        print(self.c.BWHITE + '[!] Listening on: ' + self.c.GREEN + '%s' % networkInterface)
 
         if self.proto == 'all':
-            print(self.c.BWHITE + '[!] Protocols: ' + self.c.WHITE + 'UDP, TCP, TLS')
+            print(self.c.BWHITE + '[!] Protocols: ' + self.c.GREEN + 'UDP, TCP, TLS')
         else:
-            print(self.c.BWHITE + '[!] Protocol: ' + self.c.WHITE + '%s' %
+            print(self.c.BWHITE + '[!] Protocol: ' + self.c.GREEN + '%s' %
                   self.proto.upper())
 
         if self.ofile != '':

@@ -12,7 +12,6 @@ import sys
 import ipaddress
 import ssl
 import re
-import time
 from IPy import IP
 from lib.functions import create_message, parse_message, get_machine_default_ip, ip2long, long2ip, get_free_port, ping, fingerprinting
 from lib.color import Color

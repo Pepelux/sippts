@@ -976,25 +976,28 @@ of a legitimate computer or server on the network.
     # Add arguments
     parser.add_argument('-i', '--ip', type=str, help='Target IP address (ex: 192.168.0.10 | 192.168.0.0/24 | 192.168.0.1,192.168.0.2)', dest="ipaddr")
     parser.add_argument('-gw', help='Set Gateway (by default try to get it)', dest='gw', default="")
+    parser.add_argument('-f', '--file', type=str, help='File with several IPs or network ranges', dest='file', default='')
     parser.add_argument('-v', '--verbose', help='Increase verbosity (no data displayed by default)', dest='verbose', action="count")
     parser.add_argument('-vv', '--more_verbose', help='Increase more verbosity', dest='more_verbose', action="count")
 
     # Array for all arguments passed to script
     args = parser.parse_args()
 
-    try:
-        IPADDR = args.ipaddr
-        GW = args.gw
-        VERBOSE = args.verbose
+    if not args.ipaddr and not args.file:
+        print(
+            'error: one of the following arguments are required: -i/--ip, -f/--file')
+        sys.exit()
 
-        MORE_VERBOSE = args.more_verbose
-        if MORE_VERBOSE == 1:
-            VERBOSE = 2
+    IPADDR = args.ipaddr
+    GW = args.gw
+    FILE = args.file
+    VERBOSE = args.verbose
 
-        return IPADDR, VERBOSE, GW
-    except ValueError:
-        print('[-] Error')
-        sys.exit(1)
+    MORE_VERBOSE = args.more_verbose
+    if MORE_VERBOSE == 1:
+        VERBOSE = 2
+
+    return IPADDR, VERBOSE, GW, FILE
 
 
 def get_sniff_args():

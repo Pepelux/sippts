@@ -16,6 +16,7 @@ import ipaddress
 import threading
 import platform
 import socket
+from IPy import IP
 from lib.functions import get_machine_default_ip, ip2long, get_default_gateway_linux, get_default_gateway_mac, enable_ip_route, disable_ip_route, ip2long, long2ip
 from lib.color import Color
 
@@ -25,6 +26,7 @@ class ArpSpoof:
         self.ip = '-'
         self.gw = ''
         self.verbose = '0'
+        self.file = ''
         self.ips = []
         self.dropped_ips = []
 
@@ -36,8 +38,8 @@ class ArpSpoof:
     #     print("I'm being automatically destroyed. Goodbye!")
 
     def signal_handler(self, sig, frame):
-        print(self.c.BYELLOW + 'You pressed Ctrl+C!')
-        print(self.c.BWHITE + '\nRestoring ARP tables ...')
+        print(self.c.BYELLOW + 'You pressed Ctrl+C!\n' + self.c.WHITE)
+        print(self.c.BWHITE + 'Restoring ARP tables ...')
         print(self.c.WHITE)
 
         self.stop()
@@ -51,17 +53,13 @@ class ArpSpoof:
         if self.verbose == None:
             self.verbose = 0
 
-        print(self.c.BWHITE + '[!] Operating System: %s' % ops)
-        print(self.c.BWHITE + '[!] Current User: %s' % current_user)
-        print(self.c.WHITE)
-
         if ops == 'Linux' and current_user != 'root':
             print(self.c.WHITE + 'You must be ' + self.c.RED +
                   'root' + self.c.WHITE + ' to use this module')
             return
 
         signal.signal(signal.SIGINT, self.signal_handler)
-        print(self.c.BYELLOW + '\nPress Ctrl+C to stop\n')
+        print(self.c.BYELLOW + '\nPress Ctrl+C to stop')
         print(self.c.WHITE)
 
         # my IP address
@@ -73,34 +71,82 @@ class ArpSpoof:
             if ops == 'Darwin':
                 self.gw = get_default_gateway_mac().strip()
 
+        print(self.c.BWHITE + '[!] Operating System: ' + self.c.GREEN + '%s' % ops)
+        print(self.c.BWHITE + '[!] Current User: ' + self.c.GREEN + '%s' % current_user)
+        print(self.c.BWHITE + '[!] Local IP address: ' + self.c.GREEN + '%s' % local_ip)
+        print(self.c.BWHITE + '[!] Target IP/range: ' + self.c.GREEN + '%s' % self.ip)
+        print(self.c.BWHITE + '[!] Gateway: ' + self.c.GREEN + '%s' % self.gw)
+        print(self.c.WHITE)
+
         enable_ip_route()
 
-        hosts = []
-        for i in self.ip.split(','):
+        if self.file != '':
             try:
-                i = socket.gethostbyname(i)
+                with open(self.file) as f:
+                    line = f.readline()
+                    line = line.replace('\n', '')
+                    hosts = []
+
+                    while (line):
+                        if self.run == True:
+                            try:
+                                i = socket.gethostbyname(line)
+                            except:
+                                pass
+                            hlist = list(ipaddress.ip_network(str(i)).hosts())
+
+                            if hlist == []:
+                                hosts.append(i)
+                            else:
+                                for h in hlist:
+                                    hosts.append(h)
+
+                            last = len(hosts)-1
+                            start_ip = hosts[0]
+                            end_ip = hosts[last]
+
+                            ipini = int(ip2long(str(start_ip)))
+                            ipend = int(ip2long(str(end_ip)))
+
+                            for ip in range(ipini, ipend+1):
+                                # if ip != local_ip:
+                                if ip != local_ip and ip != self.gw:
+                                    self.ips.append(long2ip(ip))
+                                    self.ips.append('')
+
+                        line = f.readline()
+
+                f.close()
             except:
-                pass
-            hlist = list(ipaddress.ip_network(str(i)).hosts())
+                print('Error reading file %s' % self.file)
+                exit()
+        else:
+            hosts = []
+            for i in self.ip.split(','):
+                try:
+                    i = socket.gethostbyname(i)
+                except:
+                    pass
+                hlist = list(ipaddress.ip_network(str(i)).hosts())
 
-            if hlist == []:
-                hosts.append(i)
-            else:
-                for h in hlist:
-                    hosts.append(h)
+                if hlist == []:
+                    hosts.append(i)
+                else:
+                    for h in hlist:
+                        hosts.append(h)
 
-            last = len(hosts)-1
-            start_ip = hosts[0]
-            end_ip = hosts[last]
+                last = len(hosts)-1
+                start_ip = hosts[0]
+                end_ip = hosts[last]
 
-            ipini = int(ip2long(str(start_ip)))
-            ipend = int(ip2long(str(end_ip)))
+                ipini = int(ip2long(str(start_ip)))
+                ipend = int(ip2long(str(end_ip)))
 
-            for ip in range(ipini, ipend+1):
-                # if ip != local_ip:
-                if ip != local_ip and ip != self.gw:
-                    self.ips.append(long2ip(ip))
-                    self.ips.append('')
+                for ip in range(ipini, ipend+1):
+                    # if ip != local_ip:
+                    if ip != local_ip and ip != self.gw:
+                        self.ips.append(long2ip(ip))
+                        self.ips.append('')
 
         threads = list()
 
@@ -175,7 +221,7 @@ class ArpSpoof:
             # get the MAC address of the default interface we are using
             self_mac = ARP().hwsrc
             print(
-                self.c.YELLOW + "[+] Sent to {} : {} is-at {}".format(target_ip, host_ip, self_mac))
+                self.c.YELLOW + "[+] Sent restoring to {} : {} is-at {}".format(target_ip, host_ip, self_mac) + self.c.WHITE)
 
     def restore(self, target_ip, host_ip, verbose=1):
         """
@@ -196,7 +242,7 @@ class ArpSpoof:
         send(arp_response, verbose=0, count=7)
         if verbose > 0:
             print(
-                self.c.YELLOW + "[-] Sent to {} : {} is-at {}".format(target_ip, host_ip, host_mac))
+                self.c.GREEN + "[-] Sent poisoning to {} : {} is-at {}".format(target_ip, host_ip, host_mac) + self.c.WHITE)
 
     def start_spoof(self, target_ip, gw_ip, target_mac, verbose):
         if verbose > 0:
@@ -207,16 +253,16 @@ class ArpSpoof:
 
             if target_mac == None:
                 print(
-                    self.c.RED + '[!] Error getting the target MAC address for IP: %s' % target_ip)
+                    self.c.RED + '[!] Error getting the target MAC address for IP: %s' % target_ip + self.c.WHITE)
                 self.dropped_ips.append(target_ip)
                 return
             if gw_mac == None:
                 print(
-                    self.c.RED + '[!] Error getting the gateway MAC address for IP: %s' % gw_ip)
+                    self.c.RED + '[!] Error getting the gateway MAC address for IP: %s' % gw_ip + self.c.WHITE)
                 return
 
             print(self.c.YELLOW + "[+] Start ARP spoof between %s (%s) and %s (%s)" %
-                  (target_ip, target_mac, gw_ip, gw_mac))
+                  (target_ip, target_mac, gw_ip, gw_mac) + self.c.WHITE)
 
         while self.run == True:
             # telling the `target` that we are the `gw`
