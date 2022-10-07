@@ -37,6 +37,8 @@ class SipDigestCrack:
 
         self.run = True
 
+        self.found = []
+
         self.c = Color()
 
     def start(self):
@@ -74,6 +76,9 @@ class SipDigestCrack:
         t.start()
         t.join()
 
+        self.found.sort()
+        self.print()
+
     def signal_handler(self, sig, frame):
         print(self.c.BYELLOW + 'You pressed Ctrl+C!')
         print(self.c.BWHITE + '\nStopping sipcrack ...')
@@ -93,10 +98,10 @@ class SipDigestCrack:
                 line = f.readline()
 
                 print(self.c.BWHITE + '[!]' + self.c.WHITE + ' Using wordlist: ' +
-                        self.c.GREEN + '%s' % self.wordlist + self.c.WHITE)
+                      self.c.GREEN + '%s' % self.wordlist + self.c.WHITE)
                 print(self.c.BWHITE + '[!]' + self.c.WHITE + ' Hashes file: ' +
-                        self.c.GREEN + '%s' % self.file + self.c.WHITE)
-                
+                      self.c.GREEN + '%s' % self.file + self.c.WHITE)
+
                 rows = []
 
                 while line:
@@ -122,10 +127,11 @@ class SipDigestCrack:
                     row = '%s#%s#%s#%s' % (ipsrc, ipdst, username, realm)
 
                     if row in rows:
-                        print('username %s@%s already checked' % (username, ipdst))
+                        print(self.c.YELLOW + 'username %s@%s already checked' %
+                              (username, ipdst) + self.c.WHITE)
                     else:
                         print(self.c.BYELLOW+'[+] Trying to crack hash %s of the user %s ...' %
-                            (response, username))
+                              (response, username))
 
                         word_start = ''
 
@@ -150,11 +156,13 @@ class SipDigestCrack:
                             pass
 
                         pwd = self.crack(response, username, realm, method,
-                                        uri, nonce, algorithm, cnonce, nc, qop, word_start)
+                                         uri, nonce, algorithm, cnonce, nc, qop, word_start)
 
                         if pwd != '':
                             print(self.c.GREEN+'[-] Cleartext password for user %s is %s' %
-                                (username, pwd))
+                                  (username, pwd))
+                            self.found.append('%s###%s###%s###%s' % (
+                                ipsrc, ipdst, username, pwd))
                         else:
                             print(
                                 self.c.RED+'[-] Password not found. Try with another wordlist')
@@ -238,10 +246,16 @@ class SipDigestCrack:
                 START_VALUE = self.check_value(word_start, self.chars)
 
                 for n in range(int(self.min), int(self.max)+1):
+                    if self.run == False:
+                        return ''
+
                     xs = itertools.product(self.chars, repeat=n)
                     combos = itertools.islice(xs, START_VALUE, None)
 
                     for i, pwd in enumerate(combos, start=START_VALUE):
+                        if self.run == False:
+                            return ''
+
                         pwd = ''.join(pwd)
                         pwd = '%s%s%s' % (self.prefix, pwd, self.suffix)
                         pwd = pwd.replace('\n', '')
@@ -253,7 +267,8 @@ class SipDigestCrack:
                             word_start = ''
                             if self.verbose == 1:
                                 print(self.c.WHITE+'Password: %s' % pwd)
-                                print(self.c.WHITE+'Expected hash: %s' % response)
+                                print(self.c.WHITE+'Expected hash: %s' %
+                                      response)
                             if response == calculateHash(username, realm, pwd, method, uri, nonce, algorithm, cnonce, nc, qop, self.verbose, ''):
                                 self.save_file(self.wordlist, username, pwd)
                                 return pwd
@@ -305,11 +320,14 @@ class SipDigestCrack:
                             if word_start == '' or word_start == pwd:
                                 word_start = ''
                                 if self.verbose == 1:
-                                    print(self.c.WHITE+'Password: %s' % pwd.ljust(50))
-                                    print(self.c.WHITE+'Expected hash: %s' % (response))
+                                    print(self.c.WHITE+'Password: %s' %
+                                          pwd.ljust(50))
+                                    print(self.c.WHITE+'Expected hash: %s' %
+                                          (response))
                                 if response == calculateHash(username, realm, pwd, method, uri, nonce, algorithm, cnonce, nc, qop, self.verbose, ''):
                                     fd.close()
-                                    self.save_file(self.wordlist, username, pwd)
+                                    self.save_file(
+                                        self.wordlist, username, pwd)
                                     return pwd
                     except KeyboardInterrupt:
                         fd.close()
@@ -326,3 +344,53 @@ class SipDigestCrack:
 
         self.save_file(self.wordlist, username, pwd)
         return ''
+
+    def print(self):
+        slen = len('Source IP')
+        dlen = len('Destination IP')
+        ulen = len('Username')
+        plen = len('Password')
+
+        for x in self.found:
+            (s, d, u, p) = x.split('###')
+            if len(s) > slen:
+                slen = len(s)
+            if len(d) > dlen:
+                dlen = len(d)
+            if len(u) > ulen:
+                ulen = len(u)
+            if len(p) > plen:
+                plen = len(p)
+
+        tlen = slen+dlen+ulen+plen+11
+
+        print(self.c.WHITE + '\n ' + '-' * tlen)
+        print(self.c.WHITE +
+              '| ' + self.c.BWHITE + 'Source IP'.ljust(slen) + self.c.WHITE +
+              ' | ' + self.c.BWHITE + 'Destination IP'.ljust(dlen) + self.c.WHITE +
+              ' | ' + self.c.BWHITE + 'Username'.ljust(ulen) + self.c.WHITE +
+              ' | ' + self.c.BWHITE + 'Password'.ljust(plen) + self.c.WHITE + ' |')
+        print(self.c.WHITE + ' ' + '-' * tlen)
+
+        if len(self.found) == 0:
+            print(self.c.WHITE + '| ' + self.c.WHITE +
+                  'Nothing found'.ljust(tlen-2) + ' |')
+        else:
+            for x in self.found:
+                (ip, port, proto, res) = x.split('###')
+
+                if res == 'No Auth Digest received :(':
+                    colorres = self.c.RED
+                else:
+                    colorres = self.c.BLUE
+
+                print(self.c.WHITE +
+                      '| ' + self.c.BGREEN + '%s' % ip.ljust(slen) + self.c.WHITE +
+                      ' | ' + self.c.YELLOW + '%s' % port.ljust(dlen) + self.c.WHITE +
+                      ' | ' + self.c.YELLOW + '%s' % proto.ljust(ulen) + self.c.WHITE +
+                      ' | ' + colorres + '%s' % res.ljust(plen) + self.c.WHITE + ' |')
+
+        print(self.c.WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE)
+
+        self.found.clear()
