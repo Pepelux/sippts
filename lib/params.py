@@ -61,8 +61,9 @@ UDP, TCP and TLS protocols.
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
     parser.add_argument('-vv', '--more_verbose', help='Increase more verbosity', dest='more_verbose', action="count")
     parser.add_argument('-f', '--file', type=str, help='File with several IPs or network ranges', dest='file', default='')
-    parser.add_argument('--nocolor', help='Show result without colors', dest='nocolor', action="count")
+    parser.add_argument('-nocolor', help='Show result without colors', dest='nocolor', action="count")
     parser.add_argument('-o', '--output-file', type=str, help='Save data into a log file', dest='ofile', default='')
+    parser.add_argument('-save_ips', type=str, help='Save found services into a file (format: ip:port/proto)', dest='ipfile', default='')
     parser.add_argument('-fp', help='Try to fingerprinting', dest='fp', action="count")
 
     # Array for all arguments passed to script
@@ -98,8 +99,9 @@ UDP, TCP and TLS protocols.
         NOCOLOR = args.nocolor
         OFILE = args.ofile
         FP = args.fp
+        IPFILE = args.ipfile
 
-        return IPADDR, HOST, PORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, THREADS, VERBOSE, PING, FILE, NOCOLOR, OFILE, FP
+        return IPADDR, HOST, PORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, THREADS, VERBOSE, PING, FILE, NOCOLOR, OFILE, FP, IPFILE
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -140,7 +142,7 @@ or not. Sipexten uses multithread and can check several IPs and port ranges.
     parser.add_argument('-th', '--threads', type=int, help='Number of threads (default: 200)', dest='threads', default=200)
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
     parser.add_argument('-vv', '--more_verbose', help='Increase more verbosity', dest='more_verbose', action="count")
-    parser.add_argument('--nocolor', help='Show result without colors', dest='nocolor', action="count")
+    parser.add_argument('-nocolor', help='Show result without colors', dest='nocolor', action="count")
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -205,7 +207,7 @@ passwords for several users using bruteforce.
     parser.add_argument('-w', '--wordlist', help='Wordlist for bruteforce', dest='wordlist', default="", required=True)
     parser.add_argument('-th', '--threads', type=int, help='Number of threads (default: 100)', dest='threads', default=100)
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
-    parser.add_argument('--nocolor', help='Show result without colors', dest='nocolor', action="count")
+    parser.add_argument('-nocolor', help='Show result without colors', dest='nocolor', action="count")
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -257,7 +259,7 @@ possible and can recover most passwords based on the challenge response.
 ''')
 
     # Add arguments
-    parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
+    parser.add_argument('-i', '--ip', type=str, help='Host/IP address/network (ex: mysipserver.com | 192.168.0.10 | 192.168.0.0/24)', dest="ipaddr", default='')
     parser.add_argument('-r', '--remote_port', type=int, help='Remote port (default: 5060)', dest='rport', default=5060)
     parser.add_argument('-p', '--proto', type=str, help='Protocol: udp|tcp (default: udp)', dest='proto', default='udp')
     parser.add_argument('-d', '--domain', type=str, help='SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)', dest='domain', default='')
@@ -277,9 +279,16 @@ possible and can recover most passwords based on the challenge response.
     parser.add_argument('--sdp', help='Send SDP in INVITE messages', dest='sdp', action="count")
     parser.add_argument('--sdes', help='Send SDES in SDP', dest='sdes', action="count")
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
+    parser.add_argument('-f', '--file', type=str, help='File with several IPs (format: ip:port/proto ... one per line)', dest='file', default='')
+    parser.add_argument('-ping', help='Ping host before send attack', dest='ping', action="count")
 
     # Array for all arguments passed to script
     args = parser.parse_args()
+
+    if not args.ipaddr and not args.file:
+        print(
+            'error: one of the following arguments are required: -i/--ip, -f/--file')
+        sys.exit()
 
     try:
         IPADDR = args.ipaddr
@@ -303,8 +312,10 @@ possible and can recover most passwords based on the challenge response.
         SDP = args.sdp
         SDES = args.sdes
         VERBOSE = args.verbose
+        FILE = args.file
+        PING = args.ping
 
-        return IPADDR, HOST, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, LOCALIP, OFILE, USER, PWD, AUTH, VERBOSE, SDP, SDES
+        return IPADDR, HOST, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, LOCALIP, OFILE, USER, PWD, AUTH, VERBOSE, SDP, SDES, FILE, PING
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -353,7 +364,7 @@ the call to a second external number.
     parser.add_argument('--no-sdp', help='Do not send SDP (by default is included)', dest='nosdp', action="count")
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
     parser.add_argument('--sdes', help='Use SDES in SDP protocol', dest='sdes', action="count")
-    parser.add_argument('--nocolor', help='Show result without colors', dest='nocolor', action="count")
+    parser.add_argument('-nocolor', help='Show result without colors', dest='nocolor', action="count")
     parser.add_argument('-o', '--output-file', type=str, help='Save data into a log file', dest='ofile', default='')
 
     # Array for all arguments passed to script
@@ -504,7 +515,7 @@ SIP Send allow us to send a customized SIP message and analyze the response.
     parser.add_argument('--sdes', help='Use SDES in SDP protocol', dest='sdes', action="count")
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
     parser.add_argument('--local-ip', type=str, help='Set local IP address (by default try to get it)', dest='localip', default='')
-    parser.add_argument('--nocolor', help='Show result without colors', dest='nocolor', action="count")
+    parser.add_argument('-nocolor', help='Show result without colors', dest='nocolor', action="count")
     parser.add_argument('-o', '--output-file', type=str, help='Save data into a log file', dest='ofile', default='')
 
     # Array for all arguments passed to script
@@ -902,7 +913,7 @@ rtp                 Show all RTP streams
     parser.add_argument('-rtp_extract', help='Extract RTP streams. Ex: --rtp_extract -p 1210 -o rtp.pcap', dest='rtpextract', action="count")
     parser.add_argument('-rport', type=str, help='RTP port to extract streams', dest='rtpport', default="")
     parser.add_argument('-o', '--output-file', type=str, help='Save RTP streams into a PCAP file', dest='ofile', default="")
-    parser.add_argument('--nocolor', help='Show result without colors', dest='nocolor', action="count")
+    parser.add_argument('-nocolor', help='Show result without colors', dest='nocolor', action="count")
 
     # Array for all arguments passed to script
     args = parser.parse_args()

@@ -42,6 +42,7 @@ class SipScan:
         self.nocolor = ''
         self.ofile = ''
         self.fp = '0'
+        self.ipfile = ''
 
         self.found = []
         self.line = ['-', '\\', '|', '/']
@@ -49,9 +50,6 @@ class SipScan:
         self.quit = False
 
         self.c = Color()
-
-    # def __del__(self):
-    #     print('SIPScan destruido')
 
     def start(self):
         supported_protos = ['UDP', 'TCP', 'TLS']
@@ -528,6 +526,9 @@ class SipScan:
                 f.write('| Nothing found'.ljust(tlen-2) + ' |')
                 f.write('\n')
         else:
+            if self.ipfile != '':
+                ipf = open(self.ipfile, 'w')
+
             for x in self.found:
                 (ip, port, proto, res, ua, type, fp) = x.split('###')
 
@@ -568,11 +569,18 @@ class SipScan:
                                 ' | %s' % type.ljust(tplen) + ' |')
                         f.write('\n')
 
+                if self.ipfile != '':
+                    ipf.write('%s:%s/%s\n' % (ip, port, proto))
+
+            if self.ipfile != '':
+                ipf.close()
+
         print(self.c.WHITE + ' ' + '-' * tlen)
         print(self.c.WHITE)
 
         if self.fp == 1 and len(self.found) > 0:
-            print(self.c.YELLOW + '[!] Fingerprinting is based on `To-tag` and other header values. The result may not be correct\n' + self.c.WHITE)
+            print(self.c.YELLOW +
+                  '[!] Fingerprinting is based on `To-tag` and other header values. The result may not be correct\n' + self.c.WHITE)
 
         if self.ofile != '':
             f.write(' ' + '-' * tlen)
