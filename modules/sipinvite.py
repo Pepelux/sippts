@@ -423,20 +423,6 @@ class SipInvite:
             else:
                 destinations.append(p)
 
-        # SIP headers
-        if self.domain == '':
-            self.domain = self.host
-        if self.domain == '':
-            self.domain = self.ip
-        if self.from_domain == '':
-            self.from_domain = self.domain
-        if self.to_domain == '':
-            self.to_domain = self.domain
-        if self.contact_domain == '':
-            self.contact_domain = local_ip
-        if self.nosdp != None and self.nosdp == 1:
-            self.sdp = 0
-
         # threads to use
         nthreads = int(self.threads)
         total = len(list(product(origin, destinations)))
@@ -475,6 +461,20 @@ class SipInvite:
         print(self.c.BWHITE + '[!] Call To: ' +
               self.c.YELLOW + '%s' % self.to_user)
         print(self.c.WHITE)
+
+        # SIP headers
+        if self.domain == '':
+            self.domain = self.host
+        if self.domain == '':
+            self.domain = self.ip
+        if self.from_domain == '':
+            self.from_domain = self.domain
+        if self.to_domain == '':
+            self.to_domain = self.domain
+        if self.contact_domain == '':
+            self.contact_domain = local_ip
+        if self.nosdp != None and self.nosdp == 1:
+            self.sdp = 0
 
         if self.ofile != '':
             fw = open(self.ofile, 'w')
