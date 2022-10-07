@@ -543,6 +543,7 @@ class SipDigestLeak:
                         ip, port, proto)
                     self.found.append(line)
             else:
+                print(self.c.BRED + 'No Auth Digest received :(\n' + self.c.WHITE)
                 line = '%s###%d###%s###%s %s' % (
                     ip, port, proto, headers['response_code'], headers['response_text'])
                 self.found.append(line)
