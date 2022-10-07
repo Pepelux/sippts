@@ -148,7 +148,7 @@ class SipInvite:
                             headers['response_code'], headers['response_text'])
                         rescode = headers['response_code']
                         print(
-                            self.c.BWHITE + '[-] Response from %s to %s: %s' % (dst, src, response))
+                            self.c.BWHITE + '[-] Response from %s to %s: ' % (dst, src) + self.c.CYAN + '%s' % response)
                         if self.verbose == 1 and self.ofile == '':
                             print(self.c.GREEN + resp.decode())
 
