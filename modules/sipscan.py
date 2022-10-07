@@ -571,7 +571,7 @@ class SipScan:
         print(self.c.WHITE + ' ' + '-' * tlen)
         print(self.c.WHITE)
 
-        if self.fp == 1:
+        if self.fp == 1 and len(self.found) > 0:
             print(self.c.YELLOW + '[!] Fingerprinting is based on `To-tag` and other header values. The result may not be correct\n' + self.c.WHITE)
 
         if self.ofile != '':
