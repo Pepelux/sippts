@@ -134,11 +134,11 @@ class SipDigestLeak:
                     ips.append(long2ip(i))
                 else:
                     print(self.c.YELLOW + '[+] Ping %s ...' %
-                            str(long2ip(i)) + self.c.WHITE, end='\r')
+                          str(long2ip(i)) + self.c.WHITE, end='\r')
 
                     if ping(long2ip(i), '0.1') == True:
                         print(self.c.GREEN + '\n   [-] ... Pong %s' %
-                                str(long2ip(i)) + self.c.WHITE)
+                              str(long2ip(i)) + self.c.WHITE)
                         ips.append(long2ip(i))
 
             for ip in ips:
@@ -542,6 +542,10 @@ class SipDigestLeak:
                     line = '%s###%d###%s###No Auth Digest received :(' % (
                         ip, port, proto)
                     self.found.append(line)
+            else:
+                line = '%s###%d###%s###%s %s' % (
+                    ip, port, proto, headers['response_code'], headers['response_text'])
+                self.found.append(line)
         except socket.timeout:
             print(self.c.BRED + 'No Auth Digest received :(\n' + self.c.WHITE)
             line = '%s###%d###%s###No Auth Digest received :(' % (
