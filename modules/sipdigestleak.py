@@ -65,6 +65,11 @@ class SipDigestLeak:
         else:
             self.auth_code = 'WWW-Authenticate'
 
+        if self.ping == 1:
+            self.ping = 'True'
+        else:
+            self.ping = 'False'
+
         # check protocol
         if self.proto not in supported_protos:
             print(self.c.BRED + 'Protocol %s is not supported' % self.proto)
