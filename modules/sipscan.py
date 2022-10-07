@@ -169,7 +169,10 @@ class SipScan:
             for i in self.ip.split(','):
                 try:
                     i = socket.gethostbyname(i)
+                except:
+                    pass
                 
+                try:
                     hlist = list(ipaddress.ip_network(str(i)).hosts())
 
                     if hlist == []:
