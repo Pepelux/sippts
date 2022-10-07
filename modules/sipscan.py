@@ -118,41 +118,44 @@ class SipScan:
                     line = line.replace('\n', '')
 
                     while (line):
-                        if self.quit == False:
-                            try:
-                                ip = socket.gethostbyname(line)
-                                self.ip = IP(ip)
-                            except:
-                                self.ip = IP(line)
+                        try:
+                            if self.quit == False:
+                                try:
+                                    ip = socket.gethostbyname(line)
+                                    self.ip = IP(ip)
+                                except:
+                                    self.ip = IP(line)
 
-                            ips = []
-                            hosts = list(ipaddress.ip_network(
-                                str(self.ip)).hosts())
+                                ips = []
+                                hosts = list(ipaddress.ip_network(
+                                    str(self.ip)).hosts())
 
-                            if hosts == []:
-                                hosts.append(self.ip)
+                                if hosts == []:
+                                    hosts.append(self.ip)
 
-                            last = len(hosts)-1
-                            start_ip = hosts[0]
-                            end_ip = hosts[last]
+                                last = len(hosts)-1
+                                start_ip = hosts[0]
+                                end_ip = hosts[last]
 
-                            ipini = int(ip2long(str(start_ip)))
-                            ipend = int(ip2long(str(end_ip)))
+                                ipini = int(ip2long(str(start_ip)))
+                                ipend = int(ip2long(str(end_ip)))
 
-                            for i in range(ipini, ipend+1):
-                                if i != local_ip:
-                                    if self.ping == 'False':
-                                        ips.append(long2ip(i))
-                                    else:
-                                        print(self.c.YELLOW + '[+] Ping %s ...' %
-                                              str(long2ip(i)) + self.c.WHITE, end='\r')
-
-                                        if ping(long2ip(i), '0.1') == True:
-                                            print(self.c.GREEN + '\n   [-] ... Pong %s' %
-                                                  str(long2ip(i)) + self.c.WHITE)
+                                for i in range(ipini, ipend+1):
+                                    if i != local_ip:
+                                        if self.ping == 'False':
                                             ips.append(long2ip(i))
+                                        else:
+                                            print(self.c.YELLOW + '[+] Ping %s ...' %
+                                                str(long2ip(i)) + self.c.WHITE, end='\r')
 
-                            self.prepare_scan(ips, ports, protos)
+                                            if ping(long2ip(i), '0.1') == True:
+                                                print(self.c.GREEN + '\n   [-] ... Pong %s' %
+                                                    str(long2ip(i)) + self.c.WHITE)
+                                                ips.append(long2ip(i))
+
+                                self.prepare_scan(ips, ports, protos)
+                        except:
+                            pass
 
                         line = f.readline()
 
@@ -166,37 +169,38 @@ class SipScan:
             for i in self.ip.split(','):
                 try:
                     i = socket.gethostbyname(i)
+                
+                    hlist = list(ipaddress.ip_network(str(i)).hosts())
+
+                    if hlist == []:
+                        hosts.append(i)
+                    else:
+                        for h in hlist:
+                            hosts.append(h)
+
+                    last = len(hosts)-1
+                    start_ip = hosts[0]
+                    end_ip = hosts[last]
+
+                    ipini = int(ip2long(str(start_ip)))
+                    ipend = int(ip2long(str(end_ip)))
+
+                    for i in range(ipini, ipend+1):
+                        if i != local_ip:
+                            if self.ping == 'False':
+                                ips.append(long2ip(i))
+                            else:
+                                print(self.c.YELLOW + '[+] Ping %s ...' %
+                                    str(long2ip(i)) + self.c.WHITE, end='\r')
+
+                                if ping(long2ip(i), '0.1') == True:
+                                    print(self.c.GREEN + '\n   [-] ... Pong %s' %
+                                        str(long2ip(i)) + self.c.WHITE)
+                                    ips.append(long2ip(i))
+
+                    self.prepare_scan(ips, ports, protos)
                 except:
                     pass
-                hlist = list(ipaddress.ip_network(str(i)).hosts())
-
-                if hlist == []:
-                    hosts.append(i)
-                else:
-                    for h in hlist:
-                        hosts.append(h)
-
-            last = len(hosts)-1
-            start_ip = hosts[0]
-            end_ip = hosts[last]
-
-            ipini = int(ip2long(str(start_ip)))
-            ipend = int(ip2long(str(end_ip)))
-
-            for i in range(ipini, ipend+1):
-                if i != local_ip:
-                    if self.ping == 'False':
-                        ips.append(long2ip(i))
-                    else:
-                        print(self.c.YELLOW + '[+] Ping %s ...' %
-                              str(long2ip(i)) + self.c.WHITE, end='\r')
-
-                        if ping(long2ip(i), '0.1') == True:
-                            print(self.c.GREEN + '\n   [-] ... Pong %s' %
-                                  str(long2ip(i)) + self.c.WHITE)
-                            ips.append(long2ip(i))
-
-            self.prepare_scan(ips, ports, protos)
 
     def prepare_scan(self, ips, ports, protos):
         max_values = 100000
