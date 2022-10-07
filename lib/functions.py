@@ -824,6 +824,9 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[0-9]{5,10}$', tag)
         if m:
             fp.append('Aastra')
+        m = re.search('^[0-9A-F]{8}$', tag)
+        if m:
+            fp.append('CommuniGate')
 
         if tag == '12345678':
             fp.append('Alcatel')
