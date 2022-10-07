@@ -20,6 +20,7 @@ import string
 import threading
 import signal
 from lib.color import Color
+from lib.logos import Logo
 
 
 class SipDigestCrack:
@@ -65,6 +66,9 @@ class SipDigestCrack:
 
         if self.bruteforce == 1:
             self.bruteforce = 'True'
+
+        logo = Logo('sipcrack')
+        logo.print()
 
         signal.signal(signal.SIGINT, self.signal_handler)
         print(self.c.BYELLOW + '\nPress Ctrl+C to stop\n')

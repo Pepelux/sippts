@@ -33,9 +33,9 @@ def main():
     s.digest = digest
     s.verbose = verbose
     s.number = number
-    s.bad= bad
+    s.bad = bad
     s.alphabet = alphabet
-    s.max= max
+    s.max = max
     s.min = min
 
     s.start()

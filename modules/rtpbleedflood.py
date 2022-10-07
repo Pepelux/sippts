@@ -14,6 +14,7 @@ import fcntl
 import os
 import sys
 from lib.color import Color
+from lib.logos import Logo
 
 
 class RTPBleedFlood:
@@ -28,9 +29,15 @@ class RTPBleedFlood:
         self.port = int(self.port)
         self.payload = int(self.payload)
 
-        print(self.c.BWHITE + '[!] Target IP: ' + self.c.YELLOW + '%s' % self.ip)
-        print(self.c.BWHITE + '[!] Target port:' + self.c.YELLOW + ' %d' % self.port)
-        print(self.c.BWHITE + '[!] Payload type: ' + self.c.YELLOW + '%d' % self.payload)
+        logo = Logo('rtpbleedflood')
+        logo.print()
+
+        print(self.c.BWHITE + '[!] Target IP: ' +
+              self.c.YELLOW + '%s' % self.ip)
+        print(self.c.BWHITE + '[!] Target port:' +
+              self.c.YELLOW + ' %d' % self.port)
+        print(self.c.BWHITE + '[!] Payload type: ' +
+              self.c.YELLOW + '%d' % self.payload)
         print(self.c.WHITE)
 
         print(self.c.YELLOW + '[+] Sending RTP packets to %s:%d' %

@@ -9,6 +9,7 @@ __email__ = "pepeluxx@gmail.com"
 
 import os
 from lib.color import Color
+from lib.logos import Logo
 
 # https://www.wireshark.org/docs/dfref/s/sip.html
 
@@ -31,6 +32,9 @@ class SipShark:
     def start(self):
         if self.nocolor == 1:
             self.c.ansy()
+
+        logo = Logo('siptshark')
+        logo.print()
 
         if self.filter.lower()[0:6] == 'method':
             (self.filter, self.method) = self.filter.split(' ')

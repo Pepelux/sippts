@@ -16,6 +16,7 @@ import threading
 import signal
 from lib.functions import create_message, parse_message, parse_digest, ip2long, long2ip, generate_random_string, get_free_port, calculateHash
 from lib.color import Color
+from lib.logos import Logo
 from itertools import product
 from concurrent.futures import ThreadPoolExecutor
 
@@ -237,6 +238,9 @@ class SipRemoteCrack:
         if self.domain == '':
             self.domain = self.ip
 
+        logo = Logo('siprcrack')
+        logo.print()
+
         # create a list of IP addresses
         self.ips = []
         hosts = []
@@ -355,7 +359,8 @@ class SipRemoteCrack:
                                     val_exten = val2[1]
                                     to_user = '%s%s' % (self.prefix, val_exten)
 
-                                    executor.submit(self.scan_host, val_ipaddr, to_user)
+                                    executor.submit(
+                                        self.scan_host, val_ipaddr, to_user)
                     except:
                         pass
 
@@ -415,7 +420,8 @@ class SipRemoteCrack:
                                         else:
                                             auth_user = self.authuser
 
-                                        data = self.register(ipaddr, to_user, pwd)
+                                        data = self.register(
+                                            ipaddr, to_user, pwd)
 
                                         str = self.c.BYELLOW+'[%s] ' % self.line[self.pos] + self.c.BWHITE+'Scanning ' + self.c.BYELLOW+'%s:%s/%s' % (
                                             ipaddr, self.rport, self.proto) + self.c.BWHITE + ' => Exten/Pass: ' + self.c.BGREEN + '%s/%s' % (auth_user, pwd) + self.c.BBLUE + ' - %s %s' % (data['code'], data['text'])
@@ -425,7 +431,7 @@ class SipRemoteCrack:
                                             print(self.c.WHITE)
                                             pre = ''
                                             print(self.c.BWHITE + '%s' % pre + self.c.WHITE+'Password for user ' + self.c.BBLUE + '%s' %
-                                                auth_user + self.c.WHITE + ' found: ' + self.c.BRED + '%s' % pwd + self.c.WHITE)
+                                                  auth_user + self.c.WHITE + ' found: ' + self.c.BRED + '%s' % pwd + self.c.WHITE)
                                             line = '%s###%s###%s###%s###%s' % (
                                                 ipaddr, self.rport, self.proto, auth_user, pwd)
                                             self.found.append(line)

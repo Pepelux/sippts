@@ -18,6 +18,7 @@ import threading
 import time
 from lib.color import Color
 from lib.functions import create_message, get_free_port, generate_random_integer, generate_random_string
+from lib.logos import Logo
 
 
 class SipFlood:
@@ -86,6 +87,9 @@ class SipFlood:
             sys.exit()
 
         self.verbose = int(self.verbose)
+
+        logo = Logo('sipflood')
+        logo.print()
 
         signal.signal(signal.SIGINT, self.signal_handler)
         print(self.c.BYELLOW + '\nPress Ctrl+C to stop\n')

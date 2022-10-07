@@ -15,6 +15,7 @@ import re
 from IPy import IP
 from lib.functions import create_message, parse_message, get_machine_default_ip, ip2long, long2ip, get_free_port, ping, fingerprinting
 from lib.color import Color
+from lib.logos import Logo
 from itertools import product
 from concurrent.futures import ThreadPoolExecutor
 
@@ -86,6 +87,9 @@ class SipScan:
 
         if self.rport.upper() == 'ALL':
             self.rport = '1-65536'
+
+        logo = Logo('sipscan')
+        logo.print()
 
         # create a list of protocols
         protos = []

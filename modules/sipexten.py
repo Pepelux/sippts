@@ -14,6 +14,7 @@ import ssl
 import re
 from lib.functions import create_message, parse_message, ip2long, long2ip, get_free_port
 from lib.color import Color
+from lib.logos import Logo
 from itertools import product
 from concurrent.futures import ThreadPoolExecutor
 
@@ -115,6 +116,9 @@ class SipExten:
         if nthreads < 1:
             nthreads = 1
 
+        logo = Logo('sipexten')
+        logo.print()
+
         print(self.c.BWHITE+'[!] IP/Network: ' +
               self.c.GREEN + '%s' % str(self.ip))
         print(self.c.BWHITE+'[!] Port: ' + self.c.GREEN + '%s' % (self.rport))
@@ -171,11 +175,13 @@ class SipExten:
                                     val_ipaddr = val2[0]
                                     val_exten = int(val2[1])
                                     if val_exten != 0:
-                                        to_user = '%s%s' % (self.prefix, val_exten)
+                                        to_user = '%s%s' % (
+                                            self.prefix, val_exten)
                                     else:
                                         to_user = '%s' % self.prefix
 
-                                    executor.submit(self.scan_host, val_ipaddr, to_user)
+                                    executor.submit(
+                                        self.scan_host, val_ipaddr, to_user)
                     except KeyboardInterrupt:
                         print(self.c.RED + '\nYou pressed Ctrl+C!' + self.c.WHITE)
                         self.quit = True

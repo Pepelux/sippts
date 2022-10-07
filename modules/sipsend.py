@@ -12,6 +12,7 @@ import sys
 import ssl
 from lib.functions import create_message, get_free_port, parse_message, parse_digest, generate_random_string, calculateHash, get_machine_default_ip
 from lib.color import Color
+from lib.logos import Logo
 
 
 class SipSend:
@@ -81,6 +82,9 @@ class SipSend:
         except socket.error:
             print(self.c.RED + 'Failed to create socket')
             sys.exit(1)
+
+        logo = Logo('sipsend')
+        logo.print()
 
         print(self.c.BWHITE + '[!] Target: ' + self.c.YELLOW + '%s' % self.ip + self.c.WHITE + ':' +
               self.c.YELLOW + '%s' % self.rport + self.c.WHITE + '/' + self.c.YELLOW + '%s' % self.proto)

@@ -35,7 +35,7 @@ def main():
     s.pwd = pwd
     s.auth_code = auth
     s.verbose = verbose
-    s.sdp = sdp 
+    s.sdp = sdp
     s.sdes = sdes
     s.file = file
     s.ping = ping

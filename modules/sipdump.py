@@ -11,6 +11,7 @@ import os
 import re
 from lib.functions import parse_digest
 from lib.color import Color
+from lib.logos import Logo
 
 
 class SipDump:
@@ -22,6 +23,9 @@ class SipDump:
 
     def start(self):
         tmpfile = 'sipdump.tmp'
+
+        logo = Logo('sipdump')
+        logo.print()
 
         print(self.c.BWHITE+'[!] Input file: %s ...' % self.file)
         print(self.c.BWHITE+'[!] Output file: %s ...\n' % self.ofile)

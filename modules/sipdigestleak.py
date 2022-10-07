@@ -16,6 +16,7 @@ import time
 import signal
 from lib.functions import create_message, create_response_error, create_response_ok, parse_message, parse_digest, generate_random_string, get_machine_default_ip, ip2long, get_free_port, calculateHash, long2ip, ping
 from lib.color import Color
+from lib.logos import Logo
 
 
 class SipDigestLeak:
@@ -78,6 +79,9 @@ class SipDigestLeak:
         # if rport is by default but we want to scan TLS protocol, use port 5061
         if self.rport == 5060 and self.proto == 'TLS':
             self.rport = 5061
+
+        logo = Logo('sipdigestleak')
+        logo.print()
 
         signal.signal(signal.SIGINT, self.signal_handler)
         print(self.c.BYELLOW + '\nPress Ctrl+C to stop\n')
@@ -548,7 +552,8 @@ class SipDigestLeak:
                         ip, port, proto)
                     self.found.append(line)
             else:
-                print(self.c.BRED + 'No Auth Digest received :(\n' + self.c.WHITE)
+                print(self.c.BRED +
+                      'No Auth Digest received :(\n' + self.c.WHITE)
                 line = '%s###%d###%s###%s %s' % (
                     ip, port, proto, headers['response_code'], headers['response_text'])
                 self.found.append(line)

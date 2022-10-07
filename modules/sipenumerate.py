@@ -12,6 +12,7 @@ import sys
 import ssl
 from lib.functions import create_message, get_free_port, parse_message, fingerprinting
 from lib.color import Color
+from lib.logos import Logo
 from concurrent.futures import ThreadPoolExecutor
 
 
@@ -54,6 +55,9 @@ class SipEnumerate:
         if self.proto not in supported_protos:
             print(self.c.BRED + 'Protocol %s is not supported' % self.proto)
             sys.exit()
+
+        logo = Logo('sipenumerate')
+        logo.print()
 
         print(self.c.BWHITE + '[!] IP address: ' + self.c.GREEN + '%s' % str(self.ip) + self.c.WHITE +
               ':' + self.c.GREEN + '%s' % self.rport + self.c.WHITE + '/' + self.c.GREEN + '%s' % self.proto)

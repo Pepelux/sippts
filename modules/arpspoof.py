@@ -19,6 +19,7 @@ import socket
 from IPy import IP
 from lib.functions import get_machine_default_ip, ip2long, get_default_gateway_linux, get_default_gateway_mac, enable_ip_route, disable_ip_route, ip2long, long2ip
 from lib.color import Color
+from lib.logos import Logo
 
 
 class ArpSpoof:
@@ -58,6 +59,9 @@ class ArpSpoof:
                   'root' + self.c.WHITE + ' to use this module')
             return
 
+        logo = Logo('arpspoof')
+        logo.print()
+
         signal.signal(signal.SIGINT, self.signal_handler)
         print(self.c.BYELLOW + '\nPress Ctrl+C to stop')
         print(self.c.WHITE)
@@ -71,10 +75,14 @@ class ArpSpoof:
             if ops == 'Darwin':
                 self.gw = get_default_gateway_mac().strip()
 
-        print(self.c.BWHITE + '[!] Operating System: ' + self.c.GREEN + '%s' % ops)
-        print(self.c.BWHITE + '[!] Current User: ' + self.c.GREEN + '%s' % current_user)
-        print(self.c.BWHITE + '[!] Local IP address: ' + self.c.GREEN + '%s' % local_ip)
-        print(self.c.BWHITE + '[!] Target IP/range: ' + self.c.GREEN + '%s' % self.ip)
+        print(self.c.BWHITE + '[!] Operating System: ' +
+              self.c.GREEN + '%s' % ops)
+        print(self.c.BWHITE + '[!] Current User: ' +
+              self.c.GREEN + '%s' % current_user)
+        print(self.c.BWHITE + '[!] Local IP address: ' +
+              self.c.GREEN + '%s' % local_ip)
+        print(self.c.BWHITE + '[!] Target IP/range: ' +
+              self.c.GREEN + '%s' % self.ip)
         print(self.c.BWHITE + '[!] Gateway: ' + self.c.GREEN + '%s' % self.gw)
         print(self.c.WHITE)
 

@@ -18,6 +18,7 @@ import threading
 import time
 from lib.functions import parse_message, parse_digest, searchInterface
 from lib.color import Color
+from lib.logos import Logo
 
 
 class SipSniff:
@@ -66,6 +67,9 @@ class SipSniff:
 
         self.verbose = int(self.verbose)
 
+        logo = Logo('sipsniff')
+        logo.print()
+
         signal.signal(signal.SIGINT, self.signal_handler)
         print(self.c.BYELLOW + '\nPress Ctrl+C to stop')
         print(self.c.WHITE)
@@ -76,10 +80,12 @@ class SipSniff:
         else:
             networkInterface = self.dev
 
-        print(self.c.BWHITE + '[!] Listening on: ' + self.c.GREEN + '%s' % networkInterface)
+        print(self.c.BWHITE + '[!] Listening on: ' +
+              self.c.GREEN + '%s' % networkInterface)
 
         if self.proto == 'all':
-            print(self.c.BWHITE + '[!] Protocols: ' + self.c.GREEN + 'UDP, TCP, TLS')
+            print(self.c.BWHITE + '[!] Protocols: ' +
+                  self.c.GREEN + 'UDP, TCP, TLS')
         else:
             print(self.c.BWHITE + '[!] Protocol: ' + self.c.GREEN + '%s' %
                   self.proto.upper())
@@ -158,7 +164,7 @@ class SipSniff:
                             if src_port == '5061' or dst_port == '5061':
                                 if self.auth != 'True' and self.verbose != 0:
                                     print(self.c.YELLOW + 'Found TLS connection %s:%s => %s:%s' %
-                                        (src_addr, src_port, dst_addr, dst_port))
+                                          (src_addr, src_port, dst_addr, dst_port))
 
                         try:
                             msg = packet[protocol].payload_raw[0]
@@ -178,20 +184,21 @@ class SipSniff:
                                 if method != '':
                                     if self.auth != 'True' and self.verbose != 0:
                                         print(self.c.WHITE+'[%s] %s:%s => %s:%s - %s' %
-                                            (method, src_addr, src_port, dst_addr, dst_port, ua))
+                                              (method, src_addr, src_port, dst_addr, dst_port, ua))
 
                                     ip = socket.gethostbyname(sipdomain)
                                     if ip != sipdomain:
                                         if self.verbose != 0:
                                             print(self.c.BLUE + 'Found Domain %s for user %s connecting to %s:%s' %
-                                                (sipdomain, sipuser, dst_addr, dst_port))
+                                                  (sipdomain, sipuser, dst_addr, dst_port))
 
                                     try:
                                         auth = headers['auth']
                                         headers_auth = parse_digest(auth)
                                         if headers_auth:
                                             if self.verbose != 0:
-                                                print(self.c.GREEN+'Auth=%s\n' % auth)
+                                                print(self.c.GREEN +
+                                                      'Auth=%s\n' % auth)
                                     except:
                                         pass
 
@@ -204,7 +211,7 @@ class SipSniff:
                                         ipfound = '%s' % (m.group(1))
                                         if self.verbose == 2:
                                             print(self.c.WHITE+'\tFound IP %s in header Via' %
-                                                ipfound)
+                                                  ipfound)
 
                                     m = re.search(
                                         '^Route:\s\<sip:([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*', header)
@@ -212,7 +219,7 @@ class SipSniff:
                                         ipfound = '%s' % (m.group(1))
                                         if self.verbose == 2:
                                             print(self.c.WHITE+'\tFound IP %s in header Route' %
-                                                ipfound)
+                                                  ipfound)
 
                                     m = re.search(
                                         '^Record-Route:\s\<sip:([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*', header)
@@ -235,7 +242,7 @@ class SipSniff:
                                         ipfound = socket.gethostbyname(ipfound)
                                         if self.verbose == 2:
                                             print(self.c.WHITE+'\tFound IP %s in header From' %
-                                                ipfound)
+                                                  ipfound)
 
                                     m = re.search(
                                         '^To:\s\"*(.*)\"*\s*\<[sip|sips]+:(.*)\@(.*)>.*', header)
@@ -252,7 +259,7 @@ class SipSniff:
 
                                         if self.verbose == 2:
                                             print(self.c.WHITE+'\tFound IP %s in header To' %
-                                                ipfound)
+                                                  ipfound)
 
                                     m = re.search(
                                         '^Contact:\s\<sip:(.*)\@(.*)>.*>', header)
@@ -269,7 +276,7 @@ class SipSniff:
 
                                         if self.verbose == 2:
                                             print(self.c.WHITE+'\tFound user %s from IP %s:%s to IP %s:%s in header Contact' %
-                                                (userfound, ipfound, portfound, dst_addr, dst_port))
+                                                  (userfound, ipfound, portfound, dst_addr, dst_port))
 
                         except:
                             # Non ASCII data

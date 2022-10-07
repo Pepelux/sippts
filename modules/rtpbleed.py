@@ -15,6 +15,7 @@ import os
 import sys
 import time
 from lib.color import Color
+from lib.logos import Logo
 
 
 class RTPBleed:
@@ -35,10 +36,15 @@ class RTPBleed:
         self.payload = int(self.payload)
         self.delay = int(self.delay)
 
-        print(self.c.BWHITE + '[!] Target IP: ' + self.c.YELLOW + '%s' % self.ip)
+        logo = Logo('rtpbleed')
+        logo.print()
+
+        print(self.c.BWHITE + '[!] Target IP: ' +
+              self.c.YELLOW + '%s' % self.ip)
         print(self.c.BWHITE + '[!] Port range:' + self.c.YELLOW + ' %d' %
               self.start_port + self.c.WHITE + '-' + self.c.YELLOW + '%d' % self.end_port)
-        print(self.c.BWHITE + '[!] Payload type: ' + self.c.YELLOW + '%d' % self.payload)
+        print(self.c.BWHITE + '[!] Payload type: ' +
+              self.c.YELLOW + '%d' % self.payload)
         print(self.c.BWHITE + '[!] Number of tries per port: ' +
               self.c.YELLOW + '%d' % self.loops)
         print(self.c.BWHITE + '[!] Delay between tries: ' +

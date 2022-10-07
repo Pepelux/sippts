@@ -33,6 +33,7 @@ from concurrent.futures import ThreadPoolExecutor
 from itertools import product
 from lib.functions import create_message, create_response_ok, parse_message, generate_random_string, get_machine_default_ip, parse_digest, calculateHash, get_free_port
 from lib.color import Color
+from lib.logos import Logo
 
 
 class SipInvite:
@@ -402,6 +403,9 @@ class SipInvite:
             local_ip = get_machine_default_ip()
 
         self.ip = str(self.ip)
+
+        logo = Logo('sipinvite')
+        logo.print()
 
         # create a list of callers
         origin = []
