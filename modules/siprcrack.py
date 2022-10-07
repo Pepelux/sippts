@@ -183,10 +183,16 @@ class SipRemoteCrack:
                 return data
             except socket.timeout:
                 print('Socket timeout error')
-                pass
+                if self.run == True:
+                    exit()
+                else:
+                    pass
             except:
                 print('Socket error')
-                pass
+                if self.run == True:
+                    exit()
+                else:
+                    pass
             finally:
                 sock.close()
 
