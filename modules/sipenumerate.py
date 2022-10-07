@@ -107,7 +107,6 @@ class SipEnumerate:
 
         self.print()
 
-
     def send(self, method):
         if self.quit == False:
             try:
@@ -145,11 +144,11 @@ class SipEnumerate:
                 exit()
 
             msg = create_message(method, self.contact_domain, self.from_user, self.from_name, self.domain,
-                                    self.to_user, self.to_name, self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', '')
+                                 self.to_user, self.to_name, self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', '')
 
             if self.verbose == 1:
                 print(self.c.BWHITE + '[+] Sending to %s:%s/%s ...' %
-                        (self.ip, self.rport, self.proto))
+                      (self.ip, self.rport, self.proto))
                 print(self.c.YELLOW + msg)
 
             try:
@@ -179,14 +178,17 @@ class SipEnumerate:
 
                         if resdata != '':
                             resdata = resdata + self.c.WHITE + ' / '
-                        resdata = resdata + self.c.YELLOW + '%s %s' % (rescode, restext) + self.c.WHITE + ' (User-Agent: %s)' % ua
-                        
+                        resdata = resdata + self.c.YELLOW + \
+                            '%s %s' % (rescode, restext) + \
+                            self.c.WHITE + ' (User-Agent: %s)' % ua
+
                 if self.verbose == 1:
                     print(self.c.BWHITE + '[+] Receiving from %s:%d ...' %
-                            (self.ip, self.rport))
+                          (self.ip, self.rport))
                     print(self.c.GREEN + resp.decode())
                 else:
-                    print(self.c.BCYAN + '%s' % method + self.c.WHITE + ' => %s' % resdata)
+                    print(self.c.BCYAN + '%s' %
+                          method + self.c.WHITE + ' => %s' % resdata)
 
                 fps = fingerprinting(method, resp.decode(), headers)
 
@@ -200,20 +202,21 @@ class SipEnumerate:
                 if fp[0:1] == '/':
                     fp = fp[1:]
 
-                line = '%s###%s %s###%s###%s' % (method, rescode, restext, ua, fp)
+                line = '%s###%s %s###%s###%s' % (
+                    method, rescode, restext, ua, fp)
                 self.found.append(line)
             except KeyboardInterrupt:
                 print(self.c.RED + '\nYou pressed Ctrl+C!' + self.c.WHITE)
                 self.quit = True
             except socket.timeout:
-                print(self.c.BGREEN + '%s' % method + self.c.RED + ' => Timeout error')
+                print(self.c.BGREEN + '%s' %
+                      method + self.c.RED + ' => Timeout error')
                 pass
             except:
                 print(self.c.BGREEN + '%s' % method + self.c.RED + ' => Error')
                 pass
 
             sock.close()
-
 
     def print(self):
         mlen = len('Method')
@@ -237,10 +240,10 @@ class SipEnumerate:
         print(self.c.WHITE)
         print(self.c.WHITE + ' ' + '-' * tlen)
         print(self.c.WHITE +
-                '| ' + self.c.BWHITE + 'Method'.ljust(mlen) + self.c.WHITE +
-                ' | ' + self.c.BWHITE + 'Response'.ljust(rlen) + self.c.WHITE +
-                ' | ' + self.c.BWHITE + 'User-Agent'.ljust(ualen) + self.c.WHITE +
-                ' | ' + self.c.BWHITE + 'Fingerprinting'.ljust(fplen) + self.c.WHITE + ' |')
+              '| ' + self.c.BWHITE + 'Method'.ljust(mlen) + self.c.WHITE +
+              ' | ' + self.c.BWHITE + 'Response'.ljust(rlen) + self.c.WHITE +
+              ' | ' + self.c.BWHITE + 'User-Agent'.ljust(ualen) + self.c.WHITE +
+              ' | ' + self.c.BWHITE + 'Fingerprinting'.ljust(fplen) + self.c.WHITE + ' |')
         print(self.c.WHITE + ' ' + '-' * tlen)
 
         if len(self.found) == 0:
@@ -251,14 +254,16 @@ class SipEnumerate:
                 (m, r, ua, fp) = x.split('###')
 
                 print(self.c.WHITE +
-                        '| ' + self.c.BCYAN + '%s' % m.ljust(mlen) + self.c.WHITE +
-                        ' | ' + self.c.GREEN + '%s' % r.ljust(rlen) + self.c.WHITE +
-                        ' | ' + self.c.YELLOW + '%s' % ua.ljust(ualen) + self.c.WHITE +
-                        ' | ' + self.c.GREEN + '%s' % fp.ljust(fplen) + self.c.WHITE + ' |')
+                      '| ' + self.c.BCYAN + '%s' % m.ljust(mlen) + self.c.WHITE +
+                      ' | ' + self.c.GREEN + '%s' % r.ljust(rlen) + self.c.WHITE +
+                      ' | ' + self.c.YELLOW + '%s' % ua.ljust(ualen) + self.c.WHITE +
+                      ' | ' + self.c.GREEN + '%s' % fp.ljust(fplen) + self.c.WHITE + ' |')
 
         print(self.c.WHITE + ' ' + '-' * tlen)
         print(self.c.WHITE)
 
-        print(self.c.YELLOW + '[!] Fingerprinting is based on `To-tag` and other header values. The result may not be correct\n' + self.c.WHITE)
+        if len(self.found) > 0:
+            print(self.c.YELLOW +
+                  '[!] Fingerprinting is based on `To-tag` and other header values. The result may not be correct\n' + self.c.WHITE)
 
         self.found.clear()
