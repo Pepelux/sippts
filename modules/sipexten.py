@@ -250,17 +250,28 @@ class SipExten:
                           (ipaddr, self.rport, self.proto))
                     print(self.c.WHITE+msg)
 
-                if self.proto == 'TLS':
-                    (resp, addr) = sock_ssl.recv(4096)
-                    (ipaddr, rport) = host
-                else:
-                    (resp, addr) = sock.recvfrom(4096)
-                    (ipaddr, rport) = addr
+                rescode = '100'
 
-                if self.verbose == 2:
-                    print(self.c.WHITE+'[+] Receiving from %s:%d ...' %
-                          (ipaddr, rport))
-                    print(self.c.WHITE+resp.decode())
+                while rescode[:1] == '1':
+                    # receive temporary code
+                    if self.proto == 'TLS':
+                        (resp, addr) = sock_ssl.recv(4096)
+                        (ipaddr, rport) = host
+                    else:
+                        (resp, addr) = sock.recvfrom(4096)
+                        (ipaddr, rport) = addr
+
+                    headers = parse_message(resp.decode())
+
+                    if headers:
+                        response = '%s %s' % (
+                            headers['response_code'], headers['response_text'])
+                        rescode = headers['response_code']
+
+                        if self.verbose == 2:
+                            print(self.c.BWHITE + '[-] Receiving from %s:%s/%s ...' %
+                                (ipaddr, rport, self.proto))
+                            print(self.c.GREEN + resp.decode() + self.c.WHITE)
 
                 headers = parse_message(resp.decode())
 

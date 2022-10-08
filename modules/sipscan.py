@@ -393,17 +393,28 @@ class SipScan:
                           (ipaddr, port, proto))
                     print(self.c.YELLOW + msg)
 
-                if proto == 'TLS':
-                    resp = sock_ssl.recv(4096)
-                    (ip, rport) = host
-                else:
-                    (resp, addr) = sock.recvfrom(4096)
-                    (ip, rport) = addr
+                rescode = '100'
 
-                if self.verbose == 2:
-                    print(self.c.BWHITE + '[+] Receiving from %s:%d ...' %
-                          (ip, rport))
-                    print(self.c.GREEN + resp.decode())
+                while rescode[:1] == '1':
+                    # receive temporary code
+                    if self.proto == 'TLS':
+                        (resp, addr) = sock_ssl.recv(4096)
+                        (ip, rport) = host
+                    else:
+                        (resp, addr) = sock.recvfrom(4096)
+                        (ip, rport) = addr
+
+                    headers = parse_message(resp.decode())
+
+                    if headers:
+                        response = '%s %s' % (
+                            headers['response_code'], headers['response_text'])
+                        rescode = headers['response_code']
+
+                        if self.verbose == 2:
+                            print(self.c.BWHITE + '[-] Receiving from %s:%s/%s ...' %
+                                (ipaddr, rport, self.proto))
+                            print(self.c.GREEN + resp.decode() + self.c.WHITE)
 
                 headers = parse_message(resp.decode())
 
