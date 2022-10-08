@@ -761,6 +761,18 @@ def fingerprinting(method, msg, headers):
             fp.append('Comrex')
             fp.append('OXO')
             fp.append('InterVideo')
+        m = re.search('^[0-9a-f]{2}-[0-9]{9,10}$', tag)
+        if m:
+            fp.append('Sercomm Router')
+        m = re.search('^[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{1}-[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{6}$', tag)
+        if m:
+            fp.append('Matrix')
+        m = re.search('^[0-9a-f]{8}-[0-9a-f]{12}-[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{7}$', tag)
+        if m:
+            fp.append('Matrix')
+        m = re.search('^[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{8}$', tag)
+        if m:
+            fp.append('Matrix')
 
         if tag == '123456':
             fp.append('Alcatel')
@@ -828,6 +840,9 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[0-9A-F]{8}$', tag)
         if m:
             fp.append('CommuniGate')
+        m = re.search('^[0-9A-F]{24}$', tag)
+        if m:
+            fp.append('NEC')
 
         if tag == '12345678':
             fp.append('Alcatel')
