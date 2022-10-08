@@ -791,7 +791,7 @@ def fingerprinting(method, msg, headers):
         m = re.search('^as[0-9a-f]{8}$', tag)
         if m:
             fp.append('Asterisk PBX')
-        m = re.search('^[0-9a-f]{8}$', tag)
+        m = re.search('^[0-9a-z]{71}$', tag)
         if m:
             fp.append('Asterisk PBX')
         m = re.search('^[a-f0-9]{32}.[a-f0-9]{2,8}$', tag)
