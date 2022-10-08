@@ -62,7 +62,7 @@ UDP, TCP and TLS protocols.
     parser.add_argument('-vv', '--more_verbose', help='Increase more verbosity', dest='more_verbose', action="count")
     parser.add_argument('-f', '--file', type=str, help='File with several IPs or network ranges', dest='file', default='')
     parser.add_argument('-nocolor', help='Show result without colors', dest='nocolor', action="count")
-    parser.add_argument('-o', '--output-file', type=str, help='Save data into a log file', dest='ofile', default='')
+    parser.add_argument('-o', '--output_file', type=str, help='Save data into a log file', dest='ofile', default='')
     parser.add_argument('-save_ips', type=str, help='Save found services into a file (format: ip:port/proto)', dest='ipfile', default='')
     parser.add_argument('-fp', help='Try to fingerprinting', dest='fp', action="count")
 
@@ -271,7 +271,7 @@ possible and can recover most passwords based on the challenge response.
     parser.add_argument('-tu', '--to_user', type=str, help='To User (default: 100)', dest='to_user', default='100')
     parser.add_argument('-td', '--to_domain', type=str, help='To Domain. Ex: 10.0.0.1', dest='to_domain', default='')
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
-    parser.add_argument('-o', '--output-file', type=str, help='Save digest to file in SipCrack format', dest='ofile', default='')
+    parser.add_argument('-o', '--output_file', type=str, help='Save digest to file in SipCrack format', dest='ofile', default='')
     parser.add_argument('--local-ip', type=str, help='Set local IP address (by default try to get it)', dest='localip', default='')
     parser.add_argument('--user', type=str, help='Authentication user', dest='user', default='')
     parser.add_argument('--pass', type=str, help='Authentication password', dest='pwd', default='')
@@ -280,6 +280,7 @@ possible and can recover most passwords based on the challenge response.
     parser.add_argument('--sdes', help='Send SDES in SDP', dest='sdes', action="count")
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
     parser.add_argument('-f', '--file', type=str, help='File with several IPs (format: ip:port/proto ... one per line)', dest='file', default='')
+    parser.add_argument('-l', '--log_file', type=str, help='Save result into a file', dest='lfile', default='')
     parser.add_argument('-ping', help='Ping host before send attack', dest='ping', action="count")
 
     # Array for all arguments passed to script
@@ -305,6 +306,7 @@ possible and can recover most passwords based on the challenge response.
         TODOMAIN = args.to_domain
         UA = args.user_agent
         OFILE = args.ofile
+        LFILE = args.lfile
         LOCALIP = args.localip
         USER = args.user
         PWD = args.pwd
@@ -315,7 +317,7 @@ possible and can recover most passwords based on the challenge response.
         FILE = args.file
         PING = args.ping
 
-        return IPADDR, HOST, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, LOCALIP, OFILE, USER, PWD, AUTH, VERBOSE, SDP, SDES, FILE, PING
+        return IPADDR, HOST, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, LOCALIP, OFILE, LFILE, USER, PWD, AUTH, VERBOSE, SDP, SDES, FILE, PING
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -365,7 +367,7 @@ the call to a second external number.
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
     parser.add_argument('--sdes', help='Use SDES in SDP protocol', dest='sdes', action="count")
     parser.add_argument('-nocolor', help='Show result without colors', dest='nocolor', action="count")
-    parser.add_argument('-o', '--output-file', type=str, help='Save data into a log file', dest='ofile', default='')
+    parser.add_argument('-o', '--output_file', type=str, help='Save data into a log file', dest='ofile', default='')
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -516,7 +518,7 @@ SIP Send allow us to send a customized SIP message and analyze the response.
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
     parser.add_argument('--local-ip', type=str, help='Set local IP address (by default try to get it)', dest='localip', default='')
     parser.add_argument('-nocolor', help='Show result without colors', dest='nocolor', action="count")
-    parser.add_argument('-o', '--output-file', type=str, help='Save data into a log file', dest='ofile', default='')
+    parser.add_argument('-o', '--output_file', type=str, help='Save data into a log file', dest='ofile', default='')
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -634,7 +636,7 @@ Extracts SIP Digest authentications from a PCAP file
 
     # Add arguments
     parser.add_argument('-f', '--file', type=str, help='PCAP file to analyze', dest="file", required=True, default='')
-    parser.add_argument('-o', '--output-file', type=str, help='Save digest to file in SipCrack format', dest='ofile', required=True, default='')
+    parser.add_argument('-o', '--output_file', type=str, help='Save digest to file in SipCrack format', dest='ofile', required=True, default='')
  
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -912,7 +914,7 @@ rtp                 Show all RTP streams
     parser.add_argument('-filter', help='Filter data to show', dest='filter', default="")
     parser.add_argument('-rtp_extract', help='Extract RTP streams. Ex: --rtp_extract -p 1210 -o rtp.pcap', dest='rtpextract', action="count")
     parser.add_argument('-rport', type=str, help='RTP port to extract streams', dest='rtpport', default="")
-    parser.add_argument('-o', '--output-file', type=str, help='Save RTP streams into a PCAP file', dest='ofile', default="")
+    parser.add_argument('-o', '--output_file', type=str, help='Save RTP streams into a PCAP file', dest='ofile', default="")
     parser.add_argument('-nocolor', help='Show result without colors', dest='nocolor', action="count")
 
     # Array for all arguments passed to script
@@ -1017,7 +1019,7 @@ Network sniffer for SIP protocol.
 
     # Add arguments
     parser.add_argument('-d', '--dev', help='Set Device (by default try to get it)', dest='dev', default="")
-    parser.add_argument('-o', '--output-file', type=str, help='Save output into a PCAP file', dest='ofile', default="")
+    parser.add_argument('-o', '--output_file', type=str, help='Save output into a PCAP file', dest='ofile', default="")
     parser.add_argument('-p', '--proto', help='Protocol to sniff: udp|tcp|tls|all', dest='proto', default="all")
     parser.add_argument('-auth', help='Show only auth digest', dest='auth', action="count")
     parser.add_argument('-v', '--verbose', help='Increase verbosity (no data displayed by default)', dest='verbose', action="count")

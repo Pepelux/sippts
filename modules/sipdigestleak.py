@@ -36,6 +36,7 @@ class SipDigestLeak:
         self.user_agent = 'pplsip'
         self.localip = ''
         self.ofile = ''
+        self.lfile = ''
         self.user = ''
         self.pwd = ''
         self.auth_code = 'www'
@@ -139,16 +140,17 @@ class SipDigestLeak:
             ipend = int(ip2long(str(end_ip)))
 
             for i in range(ipini, ipend+1):
-                if self.ping == 'False':
-                    ips.append(long2ip(i))
-                else:
-                    print(self.c.YELLOW + '[+] Ping %s ...' %
-                          str(long2ip(i)) + self.c.WHITE, end='\r')
-
-                    if ping(long2ip(i), '0.1') == True:
-                        print(self.c.GREEN + '\n   [-] ... Pong %s' %
-                              str(long2ip(i)) + self.c.WHITE)
+                if self.quit == False:
+                    if self.ping == 'False':
                         ips.append(long2ip(i))
+                    else:
+                        print(self.c.YELLOW + '[+] Ping %s ...' %
+                              str(long2ip(i)) + self.c.WHITE, end='\r')
+
+                        if ping(long2ip(i), '0.1') == True:
+                            print(self.c.GREEN + '\n   [-] ... Pong %s' %
+                                  str(long2ip(i)) + self.c.WHITE)
+                            ips.append(long2ip(i))
 
             for ip in ips:
                 if self.quit == False:
@@ -601,6 +603,9 @@ class SipDigestLeak:
             print(self.c.WHITE + '| ' + self.c.WHITE +
                   'Nothing found'.ljust(tlen-2) + ' |')
         else:
+            if self.lfile != '':
+                f = open(self.lfile, 'w')
+
             for x in self.found:
                 (ip, port, proto, res) = x.split('###')
 
@@ -614,6 +619,13 @@ class SipDigestLeak:
                       ' | ' + self.c.YELLOW + '%s' % port.ljust(polen) + self.c.WHITE +
                       ' | ' + self.c.YELLOW + '%s' % proto.ljust(prlen) + self.c.WHITE +
                       ' | ' + colorres + '%s' % res.ljust(relen) + self.c.WHITE + ' |')
+
+                if self.lfile != '':
+                    f.write('%s:%s/%s => %s' % (ip, port, proto, res))
+                    f.write('\n')
+
+            if self.lfile != '':
+                f.close()
 
         print(self.c.WHITE + ' ' + '-' * tlen)
         print(self.c.WHITE)
