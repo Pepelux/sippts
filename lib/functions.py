@@ -773,6 +773,9 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[0-9a-f]{6,8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{8}$', tag)
         if m:
             fp.append('Matrix')
+        m = re.search('^[0-9A-F]{16}$', tag)
+        if m:
+            fp.append('Fritz')
 
         if tag == '123456':
             fp.append('Alcatel')
@@ -843,6 +846,7 @@ def fingerprinting(method, msg, headers):
             if m:
                 fp.append('OpenScape')
                 fp.append('Aastra')
+                fp.append('SNOM')
             m = re.search('^[0-9A-F]{8}$', tag)
             if m:
                 fp.append('CommuniGate')
