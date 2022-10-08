@@ -823,6 +823,7 @@ def fingerprinting(method, msg, headers):
             fp.append('Mediant SBC')
         m = re.search('^[0-9]{5,10}$', tag)
         if m:
+            fp.append('OpenScape')
             fp.append('Aastra')
         m = re.search('^[0-9A-F]{8}$', tag)
         if m:
