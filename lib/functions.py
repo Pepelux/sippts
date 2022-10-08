@@ -764,13 +764,13 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[0-9a-f]{2}-[0-9]{9,10}$', tag)
         if m:
             fp.append('Sercomm Router')
-        m = re.search('^[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{1}-[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{6}$', tag)
+        m = re.search('^[0-9a-f]{6,8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{1}-[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{6}$', tag)
         if m:
             fp.append('Matrix')
-        m = re.search('^[0-9a-f]{8}-[0-9a-f]{12}-[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{7}$', tag)
+        m = re.search('^[0-9a-f]{6,8}-[0-9a-f]{12,15}-[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{7}$', tag)
         if m:
             fp.append('Matrix')
-        m = re.search('^[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{8}$', tag)
+        m = re.search('^[0-9a-f]{6,8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{8}$', tag)
         if m:
             fp.append('Matrix')
 
@@ -791,58 +791,63 @@ def fingerprinting(method, msg, headers):
         m = re.search('^as[0-9a-f]{8}$', tag)
         if m:
             fp.append('Asterisk PBX')
+        m = re.search('^[0-9a-f]{8}$', tag)
+        if m:
+            fp.append('Asterisk PBX')
         m = re.search('^[a-f0-9]{32}.[a-f0-9]{2,8}$', tag)
         if m:
             fp.append('Kamailio SIP Proxy')
-        m = re.search('^[a-fA-F0-9]{6,8}-[a-fA-F0-9]{1,4}$', tag)
-        if m:
-            fp.append('Cisco SIP Gateway')
-        m = re.search('^[a-f0-9]{18}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$', tag)
-        if m:
-            fp.append('Quadro')
-        m = re.search('^[a-f0-9]{16}$', tag)
-        if m:
-            fp.append('Tandberg')
-            fp.append('Algo')
         m = re.search('^DL[a-f0-9]{10}$', tag)
         if m:
             fp.append('LifeSize Media Server')
         m = re.search('^[a-zA-Z0-9]{13}$', tag)
         if m:
             fp.append('FreeSWITCH')
-        m = re.search('^[a-f0-9]{19}$', tag)
-        if m:
-            fp.append('SIParator')
-            fp.append('StarkPBX')
-        m = re.search('^[0-9]{5,10}$', tag)
-        if m:
-            fp.append('Panasonic')
-        m = re.search('^[0-9A-Z]{32}$', tag)
-        if m:
-            fp.append('RTC')
-        m = re.search('^[0-9a-f]{32}$', tag)
-        if m:
-            fp.append('PhonerLite')
-        m = re.search('^[0-9a-z]{18}$', tag)
-        if m:
-            fp.append('Cisco/SPA')
-        m = re.search('^[0-9a-z]{71}$', tag)
-        if m:
-            fp.append('Grandstream')
-            fp.append('TP-Link')
-        m = re.search('^1c[0-9]{9,10}$', tag)
-        if m:
-            fp.append('Mediant SBC')
-        m = re.search('^[0-9]{5,10}$', tag)
-        if m:
-            fp.append('OpenScape')
-            fp.append('Aastra')
-        m = re.search('^[0-9A-F]{8}$', tag)
-        if m:
-            fp.append('CommuniGate')
-        m = re.search('^[0-9A-F]{24}$', tag)
-        if m:
-            fp.append('NEC')
+
+        if fp == []:
+            m = re.search('^[a-fA-F0-9]{6,8}-[a-fA-F0-9]{1,4}$', tag)
+            if m:
+                fp.append('Cisco SIP Gateway')
+            m = re.search('^[a-f0-9]{18}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$', tag)
+            if m:
+                fp.append('Quadro')
+            m = re.search('^[a-f0-9]{16}$', tag)
+            if m:
+                fp.append('Tandberg')
+                fp.append('Algo')
+            m = re.search('^[a-f0-9]{19}$', tag)
+            if m:
+                fp.append('SIParator')
+                fp.append('StarkPBX')
+            m = re.search('^[0-9]{5,10}$', tag)
+            if m:
+                fp.append('Panasonic')
+            m = re.search('^[0-9A-Z]{32}$', tag)
+            if m:
+                fp.append('RTC')
+            m = re.search('^[0-9a-f]{32}$', tag)
+            if m:
+                fp.append('PhonerLite')
+            m = re.search('^[0-9a-z]{18}$', tag)
+            if m:
+                fp.append('Cisco/SPA')
+            m = re.search('^[0-9a-z]{71}$', tag)
+            if m:
+                fp.append('Grandstream')
+                fp.append('TP-Link')
+            m = re.search('^1c[0-9]{9,10}$', tag)
+            if m:
+                fp.append('Mediant SBC')
+            m = re.search('^[0-9]{5,10}$', tag)
+            if m:
+                fp.append('OpenScape')
+                fp.append('Aastra')
+            m = re.search('^[0-9A-F]{8}$', tag)
+            if m:
+                fp.append('CommuniGate')
+            m = re.search('^[0-9A-F]{24}$', tag)
+            if m:
+                fp.append('NEC')
 
         if tag == '12345678':
             fp.append('Alcatel')
