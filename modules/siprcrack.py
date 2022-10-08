@@ -96,15 +96,26 @@ class SipRemoteCrack:
                 else:
                     sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
-                if self.proto == 'TLS':
-                    resp = sock_ssl.recv(4096)
-                else:
-                    resp = sock.recv(4096)
+                rescode = '100'
 
-                if self.verbose == 1:
-                    print(self.c.BWHITE + '[+] Receiving from %s:%d ...' %
-                          (ip, self.rport))
-                    print(self.c.GREEN + resp.decode())
+                while rescode[:1] == '1':
+                    # receive temporary code
+                    if self.proto == 'TLS':
+                        (resp, addr) = sock_ssl.recv(4096)
+                    else:
+                        (resp, addr) = sock.recvfrom(4096)
+
+                    headers = parse_message(resp.decode())
+
+                    if headers:
+                        response = '%s %s' % (
+                            headers['response_code'], headers['response_text'])
+                        rescode = headers['response_code']
+
+                        if self.verbose == 2:
+                            print(self.c.BWHITE + '[-] Receiving from %s:%s/%s ...' %
+                                  (ip, self.rport, self.proto))
+                            print(self.c.GREEN + resp.decode() + self.c.WHITE)
 
                 headers = parse_message(resp.decode())
 

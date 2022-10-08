@@ -413,7 +413,7 @@ class SipScan:
 
                         if self.verbose == 2:
                             print(self.c.BWHITE + '[-] Receiving from %s:%s/%s ...' %
-                                (ipaddr, rport, self.proto))
+                                  (ipaddr, rport, self.proto))
                             print(self.c.GREEN + resp.decode() + self.c.WHITE)
 
                 headers = parse_message(resp.decode())
