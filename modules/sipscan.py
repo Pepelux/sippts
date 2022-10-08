@@ -215,50 +215,50 @@ class SipScan:
         if nthreads < 1:
             nthreads = 1
 
-        print(self.c.BWHITE + '[!] IP/Network: ' +
+        print(self.c.BWHITE + '[✓] IP/Network: ' +
               self.c.GREEN + '%s' % str(self.ip))
 
-        print(self.c.BWHITE + '[!] Port range: ' +
+        print(self.c.BWHITE + '[✓] Port range: ' +
               self.c.GREEN + '%s' % self.rport)
         if self.proto == 'ALL':
-            print(self.c.BWHITE + '[!] Protocols: ' +
+            print(self.c.BWHITE + '[✓] Protocols: ' +
                   self.c.GREEN + 'UDP, TCP, TLS')
         else:
-            print(self.c.BWHITE + '[!] Protocol: ' + self.c.GREEN + '%s' %
+            print(self.c.BWHITE + '[✓] Protocol: ' + self.c.GREEN + '%s' %
                   self.proto.upper())
 
-        print(self.c.BWHITE + '[!] Method to scan: ' +
+        print(self.c.BWHITE + '[✓] Method to scan: ' +
               self.c.GREEN + '%s' % self.method)
 
         if self.domain != '' and self.domain != str(self.ip) and self.domain != self.host:
-            print(self.c.BWHITE + '[!] Customized Domain: ' +
+            print(self.c.BWHITE + '[✓] Customized Domain: ' +
                   self.c.GREEN + '%s' % self.domain)
         if self.contact_domain != '':
-            print(self.c.BWHITE + '[!] Customized Contact Domain: ' + self.c.GREEN + '%s' %
+            print(self.c.BWHITE + '[✓] Customized Contact Domain: ' + self.c.GREEN + '%s' %
                   self.contact_domain)
         if self.from_name != '':
-            print(self.c.BWHITE + '[!] Customized From Name: ' +
+            print(self.c.BWHITE + '[✓] Customized From Name: ' +
                   self.c.GREEN + '%s' % self.from_name)
         if self.from_user != '100':
-            print(self.c.BWHITE + '[!] Customized From User: ' +
+            print(self.c.BWHITE + '[✓] Customized From User: ' +
                   self.c.GREEN + '%s' % self.from_user)
         if self.from_domain != '':
-            print(self.c.BWHITE + '[!] Customized From Domain: ' +
+            print(self.c.BWHITE + '[✓] Customized From Domain: ' +
                   self.c.GREEN + '%s' % self.from_domain)
         if self.to_name != '':
-            print(self.c.BWHITE + '[!] Customized To Name: ' +
+            print(self.c.BWHITE + '[✓] Customized To Name: ' +
                   self.c.GREEN + '%s' % self.to_name)
         if self.to_user != '100':
-            print(self.c.BWHITE + '[!] Customized To User:' +
+            print(self.c.BWHITE + '[✓] Customized To User:' +
                   self.c.GREEN + ' %s' % self.to_user)
         if self.to_domain != '':
-            print(self.c.BWHITE + '[!] Customized To Domain: ' +
+            print(self.c.BWHITE + '[✓] Customized To Domain: ' +
                   self.c.GREEN + '%s' % self.to_domain)
         if self.user_agent != 'pplsip':
-            print(self.c.BWHITE + '[!] Customized User-Agent: ' +
+            print(self.c.BWHITE + '[✓] Customized User-Agent: ' +
                   self.c.GREEN + '%s' % self.user_agent)
 
-        print(self.c.BWHITE + '[!] Used threads: ' +
+        print(self.c.BWHITE + '[✓] Used threads: ' +
               self.c.GREEN + '%d' % nthreads)
         if nthreads > 800:
             print(self.c.BRED +
@@ -268,16 +268,16 @@ class SipScan:
         if self.ofile != '':
             f = open(self.ofile, 'a+')
 
-            f.write('[!] IP/Network: %s' % str(self.ip))
+            f.write('[✓] IP/Network: %s' % str(self.ip))
             f.write('\n')
-            f.write('[!] Port range: %s' % self.rport)
+            f.write('[✓] Port range: %s' % self.rport)
             f.write('\n')
             if self.proto == 'ALL':
-                f.write('[!] Protocols: UDP, TCP, TLS')
+                f.write('[✓] Protocols: UDP, TCP, TLS')
             else:
-                f.write('[!] Protocol: %s' % self.proto.upper())
+                f.write('[✓] Protocol: %s' % self.proto.upper())
             f.write('\n')
-            f.write('[!] Method to scan: %s' % self.method)
+            f.write('[✓] Method to scan: %s' % self.method)
             f.write('\n\n')
 
             f.close()

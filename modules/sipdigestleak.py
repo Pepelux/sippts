@@ -89,31 +89,31 @@ class SipDigestLeak:
         print(self.c.WHITE)
 
         if self.domain != '' and self.domain != str(self.ip) and self.domain != self.host:
-            print(self.c.BWHITE + '[!] Customized Domain: ' +
+            print(self.c.BWHITE + '[✓] Customized Domain: ' +
                   self.c.GREEN + '%s' % self.domain)
         if self.contact_domain != '':
-            print(self.c.BWHITE + '[!] Customized Contact Domain: ' + self.c.GREEN + '%s' %
+            print(self.c.BWHITE + '[✓] Customized Contact Domain: ' + self.c.GREEN + '%s' %
                   self.contact_domain)
         if self.from_name != '':
-            print(self.c.BWHITE + '[!] Customized From Name: ' +
+            print(self.c.BWHITE + '[✓] Customized From Name: ' +
                   self.c.GREEN + '%s' % self.from_name)
         if self.from_user != '100':
-            print(self.c.BWHITE + '[!] Customized From User: ' +
+            print(self.c.BWHITE + '[✓] Customized From User: ' +
                   self.c.GREEN + '%s' % self.from_user)
         if self.from_domain != '':
-            print(self.c.BWHITE + '[!] Customized From Domain: ' +
+            print(self.c.BWHITE + '[✓] Customized From Domain: ' +
                   self.c.GREEN + '%s' % self.from_domain)
         if self.to_name != '':
-            print(self.c.BWHITE + '[!] Customized To Name: ' +
+            print(self.c.BWHITE + '[✓] Customized To Name: ' +
                   self.c.GREEN + '%s' % self.to_name)
         if self.to_user != '100':
-            print(self.c.BWHITE + '[!] Customized To User:' +
+            print(self.c.BWHITE + '[✓] Customized To User:' +
                   self.c.GREEN + ' %s' % self.to_user)
         if self.to_domain != '':
-            print(self.c.BWHITE + '[!] Customized To Domain: ' +
+            print(self.c.BWHITE + '[✓] Customized To Domain: ' +
                   self.c.GREEN + '%s' % self.to_domain)
         if self.user_agent != 'pplsip':
-            print(self.c.BWHITE + '[!] Customized User-Agent: ' +
+            print(self.c.BWHITE + '[✓] Customized User-Agent: ' +
                   self.c.GREEN + '%s' % self.user_agent)
 
         if self.file == '':
@@ -190,7 +190,7 @@ class SipDigestLeak:
         print(self.c.WHITE)
 
     def call(self, ip, port, proto):
-        print(self.c.BWHITE + '[!] Target: ' + self.c.GREEN + '%s:%s/%s' %
+        print(self.c.BWHITE + '[✓] Target: ' + self.c.GREEN + '%s:%s/%s' %
               (ip, port, proto))
         print(self.c.WHITE)
 

@@ -119,33 +119,33 @@ class SipExten:
         logo = Logo('sipexten')
         logo.print()
 
-        print(self.c.BWHITE+'[!] IP/Network: ' +
+        print(self.c.BWHITE+'[✓] IP/Network: ' +
               self.c.GREEN + '%s' % str(self.ip))
-        print(self.c.BWHITE+'[!] Port: ' + self.c.GREEN + '%s' % (self.rport))
+        print(self.c.BWHITE+'[✓] Port: ' + self.c.GREEN + '%s' % (self.rport))
         if self.prefix != '':
-            print(self.c.BWHITE+'[!] Users prefix: ' +
+            print(self.c.BWHITE+'[✓] Users prefix: ' +
                   self.c.GREEN + '%s' % self.prefix)
-        print(self.c.BWHITE+'[!] Exten range: ' +
+        print(self.c.BWHITE+'[✓] Exten range: ' +
               self.c.GREEN + '%s' % self.exten)
-        print(self.c.BWHITE+'[!] Protocol: ' +
+        print(self.c.BWHITE+'[✓] Protocol: ' +
               self.c.GREEN + '%s' % self.proto.upper())
-        print(self.c.BWHITE + '[!] Method to scan: ' +
+        print(self.c.BWHITE + '[✓] Method to scan: ' +
               self.c.GREEN + '%s' % self.method)
 
         if self.domain != '' and self.domain != str(self.ip) and self.domain != self.host:
-            print(self.c.BWHITE + '[!] Customized Domain: ' +
+            print(self.c.BWHITE + '[✓] Customized Domain: ' +
                   self.c.GREEN + '%s' % self.domain)
         if self.contact_domain != '':
-            print(self.c.BWHITE + '[!] Customized Contact Domain: ' + self.c.GREEN + '%s' %
+            print(self.c.BWHITE + '[✓] Customized Contact Domain: ' + self.c.GREEN + '%s' %
                   self.contact_domain)
         if self.from_user != '100' and self.from_user != '':
-            print(self.c.BWHITE + '[!] Customized From User: ' +
+            print(self.c.BWHITE + '[✓] Customized From User: ' +
                   self.c.GREEN + '%s' % self.from_user)
         if self.user_agent != 'pplsip':
-            print(self.c.BWHITE + '[!] Customized User-Agent: ' +
+            print(self.c.BWHITE + '[✓] Customized User-Agent: ' +
                   self.c.GREEN + '%s' % self.user_agent)
 
-        print(self.c.BWHITE + '[!] Used threads: ' +
+        print(self.c.BWHITE + '[✓] Used threads: ' +
               self.c.GREEN + '%d' % nthreads)
         if nthreads > 800:
             print(self.c.BRED +

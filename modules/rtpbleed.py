@@ -39,15 +39,15 @@ class RTPBleed:
         logo = Logo('rtpbleed')
         logo.print()
 
-        print(self.c.BWHITE + '[!] Target IP: ' +
+        print(self.c.BWHITE + '[✓] Target IP: ' +
               self.c.YELLOW + '%s' % self.ip)
-        print(self.c.BWHITE + '[!] Port range:' + self.c.YELLOW + ' %d' %
+        print(self.c.BWHITE + '[✓] Port range:' + self.c.YELLOW + ' %d' %
               self.start_port + self.c.WHITE + '-' + self.c.YELLOW + '%d' % self.end_port)
-        print(self.c.BWHITE + '[!] Payload type: ' +
+        print(self.c.BWHITE + '[✓] Payload type: ' +
               self.c.YELLOW + '%d' % self.payload)
-        print(self.c.BWHITE + '[!] Number of tries per port: ' +
+        print(self.c.BWHITE + '[✓] Number of tries per port: ' +
               self.c.YELLOW + '%d' % self.loops)
-        print(self.c.BWHITE + '[!] Delay between tries: ' +
+        print(self.c.BWHITE + '[✓] Delay between tries: ' +
               self.c.YELLOW + '%d microseconds' % self.delay)
         print(self.c.WHITE)
 

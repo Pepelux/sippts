@@ -75,15 +75,15 @@ class ArpSpoof:
             if ops == 'Darwin':
                 self.gw = get_default_gateway_mac().strip()
 
-        print(self.c.BWHITE + '[!] Operating System: ' +
+        print(self.c.BWHITE + '[✓] Operating System: ' +
               self.c.GREEN + '%s' % ops)
-        print(self.c.BWHITE + '[!] Current User: ' +
+        print(self.c.BWHITE + '[✓] Current User: ' +
               self.c.GREEN + '%s' % current_user)
-        print(self.c.BWHITE + '[!] Local IP address: ' +
+        print(self.c.BWHITE + '[✓] Local IP address: ' +
               self.c.GREEN + '%s' % local_ip)
-        print(self.c.BWHITE + '[!] Target IP/range: ' +
+        print(self.c.BWHITE + '[✓] Target IP/range: ' +
               self.c.GREEN + '%s' % self.ip)
-        print(self.c.BWHITE + '[!] Gateway: ' + self.c.GREEN + '%s' % self.gw)
+        print(self.c.BWHITE + '[✓] Gateway: ' + self.c.GREEN + '%s' % self.gw)
         print(self.c.WHITE)
 
         enable_ip_route()

@@ -80,21 +80,21 @@ class SipSniff:
         else:
             networkInterface = self.dev
 
-        print(self.c.BWHITE + '[!] Listening on: ' +
+        print(self.c.BWHITE + '[✓] Listening on: ' +
               self.c.GREEN + '%s' % networkInterface)
 
         if self.proto == 'all':
-            print(self.c.BWHITE + '[!] Protocols: ' +
+            print(self.c.BWHITE + '[✓] Protocols: ' +
                   self.c.GREEN + 'UDP, TCP, TLS')
         else:
-            print(self.c.BWHITE + '[!] Protocol: ' + self.c.GREEN + '%s' %
+            print(self.c.BWHITE + '[✓] Protocol: ' + self.c.GREEN + '%s' %
                   self.proto.upper())
 
         if self.ofile != '':
             print(
-                self.c.BWHITE + '[!] Save captured data in the file: ' + self.c.GREEN + '%s' % self.ofile)
+                self.c.BWHITE + '[✓] Save captured data in the file: ' + self.c.GREEN + '%s' % self.ofile)
         if self.auth == 'True':
-            print(self.c.BWHITE + '[!]' + self.c.GREEN +
+            print(self.c.BWHITE + '[✓]' + self.c.GREEN +
                   ' Capture only authentication digest')
         print(self.c.WHITE)
 

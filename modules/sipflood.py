@@ -95,9 +95,9 @@ class SipFlood:
         print(self.c.BYELLOW + '\nPress Ctrl+C to stop\n')
         print(self.c.WHITE)
 
-        print(self.c.BWHITE + '[!] Target: ' + self.c.GREEN + '%s:%s/%s' %
+        print(self.c.BWHITE + '[✓] Target: ' + self.c.GREEN + '%s:%s/%s' %
               (self.ip, self.rport, self.proto))
-        print(self.c.BWHITE + '[!] Used threads: ' +
+        print(self.c.BWHITE + '[✓] Used threads: ' +
               self.c.GREEN + '%d' % self.nthreads)
         if self.nthreads > 300:
             print(self.c.BRED +
@@ -105,17 +105,17 @@ class SipFlood:
 
         if self.number == 0:
             print(self.c.BWHITE +
-                  '[!] Number of requests: ' + self.c.GREEN + 'INFINITE')
+                  '[✓] Number of requests: ' + self.c.GREEN + 'INFINITE')
         else:
-            print(self.c.BWHITE + '[!] Number of requests: ' +
+            print(self.c.BWHITE + '[✓] Number of requests: ' +
                   self.c.GREEN + '%s' % self.number)
 
         if self.bad == 1:
-            print(self.c.BWHITE + '[!] Alphabet: ' +
+            print(self.c.BWHITE + '[✓] Alphabet: ' +
                   self.c.GREEN + '%s' % self.alphabet)
-            print(self.c.BWHITE + '[!] Min length: ' +
+            print(self.c.BWHITE + '[✓] Min length: ' +
                   self.c.GREEN + '%d' % self.min)
-            print(self.c.BWHITE + '[!] Max length: ' +
+            print(self.c.BWHITE + '[✓] Max length: ' +
                   self.c.GREEN + '%d' % self.max)
         print(self.c.WHITE)
 

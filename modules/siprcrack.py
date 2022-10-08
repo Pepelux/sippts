@@ -305,33 +305,33 @@ class SipRemoteCrack:
         if nthreads < 1:
             nthreads = 1
 
-        print(self.c.BWHITE+'[!] IP/Network: ' +
+        print(self.c.BWHITE+'[✓] IP/Network: ' +
               self.c.GREEN + '%s' % str(self.ip))
-        print(self.c.BWHITE+'[!] Port: ' + self.c.GREEN + '%s' % (self.rport))
+        print(self.c.BWHITE+'[✓] Port: ' + self.c.GREEN + '%s' % (self.rport))
         if self.prefix != '':
-            print(self.c.BWHITE+'[!] Users prefix: ' +
+            print(self.c.BWHITE+'[✓] Users prefix: ' +
                   self.c.GREEN + '%s' % self.prefix)
-        print(self.c.BWHITE+'[!] Exten range: ' +
+        print(self.c.BWHITE+'[✓] Exten range: ' +
               self.c.GREEN + '%s' % self.exten)
         if self.authuser != '':
-            print(self.c.BWHITE+'[!] Auth User: ' +
+            print(self.c.BWHITE+'[✓] Auth User: ' +
                   self.c.GREEN + '%s' % self.authuser)
-        print(self.c.BWHITE+'[!] Protocol: ' +
+        print(self.c.BWHITE+'[✓] Protocol: ' +
               self.c.GREEN + '%s' % self.proto.upper())
 
         if self.domain != '' and self.domain != str(self.ip) and self.domain != self.host:
-            print(self.c.BWHITE + '[!] Customized Domain: ' +
+            print(self.c.BWHITE + '[✓] Customized Domain: ' +
                   self.c.GREEN + '%s' % self.domain)
         if self.contact_domain != '':
-            print(self.c.BWHITE + '[!] Customized Contact Domain: ' + self.c.GREEN + '%s' %
+            print(self.c.BWHITE + '[✓] Customized Contact Domain: ' + self.c.GREEN + '%s' %
                   self.contact_domain)
         if self.user_agent != 'pplsip':
-            print(self.c.BWHITE + '[!] Customized User-Agent: ' +
+            print(self.c.BWHITE + '[✓] Customized User-Agent: ' +
                   self.c.GREEN + '%s' % self.user_agent)
 
-        print(self.c.BWHITE+'[!] Total threads: ' +
+        print(self.c.BWHITE+'[✓] Total threads: ' +
               self.c.GREEN + '%d' % nthreads)
-        print(self.c.BWHITE + '[!] Wordlist: ' +
+        print(self.c.BWHITE + '[✓] Wordlist: ' +
               self.c.GREEN + '%s' % self.wordlist)
         print(self.c.WHITE)
 

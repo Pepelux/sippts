@@ -27,8 +27,8 @@ class SipDump:
         logo = Logo('sipdump')
         logo.print()
 
-        print(self.c.BWHITE+'[!] Input file: %s ...' % self.file)
-        print(self.c.BWHITE+'[!] Output file: %s ...\n' % self.ofile)
+        print(self.c.BWHITE+'[✓] Input file: %s ...' % self.file)
+        print(self.c.BWHITE+'[✓] Output file: %s ...\n' % self.ofile)
         print(self.c.WHITE)
 
         os.system(

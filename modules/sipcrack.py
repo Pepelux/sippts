@@ -101,9 +101,9 @@ class SipDigestCrack:
             if self.run == True:
                 line = f.readline()
 
-                print(self.c.BWHITE + '[!]' + self.c.WHITE + ' Using wordlist: ' +
+                print(self.c.BWHITE + '[✓]' + self.c.WHITE + ' Using wordlist: ' +
                       self.c.GREEN + '%s' % self.wordlist + self.c.WHITE)
-                print(self.c.BWHITE + '[!]' + self.c.WHITE + ' Hashes file: ' +
+                print(self.c.BWHITE + '[✓]' + self.c.WHITE + ' Hashes file: ' +
                       self.c.GREEN + '%s' % self.file + self.c.WHITE)
 
                 rows = []

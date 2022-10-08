@@ -32,11 +32,11 @@ class RTPBleedFlood:
         logo = Logo('rtpbleedflood')
         logo.print()
 
-        print(self.c.BWHITE + '[!] Target IP: ' +
+        print(self.c.BWHITE + '[✓] Target IP: ' +
               self.c.YELLOW + '%s' % self.ip)
-        print(self.c.BWHITE + '[!] Target port:' +
+        print(self.c.BWHITE + '[✓] Target port:' +
               self.c.YELLOW + ' %d' % self.port)
-        print(self.c.BWHITE + '[!] Payload type: ' +
+        print(self.c.BWHITE + '[✓] Payload type: ' +
               self.c.YELLOW + '%d' % self.payload)
         print(self.c.WHITE)
 
