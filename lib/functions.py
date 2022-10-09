@@ -776,6 +776,9 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[0-9A-F]{16}$', tag)
         if m:
             fp.append('Fritz')
+        m = re.search('^ZyXELUA_[0-9]{10}-[0-9]{4}$', tag)
+        if m:
+            fp.append('ZyXEL')
 
         if tag == '123456':
             fp.append('Alcatel')
