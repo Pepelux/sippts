@@ -163,6 +163,7 @@ class SipEnumerate:
 
                 rescode = '100'
                 resdata = ''
+                resdataua = ''
 
                 while rescode[:1] == '1':
                     if self.proto == 'TLS':
@@ -181,8 +182,10 @@ class SipEnumerate:
                             ua = 'Not found'
 
                         if resdata != '':
-                            resdata = resdata + self.c.WHITE + ' / '
-                        resdata = resdata + self.c.YELLOW + \
+                            resdata = resdata + ' / '
+                            resdataua = resdataua + self.c.WHITE + ' / '
+                        resdata = resdata + '%s %s' % (rescode, restext)
+                        resdataua = resdataua + self.c.YELLOW + \
                             '%s %s' % (rescode, restext) + \
                             self.c.WHITE + ' (User-Agent: %s)' % ua
 
@@ -192,7 +195,7 @@ class SipEnumerate:
                     print(self.c.GREEN + resp.decode())
                 else:
                     print(self.c.BCYAN + '%s' %
-                          method + self.c.WHITE + ' => %s' % resdata)
+                          method + self.c.WHITE + ' => %s' % resdataua)
 
                 fps = fingerprinting(method, resp.decode(), headers)
 
@@ -206,8 +209,8 @@ class SipEnumerate:
                 if fp[0:1] == '/':
                     fp = fp[1:]
 
-                line = '%s###%s %s###%s###%s' % (
-                    method, rescode, restext, ua, fp)
+                line = '%s###%s###%s###%s' % (
+                    method, resdata, ua, fp)
                 self.found.append(line)
             except KeyboardInterrupt:
                 print(self.c.RED + '\nYou pressed Ctrl+C!' + self.c.WHITE)
