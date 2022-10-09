@@ -268,9 +268,9 @@ class SipScan:
         if self.ofile != '':
             print(self.c.BWHITE + '[✓] Saving logs info file: ' +
                   self.c.CYAN + '%s' % self.ofile)
-        if self.lfile != '':
+        if self.ipfile != '':
             print(self.c.BWHITE + '[✓] Saving found IPs info file: ' +
-                  self.c.CYAN + '%s' % self.lfile)
+                  self.c.CYAN + '%s' % self.ipfile)
         print(self.c.WHITE)
 
         if self.ofile != '':
@@ -556,7 +556,7 @@ class SipScan:
                 f.write('\n')
         else:
             if self.ipfile != '':
-                ipf = open(self.ipfile, 'w')
+                ipf = open(self.ipfile, 'a+')
 
             for x in self.found:
                 (ip, port, proto, res, ua, type, fp) = x.split('###')
