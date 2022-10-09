@@ -257,12 +257,20 @@ class SipScan:
         if self.user_agent != 'pplsip':
             print(self.c.BWHITE + '[✓] Customized User-Agent: ' +
                   self.c.GREEN + '%s' % self.user_agent)
-
         print(self.c.BWHITE + '[✓] Used threads: ' +
               self.c.GREEN + '%d' % nthreads)
         if nthreads > 800:
             print(self.c.BRED +
                   '[x] More than 800 threads can cause socket problems')
+        if self.file != '':
+            print(self.c.BWHITE + '[✓] Loading data from file: ' +
+                  self.c.CYAN + '%s' % self.file)
+        if self.ofile != '':
+            print(self.c.BWHITE + '[✓] Saving logs info file: ' +
+                  self.c.CYAN + '%s' % self.ofile)
+        if self.lfile != '':
+            print(self.c.BWHITE + '[✓] Saving found IPs info file: ' +
+                  self.c.CYAN + '%s' % self.lfile)
         print(self.c.WHITE)
 
         if self.ofile != '':
