@@ -5,7 +5,6 @@ devel:
 - sipscan: 
   - manage large ranges of IP networks. Fixed memory leak problems
   - can now run faster. Supports 800 threads without memory consumption
-  - added param -save_ipss to save found services info a file with format (ip:port/proto)
 - sipdigestleak
   - now can attack several IP addresses or network ranges
   - added param -ping to ping the host and connect to them only if it is alive

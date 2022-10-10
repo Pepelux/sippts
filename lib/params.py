@@ -63,7 +63,6 @@ UDP, TCP and TLS protocols.
     parser.add_argument('-f', '--file', type=str, help='File with several IPs or network ranges', dest='file', default='')
     parser.add_argument('-nocolor', help='Show result without colors', dest='nocolor', action="count")
     parser.add_argument('-o', '--output_file', type=str, help='Save data into a log file', dest='ofile', default='')
-    parser.add_argument('-save_ips', type=str, help='Save found services into a file (format: ip:port/proto)', dest='ipfile', default='')
     parser.add_argument('-fp', help='Try to fingerprinting', dest='fp', action="count")
 
     # Array for all arguments passed to script
@@ -99,9 +98,8 @@ UDP, TCP and TLS protocols.
         NOCOLOR = args.nocolor
         OFILE = args.ofile
         FP = args.fp
-        IPFILE = args.ipfile
 
-        return IPADDR, HOST, PORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, THREADS, VERBOSE, PING, FILE, NOCOLOR, OFILE, FP, IPFILE
+        return IPADDR, HOST, PORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, THREADS, VERBOSE, PING, FILE, NOCOLOR, OFILE, FP
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)

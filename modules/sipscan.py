@@ -43,7 +43,6 @@ class SipScan:
         self.nocolor = ''
         self.ofile = ''
         self.fp = '0'
-        self.ipfile = ''
 
         self.found = []
         self.line = ['-', '\\', '|', '/']
@@ -268,27 +267,7 @@ class SipScan:
         if self.ofile != '':
             print(self.c.BWHITE + '[✓] Saving logs info file: ' +
                   self.c.CYAN + '%s' % self.ofile)
-        if self.ipfile != '':
-            print(self.c.BWHITE + '[✓] Saving found IPs info file: ' +
-                  self.c.CYAN + '%s' % self.ipfile)
         print(self.c.WHITE)
-
-        if self.ofile != '':
-            f = open(self.ofile, 'a+')
-
-            f.write('[✓] IP/Network: %s' % str(self.ip))
-            f.write('\n')
-            f.write('[✓] Port range: %s' % self.rport)
-            f.write('\n')
-            if self.proto == 'ALL':
-                f.write('[✓] Protocols: UDP, TCP, TLS')
-            else:
-                f.write('[✓] Protocol: %s' % self.proto.upper())
-            f.write('\n')
-            f.write('[✓] Method to scan: %s' % self.method)
-            f.write('\n\n')
-
-            f.close()
 
         values = product(ips, ports, protos)
         values2 = []
@@ -526,27 +505,6 @@ class SipScan:
         if self.ofile != '':
             f = open(self.ofile, 'a+')
 
-            f.write(' ' + '-' * tlen)
-            f.write('\n')
-            if self.fp == 1:
-                f.write('| IP address'.ljust(iplen) +
-                        ' | Port'.ljust(polen) +
-                        ' | Proto'.ljust(prlen) +
-                        ' | Response'.ljust(relen) +
-                        ' | User-Agent'.ljust(ualen) +
-                        ' | Type'.ljust(tplen) +
-                        ' | Fingerprinting'.ljust(fplen) + ' |')
-            else:
-                f.write('| IP address'.ljust(iplen) +
-                        ' | Port'.ljust(polen) +
-                        ' | Proto'.ljust(prlen) +
-                        ' | Response'.ljust(relen) +
-                        ' | User-Agent'.ljust(ualen) +
-                        ' | Type'.ljust(tplen) + ' |')
-            f.write('\n')
-            f.write(' ' + '-' * tlen)
-            f.write('\n')
-
         if len(self.found) == 0:
             print(self.c.WHITE + '| ' + self.c.WHITE +
                   'Nothing found'.ljust(tlen-2) + ' |')
@@ -555,9 +513,6 @@ class SipScan:
                 f.write('| Nothing found'.ljust(tlen-2) + ' |')
                 f.write('\n')
         else:
-            if self.ipfile != '':
-                ipf = open(self.ipfile, 'a+')
-
             for x in self.found:
                 (ip, port, proto, res, ua, type, fp) = x.split('###')
 
@@ -572,14 +527,7 @@ class SipScan:
                           ' | ' + self.c.GREEN + '%s' % fp.ljust(fplen) + self.c.WHITE + ' |')
 
                     if self.ofile != '':
-                        f.write('| %s' % ip.ljust(iplen) +
-                                ' | %s' % port.ljust(polen) +
-                                ' | %s' % proto.ljust(prlen) +
-                                ' | %s' % res.ljust(relen) +
-                                ' | %s' % ua.ljust(ualen) +
-                                ' | %s' % type.ljust(tplen) +
-                                ' | %s' % fp.ljust(fplen) + ' |')
-                        f.write('\n')
+                        f.write('%s:%s/%s => %s - %s (%s)\n' % (ip, port, proto, res, ua, fp))
                 else:
                     print(self.c.WHITE +
                           '| ' + self.c.BGREEN + '%s' % ip.ljust(iplen) + self.c.WHITE +
@@ -590,19 +538,7 @@ class SipScan:
                           ' | ' + self.c.CYAN + '%s' % type.ljust(tplen) + self.c.WHITE + ' |')
 
                     if self.ofile != '':
-                        f.write('| %s' % ip.ljust(iplen) +
-                                ' | %s' % port.ljust(polen) +
-                                ' | %s' % proto.ljust(prlen) +
-                                ' | %s' % res.ljust(relen) +
-                                ' | %s' % ua.ljust(ualen) +
-                                ' | %s' % type.ljust(tplen) + ' |')
-                        f.write('\n')
-
-                if self.ipfile != '':
-                    ipf.write('%s:%s/%s\n' % (ip, port, proto))
-
-            if self.ipfile != '':
-                ipf.close()
+                        f.write('%s:%s/%s => %s - %s\n' % (ip, port, proto, res, ua))
 
         print(self.c.WHITE + ' ' + '-' * tlen)
         print(self.c.WHITE)
@@ -612,9 +548,6 @@ class SipScan:
                   '[!] Fingerprinting is based on `To-tag` and other header values. The result may not be correct\n' + self.c.WHITE)
 
         if self.ofile != '':
-            f.write(' ' + '-' * tlen)
-            f.write('\n\n')
-
             f.close()
 
         self.found.clear()
