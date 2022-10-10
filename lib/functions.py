@@ -736,6 +736,7 @@ def fingerprinting(method, msg, headers):
         if m:
             fp.append('Fanvil')
             fp.append('eXosip')
+            fp.append('Linphone')
         m = re.search('^[a-f0-9]{8}$', tag)
         if m:
             fp.append('Cisco IP Phone')
@@ -749,6 +750,9 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[a-z]{8}$', tag)
         if m:
             fp.append('Ozeki VoIP SIP SDK')
+        m = re.search('^[0-9]{10}$', tag)
+        if m:
+            fp.append('Draytek')
         m = re.search('^[a-f0-9]{16}$', tag)
         if m:
             fp.append('Grandtream')
@@ -862,6 +866,9 @@ def fingerprinting(method, msg, headers):
             m = re.search('^[0-9A-F]{24}$', tag)
             if m:
                 fp.append('NEC')
+            m = re.search('^[0-9A-Z]{18}$', tag)
+            if m:
+                fp.append('Aastra')
 
         if tag == '12345678':
             fp.append('Alcatel')
