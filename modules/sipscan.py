@@ -508,10 +508,6 @@ class SipScan:
         if len(self.found) == 0:
             print(self.c.WHITE + '| ' + self.c.WHITE +
                   'Nothing found'.ljust(tlen-2) + ' |')
-
-            if self.ofile != '':
-                f.write('| Nothing found'.ljust(tlen-2) + ' |')
-                f.write('\n')
         else:
             for x in self.found:
                 (ip, port, proto, res, ua, type, fp) = x.split('###')
