@@ -782,10 +782,16 @@ def fingerprinting(method, msg, headers):
 
         if tag == '123456':
             fp.append('Alcatel')
+
         if tag == '':
-            fp.append('SNOM')
-            fp.append('FortiVoice')
-            fp.append('AddPac')
+            m = re.search('', ua)
+            if m:
+                fp.append('Gigaset')
+            else:
+                fp.append('SNOM')
+                fp.append('FortiVoice')
+                fp.append('AddPac')
+                fp.append('Gigaset')
 
         hdr = msg.split('\r\n')
         for h in hdr:
