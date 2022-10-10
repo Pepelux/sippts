@@ -756,6 +756,9 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[a-f0-9]{16}$', tag)
         if m:
             fp.append('Grandtream')
+        m = re.search('^plcm_[0-9]{10}-[0-9]{4}$', tag)
+        if m:
+            fp.append('Polycom')
         m = re.search('^[a-f0-9]{15}$', tag)
         if m:
             fp.append('Sangoma')
@@ -839,6 +842,12 @@ def fingerprinting(method, msg, headers):
             m = re.search('^[0-9]{5,10}$', tag)
             if m:
                 fp.append('Panasonic')
+            m = re.search('^[0-9]{10}$', tag)
+            if m:
+                fp.append('M5T')
+            m = re.search('^[0-9a-f]{16}-[0-9a-f]{8}$', tag)
+            if m:
+                fp.append('ZTE')
             m = re.search('^[0-9A-Z]{32}$', tag)
             if m:
                 fp.append('RTC')
