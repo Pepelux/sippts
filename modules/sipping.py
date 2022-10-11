@@ -225,8 +225,6 @@ class SipPing:
                 end = time.time()
                 totaltime = end - start
 
-                # t = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-
                 self.pingcount += 1
                 print(self.c.CYAN + '[%s UTC] ' % datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S") + self.c.GREEN + '%s ' % response + self.c.WHITE + 'from ' + self.c.YELLOW + '%s' % ip + self.c.WHITE + ' cseq=' +
                       self.c.YELLOW + '%d' % self.pingcount + self.c.WHITE + ' time=' + self.c.YELLOW + '%fms' % totaltime + self.c.WHITE)

@@ -846,6 +846,9 @@ def fingerprinting(method, msg, headers):
             fp.append('Grandstream')
             fp.append('TP-Link')
             fp.append('SylkServer')
+        m = re.search('^[a-f0-9]{1}.[a-f0-9]{45}.[a-f0-9]{1}$', tag)
+        if m:
+            fp.append('Asterisk PBX')
         m = re.search('^[a-f0-9]{32}.[a-f0-9]{2,8}$', tag)
         if m:
             fp.append('Kamailio SIP Proxy')
