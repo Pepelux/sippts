@@ -781,6 +781,9 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[0-9a-f]{6,8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{8}$', tag)
         if m:
             fp.append('Matrix')
+        m = re.search('^[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{1}-[0-9a-f]{5}-[0-9a-f]{8}-[0-9a-f]{5}$', tag)
+        if m:
+            fp.append('Matrix')
         m = re.search('^[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{5}-[0-9a-f]{7,8}-[0-9a-f]{5}$', tag)
         if m:
             fp.append('Thomson')
