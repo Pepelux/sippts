@@ -744,6 +744,8 @@ def fingerprinting(method, msg, headers):
             fp.append('3CX Phone')
             fp.append('Mitel Border GW')
         m = re.search('^[a-z0-9]{10}$', tag)
+        if m:
+            fp.append('Panasonic')
         if m and tag[0:2] != 'as':
             fp.append('Panasonic')
             fp.append('RM')
@@ -781,7 +783,7 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[0-9a-f]{6,8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{8}$', tag)
         if m:
             fp.append('Matrix')
-        m = re.search('^[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{1}-[0-9a-f]{5}-[0-9a-f]{8}-[0-9a-f]{5}$', tag)
+        m = re.search('^[0-9a-f]{6,8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{1}-[0-9a-f]{5}-[0-9a-f]{8}-[0-9a-f]{5}$', tag)
         if m:
             fp.append('Matrix')
         m = re.search('^[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{5}-[0-9a-f]{7,8}-[0-9a-f]{5}$', tag)
@@ -844,11 +846,14 @@ def fingerprinting(method, msg, headers):
                 fp.append('FortiVoice')
         m = re.search('^[0-9a-z]{71}$', tag)
         if m:
-            fp.append('Asterisk PBX')
-            fp.append('Yeastar')
-            fp.append('Grandstream')
-            fp.append('TP-Link')
-            fp.append('SylkServer')
+            if ua[0:4] == 'FPBX' or ua[0:4] == 'IPBX':
+                fp.append('Asterisk PBX')
+            else:
+                fp.append('Asterisk PBX')
+                fp.append('Yeastar')
+                fp.append('Grandstream')
+                fp.append('TP-Link')
+                fp.append('SylkServer')
         m = re.search('^[a-z0-9A-Z]{11}.[a-z0-9A-Z]{32}.[0-9]{1}$', tag)
         if m:
             fp.append('Asterisk PBX')
