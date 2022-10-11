@@ -15,7 +15,7 @@ import signal
 from lib.functions import create_message, get_free_port, parse_message, parse_digest, generate_random_string, calculateHash, get_machine_default_ip
 from lib.color import Color
 from lib.logos import Logo
-
+from datetime import datetime
 
 class SipPing:
     def __init__(self):
@@ -223,13 +223,15 @@ class SipPing:
 
                 end = time.time()
                 totaltime = end - start
+                
+                t = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
                 self.pingcount += 1
-                print(self.c.GREEN + '%s ' % response + self.c.WHITE + 'from ' + self.c.YELLOW + '%s' % ip + self.c.WHITE + ' cseq=' +
+                print(self.c.CYAN + '[%s UTC] ' % t + self.c.GREEN + '%s ' % response + self.c.WHITE + 'from ' + self.c.YELLOW + '%s' % ip + self.c.WHITE + ' cseq=' +
                       self.c.YELLOW + '%d' % self.pingcount + self.c.WHITE + ' time=' + self.c.YELLOW + '%fms' % totaltime + self.c.WHITE)
             except socket.timeout:
                 self.pingcount += 1
-                print(self.c.WHITE + 'From ' + self.c.YELLOW + '%s' % ip + self.c.WHITE + ' cseq=' + self.c.YELLOW +
+                print(self.c.CYAN + '[%s UTC] ' % t + self.c.WHITE + 'From ' + self.c.YELLOW + '%s' % ip + self.c.WHITE + ' cseq=' + self.c.YELLOW +
                       '%d' % self.pingcount + self.c.WHITE + ' Destination Host Unreachable' + self.c.WHITE)
                 pass
             except KeyboardInterrupt:
@@ -237,7 +239,7 @@ class SipPing:
                 sys.exit()
             except:
                 self.pingcount += 1
-                print(self.c.WHITE + 'From ' + self.c.YELLOW + '%s' % ip + self.c.WHITE + ' cseq=' + self.c.YELLOW +
+                print(self.c.CYAN + '[%s UTC] ' % t + self.c.WHITE + 'From ' + self.c.YELLOW + '%s' % ip + self.c.WHITE + ' cseq=' + self.c.YELLOW +
                       '%d' % self.pingcount + self.c.WHITE + ' Destination Host Unreachable' + self.c.WHITE)
                 pass
 
