@@ -537,6 +537,7 @@ def parse_message(buffer):
         m = re.search('^To:\s*(.+)', header)
         if m:
             to = '%s' % (m.group(1))
+            data['to'] = to
 
             try:
                 n = re.search('.*;tag=(.+)', to)
@@ -743,7 +744,7 @@ def fingerprinting(method, msg, headers):
             fp.append('3CX Phone')
             fp.append('Mitel Border GW')
         m = re.search('^[a-z0-9]{10}$', tag)
-        if m:
+        if m and tag[0:2] != 'as':
             fp.append('Panasonic')
             fp.append('RM')
             fp.append('Grandstream')
@@ -780,25 +781,46 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[0-9a-f]{6,8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{8}$', tag)
         if m:
             fp.append('Matrix')
+        m = re.search('^[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{5}-[0-9a-f]{7,8}-[0-9a-f]{5}$', tag)
+        if m:
+            fp.append('Thomson')
+            fp.append('Technicolor')
+        m = re.search('^[0-9a-f]{7}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{6}$', tag)
+        if m:
+            fp.append('Thomson')
+            fp.append('Technicolor')
         m = re.search('^[0-9A-F]{16}$', tag)
         if m:
             fp.append('Fritz')
         m = re.search('^ZyXELUA_[0-9]{10}-[0-9]{4}$', tag)
         if m:
             fp.append('ZyXEL')
+        m = re.search('^[0-9a-z]{71}$', tag)
+        if m:
+            fp.append('Yealink')
+            fp.append('TP-Link')
+            fp.append('Gigaset')
+        m = re.search('^as[0-9a-f]{8}$', tag)
+        if m:
+            if ua[0:4] == 'FPBX' or ua[0:4] == 'IPBX':
+                fp.append('Asterisk PBX')
+            else:
+                fp.append('Asterisk PBX')
+                fp.append('Huawei')
 
         if tag == '123456':
             fp.append('Alcatel')
 
         if tag == '':
-            m = re.search('', ua)
-            if m:
-                fp.append('Gigaset')
+            if headers['to'][0:1] != '<':
+                fp.append('Intelbras')
             else:
                 fp.append('SNOM')
                 fp.append('FortiVoice')
                 fp.append('AddPac')
                 fp.append('Gigaset')
+                fp.append('VTechET')
+                fp.append('STL-IP')
 
         hdr = msg.split('\r\n')
         for h in hdr:
@@ -809,11 +831,20 @@ def fingerprinting(method, msg, headers):
     if type != 'Device' or fp == []:
         m = re.search('^as[0-9a-f]{8}$', tag)
         if m:
-            fp.append('Asterisk PBX')
-            fp.append('VoxStack')
+            if ua[0:2] == 'TE':
+                fp.append('Yeastar')
+            elif ua[0:4] == 'FPBX' or ua[0:4] == 'IPBX':
+                fp.append('Asterisk PBX')
+            else:
+                fp.append('VoxStack')
+                fp.append('FortiVoice')
         m = re.search('^[0-9a-z]{71}$', tag)
         if m:
             fp.append('Asterisk PBX')
+            fp.append('Yeastar')
+            fp.append('Grandstream')
+            fp.append('TP-Link')
+            fp.append('SylkServer')
         m = re.search('^[a-f0-9]{32}.[a-f0-9]{2,8}$', tag)
         if m:
             fp.append('Kamailio SIP Proxy')
@@ -823,8 +854,11 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[a-zA-Z0-9]{13}$', tag)
         if m:
             fp.append('FreeSWITCH')
+        m = re.search('^[0-9a-z]{4}[\.-][0-9a-z]{32}$', tag)
+        if m:
+            fp.append('OpenSIPS')
 
-        if fp == []:
+        if fp == []:            
             m = re.search('^[a-fA-F0-9]{6,8}-[a-fA-F0-9]{1,4}$', tag)
             if m:
                 fp.append('Cisco SIP Gateway')
@@ -842,6 +876,9 @@ def fingerprinting(method, msg, headers):
             m = re.search('^[0-9]{5,10}$', tag)
             if m:
                 fp.append('Panasonic')
+            m = re.search('^[0-9]{9,10}$', tag)
+            if m:
+                fp.append('Yate')
             m = re.search('^[0-9]{10}$', tag)
             if m:
                 fp.append('M5T')
@@ -857,10 +894,6 @@ def fingerprinting(method, msg, headers):
             m = re.search('^[0-9a-z]{18}$', tag)
             if m:
                 fp.append('Cisco/SPA')
-            m = re.search('^[0-9a-z]{71}$', tag)
-            if m:
-                fp.append('Grandstream')
-                fp.append('TP-Link')
             m = re.search('^1c[0-9]{9,10}$', tag)
             if m:
                 fp.append('Mediant SBC')
@@ -901,7 +934,7 @@ def fingerprinting(method, msg, headers):
     if fp == []:
         return (['Unknown'])
 
-    if len(fp) > 3:
+    if len(fp) > 4:
         return ['Too many matches']
 
     clearfp = []
