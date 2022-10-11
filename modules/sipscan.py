@@ -369,7 +369,7 @@ class SipScan:
 
                 if proto == 'TLS':
                     sock_ssl = ssl.wrap_socket(
-                        sock, ssl_version=ssl.PROTOCOL_TLS, ciphers=None, cert_reqs=ssl.CERT_NONE)
+                        sock, ssl_version=ssl.PROTOCOL_TLS, ciphers='DEFAULT', cert_reqs=ssl.CERT_NONE)
                     sock_ssl.connect(host)
                     sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
                 else:
