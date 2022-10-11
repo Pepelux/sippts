@@ -255,7 +255,7 @@ class SipExten:
                 while rescode[:1] == '1':
                     # receive temporary code
                     if self.proto == 'TLS':
-                        (resp, addr) = sock_ssl.recv(4096)
+                        resp = sock_ssl.recv(4096)
                         (ipaddr, rport) = host
                     else:
                         (resp, addr) = sock.recvfrom(4096)

@@ -892,7 +892,7 @@ def fingerprinting(method, msg, headers):
             m = re.search('^[0-9a-f]{32}$', tag)
             if m:
                 fp.append('PhonerLite')
-            m = re.search('^[0-9a-z]{18}$', tag)
+            m = re.search('^[0-9a-z]{17,18}$', tag)
             if m:
                 fp.append('Cisco/SPA')
             m = re.search('^1c[0-9]{9,10}$', tag)
@@ -924,6 +924,7 @@ def fingerprinting(method, msg, headers):
             if h.lower().find('av-global-session-id:') == 0:
                 fp.append('Avaya Session Manager')
             if h.lower().find('www-authenticate:') == 0 and h.lower().find('realm="asterisk"') > 0:
+                fp.clear()
                 fp.append('Asterisk PBX')
             if h.lower().find('o=ciscosystemssip-gw-useragent') == 0:
                 fp.append('Cisco SIP Gateway')
