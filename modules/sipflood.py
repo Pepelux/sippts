@@ -97,6 +97,7 @@ class SipFlood:
 
         print(self.c.BWHITE + '[✓] Target: ' + self.c.GREEN + '%s:%s/%s' %
               (self.ip, self.rport, self.proto))
+        print(self.c.BWHITE + '[✓] Method: ' + self.c.GREEN + '%s' % self.method)
         print(self.c.BWHITE + '[✓] Used threads: ' +
               self.c.GREEN + '%d' % self.nthreads)
         if self.nthreads > 300:
