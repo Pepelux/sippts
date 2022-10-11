@@ -836,6 +836,7 @@ def fingerprinting(method, msg, headers):
             elif ua[0:4] == 'FPBX' or ua[0:4] == 'IPBX':
                 fp.append('Asterisk PBX')
             else:
+                fp.append('Asterisk PBX')
                 fp.append('VoxStack')
                 fp.append('FortiVoice')
         m = re.search('^[0-9a-z]{71}$', tag)
