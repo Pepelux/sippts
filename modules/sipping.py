@@ -90,7 +90,7 @@ class SipPing:
             print(self.c.RED + 'Failed to create socket')
             sys.exit(1)
 
-        logo = Logo('sippings')
+        logo = Logo('sipping')
         logo.print()
 
         print(self.c.BWHITE + '[✓] Target: ' + self.c.YELLOW + '%s' % self.ip + self.c.WHITE + ':' +
