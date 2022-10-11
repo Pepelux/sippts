@@ -384,7 +384,7 @@ class SipScan:
 
                 while rescode[:1] == '1':
                     # receive temporary code
-                    if self.proto == 'TLS':
+                    if proto == 'TLS':
                         resp = sock_ssl.recv(4096)
                         (ip, rport) = host
                     else:
@@ -400,7 +400,7 @@ class SipScan:
 
                         if self.verbose == 2:
                             print(self.c.BWHITE + '[-] Receiving from %s:%s/%s ...' %
-                                  (ipaddr, rport, self.proto))
+                                  (ipaddr, rport, proto))
                             print(self.c.GREEN + resp.decode() + self.c.WHITE)
 
                 headers = parse_message(resp.decode())
@@ -442,14 +442,17 @@ class SipScan:
                         else:
                             print(self.c.WHITE + 'Response <%s %s> from %s:%d/%s without User-Agent' %
                                   (headers['response_code'], headers['response_text'], ip, rport, proto))
-
-                return headers
             except socket.timeout:
                 pass
             except:
                 pass
             finally:
                 sock.close()
+
+                if proto == 'TLS':
+                    sock_ssl.close()
+
+            return headers
 
     def print(self):
         iplen = len('IP address')
@@ -523,7 +526,8 @@ class SipScan:
                           ' | ' + self.c.GREEN + '%s' % fp.ljust(fplen) + self.c.WHITE + ' |')
 
                     if self.ofile != '':
-                        f.write('%s:%s/%s => %s - %s (%s)\n' % (ip, port, proto, res, ua, fp))
+                        f.write('%s:%s/%s => %s - %s (%s)\n' %
+                                (ip, port, proto, res, ua, fp))
                 else:
                     print(self.c.WHITE +
                           '| ' + self.c.BGREEN + '%s' % ip.ljust(iplen) + self.c.WHITE +
@@ -534,7 +538,8 @@ class SipScan:
                           ' | ' + self.c.CYAN + '%s' % type.ljust(tplen) + self.c.WHITE + ' |')
 
                     if self.ofile != '':
-                        f.write('%s:%s/%s => %s - %s\n' % (ip, port, proto, res, ua))
+                        f.write('%s:%s/%s => %s - %s\n' %
+                                (ip, port, proto, res, ua))
 
         print(self.c.WHITE + ' ' + '-' * tlen)
         print(self.c.WHITE)
