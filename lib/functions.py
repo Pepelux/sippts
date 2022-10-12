@@ -847,7 +847,7 @@ def fingerprinting(method, msg, headers):
         if m:
             if ua[0:2] == 'TE':
                 fp.append('Yeastar')
-            elif ua[0:4] == 'FPBX' or ua[0:4] == 'IPBX':
+            elif ua[0:4] == 'FPBX' or ua[0:4] == 'IPBX' or ua[0:3] == 'MOR':
                 fp.append('Asterisk PBX')
             elif ua[0:2] == 'UC':
                 fp.append('Openvox')
