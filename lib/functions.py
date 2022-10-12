@@ -818,6 +818,9 @@ def fingerprinting(method, msg, headers):
                 fp.append('Asterisk PBX')
                 fp.append('Huawei')
                 fp.append('BeWAN')
+        m = re.search('^[a-f0-9]{6}-[a-f0-9]{7,8}-[a-f0-9]{4}-[a-f0-9]{5}-[a-f0-9]{7,8}-[a-f0-9]{7,8}-[a-f0-9]{7,8}$', tag)
+        if m:
+            fp.append('Skype for Business')
 
         if tag == '123456':
             fp.append('Alcatel')
