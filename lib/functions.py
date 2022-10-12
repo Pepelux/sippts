@@ -756,6 +756,7 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[0-9]{10}$', tag)
         if m:
             fp.append('Draytek')
+            fp.append('Yealink')
         m = re.search('^[a-f0-9]{16}$', tag)
         if m:
             fp.append('Grandtream')
@@ -791,15 +792,13 @@ def fingerprinting(method, msg, headers):
         if m:
             fp.append('Matrix')
         m = re.search(
-            '^[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{5}-[0-9a-f]{7,8}-[0-9a-f]{5}$', tag)
+            '^[0-9a-f]{6,7}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{5,6}-[0-9a-f]{7,8}-[0-9a-f]{5,6}$', tag)
         if m:
-            fp.append('Thomson')
-            fp.append('Technicolor')
-        m = re.search(
-            '^[0-9a-f]{7}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{6}$', tag)
-        if m:
-            fp.append('Thomson')
-            fp.append('Technicolor')
+            if ua[0:11] == 'MediaAccess':
+                fp.append('Technicolor')
+            else:
+                fp.append('Thomson')
+                fp.append('Technicolor')
         m = re.search('^[0-9A-F]{16}$', tag)
         if m:
             fp.append('Fritz')
