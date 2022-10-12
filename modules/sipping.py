@@ -82,15 +82,6 @@ class SipPing:
             print(self.c.BRED + 'Protocol %s is not supported' % self.proto)
             sys.exit()
 
-        try:
-            if self.proto == 'UDP':
-                sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            else:
-                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        except socket.error:
-            print(self.c.RED + 'Failed to create socket')
-            sys.exit(1)
-
         logo = Logo('sipping')
         logo.print()
 
@@ -145,17 +136,6 @@ class SipPing:
         if self.cseq == None or self.cseq == '':
             self.cseq = '1'
 
-        bind = '0.0.0.0'
-        lport = get_free_port()
-
-        try:
-            sock.bind((bind, lport))
-        except:
-            lport = get_free_port()
-            sock.bind((bind, lport))
-
-        host = (str(self.ip), int(self.rport))
-
         if self.host != '' and self.domain == '':
             self.domain = self.host
         if self.domain == '':
@@ -167,27 +147,6 @@ class SipPing:
 
         if self.contact_domain == '':
             self.contact_domain = local_ip
-
-        try:
-            sock.settimeout(2)
-
-            if self.proto == 'TCP':
-                sock.connect(host)
-
-            if self.proto == 'TLS':
-                sock_ssl = ssl.wrap_socket(
-                    sock, ssl_version=ssl.PROTOCOL_TLS, ciphers='DEFAULT', cert_reqs=ssl.CERT_NONE)
-                sock_ssl.connect(host)
-        except socket.timeout:
-            print(self.c.RED +
-                  '[!] Socket connection timeout\n' + self.c.WHITE)
-            sys.exit()
-        except:
-            print(self.c.RED + '[!] Socket connection error\n' + self.c.WHITE)
-            sys.exit()
-
-        msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
-                             self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, self.to_tag, self.digest, 1, '', 0, '', '')
 
         ip = self.ip
         try:
@@ -203,6 +162,48 @@ class SipPing:
                   self.ip + self.c.YELLOW + ' using method %s' % self.method)
 
         while self.run == True and self.pingcount < self.number:
+            try:
+                if self.proto == 'UDP':
+                    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                else:
+                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            except socket.error:
+                print(self.c.RED + 'Failed to create socket')
+                sys.exit(1)
+
+            bind = '0.0.0.0'
+            lport = get_free_port()
+
+            msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
+                                 self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, self.to_tag, self.digest, 1, '', 0, '', '')
+
+            try:
+                sock.bind((bind, lport))
+            except:
+                lport = get_free_port()
+                sock.bind((bind, lport))
+
+            host = (str(self.ip), int(self.rport))
+
+            try:
+                sock.settimeout(2)
+
+                if self.proto == 'TCP':
+                    sock.connect(host)
+
+                if self.proto == 'TLS':
+                    sock_ssl = ssl.wrap_socket(
+                        sock, ssl_version=ssl.PROTOCOL_TLS, ciphers='DEFAULT', cert_reqs=ssl.CERT_NONE)
+                    sock_ssl.connect(host)
+            except socket.timeout:
+                print(self.c.RED +
+                      '[!] Socket connection timeout' + self.c.WHITE)
+                # sys.exit()
+            except:
+                print(self.c.RED +
+                      '[!] Socket connection error' + self.c.WHITE)
+                # sys.exit()
+
             try:
                 start = time.time()
 
