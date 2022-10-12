@@ -817,6 +817,7 @@ def fingerprinting(method, msg, headers):
             else:
                 fp.append('Asterisk PBX')
                 fp.append('Huawei')
+                fp.append('BeWAN')
 
         if tag == '123456':
             fp.append('Alcatel')
