@@ -882,6 +882,11 @@ def fingerprinting(method, msg, headers):
         if m:
             fp.append('OpenSIPS')
 
+        m = re.search('^[0-9]{10}$', tag)
+        if m and ua[0:4] == 'Desk' and ua[5:10] == 'Phone':
+            fp.clear()
+            fp.append('OpenScape')
+
         if fp == []:
             m = re.search('^[a-fA-F0-9]{6,8}-[a-fA-F0-9]{1,4}$', tag)
             if m:
@@ -960,8 +965,8 @@ def fingerprinting(method, msg, headers):
     if fp == []:
         return (['Unknown'])
 
-    if len(fp) > 4:
-        return ['Too many matches']
+    # if len(fp) > 4:
+    #     return ['Too many matches']
 
     clearfp = []
 
