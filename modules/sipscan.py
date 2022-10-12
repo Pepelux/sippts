@@ -546,7 +546,11 @@ class SipScan:
 
         if self.fp == 1 and len(self.found) > 0:
             print(self.c.YELLOW +
-                  '[!] Fingerprinting is based on `To-tag` and other header values. The result may not be correct\n' + self.c.WHITE)
+                  '[!] Fingerprinting is based on `To-tag` and other header values. The result may not be correct' + self.c.WHITE)
+            if self.method != 'REGISTER':
+                print(self.c.YELLOW +
+                    '[!] Tip: You can try -m REGISTER to verify the fingerprinting result' + self.c.WHITE)
+            print(self.c.WHITE)
 
         if self.ofile != '':
             f.close()
