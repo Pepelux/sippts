@@ -775,11 +775,11 @@ def fingerprinting(method, msg, headers):
         if m:
             fp.append('Sercomm Router')
         m = re.search(
-            '^[0-9a-f]{6,8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{1}-[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{6}$', tag)
+            '^[0-9a-f]{6,8}-[0-9a-f]{6,8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{1}-[0-9a-f]{5,8}-[0-9a-f]{6,8}-[0-9a-f]{5,8}$', tag)
         if m:
             fp.append('Matrix')
         m = re.search(
-            '^[0-9a-f]{6,8}-[0-9a-f]{12,15}-[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{7}$', tag)
+            '^[0-9a-f]{7,8}-[0-9a-f]{7,8}-[0-9a-f]{5,6}-[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}$', tag)
         if m:
             fp.append('Matrix')
         m = re.search(
@@ -787,7 +787,7 @@ def fingerprinting(method, msg, headers):
         if m:
             fp.append('Matrix')
         m = re.search(
-            '^[0-9a-f]{6,8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{1}-[0-9a-f]{5}-[0-9a-f]{8}-[0-9a-f]{5}$', tag)
+            '^[0-9a-f]{6,8}-[0-9a-f]{10,15}-[0-9a-f]{7,8}-[0-9a-f]{7,8}-[0-9a-f]{7}$', tag)
         if m:
             fp.append('Matrix')
         m = re.search(
@@ -823,15 +823,19 @@ def fingerprinting(method, msg, headers):
             fp.append('Alcatel')
 
         if tag == '':
-            if headers['to'][0:1] != '<':
-                fp.append('Intelbras')
-            else:
-                fp.append('SNOM')
-                fp.append('FortiVoice')
-                fp.append('AddPac')
+            m = re.search('^[A-Z]{1,2}[0-9]{2,3}\sIP', ua)
+            if m:
                 fp.append('Gigaset')
-                fp.append('VTechET')
-                fp.append('STL-IP')
+            else:
+                if headers['to'][0:1] != '<':
+                    fp.append('Intelbras')
+                else:
+                    fp.append('SNOM')
+                    fp.append('FortiVoice')
+                    fp.append('AddPac')
+                    fp.append('Gigaset')
+                    fp.append('VTechET')
+                    fp.append('STL-IP')
 
         hdr = msg.split('\r\n')
         for h in hdr:
