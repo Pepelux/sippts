@@ -774,23 +774,29 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[0-9a-f]{2}-[0-9]{9,10}$', tag)
         if m:
             fp.append('Sercomm Router')
-        m = re.search('^[0-9a-f]{6,8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{1}-[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{6}$', tag)
+        m = re.search(
+            '^[0-9a-f]{6,8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{1}-[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{6}$', tag)
         if m:
             fp.append('Matrix')
-        m = re.search('^[0-9a-f]{6,8}-[0-9a-f]{12,15}-[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{7}$', tag)
+        m = re.search(
+            '^[0-9a-f]{6,8}-[0-9a-f]{12,15}-[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{7}$', tag)
         if m:
             fp.append('Matrix')
-        m = re.search('^[0-9a-f]{6,8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{8}$', tag)
+        m = re.search(
+            '^[0-9a-f]{6,8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{8}$', tag)
         if m:
             fp.append('Matrix')
-        m = re.search('^[0-9a-f]{6,8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{1}-[0-9a-f]{5}-[0-9a-f]{8}-[0-9a-f]{5}$', tag)
+        m = re.search(
+            '^[0-9a-f]{6,8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{1}-[0-9a-f]{5}-[0-9a-f]{8}-[0-9a-f]{5}$', tag)
         if m:
             fp.append('Matrix')
-        m = re.search('^[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{5}-[0-9a-f]{7,8}-[0-9a-f]{5}$', tag)
+        m = re.search(
+            '^[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{5}-[0-9a-f]{7,8}-[0-9a-f]{5}$', tag)
         if m:
             fp.append('Thomson')
             fp.append('Technicolor')
-        m = re.search('^[0-9a-f]{7}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{6}$', tag)
+        m = re.search(
+            '^[0-9a-f]{7}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{6}$', tag)
         if m:
             fp.append('Thomson')
             fp.append('Technicolor')
@@ -840,6 +846,8 @@ def fingerprinting(method, msg, headers):
                 fp.append('Yeastar')
             elif ua[0:4] == 'FPBX' or ua[0:4] == 'IPBX':
                 fp.append('Asterisk PBX')
+            elif ua[0:2] == 'UC':
+                fp.append('Openvox')
             else:
                 fp.append('Asterisk PBX')
                 fp.append('VoxStack')
@@ -870,11 +878,12 @@ def fingerprinting(method, msg, headers):
         if m:
             fp.append('OpenSIPS')
 
-        if fp == []:            
+        if fp == []:
             m = re.search('^[a-fA-F0-9]{6,8}-[a-fA-F0-9]{1,4}$', tag)
             if m:
                 fp.append('Cisco SIP Gateway')
-            m = re.search('^[a-f0-9]{18}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$', tag)
+            m = re.search(
+                '^[a-f0-9]{18}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$', tag)
             if m:
                 fp.append('Quadro')
             m = re.search('^[a-f0-9]{16}$', tag)
