@@ -136,8 +136,9 @@ class SipScan:
 
                                             error = 1
 
+                                ips = []
+
                                 if error == 0:
-                                    ips = []
                                     hosts = list(ipaddress.ip_network(
                                         str(self.ip)).hosts())
 
@@ -157,11 +158,11 @@ class SipScan:
                                             ips.append(long2ip(i))
                                         else:
                                             print(self.c.YELLOW + '[+] Ping %s ...' %
-                                                  str(long2ip(i)) + self.c.WHITE, end='\r')
+                                                    str(long2ip(i)) + self.c.WHITE, end='\r')
 
                                             if ping(long2ip(i), '0.1') == True:
                                                 print(self.c.GREEN + '\n   [-] ... Pong %s' %
-                                                      str(long2ip(i)) + self.c.WHITE)
+                                                        str(long2ip(i)) + self.c.WHITE)
                                                 ips.append(long2ip(i))
 
                                 self.prepare_scan(ips, ports, protos)
