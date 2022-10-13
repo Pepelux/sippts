@@ -115,9 +115,10 @@ class SipScan:
                 with open(self.file) as f:
                     line = f.readline()
                     line = line.replace('\n', '')
-                    error = 0
 
                     while (line):
+                        error = 0
+
                         try:
                             if self.quit == False:
                                 try:
@@ -134,6 +135,7 @@ class SipScan:
                                             end_ip = val[1]
 
                                             error = 1
+
                                 if error == 0:
                                     ips = []
                                     hosts = list(ipaddress.ip_network(
@@ -175,8 +177,9 @@ class SipScan:
         else:
             ips = []
             hosts = []
-            error = 0
             for i in self.ip.split(','):
+                error = 0
+
                 try:
                     i = socket.gethostbyname(i)
                     i = IP(i)
