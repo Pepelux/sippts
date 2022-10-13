@@ -842,6 +842,7 @@ def fingerprinting(method, msg, headers):
                     fp.append('Gigaset')
                     fp.append('VTechET')
                     fp.append('STL-IP')
+                    fp.append('Laia')
 
         hdr = msg.split('\r\n')
         for h in hdr:
@@ -887,6 +888,9 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[0-9a-z]{4}[\.-][0-9a-z]{32}$', tag)
         if m:
             fp.append('OpenSIPS')
+        m = re.search('^[0-9A-F]{8}-[0-9A-F]{16}-[0-9A-F]{8}$', tag)
+        if m:
+            fp.append('SEMS')
 
         m = re.search('^[0-9]{10}$', tag)
         if m and ua[0:4] == 'Desk' and ua[5:10] == 'Phone':
@@ -927,6 +931,9 @@ def fingerprinting(method, msg, headers):
             m = re.search('^[0-9a-f]{32}$', tag)
             if m:
                 fp.append('PhonerLite')
+            m = re.search('^[0-9a-z]{16}$', tag)
+            if m:
+                fp.append('Cisco')
             m = re.search('^[0-9a-z]{17,18}$', tag)
             if m:
                 fp.append('Cisco/SPA')
