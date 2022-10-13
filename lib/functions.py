@@ -760,7 +760,7 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[a-f0-9]{16}$', tag)
         if m:
             fp.append('Grandtream')
-        m = re.search('^plcm_[0-9]{10}-[0-9]{3,4}$', tag)
+        m = re.search('^plcm_', tag)
         if m:
             fp.append('Polycom')
         m = re.search('^[a-f0-9]{15}$', tag)
@@ -821,6 +821,9 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[a-f0-9]{6}-[a-f0-9]{7,8}-[a-f0-9]{4}-[a-f0-9]{5}-[a-f0-9]{7,8}-[a-f0-9]{7,8}-[a-f0-9]{7,8}$', tag)
         if m:
             fp.append('Skype for Business')
+        m = re.search('^ZyXELUA_', tag)
+        if m:
+            fp.append('ZyXEL')
 
         if tag == '123456':
             fp.append('Alcatel')
@@ -851,7 +854,7 @@ def fingerprinting(method, msg, headers):
         if m:
             if ua[0:2] == 'TE':
                 fp.append('Yeastar')
-            elif ua[0:4] == 'FPBX' or ua[0:4] == 'IPBX' or ua[0:3] == 'MOR':
+            elif ua[0:4] == 'FPBX' or ua[0:4] == 'IPBX' or ua[0:3] == 'MOR' or ua[0:8] == 'Asterisk':
                 fp.append('Asterisk PBX')
             elif ua[0:2] == 'UC':
                 fp.append('Openvox')
