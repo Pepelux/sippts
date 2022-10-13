@@ -328,10 +328,6 @@ class SipScan:
                                             self.domain = self.host
                                         if self.domain == '':
                                             self.domain = val_ipaddr
-                                        if not self.from_domain or self.from_domain == '':
-                                            self.from_domain = self.domain
-                                        if not self.to_domain or self.to_domain == '':
-                                            self.to_domain = self.domain
 
                                         executor.submit(self.scan_host, val_ipaddr,
                                                         val_port, val_proto)
@@ -381,8 +377,16 @@ class SipScan:
             if contact_domain == '':
                 contact_domain = '10.0.0.1'
 
-            msg = create_message(self.method, contact_domain, self.from_user, self.from_name, self.from_domain,
-                                 self.to_user, self.to_name, self.to_domain, proto, domain, self.user_agent, lport, '', '', '', '1', '', '', 1, '', 0, '', '')
+            fdomain = self.from_domain
+            tdomain = self.to_domain
+
+            if not self.from_domain or self.from_domain == '':
+                fdomain = self.domain
+            if not self.to_domain or self.to_domain == '':
+                tdomain = self.domain
+
+            msg = create_message(self.method, contact_domain, self.from_user, self.from_name, fdomain,
+                                 self.to_user, self.to_name, tdomain, proto, domain, self.user_agent, lport, '', '', '', '1', '', '', 1, '', 0, '', '')
 
             try:
                 sock.settimeout(2)
