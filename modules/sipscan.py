@@ -115,6 +115,7 @@ class SipScan:
                 with open(self.file) as f:
                     line = f.readline()
                     line = line.replace('\n', '')
+                    error = 0
 
                     while (line):
                         try:
@@ -123,18 +124,27 @@ class SipScan:
                                     ip = socket.gethostbyname(line)
                                     self.ip = IP(ip)
                                 except:
-                                    self.ip = IP(line)
+                                    try:
+                                        self.ip = IP(line)
 
-                                ips = []
-                                hosts = list(ipaddress.ip_network(
-                                    str(self.ip)).hosts())
+                                    except:
+                                        if line.find('-') > 0:
+                                            val = line.split('-')
+                                            start_ip = val[0]
+                                            end_ip = val[1]
 
-                                if hosts == []:
-                                    hosts.append(self.ip)
+                                            error = 1
+                                if error == 0:
+                                    ips = []
+                                    hosts = list(ipaddress.ip_network(
+                                        str(self.ip)).hosts())
 
-                                last = len(hosts)-1
-                                start_ip = hosts[0]
-                                end_ip = hosts[last]
+                                    if hosts == []:
+                                        hosts.append(self.ip)
+
+                                    last = len(hosts)-1
+                                    start_ip = hosts[0]
+                                    end_ip = hosts[last]
 
                                 ipini = int(ip2long(str(start_ip)))
                                 ipend = int(ip2long(str(end_ip)))
@@ -165,25 +175,34 @@ class SipScan:
         else:
             ips = []
             hosts = []
+            error = 0
             for i in self.ip.split(','):
                 try:
                     i = socket.gethostbyname(i)
                     i = IP(i)
                 except:
-                    i = IP(i)
+                    try:
+                        i = IP(i)
+                    except:
+                        if i.find('-') > 0:
+                            val = i.split('-')
+                            start_ip = val[0]
+                            end_ip = val[1]
 
+                            error = 1
                 try:
-                    hlist = list(ipaddress.ip_network(str(i)).hosts())
+                    if error == 0:
+                        hlist = list(ipaddress.ip_network(str(i)).hosts())
 
-                    if hlist == []:
-                        hosts.append(i)
-                    else:
-                        for h in hlist:
-                            hosts.append(h)
+                        if hlist == []:
+                            hosts.append(i)
+                        else:
+                            for h in hlist:
+                                hosts.append(h)
 
-                    last = len(hosts)-1
-                    start_ip = hosts[0]
-                    end_ip = hosts[last]
+                        last = len(hosts)-1
+                        start_ip = hosts[0]
+                        end_ip = hosts[last]
 
                     ipini = int(ip2long(str(start_ip)))
                     ipend = int(ip2long(str(end_ip)))
