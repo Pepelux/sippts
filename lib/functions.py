@@ -760,7 +760,7 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[a-f0-9]{16}$', tag)
         if m:
             fp.append('Grandtream')
-        m = re.search('^plcm_[0-9]{10}-[0-9]{4}$', tag)
+        m = re.search('^plcm_[0-9]{10}-[0-9]{3,4}$', tag)
         if m:
             fp.append('Polycom')
         m = re.search('^[a-f0-9]{15}$', tag)
