@@ -168,8 +168,9 @@ class SipScan:
             for i in self.ip.split(','):
                 try:
                     i = socket.gethostbyname(i)
+                    i = IP(i)
                 except:
-                    pass
+                    i = IP(i)
 
                 try:
                     hlist = list(ipaddress.ip_network(str(i)).hosts())
@@ -549,7 +550,7 @@ class SipScan:
                   '[!] Fingerprinting is based on `To-tag` and other header values. The result may not be correct' + self.c.WHITE)
             if self.method != 'REGISTER':
                 print(self.c.YELLOW +
-                    '[!] Tip: You can try -m REGISTER to verify the fingerprinting result' + self.c.WHITE)
+                      '[!] Tip: You can try -m REGISTER to verify the fingerprinting result' + self.c.WHITE)
             print(self.c.WHITE)
 
         if self.ofile != '':
