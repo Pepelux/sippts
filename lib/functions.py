@@ -785,13 +785,21 @@ def fingerprinting(method, msg, headers):
         if m:
             fp.append('Matrix')
         m = re.search(
-            '^[0-9a-f]{6,8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{8}$', tag)
+            '^[0-9a-f]{6,8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{8}-[0-9a-f]{7,8}-[0-9a-f]{8}$', tag)
         if m:
-            fp.append('Matrix')
+            if ua[0:8] == 'Inventel':
+                fp.append('Livebox')
+            else:
+                fp.append('Matrix')
+                fp.append('Livebox')
         m = re.search(
             '^[0-9a-f]{6,8}-[0-9a-f]{10,15}-[0-9a-f]{7,8}-[0-9a-f]{7,8}-[0-9a-f]{7}$', tag)
         if m:
             fp.append('Matrix')
+        m = re.search(
+            '^[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{5}-[0-9a-f]{8}-[0-9a-f]{5}$', tag)
+        if m:
+            fp.append('Sagem')
         m = re.search(
             '^[0-9a-f]{6,7}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{5,6}-[0-9a-f]{7,8}-[0-9a-f]{5,6}$', tag)
         if m:
