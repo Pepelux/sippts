@@ -14,6 +14,8 @@ devel:
   - show fingerprinting to give more information
 - sipping:
   - new module to check if a server/device is alive
+- rtpbleedinject:
+  - new module to inject RTP frames when RTPBleed vulnerability is present 
 - global:
   - bug fixes
 

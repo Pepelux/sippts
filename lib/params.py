@@ -765,22 +765,18 @@ More info about the vulnerability: https://www.rtpbleed.com/
     # Array for all arguments passed to script
     args = parser.parse_args()
 
-    try:
-        IPADDR = args.ipaddr
-        SP = args.start_port
-        EP = args.end_port
-        # Always start on odd port
-        if SP % 2 != 0:
-            SP = SP + 1
-        if EP % 2 != 0:
-            EP = EP + 1
-        LOOPS = args.loops
-        PAYLOAD = args.payload
-        DELAY = args.delay
-        return IPADDR, SP, EP, LOOPS, PAYLOAD, DELAY
-    except ValueError:
-        print('[-] Error: Bad IP format')
-        sys.exit(1)
+    IPADDR = args.ipaddr
+    SP = args.start_port
+    EP = args.end_port
+    # Always start on odd port
+    if SP % 2 != 0:
+        SP = SP + 1
+    if EP % 2 != 0:
+        EP = EP + 1
+    LOOPS = args.loops
+    PAYLOAD = args.payload
+    DELAY = args.delay
+    return IPADDR, SP, EP, LOOPS, PAYLOAD, DELAY
 
 
 def get_rtcpbleed_args():
@@ -817,20 +813,16 @@ More info about the vulnerability: https://www.rtpbleed.com/
     # Array for all arguments passed to script
     args = parser.parse_args()
 
-    try:
-        IPADDR = args.ipaddr
-        SP = args.start_port
-        EP = args.end_port
-        # Always start on odd port
-        if SP % 2 == 0:
-            SP = SP + 1
-        if EP % 2 == 0:
-            EP = EP + 1
-        DELAY = args.delay
-        return IPADDR, SP, EP, DELAY
-    except ValueError:
-        print('[-] Error: Bad IP format')
-        sys.exit(1)
+    IPADDR = args.ipaddr
+    SP = args.start_port
+    EP = args.end_port
+    # Always start on odd port
+    if SP % 2 == 0:
+        SP = SP + 1
+    if EP % 2 == 0:
+        EP = EP + 1
+    DELAY = args.delay
+    return IPADDR, SP, EP, DELAY
 
 
 def get_rtcbleed_flood_args():
@@ -860,19 +852,58 @@ More info about the vulnerability: https://www.rtpbleed.com/
 
     # Add arguments
     parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
-    parser.add_argument('-r', '--port', type=int, help='Port number to flood', dest='port', required=True)
+    parser.add_argument('-r', '--remote_port', type=int, help='Port number to flood', dest='port', required=True)
     parser.add_argument('-p', '--payload', type=int,help='Codec payload (default: 0)', dest='payload', default=0)
 
     # Array for all arguments passed to script
     args = parser.parse_args()
-    try:
-        IPADDR = args.ipaddr
-        P = args.port
-        PAYLOAD = args.payload
-        return IPADDR, P, PAYLOAD
-    except ValueError:
-        print('[-] Error: Bad IP format')
-        sys.exit(1)
+
+    IPADDR = args.ipaddr
+    P = args.port
+    PAYLOAD = args.payload
+    return IPADDR, P, PAYLOAD
+
+
+def get_rtcbleed_inject_args():
+    parser = argparse.ArgumentParser(
+        formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
+            prog, max_help_position=50),
+        description= RED + u'''☎️  SIPPTS''' + WHITE + ''' BY ''' + GREEN + '''🅿 🅴 🅿 🅴 🅻 🆄 🆇''' + YELLOW + '''
+
+█████████████████████████████████████████████████████████████████████████████████████████
+█▄─▄▄▀█─▄─▄─█▄─▄▄─███▄─▄─▀█▄─▄███▄─▄▄─█▄─▄▄─█▄─▄▄▀███▄─▄█▄─▀█▄─▄███▄─▄█▄─▄▄─█─▄▄▄─█─▄─▄─█
+██─▄─▄███─████─▄▄▄████─▄─▀██─██▀██─▄█▀██─▄█▀██─██─████─███─█▄▀─██─▄█─███─▄█▀█─███▀███─███
+▀▄▄▀▄▄▀▀▄▄▄▀▀▄▄▄▀▀▀▀▀▄▄▄▄▀▀▄▄▄▄▄▀▄▄▄▄▄▀▄▄▄▄▄▀▄▄▄▄▀▀▀▀▄▄▄▀▄▄▄▀▀▄▄▀▄▄▄▀▀▀▄▄▄▄▄▀▄▄▄▄▄▀▀▄▄▄▀▀
+
+''' + GREEN + '''💾 https://github.com/Pepelux/sippts''' + WHITE + '''
+''' + YELLOW + '''🐦 https://twitter.com/pepeluxx''' + WHITE + '''
+
+''' + BLUE + ''' -= Exploit the RTP Bleed vulnerability sending RTP streams =-''' + WHITE,
+        epilog=WHITE + '''
+The RTP bleed Bug is a serious vulnerability in a number of RTP proxies. This weakness allows 
+malicious users to inject and receive RTP streams of ongoing calls without needing to be positioned 
+as man-in-the-middle. This may lead to eavesdropping of audio calls, impersonation and possibly cause 
+toll fraud by redirecting ongoing calls.
+
+More info about the vulnerability: https://www.rtpbleed.com/
+ 
+''')
+
+    # Add arguments
+    parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
+    parser.add_argument('-r', '--remote_port', type=int, help='Port number to inject media', dest='port', required=True)
+    parser.add_argument('-p', '--payload', type=int,help='Codec payload (default: 0)', dest='payload', default=0)
+    parser.add_argument('-f', '--file', type=str, help='Audio file (WAV) to inject', dest='file', default="", required=True)
+
+    # Array for all arguments passed to script
+    args = parser.parse_args()
+
+    IPADDR = args.ipaddr
+    P = args.port
+    PAYLOAD = args.payload
+    FILE = args.file
+
+    return IPADDR, P, PAYLOAD, FILE
 
 
 def get_tshark_args():
