@@ -133,6 +133,7 @@ class SipScan:
                                             val = line.split('-')
                                             start_ip = val[0]
                                             end_ip = val[1]
+                                            self.ip = line
 
                                             error = 1
 
@@ -158,14 +159,14 @@ class SipScan:
                                             ips.append(long2ip(i))
                                         else:
                                             print(self.c.YELLOW + '[+] Ping %s ...' %
-                                                    str(long2ip(i)) + self.c.WHITE, end='\r')
+                                                  str(long2ip(i)) + self.c.WHITE, end='\r')
 
                                             if ping(long2ip(i), '0.1') == True:
                                                 print(self.c.GREEN + '\n   [-] ... Pong %s' %
-                                                        str(long2ip(i)) + self.c.WHITE)
+                                                      str(long2ip(i)) + self.c.WHITE)
                                                 ips.append(long2ip(i))
 
-                                self.prepare_scan(ips, ports, protos)
+                                self.prepare_scan(ips, ports, protos, self.ip)
                         except:
                             pass
 
@@ -210,6 +211,7 @@ class SipScan:
 
                     ipini = int(ip2long(str(start_ip)))
                     ipend = int(ip2long(str(end_ip)))
+                    iplist = i
 
                     for i in range(ipini, ipend+1):
                         if i != local_ip and long2ip(i)[-2:] != '.0' and long2ip(i)[-4:] != '.255':
@@ -217,18 +219,18 @@ class SipScan:
                                 ips.append(long2ip(i))
                             else:
                                 print(self.c.YELLOW + '[+] Ping %s ...' %
-                                    str(long2ip(i)) + self.c.WHITE, end='\r')
+                                      str(long2ip(i)) + self.c.WHITE, end='\r')
 
                                 if ping(long2ip(i), '0.1') == True:
                                     print(self.c.GREEN + '\n   [-] ... Pong %s' %
-                                        str(long2ip(i)) + self.c.WHITE)
+                                          str(long2ip(i)) + self.c.WHITE)
                                     ips.append(long2ip(i))
 
-                    self.prepare_scan(ips, ports, protos)
+                    self.prepare_scan(ips, ports, protos, iplist)
                 except:
                     pass
 
-    def prepare_scan(self, ips, ports, protos):
+    def prepare_scan(self, ips, ports, protos, iplist):
         max_values = 100000
 
         # threads to use
@@ -240,7 +242,7 @@ class SipScan:
             nthreads = 1
 
         print(self.c.BWHITE + '[✓] IP/Network: ' +
-              self.c.GREEN + '%s' % str(self.ip))
+              self.c.GREEN + '%s' % str(iplist))
 
         print(self.c.BWHITE + '[✓] Port range: ' +
               self.c.GREEN + '%s' % self.rport)

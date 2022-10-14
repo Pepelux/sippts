@@ -105,7 +105,7 @@ class RTPBleedInject:
                     size = 160
 
                     print(
-                        YELLOW + '[+] Injecting RTP audio ...' + self.c.WHITE)
+                        self.c.YELLOW + '[+] Injecting RTP audio ...' + self.c.WHITE)
 
                     while cont-size < total:
                         packet = hexdata[cont:cont+(size*2)]
