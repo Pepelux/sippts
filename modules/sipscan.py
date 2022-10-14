@@ -153,7 +153,7 @@ class SipScan:
                                 ipend = int(ip2long(str(end_ip)))
 
                                 for i in range(ipini, ipend+1):
-                                    if i != local_ip:
+                                    if i != local_ip and long2ip(i)[-2:] != '.0' and long2ip(i)[-4:] != '.255':
                                         if self.ping == 'False':
                                             ips.append(long2ip(i))
                                         else:
@@ -212,16 +212,17 @@ class SipScan:
                     ipend = int(ip2long(str(end_ip)))
 
                     for i in range(ipini, ipend+1):
-                        if self.ping == 'False':
-                            ips.append(long2ip(i))
-                        else:
-                            print(self.c.YELLOW + '[+] Ping %s ...' %
-                                  str(long2ip(i)) + self.c.WHITE, end='\r')
-
-                            if ping(long2ip(i), '0.1') == True:
-                                print(self.c.GREEN + '\n   [-] ... Pong %s' %
-                                      str(long2ip(i)) + self.c.WHITE)
+                        if i != local_ip and long2ip(i)[-2:] != '.0' and long2ip(i)[-4:] != '.255':
+                            if self.ping == 'False':
                                 ips.append(long2ip(i))
+                            else:
+                                print(self.c.YELLOW + '[+] Ping %s ...' %
+                                    str(long2ip(i)) + self.c.WHITE, end='\r')
+
+                                if ping(long2ip(i), '0.1') == True:
+                                    print(self.c.GREEN + '\n   [-] ... Pong %s' %
+                                        str(long2ip(i)) + self.c.WHITE)
+                                    ips.append(long2ip(i))
 
                     self.prepare_scan(ips, ports, protos)
                 except:
