@@ -772,6 +772,7 @@ def fingerprinting(method, msg, headers):
             fp.append('Comrex')
             fp.append('OXO')
             fp.append('InterVideo')
+            fp.append('Dahua')
         m = re.search('^[0-9a-f]{2}-[0-9]{9,10}$', tag)
         if m:
             fp.append('Sercomm Router')
@@ -807,9 +808,12 @@ def fingerprinting(method, msg, headers):
             fp.append('ZyXEL')
         m = re.search('^[0-9a-z]{71}$', tag)
         if m:
-            fp.append('Yealink')
-            fp.append('TP-Link')
-            fp.append('Gigaset')
+            if ua[0:7] == 'Maxwell':
+                fp.append('Gigaset')
+            else:
+                fp.append('Yealink')
+                fp.append('TP-Link')
+                fp.append('Gigaset')
         m = re.search('^as[0-9a-f]{8}$', tag)
         if m:
             if ua[0:4] == 'FPBX' or ua[0:4] == 'IPBX':
