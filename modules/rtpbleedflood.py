@@ -53,6 +53,7 @@ class RTPBleedFlood:
 
         host = (str(self.ip), self.port)
         nloop = 0
+        count = 1
 
         while True:
             try:
@@ -86,13 +87,14 @@ class RTPBleedFlood:
                         ssrc = '%s%s%s%s' % (hex(msg[8])[2:], hex(
                             msg[9])[2:], hex(msg[10])[2:], hex(msg[11])[2:])
 
-                        print(self.c.WHITE + 'received %d bytes from target port %d Seq number %s' %
-                              (size, rport, seq))
+                        print(self.c.WHITE + '[%d] received %d bytes from target port %d Seq number %s' %
+                              (count, size, rport, seq), end='\r')
+                        count += 1
                 except:
                     # No data available
                     continue
             except KeyboardInterrupt:
-                print(self.c.YELLOW + 'You pressed Ctrl+C!')
+                print(self.c.YELLOW + '\nYou pressed Ctrl+C!')
                 exit()
             except:
                 pass
