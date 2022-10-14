@@ -753,7 +753,7 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[a-z]{8}$', tag)
         if m:
             fp.append('Ozeki VoIP SIP SDK')
-        m = re.search('^[0-9]{10}$', tag)
+        m = re.search('^[0-9]{8,10}$', tag)
         if m:
             fp.append('Draytek')
             fp.append('Yealink')
@@ -773,7 +773,7 @@ def fingerprinting(method, msg, headers):
             fp.append('OXO')
             fp.append('InterVideo')
             fp.append('Dahua')
-        m = re.search('^[0-9a-f]{2}-[0-9]{9,10}$', tag)
+        m = re.search('^[0-9a-f]{2}-[0-9]{8,10}$', tag)
         if m:
             fp.append('Sercomm Router')
         m = re.search(
@@ -836,6 +836,11 @@ def fingerprinting(method, msg, headers):
         m = re.search('^ZyXELUA_', tag)
         if m:
             fp.append('ZyXEL')
+        m = re.search('^[0-9]{8,10}$', tag)
+        if m:
+            if ua[0:4] == 'ININ':
+                fp.clear()
+                fp.append('Interactive Intelligence EDGE')
 
         if tag == '123456':
             fp.append('Alcatel')
@@ -875,10 +880,13 @@ def fingerprinting(method, msg, headers):
                 fp.append('Asterisk PBX')
                 fp.append('VoxStack')
                 fp.append('FortiVoice')
+                fp.append('Aline')
         m = re.search('^[0-9a-z]{71}$', tag)
         if m:
             if ua[0:4] == 'FPBX' or ua[0:4] == 'IPBX':
                 fp.append('Asterisk PBX')
+            elif ua[0:10] == 'FortiVoice':
+                fp.append('FortiVoice')
             else:
                 fp.append('Asterisk PBX')
                 fp.append('Yeastar')
@@ -928,9 +936,10 @@ def fingerprinting(method, msg, headers):
             m = re.search('^[0-9]{5,10}$', tag)
             if m:
                 fp.append('Panasonic')
-            m = re.search('^[0-9]{9,10}$', tag)
+            m = re.search('^[0-9]{8,10}$', tag)
             if m:
                 fp.append('Yate')
+                fp.append('Mediatrix')
             m = re.search('^[0-9]{10}$', tag)
             if m:
                 fp.append('M5T')
