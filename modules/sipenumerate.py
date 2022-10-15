@@ -10,7 +10,8 @@ __email__ = "pepeluxx@gmail.com"
 import socket
 import sys
 import ssl
-from lib.functions import create_message, get_free_port, parse_message, fingerprinting
+import time
+from lib.functions import create_message, get_free_port, parse_message, fingerprinting, format_time
 from lib.color import Color
 from lib.logos import Logo
 from concurrent.futures import ThreadPoolExecutor
@@ -34,6 +35,7 @@ class SipEnumerate:
         self.digest = ''
         self.verbose = '0'
 
+        self.totaltime = 0
         self.quit = False
 
         self.found = []
@@ -104,10 +106,15 @@ class SipEnumerate:
         if self.contact_domain == '':
             self.contact_domain = '10.0.0.1'
 
+        start = time.time()
+
         with ThreadPoolExecutor(max_workers=20) as executor:
             for j, method in enumerate(supported_methods):
                 if self.quit == False:
                     executor.submit(self.send, method)
+
+        end = time.time()
+        self.totaltime = int(end-start)
 
         self.print()
 
@@ -267,6 +274,10 @@ class SipEnumerate:
                       ' | ' + self.c.GREEN + '%s' % fp.ljust(fplen) + self.c.WHITE + ' |')
 
         print(self.c.WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE)
+
+        print(self.c.BWHITE + 'Time elapsed: ' + self.c.YELLOW + '%s' %
+              format_time(self.totaltime) + self.c.WHITE)
         print(self.c.WHITE)
 
         if len(self.found) > 0:

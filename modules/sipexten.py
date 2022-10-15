@@ -12,7 +12,8 @@ import sys
 import ipaddress
 import ssl
 import re
-from lib.functions import create_message, parse_message, ip2long, long2ip, get_free_port
+import time
+from lib.functions import create_message, parse_message, ip2long, long2ip, get_free_port, format_time
 from lib.color import Color
 from lib.logos import Logo
 from itertools import product
@@ -36,6 +37,7 @@ class SipExten:
         self.verbose = '0'
         self.nocolor = ''
 
+        self.totaltime = 0
         self.found = []
         self.line = ['-', '\\', '|', '/']
         self.pos = 0
@@ -161,6 +163,8 @@ class SipExten:
 
         values = product(ips, extens)
 
+        start = time.time()
+
         for i, val in enumerate(values):
             if self.quit == False:
                 if count < max_values:
@@ -188,6 +192,9 @@ class SipExten:
 
                     values2.clear()
                     count = 0
+
+        end = time.time()
+        self.totaltime = int(end-start)
 
         self.found.sort()
         self.print()
@@ -345,4 +352,8 @@ class SipExten:
                       ' | ' + self.c.YELLOW + '%s' % ua.ljust(ualen) + self.c.WHITE + ' |')
 
         print(self.c.WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE)
+
+        print(self.c.BWHITE + 'Time elapsed: ' + self.c.YELLOW + '%s' %
+              format_time(self.totaltime) + self.c.WHITE)
         print(self.c.WHITE)

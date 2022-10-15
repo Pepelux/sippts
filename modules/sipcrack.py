@@ -11,10 +11,9 @@ from curses.ascii import isascii
 import io
 import base64
 from nis import cat
-# from string import printable
-# from itertools import product, count
 import re
-from lib.functions import calculateHash
+import time
+from lib.functions import calculateHash, format_time
 import itertools
 import string
 import threading
@@ -38,6 +37,7 @@ class SipDigestCrack:
 
         self.run = True
 
+        sself.totaltime = 0
         self.found = []
 
         self.c = Color()
@@ -108,6 +108,8 @@ class SipDigestCrack:
 
                 rows = []
 
+                start = time.time()
+
                 while line:
                     if self.run == False:
                         f.close()
@@ -173,6 +175,9 @@ class SipDigestCrack:
 
                     rows.append(row)
                     line = f.readline()
+
+                end = time.time()
+                self.totaltime = int(end-start)
             else:
                 f.close()
                 return
@@ -395,6 +400,10 @@ class SipDigestCrack:
                       ' | ' + colorres + '%s' % res.ljust(plen) + self.c.WHITE + ' |')
 
         print(self.c.WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE)
+
+        print(self.c.BWHITE + 'Time elapsed: ' + self.c.YELLOW + '%s' %
+              format_time(self.totaltime) + self.c.WHITE)
         print(self.c.WHITE)
 
         self.found.clear()

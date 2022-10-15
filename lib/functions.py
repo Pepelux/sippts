@@ -706,6 +706,22 @@ def calculateHash(username, realm, pwd, method, uri, nonce, algorithm, cnonce, n
     return ret
 
 
+def format_time(value):
+    if value < 60:
+        return str(value) + ' sec(s)'
+
+    m = int(value/60)
+    s = value % 60
+
+    if m < 60:
+        return str(m) + ' min(s) ' + str(s) + ' sec(s)'
+
+    h = int(m/60)
+    m = m % 60
+
+    return str(h) + ' hour(s) ' + str(m) + ' min(s) ' + str(s) + ' sec(s)'
+
+
 def fingerprinting(method, msg, headers):
     fp = []
 
@@ -830,7 +846,8 @@ def fingerprinting(method, msg, headers):
                 fp.append('Asterisk PBX')
                 fp.append('Huawei')
                 fp.append('BeWAN')
-        m = re.search('^[a-f0-9]{6}-[a-f0-9]{7,8}-[a-f0-9]{4}-[a-f0-9]{5}-[a-f0-9]{7,8}-[a-f0-9]{7,8}-[a-f0-9]{7,8}$', tag)
+        m = re.search(
+            '^[a-f0-9]{6}-[a-f0-9]{7,8}-[a-f0-9]{4}-[a-f0-9]{5}-[a-f0-9]{7,8}-[a-f0-9]{7,8}-[a-f0-9]{7,8}$', tag)
         if m:
             fp.append('Skype for Business')
         m = re.search('^ZyXELUA_', tag)

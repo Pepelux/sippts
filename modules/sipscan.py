@@ -12,8 +12,9 @@ import sys
 import ipaddress
 import ssl
 import re
+import time
 from IPy import IP
-from lib.functions import create_message, parse_message, get_machine_default_ip, ip2long, long2ip, get_free_port, ping, fingerprinting
+from lib.functions import create_message, parse_message, get_machine_default_ip, ip2long, long2ip, get_free_port, ping, fingerprinting, format_time
 from lib.color import Color
 from lib.logos import Logo
 from itertools import product
@@ -48,6 +49,7 @@ class SipScan:
         self.line = ['-', '\\', '|', '/']
         self.pos = 0
         self.quit = False
+        self.totaltime = 0
 
         self.c = Color()
 
@@ -305,6 +307,8 @@ class SipScan:
 
         values = product(ips, ports, protos)
 
+        start = time.time()
+
         for i, val in enumerate(values):
             if self.quit == False:
                 if count < max_values:
@@ -341,6 +345,9 @@ class SipScan:
 
                     values2.clear()
                     count = 0
+
+        end = time.time()
+        self.totaltime = int(end-start)
 
         self.found.sort()
         self.print()
@@ -573,6 +580,10 @@ class SipScan:
                                 (ip, port, proto, res, ua))
 
         print(self.c.WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE)
+
+        print(self.c.BWHITE + 'Time elapsed: ' + self.c.YELLOW + '%s' %
+              format_time(self.totaltime) + self.c.WHITE)
         print(self.c.WHITE)
 
         if self.fp == 1 and len(self.found) > 0:

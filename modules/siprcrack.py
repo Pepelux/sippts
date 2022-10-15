@@ -14,7 +14,8 @@ import ssl
 import re
 import threading
 import signal
-from lib.functions import create_message, parse_message, parse_digest, ip2long, long2ip, generate_random_string, get_free_port, calculateHash
+import time
+from lib.functions import create_message, parse_message, parse_digest, ip2long, long2ip, generate_random_string, get_free_port, calculateHash, format_time
 from lib.color import Color
 from lib.logos import Logo
 from itertools import product
@@ -44,6 +45,7 @@ class SipRemoteCrack:
         self.ips = []
         self.extens = []
 
+        self.totaltime = 0
         self.found = []
         self.line = ['-', '\\', '|', '/']
         self.pos = 0
@@ -355,6 +357,8 @@ class SipRemoteCrack:
 
         values = product(self.ips, self.extens)
 
+        start = time.time()
+
         for i, val in enumerate(values):
             if self.run == True:
                 if count < max_values:
@@ -377,6 +381,9 @@ class SipRemoteCrack:
 
                     values2.clear()
                     count = 0
+
+        end = time.time()
+        self.totaltime = int(end-start)
 
         self.found.sort()
         self.print()
@@ -501,4 +508,8 @@ class SipRemoteCrack:
                       ' | ' + self.c.BRED + '%s' % pwd.ljust(pwlen) + self.c.WHITE + ' |')
 
         print(self.c.WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE)
+
+        print(self.c.BWHITE + 'Time elapsed: ' + self.c.YELLOW + '%s' %
+              format_time(self.totaltime) + self.c.WHITE)
         print(self.c.WHITE)
