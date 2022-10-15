@@ -3,3 +3,5 @@ IPy
 pyshark
 scapy
 ArpSpoof
+websocket-client
+rel

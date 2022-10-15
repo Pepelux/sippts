@@ -16,6 +16,8 @@ devel:
   - new module to check if a server/device is alive
 - rtpbleedinject:
   - new module to inject RTP frames when RTPBleed vulnerability is present 
+- wssend:
+  - new module to send SIP messages over WebSockets
 - global:
   - bug fixes
 
