@@ -113,10 +113,10 @@ class WsSend:
         rel.dispatch()
 
     def on_message(self, ws, message):
-        if self.verbose == None:
-            print(self.c.YELLOW + self.msg + self.c.WHITE)
-        else:
+        if self.verbose == 1:
             print(self.c.WHITE)
+
+        print(self.c.YELLOW + self.msg + self.c.WHITE)
 
         print(self.c.GREEN + message + self.c.WHITE)
         ws.close()
