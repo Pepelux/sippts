@@ -869,17 +869,16 @@ def fingerprinting(method, msg, headers, verbose):
             m = re.search('^[A-Z]{1,2}[0-9]{2,3}\sIP', ua)
             if m:
                 fp.append('Gigaset')
+            elif headers['to'][0:1] != '<':
+                fp.append('Intelbras')
             else:
-                if headers['to'][0:1] != '<':
-                    fp.append('Intelbras')
-                else:
-                    fp.append('SNOM')
-                    fp.append('FortiVoice')
-                    fp.append('AddPac')
-                    fp.append('Gigaset')
-                    fp.append('VTechET')
-                    fp.append('STL-IP')
-                    fp.append('Laia')
+                fp.append('SNOM')
+                fp.append('FortiVoice')
+                fp.append('AddPac')
+                fp.append('Gigaset')
+                fp.append('VTechET')
+                fp.append('STL-IP')
+                fp.append('Laia')
 
         hdr = msg.split('\r\n')
         for h in hdr:
@@ -900,10 +899,12 @@ def fingerprinting(method, msg, headers, verbose):
                 fp.append('Aline')
             elif ua[0:5] == 'Cisco':
                 fp.append('Cisco/SPA')
+            elif ua[0:10] == 'FortiVoice':
+                fp.append('FortiVoice')
+            elif ua[0:8] == 'VoxStack':
+                fp.append('VoxStack')
             else:
                 fp.append('Asterisk PBX')
-                fp.append('VoxStack')
-                fp.append('FortiVoice')
         m = re.search('^[0-9a-z]{71}$', tag)
         if m:
             if ua[0:4] == 'FPBX' or ua[0:4] == 'IPBX':
