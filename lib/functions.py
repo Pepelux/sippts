@@ -922,7 +922,10 @@ def fingerprinting(method, msg, headers, verbose):
             fp.append('Asterisk PBX')
         m = re.search('^[a-f0-9]{32}.[a-f0-9]{2,8}$', tag)
         if m:
-            fp.append('Kamailio SIP Proxy')
+            if ua[0:6] == 'Siedle':
+                fp.append('Siedle')
+            else:
+                fp.append('Kamailio SIP Proxy')
         m = re.search('^DL[a-f0-9]{10}$', tag)
         if m:
             fp.append('LifeSize Media Server')
