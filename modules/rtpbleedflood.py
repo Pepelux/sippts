@@ -22,6 +22,7 @@ class RTPBleedFlood:
         self.ip = ''
         self.port = ''
         self.payload = '0'
+        self.verbose = 0
 
         self.c = Color()
 
@@ -87,8 +88,12 @@ class RTPBleedFlood:
                         ssrc = '%s%s%s%s' % (hex(msg[8])[2:], hex(
                             msg[9])[2:], hex(msg[10])[2:], hex(msg[11])[2:])
 
-                        print(self.c.WHITE + '[%d] received %d bytes from target port %d Seq number %s' %
-                              (count, size, rport, seq), end='\r')
+                        if self.verbose == 1:
+                            print(self.c.WHITE + '[%d] received %d bytes from target port %d Seq number %s' %
+                                (count, size, rport, seq))
+                        else:
+                            print(self.c.WHITE + '[%d] received %d bytes from target port %d Seq number %s' %
+                                (count, size, rport, seq), end='\r')
                         count += 1
                 except:
                     # No data available

@@ -854,6 +854,7 @@ More info about the vulnerability: https://www.rtpbleed.com/
     parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
     parser.add_argument('-r', '--remote_port', type=int, help='Port number to flood', dest='port', required=True)
     parser.add_argument('-p', '--payload', type=int,help='Codec payload (default: 0)', dest='payload', default=0)
+    parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -861,7 +862,9 @@ More info about the vulnerability: https://www.rtpbleed.com/
     IPADDR = args.ipaddr
     P = args.port
     PAYLOAD = args.payload
-    return IPADDR, P, PAYLOAD
+    VERBOSE = args.verbose
+
+    return IPADDR, P, PAYLOAD, VERBOSE
 
 
 def get_rtcbleed_inject_args():
