@@ -204,7 +204,7 @@ class SipEnumerate:
                     print(self.c.BCYAN + '%s' %
                           method + self.c.WHITE + ' => %s' % resdataua)
 
-                fps = fingerprinting(method, resp.decode(), headers)
+                fps = fingerprinting(method, resp.decode(), headers, self.verbose)
 
                 fp = ''
                 for f in fps:

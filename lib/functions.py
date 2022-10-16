@@ -722,7 +722,7 @@ def format_time(value):
     return str(h) + ' hour(s) ' + str(m) + ' min(s) ' + str(s) + ' sec(s)'
 
 
-def fingerprinting(method, msg, headers):
+def fingerprinting(method, msg, headers, verbose):
     fp = []
 
     tag = headers['totag']
@@ -759,6 +759,7 @@ def fingerprinting(method, msg, headers):
             fp.append('Cisco IP Phone')
             fp.append('3CX Phone')
             fp.append('Mitel Border GW')
+            fp.append('Abto SIP SDK')
         m = re.search('^[a-z0-9]{10}$', tag)
         if m:
             fp.append('Panasonic')
@@ -838,6 +839,8 @@ def fingerprinting(method, msg, headers):
                 fp.append('Yealink')
                 fp.append('TP-Link')
                 fp.append('Gigaset')
+                fp.append('DoorBird')
+                fp.append('Axis')
         m = re.search('^as[0-9a-f]{8}$', tag)
         if m:
             if ua[0:4] == 'FPBX' or ua[0:4] == 'IPBX':
@@ -893,11 +896,14 @@ def fingerprinting(method, msg, headers):
                 fp.append('Asterisk PBX')
             elif ua[0:2] == 'UC':
                 fp.append('Openvox')
+            elif ua[0:5] == 'Aline':
+                fp.append('Aline')
+            elif ua[0:5] == 'Cisco':
+                fp.append('Cisco/SPA')
             else:
                 fp.append('Asterisk PBX')
                 fp.append('VoxStack')
                 fp.append('FortiVoice')
-                fp.append('Aline')
         m = re.search('^[0-9a-z]{71}$', tag)
         if m:
             if ua[0:4] == 'FPBX' or ua[0:4] == 'IPBX':
@@ -928,11 +934,13 @@ def fingerprinting(method, msg, headers):
         m = re.search('^[0-9A-F]{8}-[0-9A-F]{16}-[0-9A-F]{8}$', tag)
         if m:
             fp.append('SEMS')
-
         m = re.search('^[0-9]{10}$', tag)
         if m and ua[0:4] == 'Desk' and ua[5:10] == 'Phone':
             fp.clear()
             fp.append('OpenScape')
+        m = re.search('^[0-9A-F]{3,4}$', tag)
+        if m:
+            fp.append('OneAccess')
 
         if fp == []:
             m = re.search('^[a-fA-F0-9]{6,8}-[a-fA-F0-9]{1,4}$', tag)
@@ -1020,7 +1028,7 @@ def fingerprinting(method, msg, headers):
     if fp == []:
         return (['Unknown'])
 
-    if len(fp) > 3:
+    if len(fp) > 3 and verbose != 2:
         return ['Too many matches']
 
     clearfp = []
