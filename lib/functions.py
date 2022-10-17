@@ -756,10 +756,13 @@ def fingerprinting(method, msg, headers, verbose):
             fp.append('Linphone')
         m = re.search('^[a-f0-9]{8}$', tag)
         if m:
-            fp.append('Cisco IP Phone')
-            fp.append('3CX Phone')
-            fp.append('Mitel Border GW')
-            fp.append('Abto SIP SDK')
+            if ua[0:2] == 'Z ':
+                fp.append('Zoiper')
+            else:
+                fp.append('Cisco IP Phone')
+                fp.append('3CX Phone')
+                fp.append('Mitel Border GW')
+                fp.append('Abto SIP SDK')
         m = re.search('^[a-z0-9]{10}$', tag)
         if m:
             fp.append('Panasonic')
