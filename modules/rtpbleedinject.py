@@ -23,6 +23,8 @@ class RTPBleedInject:
         self.payload = '0'
         self.file = ''
 
+        self.c = Color()
+
     def start(self):
         self.port = int(self.port)
 
