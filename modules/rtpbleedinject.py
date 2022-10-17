@@ -99,7 +99,7 @@ class RTPBleedInject:
                     print(self.c.BWHITE + '[-] SSRC: ' +
                           self.c.GREEN + '%s' % ssrc)
                     print(self.c.BWHITE +
-                          '[-] Verssion: ' + self.c.GREEN + '%s' % version)
+                          '[-] Version: ' + self.c.GREEN + '%s' % version)
 
                     total = len(data) * 2
                     cont = 0
