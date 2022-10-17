@@ -303,9 +303,6 @@ class SipScan:
                 self.c.GREEN + 'True')
         print(self.c.WHITE)
 
-        if self.random == 1:
-            random.shuffle(ips)
-
         values = product(ips, ports, protos)
         values2 = []
         count = 0
@@ -327,6 +324,9 @@ class SipScan:
                     try:
                         with ThreadPoolExecutor(max_workers=nthreads) as executor:
                             if self.quit == False:
+                                if self.random == 1:
+                                    random.shuffle(values2)
+
                                 for j, val2 in enumerate(values2):
                                     val_ipaddr = val2[0]
                                     val_port = int(val2[1])
