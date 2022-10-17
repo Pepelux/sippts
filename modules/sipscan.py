@@ -7,6 +7,7 @@ __license__ = "GPL"
 __copyright__ = "Copyright (C) 2015-2022, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
 
+import random
 import socket
 import sys
 import ipaddress
@@ -44,6 +45,7 @@ class SipScan:
         self.nocolor = ''
         self.ofile = ''
         self.fp = '0'
+        self.random = 0
 
         self.found = []
         self.line = ['-', '\\', '|', '/']
@@ -296,7 +298,13 @@ class SipScan:
         if self.ofile != '':
             print(self.c.BWHITE + '[✓] Saving logs info file: ' +
                   self.c.CYAN + '%s' % self.ofile)
+        if self.random == 1:
+            print(self.c.BWHITE + '[✓] Random hosts: ' +
+                self.c.GREEN + 'True')
         print(self.c.WHITE)
+
+        if self.random == 1:
+            random.shuffle(ips)
 
         values = product(ips, ports, protos)
         values2 = []
