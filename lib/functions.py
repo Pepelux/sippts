@@ -754,6 +754,7 @@ def fingerprinting(method, msg, headers, verbose):
             fp.append('Fanvil')
             fp.append('eXosip')
             fp.append('Linphone')
+            fp.append('Kedacom')
         m = re.search('^[a-f0-9]{8}$', tag)
         if m:
             if ua[0:2] == 'Z ':
