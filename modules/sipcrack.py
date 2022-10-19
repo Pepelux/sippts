@@ -37,7 +37,7 @@ class SipDigestCrack:
 
         self.run = True
 
-        sself.totaltime = 0
+        self.totaltime = 0
         self.found = []
 
         self.c = Color()
@@ -67,7 +67,7 @@ class SipDigestCrack:
         if self.bruteforce == 1:
             self.bruteforce = 'True'
 
-        logo = Logo('sipcrack')
+        logo = Logo('sipdigestcrack')
         logo.print()
 
         signal.signal(signal.SIGINT, self.signal_handler)
