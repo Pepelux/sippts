@@ -280,5 +280,9 @@ class SipFlood:
 
             sock.close()
 
-        sock.close()
+        try:
+            sock.close()
+        except NameError:
+            pass
+
         return
