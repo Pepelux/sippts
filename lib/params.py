@@ -199,7 +199,7 @@ passwords for several users using bruteforce.
     parser.add_argument('-e', '--exten', type=str, help='Extensions to attack. Ex: 100 | 100,102,105 | 100-200 | 100,102,200-300', dest='exten', required=True)
     parser.add_argument('-au', '--auth-user', type=str, help='Use a custom SIP Auth User instead the extension', dest='authuser', default="")
     parser.add_argument('-pr', '--prefix', type=str, help='Prefix for auth user, used for authentication', dest='prefix', default='')
-    parser.add_argument('-l', '--lenght', type=str, help='Lenght of the extensions (if sett, left padding with 0\'s', dest='lenght', default='')
+    parser.add_argument('-l', '--lenght', type=str, help='Lenght of the extensions (if set, left padding with 0\'s)', dest='lenght', default='')
     parser.add_argument('-p', '--proto', type=str, help='Protocol: udp|tcp|tls (default: udp)', dest='proto', default='udp')
     parser.add_argument('-d', '--domain', type=str, help='SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)', dest='domain', default='')
     parser.add_argument('-cd', '--contact_domain', type=str, help='Domain or IP address for Contact header. Ex: 10.0.1.2', dest='contact_domain', default='')
