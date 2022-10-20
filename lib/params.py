@@ -946,8 +946,8 @@ rtp                 Show all RTP streams
     # Add arguments
     parser.add_argument('-f', '--file', type=str, help='PCAP file to analyze', required=True, dest='file', default="")
     parser.add_argument('-filter', help='Filter data to show', dest='filter', default="")
-    parser.add_argument('-rtp_extract', help='Extract RTP streams. Ex: --rtp_extract -p 1210 -o rtp.pcap', dest='rtpextract', action="count")
-    parser.add_argument('-rport', type=str, help='RTP port to extract streams', dest='rtpport', default="")
+    parser.add_argument('-rtp_extract', help='Extract RTP streams. Ex: -rtp_extract -r 1210 -o rtp.pcap', dest='rtpextract', action="count")
+    parser.add_argument('-r', '-rtp_port', type=str, help='RTP port to extract streams', dest='rtpport', default="")
     parser.add_argument('-o', '--output_file', type=str, help='Save RTP streams into a PCAP file', dest='ofile', default="")
     parser.add_argument('-nocolor', help='Show result without colors', dest='nocolor', action="count")
 
@@ -956,12 +956,12 @@ rtp                 Show all RTP streams
 
     if args.rtpextract and (not args.rtpport or not args.ofile):
         print(
-            'error: --rtp_extract requires -p/--rtp_port and -o/--output_file')
+            'error: -rtp_extract requires -r/--rtp_port and -o/--output_file')
         sys.exit()
 
     if not args.rtpextract and (args.rtpport or args.ofile):
         print(
-            'error: --rtp_extract requires -p/--rtp_port and -o/--output_file')
+            'error: -rtp_extract requires -r/--rtp_port and -o/--output_file')
         sys.exit()
 
     if len(sys.argv) < 4:
