@@ -839,6 +839,8 @@ def fingerprinting(method, msg, headers, verbose):
         if m:
             if ua[0:7] == 'Maxwell':
                 fp.append('Gigaset')
+            elif ua[0:4] == 'TSW-':
+                fp.append('Creston')
             else:
                 fp.append('Yealink')
                 fp.append('TP-Link')
@@ -926,7 +928,9 @@ def fingerprinting(method, msg, headers, verbose):
             fp.append('Asterisk PBX')
         m = re.search('^[a-f0-9]{32}.[a-f0-9]{2,8}$', tag)
         if m:
-            if ua[0:6] == 'Siedle':
+            if ua[0:8] == 'OpenSIPS':
+                fp.append('OpenSIPS SIP Proxy')
+            elif ua[0:6] == 'Siedle':
                 fp.append('Siedle')
             else:
                 fp.append('Kamailio SIP Proxy')
@@ -938,7 +942,7 @@ def fingerprinting(method, msg, headers, verbose):
             fp.append('FreeSWITCH')
         m = re.search('^[0-9a-z]{4}[\.-][0-9a-z]{32}$', tag)
         if m:
-            fp.append('OpenSIPS')
+            fp.append('OpenSIPS SIP Proxy')
         m = re.search('^[0-9A-F]{8}-[0-9A-F]{16}-[0-9A-F]{8}$', tag)
         if m:
             fp.append('SEMS')
@@ -973,6 +977,7 @@ def fingerprinting(method, msg, headers, verbose):
             if m:
                 fp.append('Yate')
                 fp.append('Mediatrix')
+                fp.append('MediaCore')
             m = re.search('^[0-9]{10}$', tag)
             if m:
                 fp.append('M5T')
