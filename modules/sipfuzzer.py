@@ -16,6 +16,7 @@ import time
 import signal
 import threading
 import base64
+from datetime import datetime
 from lib.functions import create_message, get_free_port
 from lib.functions_fuzz import create_fuzzed_msg
 from lib.color import Color
@@ -28,6 +29,7 @@ class SipFuzzer:
         self.proto = 'UDP'
         self.verbose = '0'
         self.delay = 0
+        self.user_agent = 'pplsip'
 
         self.f = None
 
@@ -90,8 +92,8 @@ class SipFuzzer:
                     sock, ssl_version=ssl.PROTOCOL_TLS, ciphers=None, cert_reqs=ssl.CERT_NONE)
                 sock_ssl.connect(host)
 
-            ping = create_message('OPTIONS', self.ip, '100', '', '100', '',
-                                  self.proto, self.ip, 'Test', lport, '', '', '', 1, '', '', '', 0)
+            ping = create_message('OPTIONS', self.ip, '100', '', self.ip, '100', '', self.ip,
+                                  self.proto, self.ip, self.user_agent, lport, '', '', '', 1, '', '', 1, '', 0, '', '')
 
             try:
                 if self.proto == 'TLS':
@@ -103,8 +105,14 @@ class SipFuzzer:
                     # time.sleep(1)
                     sock.recv(4096)
 
+                self.f.write(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
+                self.f.write(' - PING\n')
+
                 if self.verbose == 1:
                     print(self.c.GREEN + 'Ping response Ok' + self.c.WHITE)
+
+                self.f.write(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
+                self.f.write(' - PONG\n')
             except socket.timeout:
                 # Timeout for ping
                 print(
@@ -119,7 +127,7 @@ class SipFuzzer:
                 self.quit = True
 
             sock.close()
-            time.sleep(1)
+            time.sleep(1+self.delay)
 
     def start(self):
         supported_protos = ['UDP', 'TCP', 'TLS']
@@ -135,8 +143,11 @@ class SipFuzzer:
         print(self.c.BYELLOW + '\nPress Ctrl+C to stop')
         print(self.c.WHITE)
 
-        print(self.c.BWHITE + '[!] Target: ' + self.c.GREEN + '%s:%s/%s' %
+        print(self.c.BWHITE + '[✓] Target: ' + self.c.GREEN + '%s:%s/%s' %
               (self.ip, self.port, self.proto))
+        if self.user_agent != 'pplsip':
+            print(self.c.BWHITE + '[✓] Customized User-Agent: ' +
+                  self.c.GREEN + '%s' % self.user_agent)
         print(self.c.WHITE)
 
         file = 'fuzz.log'
@@ -206,7 +217,8 @@ class SipFuzzer:
                     base64_bytes = base64.b64encode(msg)
                     data = base64_bytes.decode('ascii')
 
-                    self.f.write('Sent:\n' + data + '\n')
+                    self.f.write(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
+                    self.f.write(' - Sending ...\n' + data + '\n')
 
                     try:
                         if self.proto == 'TLS':

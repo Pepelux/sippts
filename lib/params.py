@@ -1246,6 +1246,7 @@ SIP Fuzzer uses Radamsa to generate a lot of malformed headers to try the robust
     parser.add_argument('-p', '--proto', type=str, help='Protocol: udp|tcp|tls (default: udp)', dest='proto', default='udp')
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
     parser.add_argument('-d', '--delay', type=float, help='Delay between each message (default: 0)', dest='delay', default=0)
+    parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header for pinging (default: pplsip)', dest='user_agent', default='pplsip')
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -1256,5 +1257,6 @@ SIP Fuzzer uses Radamsa to generate a lot of malformed headers to try the robust
     VERBOSE = args.verbose
     ALL = args.all
     DELAY = args.delay
+    UA = args.user_agent
 
-    return IPADDR, RPORT, PROTO, VERBOSE, ALL, DELAY
+    return IPADDR, RPORT, PROTO, VERBOSE, ALL, DELAY, UA

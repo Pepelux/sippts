@@ -12,7 +12,7 @@ from modules.sipfuzzer import SipFuzzer
 
 
 def main():
-    ip, port, proto, verbose, all, delay = get_sipfuzzer_args()
+    ip, port, proto, verbose, all, delay, ua = get_sipfuzzer_args()
 
     s = SipFuzzer()
     s.ip = ip
@@ -21,6 +21,7 @@ def main():
     s.verbose = verbose
     s.all = all
     s.delay = delay
+    s.user_agent = ua
 
     s.start()
 
