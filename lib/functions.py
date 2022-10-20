@@ -764,6 +764,7 @@ def fingerprinting(method, msg, headers, verbose):
                 fp.append('3CX Phone')
                 fp.append('Mitel Border GW')
                 fp.append('Abto SIP SDK')
+                fp.append('ReadyNet')
         m = re.search('^[a-z0-9]{10}$', tag)
         if m:
             fp.append('Panasonic')
@@ -771,13 +772,18 @@ def fingerprinting(method, msg, headers, verbose):
             fp.append('Panasonic')
             fp.append('RM')
             fp.append('Grandstream')
+            fp.append('IceWarp')
         m = re.search('^[a-z]{8}$', tag)
         if m:
             fp.append('Ozeki VoIP SIP SDK')
         m = re.search('^[0-9]{8,10}$', tag)
         if m:
-            fp.append('Draytek')
-            fp.append('Yealink')
+            if ua[0:6] == 'Estech':
+                fp.clear()
+                fp.append('ESI')
+            else:
+                fp.append('Draytek')
+                fp.append('Yealink')
         m = re.search('^[a-f0-9]{16}$', tag)
         if m:
             fp.append('Grandtream')
@@ -867,6 +873,9 @@ def fingerprinting(method, msg, headers, verbose):
             if ua[0:4] == 'ININ':
                 fp.clear()
                 fp.append('Interactive Intelligence EDGE')
+        m = re.search('^0\.0\.0\.0\+1\+[0-9a-z]{7,8}\+[0-9a-z]{7,8}$', tag)
+        if m:
+            fp.append('Calix')
 
         if tag == '123456':
             fp.append('Alcatel')
@@ -961,7 +970,7 @@ def fingerprinting(method, msg, headers, verbose):
             m = re.search(
                 '^[a-f0-9]{18}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$', tag)
             if m:
-                fp.append('Quadro')
+                fp.append('Epygi Quadro')
             m = re.search('^[a-f0-9]{16}$', tag)
             if m:
                 fp.append('Tandberg')
@@ -1021,8 +1030,12 @@ def fingerprinting(method, msg, headers, verbose):
         if tag == '12345678':
             fp.append('Alcatel')
         if tag == '':
-            fp.append('Aastra SIP Server')
-            fp.append('Yate SIP Server')
+            if ua[0:5] == 'Acano':
+                fp.append('Cisco Meeting Server')
+            else:
+                fp.append('Aastra SIP Server')
+                fp.append('Yate SIP Server')
+                fp.append('Epygi Quadro')
 
         hdr = msg.split('\r\n')
         for h in hdr:
