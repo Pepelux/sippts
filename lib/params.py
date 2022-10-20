@@ -1218,3 +1218,43 @@ Send SIP messages over WebSockets.
 
     return IPADDR, PORT, PATH, VERBOSE, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TOTAG, TODOMAIN, UA
 
+
+def get_sipfuzzer_args():
+    parser = argparse.ArgumentParser(
+        formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
+            prog, max_help_position=50),
+        description= RED + u'''☎️  SIPPTS''' + WHITE + ''' BY ''' + GREEN + '''🅿 🅴 🅿 🅴 🅻 🆄 🆇''' + YELLOW + '''
+
+████████████████████████████████████████████████████████
+█─▄▄▄▄█▄─▄█▄─▄▄─███▄─▄▄─█▄─██─▄█░▄▄░▄█░▄▄░▄█▄─▄▄─█▄─▄▄▀█
+█▄▄▄▄─██─███─▄▄▄████─▄████─██─███▀▄█▀██▀▄█▀██─▄█▀██─▄─▄█
+▀▄▄▄▄▄▀▄▄▄▀▄▄▄▀▀▀▀▀▄▄▄▀▀▀▀▄▄▄▄▀▀▄▄▄▄▄▀▄▄▄▄▄▀▄▄▄▄▄▀▄▄▀▄▄▀
+
+''' + GREEN + '''💾 https://github.com/Pepelux/sippts''' + WHITE + '''
+''' + YELLOW + '''🐦 https://twitter.com/pepeluxx''' + WHITE + '''
+
+''' + BLUE + ''' -= Perform a SIP method fuzzing attack =-''' + WHITE,
+        epilog=BWHITE + '''
+SIP Fuzzer uses Radamsa to generate a lot of malformed headers to try the robustness of the server/device.
+ 
+''')
+
+    # Add arguments
+    parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
+    parser.add_argument('-a', '--all', help='Fuzz all data (by default fuzz header values)', dest="all", action="count")
+    parser.add_argument('-r', '--remote_port', type=int, help='Remote port (default: 5060)', dest='remote_port', default=5060)
+    parser.add_argument('-p', '--proto', type=str, help='Protocol: udp|tcp|tls (default: udp)', dest='proto', default='udp')
+    parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
+    parser.add_argument('-d', '--delay', type=float, help='Delay between each message (default: 0)', dest='delay', default=0)
+
+    # Array for all arguments passed to script
+    args = parser.parse_args()
+
+    IPADDR = args.ipaddr
+    RPORT = args.remote_port
+    PROTO = args.proto
+    VERBOSE = args.verbose
+    ALL = args.all
+    DELAY = args.delay
+
+    return IPADDR, RPORT, PROTO, VERBOSE, ALL, DELAY

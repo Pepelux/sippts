@@ -19,6 +19,8 @@ devel:
   - new module to inject RTP frames when RTPBleed vulnerability is present 
 - wssend:
   - new module to send SIP messages over WebSockets
+- sipfuzzer:
+  - new module to perform a SIP fuzzing test on several SIP methods
 - global:
   - bug fixes
 
