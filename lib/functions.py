@@ -765,6 +765,7 @@ def fingerprinting(method, msg, headers, verbose):
                 fp.append('Mitel Border GW')
                 fp.append('Abto SIP SDK')
                 fp.append('ReadyNet')
+                fp.append('Tesira')
         m = re.search('^[a-z0-9]{10}$', tag)
         if m:
             fp.append('Panasonic')
@@ -853,6 +854,7 @@ def fingerprinting(method, msg, headers, verbose):
                 fp.append('Gigaset')
                 fp.append('DoorBird')
                 fp.append('Axis')
+                fp.append('Digium')
         m = re.search('^as[0-9a-f]{8}$', tag)
         if m:
             if ua[0:4] == 'FPBX' or ua[0:4] == 'IPBX':
@@ -876,6 +878,9 @@ def fingerprinting(method, msg, headers, verbose):
         m = re.search('^0\.0\.0\.0\+1\+[0-9a-z]{7,8}\+[0-9a-z]{7,8}$', tag)
         if m:
             fp.append('Calix')
+        m = re.search('^[0-9a-f]{7}-[0-9]{1}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{6}$', tag)
+        if m:
+            fp.append('ShoreGear')
 
         if tag == '123456':
             fp.append('Alcatel')
@@ -975,6 +980,9 @@ def fingerprinting(method, msg, headers, verbose):
             if m:
                 fp.append('Tandberg')
                 fp.append('Algo')
+            m = re.search('^[0-9a-f]{19,20}$', tag)
+            if m:
+                fp.append('Ingate')
             m = re.search('^[a-f0-9]{19}$', tag)
             if m:
                 fp.append('SIParator')
