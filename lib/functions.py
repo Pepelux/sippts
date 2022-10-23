@@ -967,6 +967,9 @@ def fingerprinting(method, msg, headers, verbose):
         m = re.search('^[0-9A-F]{3,4}$', tag)
         if m:
             fp.append('OneAccess')
+        m = re.search('^[0-9A-F]{1}-[0-9A-F]{8}-[0-9A-F]{16}-[0-9A-F]{8}$', tag)
+        if m:
+            fp.append('Yeti')
 
         if fp == []:
             m = re.search('^[a-fA-F0-9]{6,8}-[a-fA-F0-9]{1,4}$', tag)
