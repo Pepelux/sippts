@@ -321,6 +321,10 @@ def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser
     if method == 'REGISTER':
         headers['Expires'] = '10'
 
+    if withsdp == 1:
+        headers['Content-Type'] = 'application/sdp'
+        headers['Accept'] = 'application/sdp, application/dtmf-relay'
+
     msg = starting_line+'\r\n'
     for h in headers.items():
         # msg += '%s: %s\r\n' % h
@@ -334,10 +338,11 @@ def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser
 
     sdp = ''
     if withsdp == 1:
+        # Use RTP
         sdp = '\r\n'
         sdp += 'v=0\r\n'
         sdp += 'o=anonymous 1312841870 1312841870 IN IP4 %s\r\n' % contactdomain
-        sdp += 's=session\r\n'
+        sdp += 's=SIPPTS\r\n'
         sdp += 'c=IN IP4 %s\r\n' % contactdomain
         sdp += 't=0 0\r\n'
         sdp += 'm=audio 2362 RTP/AVP 0\r\n'
