@@ -25,6 +25,8 @@ from lib.color import Color
 class SipFuzzer:
     def __init__(self):
         self.ip = ''
+        self.proxy = ''
+        self.route = ''
         self.port = '5060'
         self.proto = 'UDP'
         self.verbose = '0'
@@ -71,7 +73,16 @@ class SipFuzzer:
                 lport = get_free_port()
                 sock.bind((bind, lport))
 
-            host = (str(self.ip), self.port)
+            if self.proxy == '':
+                host = (str(self.ip), int(self.port))
+            else:
+                if self.proxy.find(':') > 0:
+                    (proxy_ip, proxy_port) = self.proxy.split(':')
+                else:
+                    proxy_ip = self.proxy
+                    proxy_port = '5060'
+
+                host = (str(proxy_ip), int(proxy_port))
 
             try:
                 if self.proto == 'UDP':
@@ -93,7 +104,7 @@ class SipFuzzer:
                 sock_ssl.connect(host)
 
             ping = create_message('OPTIONS', self.ip, '100', '', self.ip, '100', '', self.ip,
-                                  self.proto, self.ip, self.user_agent, lport, '', '', '', 1, '', '', 1, '', 0, '', '')
+                                  self.proto, self.ip, self.user_agent, lport, '', '', '', 1, '', '', 1, '', 0, '', self.route)
 
             try:
                 if self.proto == 'TLS':
@@ -145,10 +156,16 @@ class SipFuzzer:
 
         print(self.c.BWHITE + '[✓] Target: ' + self.c.GREEN + '%s:%s/%s' %
               (self.ip, self.port, self.proto))
+        if self.proxy != '':
+            print(self.c.BWHITE + '[✓] Outbound Proxy: ' + self.c.GREEN + '%s' %
+                  self.proxy)
         if self.user_agent != 'pplsip':
             print(self.c.BWHITE + '[✓] Customized User-Agent: ' +
                   self.c.GREEN + '%s' % self.user_agent)
         print(self.c.WHITE)
+
+        if self.proxy != '':
+            self.route = '<sip:%s;lr>' % self.proxy
 
         file = 'fuzz.log'
         self.f = open(file, 'w')
@@ -188,7 +205,16 @@ class SipFuzzer:
         lport = get_free_port()
         sock.bind((bind, lport))
 
-        host = (str(self.ip), self.port)
+        if self.proxy == '':
+            host = (str(self.ip), int(self.port))
+        else:
+            if self.proxy.find(':') > 0:
+                (proxy_ip, proxy_port) = self.proxy.split(':')
+            else:
+                proxy_ip = self.proxy
+                proxy_port = '5060'
+
+            host = (str(proxy_ip), int(proxy_port))
 
         sock.settimeout(1)
 
@@ -217,7 +243,8 @@ class SipFuzzer:
                     base64_bytes = base64.b64encode(msg)
                     data = base64_bytes.decode('ascii')
 
-                    self.f.write(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
+                    self.f.write(datetime.utcnow().strftime(
+                        "%Y-%m-%d %H:%M:%S"))
                     self.f.write(' - Sending ...\n' + data + '\n')
 
                     try:

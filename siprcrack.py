@@ -12,11 +12,12 @@ from lib.params import get_sipremotecrack_args
 
 
 def main():
-    ip, host, rport, rexten, prefix, authuser, ext_len, proto, domain, contact_domain, user_agent, wordlist, nthreads, verbose, nocolor = get_sipremotecrack_args()
+    ip, host, proxy, rport, rexten, prefix, authuser, ext_len, proto, domain, contact_domain, user_agent, wordlist, nthreads, verbose, nocolor = get_sipremotecrack_args()
 
     s = SipRemoteCrack()
     s.ip = ip
     s.host = host
+    s.proxy = proxy
     s.rport = rport
     s.proto = proto
     s.domain = domain

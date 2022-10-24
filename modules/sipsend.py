@@ -10,6 +10,7 @@ __email__ = "pepeluxx@gmail.com"
 import socket
 import sys
 import ssl
+from urllib.request import proxy_bypass
 from lib.functions import create_message, get_free_port, parse_message, parse_digest, generate_random_string, calculateHash, get_machine_default_ip
 from lib.color import Color
 from lib.logos import Logo
@@ -19,6 +20,8 @@ class SipSend:
     def __init__(self):
         self.ip = ''
         self.host = ''
+        self.proxy = ''
+        self.route = ''
         self.rport = '5060'
         self.proto = 'UDP'
         self.method = ''
@@ -88,6 +91,9 @@ class SipSend:
 
         print(self.c.BWHITE + '[✓] Target: ' + self.c.YELLOW + '%s' % self.ip + self.c.WHITE + ':' +
               self.c.YELLOW + '%s' % self.rport + self.c.WHITE + '/' + self.c.YELLOW + '%s' % self.proto)
+        if self.proxy != '':
+            print(self.c.BWHITE + '[✓] Outbound Proxy: ' + self.c.GREEN + '%s' %
+                  self.proxy)
         if self.domain != '' and self.domain != str(self.ip) and self.domain != self.host:
             print(self.c.BWHITE + '[✓] Customized Domain: ' +
                   self.c.GREEN + '%s' % self.domain)
@@ -128,6 +134,8 @@ class SipSend:
 
             fw.write('[✓] Target: %s:%s/%s\n' %
                      (self.ip, self.rport, self.proto))
+            if self.proxy != '':
+                fw.write('[✓] Outbound Proxy: %s' % self.proxy)
             if self.domain != '' and self.domain != str(self.ip) and self.domain != self.host:
                 fw.write('[✓] Customized Domain: %s\n' % self.domain)
             if self.contact_domain != '':
@@ -179,7 +187,16 @@ class SipSend:
             lport = get_free_port()
             sock.bind((bind, lport))
 
-        host = (str(self.ip), int(self.rport))
+        if self.proxy == '':
+            host = (str(self.ip), int(self.rport))
+        else:
+            if self.proxy.find(':') > 0:
+                (proxy_ip, proxy_port) = self.proxy.split(':')
+            else:
+                proxy_ip = self.proxy
+                proxy_port = '5060'
+
+            host = (str(proxy_ip), int(proxy_port))
 
         if self.host != '' and self.domain == '':
             self.domain = self.host
@@ -193,8 +210,17 @@ class SipSend:
         if self.contact_domain == '':
             self.contact_domain = local_ip
 
+        if self.proxy != '':
+            self.route = '<sip:%s;lr>' % self.proxy
+
+        if self.method == 'REGISTER':
+            if self.to_user == '100' and self.from_user != '100':
+                self.to_user = self.from_user
+            if self.to_user != '100' and self.from_user == '100':
+                self.from_user = self.to_user
+
         msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
-                             self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, self.to_tag, self.digest, 1, '', self.sdp, '', '')
+                             self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, self.to_tag, self.digest, 1, '', self.sdp, '', self.route)
 
         try:
             sock.settimeout(5)
@@ -251,7 +277,7 @@ class SipSend:
                 # send ACK
                 print(self.c.BWHITE + '[+] Request ACK')
                 msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                                     self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, totag, '', 1, '', 0, via, '')
+                                     self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, totag, '', 1, '', 0, via, self.route)
 
                 print(self.c.YELLOW + msg)
 
@@ -297,7 +323,7 @@ class SipSend:
                     self.cseq = str(int(self.cseq) + 1)
 
                     msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
-                                         self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, self.to_tag, digest, auth_type, '', self.sdp, via, '')
+                                         self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, self.to_tag, digest, auth_type, '', self.sdp, via, self.route)
 
                     try:
                         if self.proto == 'TLS':

@@ -24,6 +24,8 @@ class SipExten:
     def __init__(self):
         self.ip = ''
         self.host = ''
+        self.proxy = ''
+        self.route = ''
         self.rport = '5060'
         self.proto = 'UDP'
         self.exten = '100-300'
@@ -123,6 +125,9 @@ class SipExten:
 
         print(self.c.BWHITE+'[✓] IP/Network: ' +
               self.c.GREEN + '%s' % str(self.ip))
+        if self.proxy != '':
+            print(self.c.BWHITE + '[✓] Outbound Proxy: ' + self.c.GREEN + '%s' %
+                  self.proxy)
         print(self.c.BWHITE+'[✓] Port: ' + self.c.GREEN + '%s' % (self.rport))
         if self.prefix != '':
             print(self.c.BWHITE+'[✓] Users prefix: ' +
@@ -226,17 +231,29 @@ class SipExten:
                 lport = get_free_port()
                 sock.bind((bind, lport))
 
-            host = (str(ipaddr), int(self.rport))
+            if self.proxy == '':
+                host = (str(ipaddr), int(self.rport))
+            else:
+                if self.proxy.find(':') > 0:
+                    (proxy_ip, proxy_port) = self.proxy.split(':')
+                else:
+                    proxy_ip = self.proxy
+                    proxy_port = '5060'
+
+                host = (str(proxy_ip), int(proxy_port))
 
             contact_domain = self.contact_domain
             if contact_domain == '':
                 contact_domain = '10.0.0.1'
 
+            if self.proxy != '':
+                self.route = '<sip:%s;lr>' % self.proxy
+
             if self.method == 'REGISTER':
                 self.from_user = to_user
 
             msg = create_message(self.method, contact_domain, self.from_user, '', self.domain,
-                                 to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', '', 1, '', 0, '', '')
+                                 to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', '', 1, '', 0, '', self.route)
 
             try:
                 sock.settimeout(5)

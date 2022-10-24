@@ -25,6 +25,8 @@ class SipFlood:
     def __init__(self):
         self.ip = ''
         self.host = ''
+        self.proxy = ''
+        self.route = ''
         self.rport = '5060'
         self.proto = 'UDP'
         self.method = ''
@@ -97,7 +99,11 @@ class SipFlood:
 
         print(self.c.BWHITE + '[✓] Target: ' + self.c.GREEN + '%s:%s/%s' %
               (self.ip, self.rport, self.proto))
-        print(self.c.BWHITE + '[✓] Method: ' + self.c.GREEN + '%s' % self.method)
+        if self.proxy != '':
+            print(self.c.BWHITE + '[✓] Outbound Proxy: ' + self.c.GREEN + '%s' %
+                  self.proxy)
+        print(self.c.BWHITE + '[✓] Method: ' +
+              self.c.GREEN + '%s' % self.method)
         print(self.c.BWHITE + '[✓] Used threads: ' +
               self.c.GREEN + '%d' % self.nthreads)
         if self.nthreads > 300:
@@ -161,7 +167,17 @@ class SipFlood:
             fcntl.fcntl(sock, fcntl.F_SETFL, os.O_NONBLOCK)
 
             bind = '0.0.0.0'
-            host = (str(self.ip), int(self.rport))
+
+            if self.proxy == '':
+                host = (str(self.ip), int(self.rport))
+            else:
+                if self.proxy.find(':') > 0:
+                    (proxy_ip, proxy_port) = self.proxy.split(':')
+                else:
+                    proxy_ip = self.proxy
+                    proxy_port = '5060'
+
+                host = (str(proxy_ip), int(proxy_port))
 
             try:
                 lport = get_free_port()
@@ -180,8 +196,11 @@ class SipFlood:
                     if self.contact_domain == '':
                         self.contact_domain = '10.0.0.1'
 
+                    if self.proxy != '':
+                        self.route = '<sip:%s;lr>' % self.proxy
+
                     msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                                         self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', '')
+                                         self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', self.route)
 
                     method_label = self.method
 
@@ -251,8 +270,11 @@ class SipFlood:
                         withsdp = generate_random_integer(1, 2)
                         via = generate_random_string(
                             self.min, self.max, self.alphabet)
-                        rr = generate_random_string(
-                            self.min, self.max, self.alphabet)
+                        if self.route == '':
+                            rr = generate_random_string(
+                                self.min, self.max, self.alphabet)
+                        else:
+                            rr = self.route
 
                         msg = create_message(method, contactdomain, fromuser, fromname, fromdomain, touser, toname, todomain, proto,
                                              domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, auth_type, referto, withsdp, via, rr)

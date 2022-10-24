@@ -40,6 +40,8 @@ class SipInvite:
     def __init__(self):
         self.ip = ''
         self.host = ''
+        self.proxy = ''
+        self.route = ''
         self.rport = '5060'
         self.proto = 'UDP'
         self.domain = ''
@@ -94,14 +96,23 @@ class SipInvite:
                     lport = get_free_port()
                     sock.bind((bind, lport))
 
-            host = (self.ip, int(self.rport))
+            if self.proxy == '':
+                host = (str(self.ip), int(self.rport))
+            else:
+                if self.proxy.find(':') > 0:
+                    (proxy_ip, proxy_port) = self.proxy.split(':')
+                else:
+                    proxy_ip = self.proxy
+                    proxy_port = '5060'
+
+                host = (str(proxy_ip), int(proxy_port))
 
             branch = generate_random_string(71, 71, 'ascii')
             callid = generate_random_string(32, 32, 'hex')
             tag = generate_random_string(8, 8, 'hex')
 
             msg = create_message('INVITE', self.contact_domain, src, self.from_name, self.from_domain,
-                                 dst, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '1', '', '', 1, '', self.sdp, '', '')
+                                 dst, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '1', '', '', 1, '', self.sdp, '', self.route)
 
             print(self.c.BWHITE +
                   '[+] Request INVITE from %s to %s' % (src, dst))
@@ -166,7 +177,7 @@ class SipInvite:
                     print(self.c.BWHITE +
                           '[+] Request ACK from %s to %s' % (src, dst))
                     msg = create_message('ACK', self.contact_domain, src, self.from_name, self.from_domain,
-                                         dst, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '1', totag, '', 1, '', 0, via, '')
+                                         dst, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '1', totag, '', 1, '', 0, via, self.route)
 
                     if self.verbose == 1 and self.ofile == '':
                         print(self.c.YELLOW + msg)
@@ -218,7 +229,7 @@ class SipInvite:
                         print(self.c.BWHITE +
                               '[+] Request INVITE from %s to %s' % (src, dst))
                         msg = create_message('INVITE', self.contact_domain, src, self.from_name, self.from_domain,
-                                             dst, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '2', totag, digest, auth_type, '', self.sdp, via, '')
+                                             dst, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '2', totag, digest, auth_type, '', self.sdp, via, self.route)
 
                         if self.verbose == 1 and self.ofile == '':
                             print(self.c.YELLOW + msg)
@@ -268,7 +279,7 @@ class SipInvite:
                     print(self.c.BWHITE +
                           '[+] Request ACK from %s to %s' % (src, dst))
                     msg = create_message('ACK', self.contact_domain, src, self.from_name, self.from_domain,
-                                         dst, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '2', totag, digest, auth_type, '', 0, via, '')
+                                         dst, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '2', totag, digest, auth_type, '', 0, via, self.route)
 
                     if self.verbose == 1 and self.ofile == '':
                         print(self.c.YELLOW + msg)
@@ -479,6 +490,9 @@ class SipInvite:
             self.contact_domain = local_ip
         if self.nosdp != None and self.nosdp == 1:
             self.sdp = 0
+
+        if self.proxy != '':
+            self.route = '<sip:%s;lr>' % self.proxy
 
         if self.ofile != '':
             fw = open(self.ofile, 'w')

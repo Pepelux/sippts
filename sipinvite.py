@@ -12,12 +12,13 @@ from lib.params import get_sipinvite_args
 
 
 def main():
-    ip, host, rport, proto, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, transfer, auth_user, auth_pwd, user_agent, localip, threads, nosdp, verbose, sdes, nocolor, ofile = get_sipinvite_args()
+    ip, host, proxy, rport, proto, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, transfer, auth_user, auth_pwd, user_agent, localip, threads, nosdp, verbose, sdes, nocolor, ofile = get_sipinvite_args()
 
     s = SipInvite()
 
     s.ip = ip
     s.host = host
+    s.proxy = proxy
     s.rport = rport
     s.proto = proto
     s.domain = domain

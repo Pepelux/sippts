@@ -12,11 +12,12 @@ from lib.params import get_sipenumerate_args
 
 
 def main():
-    ip, host, rport, proto, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, user_agent, verbose = get_sipenumerate_args()
+    ip, host, proxy, rport, proto, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, user_agent, verbose = get_sipenumerate_args()
 
     s = SipEnumerate()
     s.ip = ip
     s.host = host
+    s.proxy = proxy
     s.rport = rport
     s.proto = proto
     s.domain = domain

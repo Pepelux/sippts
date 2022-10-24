@@ -21,6 +21,8 @@ class SipEnumerate:
     def __init__(self):
         self.ip = ''
         self.host = ''
+        self.proxy = ''
+        self.route = ''
         self.rport = '5060'
         self.proto = 'UDP'
         self.domain = ''
@@ -63,7 +65,9 @@ class SipEnumerate:
 
         print(self.c.BWHITE + '[✓] IP address: ' + self.c.GREEN + '%s' % str(self.ip) + self.c.WHITE +
               ':' + self.c.GREEN + '%s' % self.rport + self.c.WHITE + '/' + self.c.GREEN + '%s' % self.proto)
-
+        if self.proxy != '':
+            print(self.c.BWHITE + '[✓] Outbound Proxy: ' + self.c.GREEN + '%s' %
+                  self.proxy)
         if self.domain != '':
             print(self.c.BWHITE + '[✓] Customized Domain: ' +
                   self.c.GREEN + '%s' % self.domain)
@@ -106,6 +110,9 @@ class SipEnumerate:
         if self.contact_domain == '':
             self.contact_domain = '10.0.0.1'
 
+        if self.proxy != '':
+            self.route = '<sip:%s;lr>' % self.proxy
+
         start = time.time()
 
         with ThreadPoolExecutor(max_workers=20) as executor:
@@ -138,7 +145,16 @@ class SipEnumerate:
                 lport = get_free_port()
                 sock.bind((bind, lport))
 
-            host = (str(self.ip), int(self.rport))
+            if self.proxy == '':
+                host = (str(self.ip), int(self.rport))
+            else:
+                if self.proxy.find(':') > 0:
+                    (proxy_ip, proxy_port) = self.proxy.split(':')
+                else:
+                    proxy_ip = self.proxy
+                    proxy_port = '5060'
+
+                host = (str(proxy_ip), int(proxy_port))
 
             try:
                 sock.settimeout(5)
@@ -154,8 +170,19 @@ class SipEnumerate:
                 print('Socket connection error')
                 exit()
 
-            msg = create_message(method, self.contact_domain, self.from_user, self.from_name, self.domain,
-                                 self.to_user, self.to_name, self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', '')
+            if method == 'REGISTER':
+                if self.to_user == '100' and self.from_user != '100':
+                    from_user = self.from_user
+                    to_user = self.from_user
+                if self.to_user != '100' and self.from_user == '100':
+                    from_user = self.to_user
+                    to_user = self.to_user
+            else:
+                from_user = self.from_user
+                to_user = self.to_user
+
+            msg = create_message(method, self.contact_domain, from_user, self.from_name, self.domain,
+                                 to_user, self.to_name, self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', self.route)
 
             if self.verbose == 1:
                 print(self.c.BWHITE + '[+] Sending to %s:%s/%s ...' %
@@ -204,7 +231,8 @@ class SipEnumerate:
                     print(self.c.BCYAN + '%s' %
                           method + self.c.WHITE + ' => %s' % resdataua)
 
-                fps = fingerprinting(method, resp.decode(), headers, self.verbose)
+                fps = fingerprinting(method, resp.decode(),
+                                     headers, self.verbose)
 
                 fp = ''
                 for f in fps:

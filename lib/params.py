@@ -44,6 +44,7 @@ UDP, TCP and TLS protocols.
 
     # Add arguments
     parser.add_argument('-i', '--ip', type=str, help='Host/IP address/network (ex: mysipserver.com | 192.168.0.10 | 192.168.0.0/24)', dest="ipaddr")
+    parser.add_argument('-proxy', '--outbound_proxy', type=str, help='Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)', dest="proxy", default="")
     parser.add_argument('-r', '--remote_port', type=str, help='Ports to scan. Ex: 5060 | 5070,5080 | 5060-5080 | 5060,5062,5070-5080 | ALL for 1-65536 (default: 5060)', dest='remote_port', default='5060')
     parser.add_argument('-p', '--proto', type=str, help='Protocol: udp|tcp|tls|all (default: udp)', dest='proto', default='udp')
     parser.add_argument('-m', '--method', type=str, help='Method used to scan: options, invite, register (default: options)', dest='method', default='options')
@@ -77,6 +78,7 @@ UDP, TCP and TLS protocols.
     try:
         IPADDR = args.ipaddr
         HOST = args.ipaddr
+        PROXY = args.proxy
         PORT = args.remote_port
         PROTO = args.proto
         METHOD = args.method
@@ -101,7 +103,7 @@ UDP, TCP and TLS protocols.
         FP = args.fp
         RANDOM = args.random
 
-        return IPADDR, HOST, PORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, THREADS, VERBOSE, PING, FILE, NOCOLOR, OFILE, FP, RANDOM
+        return IPADDR, HOST, PROXY, PORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, THREADS, VERBOSE, PING, FILE, NOCOLOR, OFILE, FP, RANDOM
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -130,6 +132,7 @@ or not. Sipexten uses multithread and can check several IPs and port ranges.
 
     # Add arguments
     parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
+    parser.add_argument('-proxy', '--outbound_proxy', type=str, help='Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)', dest="proxy", default="")
     parser.add_argument('-r', '--remote_port', type=int, help='Remote port (default: 5060)', dest='remote_port', default=5060)
     parser.add_argument('-e', '--exten', type=str, help='Extensions to scan. Ex: 100 | 100,102,105 | 100-200 | 100,102,200-300 (default: 100-300)', dest='exten', default='100-300')
     parser.add_argument('-pr', '--prefix', type=str, help='Prefix for extensions, used for authentication', dest='prefix', default='')
@@ -150,6 +153,7 @@ or not. Sipexten uses multithread and can check several IPs and port ranges.
     try:
         IPADDR = args.ipaddr
         HOST = args.ipaddr
+        PROXY = args.proxy
         RPORT = args.remote_port
         EXTEN = args.exten
         PREFIX = args.prefix
@@ -166,7 +170,7 @@ or not. Sipexten uses multithread and can check several IPs and port ranges.
             VERBOSE = 2
         NOCOLOR = args.nocolor
 
-        return IPADDR, HOST, RPORT, EXTEN, PREFIX, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMUSER, UA, THREADS, VERBOSE, NOCOLOR
+        return IPADDR, HOST, PROXY, RPORT, EXTEN, PREFIX, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMUSER, UA, THREADS, VERBOSE, NOCOLOR
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -195,6 +199,7 @@ passwords for several users using bruteforce.
 
     # Add arguments
     parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
+    parser.add_argument('-proxy', '--outbound_proxy', type=str, help='Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)', dest="proxy", default="")
     parser.add_argument('-r', '--remote_port', type=int, help='Remote port (default: 5060)', dest='remote_port', default=5060)
     parser.add_argument('-e', '--exten', type=str, help='Extensions to attack. Ex: 100 | 100,102,105 | 100-200 | 100,102,200-300', dest='exten', required=True)
     parser.add_argument('-au', '--auth-user', type=str, help='Use a custom SIP Auth User instead the extension', dest='authuser', default="")
@@ -215,6 +220,7 @@ passwords for several users using bruteforce.
     try:
         IPADDR = args.ipaddr
         HOST = args.ipaddr
+        PROXY = args.proxy
         RPORT = args.remote_port
         EXTEN = args.exten
         PREFIX = args.prefix
@@ -229,7 +235,7 @@ passwords for several users using bruteforce.
         VERBOSE = args.verbose
         NOCOLOR = args.nocolor
 
-        return IPADDR, HOST, RPORT, EXTEN, PREFIX, AUTHUSER, LENGHT, PROTO, DOMAIN, CONTACTDOMAIN, UA, WORDLIST, THREADS, VERBOSE, NOCOLOR
+        return IPADDR, HOST, PROXY, RPORT, EXTEN, PREFIX, AUTHUSER, LENGHT, PROTO, DOMAIN, CONTACTDOMAIN, UA, WORDLIST, THREADS, VERBOSE, NOCOLOR
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -260,6 +266,7 @@ possible and can recover most passwords based on the challenge response.
 
     # Add arguments
     parser.add_argument('-i', '--ip', type=str, help='Host/IP address/network (ex: mysipserver.com | 192.168.0.10 | 192.168.0.0/24)', dest="ipaddr", default='')
+    parser.add_argument('-proxy', '--outbound_proxy', type=str, help='Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)', dest="proxy", default="")
     parser.add_argument('-r', '--remote_port', type=int, help='Remote port (default: 5060)', dest='rport', default=5060)
     parser.add_argument('-p', '--proto', type=str, help='Protocol: udp|tcp (default: udp)', dest='proto', default='udp')
     parser.add_argument('-d', '--domain', type=str, help='SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)', dest='domain', default='')
@@ -294,6 +301,7 @@ possible and can recover most passwords based on the challenge response.
     try:
         IPADDR = args.ipaddr
         HOST = args.ipaddr
+        PROXY = args.proxy
         RPORT = args.rport
         PROTO = args.proto
         DOMAIN = args.domain
@@ -317,7 +325,7 @@ possible and can recover most passwords based on the challenge response.
         FILE = args.file
         PING = args.ping
 
-        return IPADDR, HOST, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, LOCALIP, OFILE, LFILE, USER, PWD, AUTH, VERBOSE, SDP, SDES, FILE, PING
+        return IPADDR, HOST, PROXY, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, LOCALIP, OFILE, LFILE, USER, PWD, AUTH, VERBOSE, SDP, SDES, FILE, PING
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -347,6 +355,7 @@ the call to a second external number.
 
     # Add arguments
     parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
+    parser.add_argument('-proxy', '--outbound_proxy', type=str, help='Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)', dest="proxy", default="")
     parser.add_argument('-r', '--remote_port', type=int, help='Remote port (default: 5060)', dest='rport', default=5060)
     parser.add_argument('-p', '--proto', type=str, help='Protocol: udp|tcp|tls (default: udp)', dest='proto', default='udp')
     parser.add_argument('-d', '--domain', type=str, help='SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)', dest='domain', default='')
@@ -375,6 +384,7 @@ the call to a second external number.
     try:
         IPADDR = args.ipaddr
         HOST = args.ipaddr
+        PROXY = args.proxy
         RPORT = args.rport
         PROTO = args.proto
         DOMAIN = args.domain
@@ -398,7 +408,7 @@ the call to a second external number.
         OFILE = args.ofile
 
 
-        return IPADDR, HOST, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, TRANSFER, USER, PWD, UA, LOCALIP, THREADS, NOSDP, VERBOSE, SDES, NOCOLOR, OFILE
+        return IPADDR, HOST, PROXY, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, TRANSFER, USER, PWD, UA, LOCALIP, THREADS, NOSDP, VERBOSE, SDES, NOCOLOR, OFILE
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -494,6 +504,7 @@ SIP Send allow us to send a customized SIP message and analyze the response.
 
     # Add arguments
     parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
+    parser.add_argument('-proxy', '--outbound_proxy', type=str, help='Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)', dest="proxy", default="")
     parser.add_argument('-r', '--port', type=int, help='Remote port (default: 5060)', dest='rport', default=5060)
     parser.add_argument('-p', '--proto', type=str, help='Protocol: udp|tcp|tls (default: udp)', dest='proto', default='udp')
     parser.add_argument('-m', '--method', type=str, help='SIP Method: options|invite|register|subscribe|cancel|bye|...', dest='method', required=True)
@@ -525,6 +536,7 @@ SIP Send allow us to send a customized SIP message and analyze the response.
 
     IPADDR = args.ipaddr
     HOST = args.ipaddr
+    PROXY = args.proxy
     RPORT = args.rport
     PROTO = args.proto
     METHOD = args.method
@@ -551,7 +563,7 @@ SIP Send allow us to send a customized SIP message and analyze the response.
     NOCOLOR = args.nocolor
     OFILE = args.ofile
 
-    return IPADDR, HOST, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, SDP, SDES, UA, LOCALIP, NOCOLOR, OFILE
+    return IPADDR, HOST, PROXY, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, SDP, SDES, UA, LOCALIP, NOCOLOR, OFILE
 
 
 def get_sipenumerate_args():
@@ -576,6 +588,7 @@ Enumerate available methods of a SIP service/server.
 
     # Add arguments
     parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
+    parser.add_argument('-proxy', '--outbound_proxy', type=str, help='Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)', dest="proxy", default="")
     parser.add_argument('-r', '--port', type=int, help='Remote port (default: 5060)', dest='rport', default=5060)
     parser.add_argument('-p', '--proto', type=str, help='Protocol: udp|tcp\tls (default: udp)', dest='proto', default='udp')
     parser.add_argument('-d', '--domain', type=str, help='SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)', dest='domain', default='')
@@ -595,6 +608,7 @@ Enumerate available methods of a SIP service/server.
     try:
         IPADDR = args.ipaddr
         HOST = args.ipaddr
+        PROXY = args.proxy
         RPORT = args.rport
         PROTO = args.proto
         DOMAIN = args.domain
@@ -608,7 +622,7 @@ Enumerate available methods of a SIP service/server.
         UA = args.user_agent
         VERBOSE = args.verbose
 
-        return IPADDR, HOST, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, VERBOSE
+        return IPADDR, HOST, PROXY, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, VERBOSE
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -1100,6 +1114,7 @@ Simple Ping to test if the server/device is available.
 
     # Add arguments
     parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
+    parser.add_argument('-proxy', '--outbound_proxy', type=str, help='Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)', dest="proxy", default="")
     parser.add_argument('-r', '--port', type=int, help='Remote port (default: 5060)', dest='rport', default=5060)
     parser.add_argument('-p', '--proto', type=str, help='Protocol: udp|tcp|tls (default: udp)', dest='proto', default='udp')
     parser.add_argument('-m', '--method', type=str, help='SIP Method: options|invite|register|subscribe|cancel|bye|...', dest='method', default='options')
@@ -1129,6 +1144,7 @@ Simple Ping to test if the server/device is available.
 
     IPADDR = args.ipaddr
     HOST = args.ipaddr
+    PROXY = args.proxy
     RPORT = args.rport
     PROTO = args.proto
     METHOD = args.method
@@ -1153,7 +1169,7 @@ Simple Ping to test if the server/device is available.
     NUMBER = args.number
     INTERVAL = args.interval
 
-    return IPADDR, HOST, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, UA, LOCALIP, NUMBER, INTERVAL
+    return IPADDR, HOST, PROXY, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, UA, LOCALIP, NUMBER, INTERVAL
 
 
 def get_wssend_args():
@@ -1241,6 +1257,7 @@ SIP Fuzzer uses Radamsa to generate a lot of malformed headers to try the robust
 
     # Add arguments
     parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
+    parser.add_argument('-proxy', '--outbound_proxy', type=str, help='Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)', dest="proxy", default="")
     parser.add_argument('-a', '--all', help='Fuzz all data (by default fuzz header values)', dest="all", action="count")
     parser.add_argument('-r', '--remote_port', type=int, help='Remote port (default: 5060)', dest='remote_port', default=5060)
     parser.add_argument('-p', '--proto', type=str, help='Protocol: udp|tcp|tls (default: udp)', dest='proto', default='udp')
@@ -1252,6 +1269,7 @@ SIP Fuzzer uses Radamsa to generate a lot of malformed headers to try the robust
     args = parser.parse_args()
 
     IPADDR = args.ipaddr
+    PROXY = args.proxy
     RPORT = args.remote_port
     PROTO = args.proto
     VERBOSE = args.verbose
@@ -1259,4 +1277,4 @@ SIP Fuzzer uses Radamsa to generate a lot of malformed headers to try the robust
     DELAY = args.delay
     UA = args.user_agent
 
-    return IPADDR, RPORT, PROTO, VERBOSE, ALL, DELAY, UA
+    return IPADDR, PROXY, RPORT, PROTO, VERBOSE, ALL, DELAY, UA

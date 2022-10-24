@@ -22,6 +22,8 @@ class SipPing:
     def __init__(self):
         self.ip = ''
         self.host = ''
+        self.proxy = ''
+        self.route = ''
         self.rport = '5060'
         self.proto = 'UDP'
         self.method = ''
@@ -87,6 +89,9 @@ class SipPing:
 
         print(self.c.BWHITE + '[✓] Target: ' + self.c.YELLOW + '%s' % self.ip + self.c.WHITE + ':' +
               self.c.YELLOW + '%s' % self.rport + self.c.WHITE + '/' + self.c.YELLOW + '%s' % self.proto)
+        if self.proxy != '':
+            print(self.c.BWHITE + '[✓] Outbound Proxy: ' + self.c.GREEN + '%s' %
+                  self.proxy)
         if self.domain != '' and self.domain != str(self.ip) and self.domain != self.host:
             print(self.c.BWHITE + '[✓] Customized Domain: ' +
                   self.c.GREEN + '%s' % self.domain)
@@ -148,6 +153,9 @@ class SipPing:
         if self.contact_domain == '':
             self.contact_domain = local_ip
 
+        if self.proxy != '':
+            self.route = '<sip:%s;lr>' % self.proxy
+
         ip = self.ip
         try:
             ip = socket.gethostbyname(self.ip)
@@ -175,7 +183,7 @@ class SipPing:
             lport = get_free_port()
 
             msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
-                                 self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, self.to_tag, self.digest, 1, '', 0, '', '')
+                                 self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, self.to_tag, self.digest, 1, '', 0, '', self.route)
 
             try:
                 sock.bind((bind, lport))
@@ -183,7 +191,16 @@ class SipPing:
                 lport = get_free_port()
                 sock.bind((bind, lport))
 
-            host = (str(self.ip), int(self.rport))
+            if self.proxy == '':
+                host = (str(self.ip), int(self.rport))
+            else:
+                if self.proxy.find(':') > 0:
+                    (proxy_ip, proxy_port) = self.proxy.split(':')
+                else:
+                    proxy_ip = self.proxy
+                    proxy_port = '5060'
+
+                host = (str(proxy_ip), int(proxy_port))
 
             try:
                 sock.settimeout(2)

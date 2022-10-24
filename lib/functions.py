@@ -350,7 +350,7 @@ def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser
         sdp = '\r\n'
         sdp += 'v=0\r\n'
         sdp += 'o=anonymous 1312841870 1312841870 IN IP4 %s\r\n' % contactdomain
-        sdp += 's=SIP Call\r\n'
+        sdp += 's=SIPPTS\r\n'
         sdp += 'c=IN IP4 %s\r\n' % contactdomain
         sdp += 't=0 0\r\n'
         sdp += 'm=audio 2362 RTP/AVP 0\r\n'

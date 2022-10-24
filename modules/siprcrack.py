@@ -26,6 +26,8 @@ class SipRemoteCrack:
     def __init__(self):
         self.ip = ''
         self.host = ''
+        self.proxy = ''
+        self.route = ''
         self.rport = '5060'
         self.proto = 'UDP'
         self.exten = ''
@@ -72,12 +74,24 @@ class SipRemoteCrack:
                 lport = get_free_port()
                 sock.bind((bind, lport))
 
-            host = (str(ip), int(self.rport))
+            if self.proxy == '':
+                host = (str(ip), int(self.rport))
+            else:
+                if self.proxy.find(':') > 0:
+                    (proxy_ip, proxy_port) = self.proxy.split(':')
+                else:
+                    proxy_ip = self.proxy
+                    proxy_port = '5060'
+
+                host = (str(proxy_ip), int(proxy_port))
+
+            if self.proxy != '':
+                self.route = '<sip:%s;lr>' % self.proxy
 
             data = dict()
 
             msg = create_message('REGISTER', self.contact_domain, to_user, '', self.domain,
-                                 to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', '', 1, '', 0, '', '')
+                                 to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', '', 1, '', 0, '', self.route)
 
             if self.verbose == 1:
                 print(self.c.BWHITE + '[+] Sending to %s:%d/%s ...' %
@@ -168,7 +182,7 @@ class SipRemoteCrack:
                             digest += ', nc=%s' % nc
 
                         msg = create_message('REGISTER', self.contact_domain, to_user, '', self.domain,
-                                             to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', callid, '', '1', '', digest, auth_type, '', 0, '', '')
+                                             to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', callid, '', '1', '', digest, auth_type, '', 0, '', self.route)
 
                         if self.verbose == 1:
                             print(self.c.BWHITE + '[+] Sending to %s:%d/%s ...' %
@@ -320,6 +334,9 @@ class SipRemoteCrack:
 
         print(self.c.BWHITE+'[✓] IP/Network: ' +
               self.c.GREEN + '%s' % str(self.ip))
+        if self.proxy != '':
+            print(self.c.BWHITE + '[✓] Outbound Proxy: ' + self.c.GREEN + '%s' %
+                  self.proxy)
         print(self.c.BWHITE+'[✓] Port: ' + self.c.GREEN + '%s' % (self.rport))
         if self.prefix != '':
             print(self.c.BWHITE+'[✓] Users prefix: ' +

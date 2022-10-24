@@ -26,6 +26,8 @@ class SipScan:
     def __init__(self):
         self.ip = ''
         self.host = ''
+        self.proxy = ''
+        self.route = ''
         self.rport = '5060'
         self.proto = 'UDP'
         self.method = 'OPTIONS'
@@ -247,7 +249,9 @@ class SipScan:
 
         print(self.c.BWHITE + '[✓] IP/Network: ' +
               self.c.GREEN + '%s' % str(iplist))
-
+        if self.proxy != '':
+            print(self.c.BWHITE + '[✓] Outbound Proxy: ' + self.c.GREEN + '%s' %
+                  self.proxy)
         print(self.c.BWHITE + '[✓] Port range: ' +
               self.c.GREEN + '%s' % self.rport)
         if self.proto == 'ALL':
@@ -300,7 +304,7 @@ class SipScan:
                   self.c.CYAN + '%s' % self.ofile)
         if self.random == 1:
             print(self.c.BWHITE + '[✓] Random hosts: ' +
-                self.c.GREEN + 'True')
+                  self.c.GREEN + 'True')
         print(self.c.WHITE)
 
         values = product(ips, ports, protos)
@@ -386,7 +390,16 @@ class SipScan:
                 lport = get_free_port()
                 sock.bind((bind, lport))
 
-            host = (str(ipaddr), port)
+            if self.proxy == '':
+                host = (str(ipaddr), port)
+            else:
+                if self.proxy.find(':') > 0:
+                    (proxy_ip, proxy_port) = self.proxy.split(':')
+                else:
+                    proxy_ip = self.proxy
+                    proxy_port = '5060'
+
+                host = (str(proxy_ip), int(proxy_port))
 
             domain = self.domain
             if domain == '':
@@ -404,8 +417,17 @@ class SipScan:
             if not self.to_domain or self.to_domain == '':
                 tdomain = self.domain
 
+            if self.method == 'REGISTER':
+                if self.to_user == '100' and self.from_user != '100':
+                    self.to_user = self.from_user
+                if self.to_user != '100' and self.from_user == '100':
+                    self.from_user = self.to_user
+
+            if self.proxy != '':
+                self.route = '<sip:%s;lr>' % self.proxy
+
             msg = create_message(self.method, contact_domain, self.from_user, self.from_name, fdomain,
-                                 self.to_user, self.to_name, tdomain, proto, domain, self.user_agent, lport, '', '', '', '1', '', '', 1, '', 0, '', '')
+                                 self.to_user, self.to_name, tdomain, proto, domain, self.user_agent, lport, '', '', '', '1', '', '', 1, '', 0, '', self.route)
 
             try:
                 sock.settimeout(2)
