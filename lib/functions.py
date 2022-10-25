@@ -928,6 +928,8 @@ def fingerprinting(method, msg, headers, verbose):
                 fp.append('FortiVoice')
             elif ua[0:8] == 'VoxStack':
                 fp.append('VoxStack')
+            elif ua[0:3] == 'BEC':
+                fp.append('BEC')
             else:
                 fp.append('Asterisk PBX')
         m = re.search('^[0-9a-z]{71}$', tag)
