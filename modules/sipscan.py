@@ -486,7 +486,7 @@ class SipScan:
                     if self.fp == 1:
                         fps = fingerprinting(
                             self.method, resp.decode(), headers, self.verbose)
-
+                        
                         fp = ''
                         for f in fps:
                             if f == '':

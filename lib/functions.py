@@ -950,6 +950,7 @@ def fingerprinting(method, msg, headers, verbose):
                 fp.append('TP-Link')
                 fp.append('SylkServer')
                 fp.append('ESI')
+                fp.append('ClearlyIP')
         m = re.search('^[a-z0-9A-Z]{11}.[a-z0-9A-Z]{32}.[0-9]{1}$', tag)
         if m:
             fp.append('Asterisk PBX')
@@ -983,7 +984,7 @@ def fingerprinting(method, msg, headers, verbose):
         m = re.search('^[0-9A-F]{1}-[0-9A-F]{8}-[0-9A-F]{16}-[0-9A-F]{8}$', tag)
         if m:
             fp.append('Yeti')
-        m = re.search('^[0-9a-Fz{10}$', tag)
+        m = re.search('^[0-9a-z]{10}$', tag)
         if m:
             fp.append('Brekeke')
 
