@@ -909,6 +909,7 @@ def fingerprinting(method, msg, headers, verbose):
                 fp.append('VTechET')
                 fp.append('STL-IP')
                 fp.append('Laia')
+                fp.append('REDCOM')
 
         hdr = msg.split('\r\n')
         for h in hdr:
