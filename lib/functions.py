@@ -349,6 +349,8 @@ def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser
         sdp += 'a=rtpmap:18 G729/8000\r\n'
         sdp += 'a=rtpmap:0 PCMU/8000\r\n'
         sdp += 'a=rtpmap:8 PCMA/8000\r\n'
+        sdp += 'a=rtpmap:3 GSM/8000\r\n'
+        sdp += 'a=rtpmap:101 telephone-event/8000\r\n'
 
     if withsdp == 2:
         # Use SRTP
@@ -367,6 +369,9 @@ def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser
         sdp += 'a=rtpmap:4 G723/8000\r\n'
         sdp += 'a=rtpmap:9 G722/8000\r\n'
         sdp += 'a=rtpmap:97 iLBC/8000\r\n'
+        sdp += 'a=rtpmap:3 GSM/8000\r\n'
+        sdp += 'a=rtpmap:0 PCMU/8000\r\n'
+        sdp += 'a=rtpmap:8 PCMA/8000\r\n'
         sdp += 'a=fmtp:97 mode=30\r\n'
         sdp += 'a=rtpmap:2 G726-32/8000\r\n'
         sdp += 'a=rtpmap:123 opus/48000/2\r\n'
@@ -978,6 +983,9 @@ def fingerprinting(method, msg, headers, verbose):
         m = re.search('^[0-9A-F]{1}-[0-9A-F]{8}-[0-9A-F]{16}-[0-9A-F]{8}$', tag)
         if m:
             fp.append('Yeti')
+        m = re.search('^[0-9a-Fz{10}$', tag)
+        if m:
+            fp.append('Brekeke')
 
         if fp == []:
             m = re.search('^[a-fA-F0-9]{6,8}-[a-fA-F0-9]{1,4}$', tag)
