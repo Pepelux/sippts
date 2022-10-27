@@ -873,6 +873,7 @@ def fingerprinting(method, msg, headers, verbose):
                 fp.append('Asterisk PBX')
                 fp.append('Huawei')
                 fp.append('BeWAN')
+                fp.append('XIVO')
         m = re.search(
             '^[a-f0-9]{6}-[a-f0-9]{7,8}-[a-f0-9]{4}-[a-f0-9]{5}-[a-f0-9]{7,8}-[a-f0-9]{7,8}-[a-f0-9]{7,8}$', tag)
         if m:
