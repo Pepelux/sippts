@@ -795,6 +795,8 @@ def fingerprinting(method, msg, headers, verbose):
             else:
                 fp.append('Draytek')
                 fp.append('Yealink')
+                fp.append('Cellgate')
+                fp.append('Akuvox')
         m = re.search('^[a-f0-9]{16}$', tag)
         if m:
             fp.append('Grandtream')
