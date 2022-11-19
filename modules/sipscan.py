@@ -189,18 +189,18 @@ class SipScan:
                 error = 0
 
                 try:
-                    i = socket.gethostbyname(i)
-                    i = IP(i)
-                except:
-                    try:
+                    if i.find('/') < 1:
+                        i = socket.gethostbyname(i)
                         i = IP(i)
-                    except:
-                        if i.find('-') > 0:
-                            val = i.split('-')
-                            start_ip = val[0]
-                            end_ip = val[1]
+                    else:
+                        i = IP(i)
+                except:
+                    if i.find('-') > 0:
+                        val = i.split('-')
+                        start_ip = val[0]
+                        end_ip = val[1]
 
-                            error = 1
+                        error = 1
                 try:
                     if error == 0:
                         hlist = list(ipaddress.ip_network(str(i)).hosts())
