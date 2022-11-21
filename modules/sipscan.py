@@ -129,10 +129,10 @@ class SipScan:
                             if self.quit == False:
                                 try:
                                     ip = socket.gethostbyname(line)
-                                    self.ip = IP(ip)
+                                    self.ip = IP(ip, make_net=True)
                                 except:
                                     try:
-                                        self.ip = IP(line)
+                                        self.ip = IP(line, make_net=True)
 
                                     except:
                                         if line.find('-') > 0:
@@ -191,9 +191,9 @@ class SipScan:
                 try:
                     if i.find('/') < 1:
                         i = socket.gethostbyname(i)
-                        i = IP(i)
+                        i = IP(i, make_net=True)
                     else:
-                        i = IP(i)
+                        i = IP(i, make_net=True)
                 except:
                     if i.find('-') > 0:
                         val = i.split('-')
