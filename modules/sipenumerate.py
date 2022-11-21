@@ -46,8 +46,9 @@ class SipEnumerate:
 
     def start(self):
         supported_protos = ['UDP', 'TCP', 'TLS']
-        supported_methods = ['REGISTER', 'SUBSCRIBE', 'NOTIFY', 'PUBLISH', 'MESSAGE', 'INVITE',
-                             'OPTIONS', 'ACK', 'CANCEL', 'BYE', 'PRACK', 'INFO', 'REFER', 'UPDATE']
+        # supported_methods = ['REGISTER', 'SUBSCRIBE', 'NOTIFY', 'PUBLISH', 'MESSAGE', 'INVITE',
+        #                      'OPTIONS', 'ACK', 'CANCEL', 'BYE', 'PRACK', 'INFO', 'REFER', 'UPDATE']
+        supported_methods = ['REGISTER']
 
         self.proto = self.proto.upper()
 
@@ -170,6 +171,9 @@ class SipEnumerate:
                 print('Socket connection error')
                 exit()
 
+            from_user = self.from_user
+            to_user = self.to_user
+
             if method == 'REGISTER':
                 if self.to_user == '100' and self.from_user != '100':
                     from_user = self.from_user
@@ -177,9 +181,6 @@ class SipEnumerate:
                 if self.to_user != '100' and self.from_user == '100':
                     from_user = self.to_user
                     to_user = self.to_user
-            else:
-                from_user = self.from_user
-                to_user = self.to_user
 
             msg = create_message(method, self.contact_domain, from_user, self.from_name, self.domain,
                                  to_user, self.to_name, self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', self.route)
