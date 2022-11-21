@@ -944,13 +944,12 @@ def get_tshark_args():
 Filters:
 -------
 stats               SIP packet statistics
-dialogs             Show all SIP dialogs
 auth                Show auth digest
 messages            Show all SIP messages
+frame <id>          Show a SIP message filtering by frame number
 method <method>     Filter frames by method: register, invite, ...
 callids             Show all call-ID
 callid <cid>        Filter by call-ID
-frame <id>          Show a SIP message filtering by frame number
 rtp                 Show all RTP streams
 ''' + WHITE + '''
 \nPCAP manipulation with TShark.
