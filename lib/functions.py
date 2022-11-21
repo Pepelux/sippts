@@ -768,6 +768,7 @@ def fingerprinting(method, msg, headers, verbose):
         m = re.search('^[a-f0-9]{8}$', tag)
         if m:
             if ua[0:2] == 'Z ':
+                fp.clear()
                 fp.append('Zoiper')
             else:
                 fp.append('Cisco IP Phone')
