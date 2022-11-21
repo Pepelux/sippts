@@ -312,7 +312,7 @@ class SipDigestLeak:
 
             if self.user != '' and self.pwd != '' and (headers['response_code'] == '401' or headers['response_code'] == '407'):
                 # send ACK
-                print(self.c.YELLOW + '[+] Request ACK')
+                print(self.c.YELLOW + '[=>] Request ACK')
                 msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name, self.from_domain,
                                      self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, cseq, totag, '', 1, '', 0, via, rr)
 

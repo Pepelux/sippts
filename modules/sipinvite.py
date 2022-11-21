@@ -114,13 +114,13 @@ class SipInvite:
             msg = create_message('INVITE', self.contact_domain, src, self.from_name, self.from_domain,
                                  dst, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '1', '', '', 1, '', self.sdp, '', self.route)
 
-            print(self.c.BWHITE +
-                  '[+] Request INVITE from %s to %s' % (src, dst))
+            print(self.c.YELLOW +
+                  '[=>] Request INVITE from %s to %s' % (src, dst))
             if self.verbose == 1 and self.ofile == '':
                 print(self.c.YELLOW + msg)
 
             if self.ofile != '':
-                fw.write('[+] Request INVITE from %s to %s\n' % (src, dst))
+                fw.write('[=>] Request INVITE from %s to %s\n' % (src, dst))
                 if self.verbose == 1:
                     fw.write(msg + '\n')
 
@@ -159,7 +159,8 @@ class SipInvite:
                             headers['response_code'], headers['response_text'])
                         rescode = headers['response_code']
                         print(
-                            self.c.BWHITE + '[-] Response from %s to %s: ' % (dst, src) + self.c.CYAN + '%s' % response)
+                            self.c.CYAN + '[<=] Response from %s to %s: ' % (dst, src) + self.c.CYAN + '%s' % response)
+
                         if self.verbose == 1 and self.ofile == '':
                             print(self.c.GREEN + resp.decode())
 
@@ -174,8 +175,8 @@ class SipInvite:
                 # receive 401/407 Unauthorized
                 if self.auth_user != '' and self.auth_pwd != '' and (headers['response_code'] == '401' or headers['response_code'] == '407'):
                     # send ACK
-                    print(self.c.BWHITE +
-                          '[+] Request ACK from %s to %s' % (src, dst))
+                    print(self.c.YELLOW +
+                          '[=>] Request ACK from %s to %s' % (src, dst))
                     msg = create_message('ACK', self.contact_domain, src, self.from_name, self.from_domain,
                                          dst, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '1', totag, '', 1, '', 0, via, self.route)
 
@@ -183,7 +184,7 @@ class SipInvite:
                         print(self.c.YELLOW + msg)
 
                     if self.ofile != '':
-                        fw.write('[+] Request ACK from %s to %s\n' %
+                        fw.write('[=>] Request ACK from %s to %s\n' %
                                  (src, dst))
                         if self.verbose == 1:
                             fw.write(msg + '\n')
@@ -226,8 +227,8 @@ class SipInvite:
                         if nc != '':
                             digest += ', nc=%s' % nc
 
-                        print(self.c.BWHITE +
-                              '[+] Request INVITE from %s to %s' % (src, dst))
+                        print(self.c.YELLOW +
+                              '[=>] Request INVITE from %s to %s' % (src, dst))
                         msg = create_message('INVITE', self.contact_domain, src, self.from_name, self.from_domain,
                                              dst, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '2', totag, digest, auth_type, '', self.sdp, via, self.route)
 
@@ -236,7 +237,7 @@ class SipInvite:
 
                         if self.ofile != '':
                             fw.write(
-                                '[+] Request INVITE from %s to %s\n' % (src, dst))
+                                '[=>] Request INVITE from %s to %s\n' % (src, dst))
                             if self.verbose == 1:
                                 fw.write(msg + '\n')
 
@@ -260,14 +261,14 @@ class SipInvite:
                                 response = '%s %s' % (
                                     headers['response_code'], headers['response_text'])
                                 rescode = headers['response_code']
-                                print(self.c.BWHITE +
-                                      '[-] Response from %s to %s: %s' % (dst, src, response))
+                                print(
+                                    self.c.CYAN + '[<=] Response from %s to %s: %s' % (dst, src, response))
                                 if self.verbose == 1 and self.ofile == '':
                                     print(self.c.GREEN + resp.decode())
 
                                 if self.ofile != '':
                                     fw.write(
-                                        '[-] Response from %s to %s: %s\n' % (dst, src, response))
+                                        '[<=] Response from %s to %s: %s\n' % (dst, src, response))
                                     if self.verbose == 1:
                                         fw.write(resp.code() + '\n')
 
@@ -276,8 +277,8 @@ class SipInvite:
                 # receive 200 Ok - call answered
                 if headers['response_code'] == '200':
                     # send ACK
-                    print(self.c.BWHITE +
-                          '[+] Request ACK from %s to %s' % (src, dst))
+                    print(self.c.YELLOW +
+                          '[=>] Request ACK from %s to %s' % (src, dst))
                     msg = create_message('ACK', self.contact_domain, src, self.from_name, self.from_domain,
                                          dst, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '2', totag, digest, auth_type, '', 0, via, self.route)
 
@@ -285,7 +286,7 @@ class SipInvite:
                         print(self.c.YELLOW + msg)
 
                     if self.ofile != '':
-                        fw.write('[+] Request ACK from %s to %s\n' %
+                        fw.write('[=>] Request ACK from %s to %s\n' %
                                  (src, dst))
                         if self.verbose == 1:
                             fw.write(msg + '\n')
@@ -297,8 +298,8 @@ class SipInvite:
 
                     if self.transfer != '':
                         # send REFER
-                        print(self.c.BWHITE +
-                              '[+] Request REFERfrom %s  to %s' % (src, dst))
+                        print(self.c.YELLOW +
+                              '[=>] Request REFERfrom %s  to %s' % (src, dst))
                         msg = create_message('REFER', self.contact_domain, src, self.from_name, self.from_domain,
                                              dst, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, branch, callid, tag, '3', totag, '', 1, self.transfer, 0, '', '')
 
@@ -307,7 +308,7 @@ class SipInvite:
 
                         if self.ofile != '':
                             fw.write(
-                                '[+] Request REFER from %s to %s\n' % (src, dst))
+                                '[=>] Request REFER from %s to %s\n' % (src, dst))
                             if self.verbose == 1:
                                 fw.write(msg + '\n')
 
@@ -324,12 +325,12 @@ class SipInvite:
                                 headers['response_code'], headers['response_text'])
                             rescode = headers['response_code']
                             print(
-                                self.c.BWHITE + '[-] Response from %s to %s: %s' % (dst, src, response))
+                                self.c.CYAN + '[<=] Response from %s to %s: %s' % (dst, src, response))
                             if self.verbose == 1 and self.ofile == '':
                                 print(self.c.GREEN + resp.decode())
 
                             if self.ofile != '':
-                                fw.write('[-] Response from %s to %s: %s\n' %
+                                fw.write('[<=] Response from %s to %s: %s\n' %
                                          (dst, src, response))
                                 if self.verbose == 1:
                                     fw.write(resp.decode() + '\n')
@@ -347,12 +348,12 @@ class SipInvite:
                             headers = parse_message(resp.decode())
                             bye = headers['method']
                             print(
-                                self.c.BWHITE + '[-] Response from %s to %s: %s' % (dst, src, bye))
+                                self.c.CYAN + '[<=] Response from %s to %s: %s' % (dst, src, bye))
                             if self.verbose == 1 and self.ofile == '':
                                 print(self.c.GREEN + resp.decode())
 
                             if self.ofile != '':
-                                fw.write('[-] Response from %s to %s: %s\n' %
+                                fw.write('[<=] Response from %s to %s: %s\n' %
                                          (dst, src, response))
                                 if self.verbose == 1:
                                     fw.write(resp.decode() + '\n')
@@ -364,8 +365,8 @@ class SipInvite:
                     msg = create_response_ok(src, dst, self.proto, self.domain, lport, int(
                         cseq), branch, callid, tag, totag)
 
-                    print(self.c.BWHITE +
-                          '[+] Sending 200 Ok from %s to %s\n' % (src, dst))
+                    print(self.c.YELLOW +
+                          '[=>] Sending 200 Ok from %s to %s\n' % (src, dst))
 
                     if self.verbose == 1 and self.ofile == '':
                         print(self.c.YELLOW + msg)
@@ -373,7 +374,7 @@ class SipInvite:
                     print(self.NORMAL)
 
                     if self.ofile != '':
-                        fw.write('[+] Sending 200 Ok from %s to %s\n' %
+                        fw.write('[=>] Sending 200 Ok from %s to %s\n' %
                                  (src, dst))
                         if self.verbose == 1:
                             fw.write(msg + '\n')
