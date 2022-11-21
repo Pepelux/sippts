@@ -46,9 +46,8 @@ class SipEnumerate:
 
     def start(self):
         supported_protos = ['UDP', 'TCP', 'TLS']
-        # supported_methods = ['REGISTER', 'SUBSCRIBE', 'NOTIFY', 'PUBLISH', 'MESSAGE', 'INVITE',
-        #                      'OPTIONS', 'ACK', 'CANCEL', 'BYE', 'PRACK', 'INFO', 'REFER', 'UPDATE']
-        supported_methods = ['REGISTER']
+        supported_methods = ['REGISTER', 'SUBSCRIBE', 'NOTIFY', 'PUBLISH', 'MESSAGE', 'INVITE',
+                             'OPTIONS', 'ACK', 'CANCEL', 'BYE', 'PRACK', 'INFO', 'REFER', 'UPDATE']
 
         self.proto = self.proto.upper()
 
