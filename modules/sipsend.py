@@ -10,7 +10,6 @@ __email__ = "pepeluxx@gmail.com"
 import socket
 import sys
 import ssl
-from urllib.request import proxy_bypass
 from lib.functions import create_message, get_free_port, parse_message, parse_digest, generate_random_string, calculateHash, get_machine_default_ip
 from lib.color import Color
 from lib.logos import Logo
@@ -177,6 +176,9 @@ class SipSend:
             self.sdp = 2
         if self.cseq == None or self.cseq == '':
             self.cseq = '1'
+
+        if self.user != '' and self.pwd != '' and self.from_user == '100':
+            self.from_user = self.user
 
         bind = '0.0.0.0'
         lport = get_free_port()

@@ -25,7 +25,6 @@ __email__ = "pepeluxx@gmail.com"
 #                                                               (Phone 1 && phone 2)
 
 import socket
-import sre_compile
 import sys
 import ssl
 import re
@@ -418,6 +417,9 @@ class SipInvite:
 
         logo = Logo('sipinvite')
         logo.print()
+
+        if self.auth_user != '' and self.auth_pwd != '' and self.from_user == '100':
+            self.from_user = self.auth_user
 
         # create a list of callers
         origin = []
