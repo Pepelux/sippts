@@ -620,7 +620,7 @@ def parse_digest(buffer):
         else:
             data['realm'] = ''
 
-        m = re.search('\snonce=\"([a-z|A-Z|0-9|\/|\+|\=]+)\"', header)
+        m = re.search('nonce=\"([a-z|A-Z|0-9|\/|\+|\=]+)\"', header)
         if m:
             data['nonce'] = '%s' % (m.group(1))
         else:

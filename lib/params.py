@@ -431,7 +431,7 @@ def get_sipcrack_args():
 ''' + BLUE + ''' -= SIP digest authentication cracking =-''' + WHITE,
         epilog=BWHITE + '''Bruteforce charsets
 -------------------
-ascii_letters             # The ascii_lowercase and ascii_uppercase constants
+alphabet=ascii_letters    # The ascii_lowercase and ascii_uppercase constants
 alphabet=ascii_lowercase  # The lowercase letters: abcdefghijklmnopqrstuvwxyz
 alphabet=ascii_uppercase  # The uppercase letters: ABCDEFGHIJKLMNOPQRSTUVWXYZ
 alphabet=digits           # The string: 0123456789
