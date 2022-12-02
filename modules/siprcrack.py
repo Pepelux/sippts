@@ -48,6 +48,7 @@ class SipRemoteCrack:
         self.extens = []
 
         self.totaltime = 0
+        self.num_lines = 0
         self.found = []
         self.line = ['-', '\\', '|', '/']
         self.pos = 0
@@ -314,6 +315,10 @@ class SipRemoteCrack:
         print(self.c.BYELLOW + '\nPress Ctrl+C to stop\n')
         print(self.c.WHITE)
 
+        print(self.c.BGREEN + 'Reading wordlist. It may take some time. Please wait ...\n')
+        print(self.c.WHITE)
+        self.num_lines = sum(1 for line in open(self.wordlist))
+
         threads = list()
         t = threading.Thread(target=self.crack, daemon=True)
         threads.append(t)
@@ -410,8 +415,9 @@ class SipRemoteCrack:
 
         if self.run == True:
             with open(self.wordlist, 'rb') as f:
-                pwd = '#'
-                while pwd:
+                for x in range (self.num_lines):
+                    pwd = ''
+
                     try:
                         pwd = f.readline()
 

@@ -38,6 +38,7 @@ class SipDigestCrack:
         self.run = True
 
         self.totaltime = 0
+        self.num_lines = 0
         self.found = []
 
         self.c = Color()
@@ -73,6 +74,11 @@ class SipDigestCrack:
         signal.signal(signal.SIGINT, self.signal_handler)
         print(self.c.BYELLOW + '\nPress Ctrl+C to stop\n')
         print(self.c.WHITE)
+
+        if self.wordlist != '':
+            print(self.c.BGREEN + 'Reading wordlist. It may take some time. Please wait ...\n')
+            print(self.c.WHITE)
+            self.num_lines = sum(1 for line in open(self.wordlist))
 
         threads = list()
         t = threading.Thread(target=self.read_data, daemon=True)
@@ -290,8 +296,7 @@ class SipDigestCrack:
                 pass
         else:
             with open(self.wordlist, 'rb') as fd:
-                pwd = '#'
-                while pwd != '':
+
                     if self.run == False:
                         return ''
 
