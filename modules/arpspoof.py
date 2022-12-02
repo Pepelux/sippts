@@ -170,7 +170,6 @@ class ArpSpoof:
                 ipend = int(ip2long(str(end_ip)))
 
                 for ip in range(ipini, ipend+1):
-                    # if ip != local_ip:
                     if ip != local_ip and ip != self.gw:
                         self.ips.append(long2ip(ip))
                         self.ips.append('')
