@@ -323,6 +323,7 @@ class SipDigestCrack:
                         self.stop()
                         return ''
                     except:
+                        pwd = ''
                         pass
 
             self.save_file(self.wordlist, username, pwd)

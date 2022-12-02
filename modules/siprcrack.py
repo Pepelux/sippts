@@ -457,6 +457,7 @@ class SipRemoteCrack:
                                 except:
                                     pass
                         except:
+                            pwd = ''
                             pass
 
         print(self.c.WHITE)
