@@ -184,8 +184,6 @@ class SipDigestCrack:
 
         f.close()
 
-        exit()
-
     def check_value(self, password, chars):
         pos = len(chars)
         value = 0
