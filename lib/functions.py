@@ -800,7 +800,7 @@ def fingerprinting(method, msg, headers, verbose):
                 fp.append('Akuvox')
         m = re.search('^[a-f0-9]{16}$', tag)
         if m:
-            fp.append('Grandtream')
+            fp.append('Grandstream')
         m = re.search('^plcm_', tag)
         if m:
             fp.append('Polycom')
