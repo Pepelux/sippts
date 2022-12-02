@@ -38,7 +38,6 @@ class SipDigestCrack:
         self.run = True
 
         self.totaltime = 0
-        self.num_lines = 0
         self.found = []
 
         self.c = Color()
@@ -74,11 +73,6 @@ class SipDigestCrack:
         signal.signal(signal.SIGINT, self.signal_handler)
         print(self.c.BYELLOW + '\nPress Ctrl+C to stop\n')
         print(self.c.WHITE)
-
-        if self.wordlist != '':
-            print(self.c.BGREEN + 'Reading wordlist. It may take some time. Please wait ...\n')
-            print(self.c.WHITE)
-            self.num_lines = sum(1 for line in open(self.wordlist))
 
         threads = list()
         t = threading.Thread(target=self.read_data, daemon=True)
@@ -296,55 +290,34 @@ class SipDigestCrack:
                 pass
         else:
             with open(self.wordlist, 'rb') as fd:
-                for x in range (self.num_lines):
-                    pwd = ''
-
+                for pwd in fd:
                     if self.run == False:
                         return ''
 
                     try:
-                        pwd = fd.readline()
-
-                        try:
-                            x = pwd.decode('ascii')
-                            isascii = 1
-                        except:
-                            isascii = 0
-                            pwd = '#'
-
-                        pwd = pwd.decode()
+                        pwd = pwd.decode('ascii')
                         pwd = pwd.replace('\'', '')
                         pwd = pwd.replace('"', '')
                         pwd = pwd.replace('<', '')
                         pwd = pwd.replace('>', '')
-
-                        try:
-                            m = re.search('^\n$', pwd.replace(' ', ''))
-                            if m:
-                                pwd = '#'
-                        except:
-                            pass
-
                         pwd = pwd.replace('\n', '')
                         pwd = pwd.strip()
                         pwd = pwd[0:50]
 
-                        if pwd != '' and pwd != '#' and isascii == 1:
-                            print(
-                                self.c.BWHITE + '   [-] Trying pass ' + self.c.YELLOW + '%s'.ljust(50) % pwd + self.c.WHITE, end="\r")
+                        print(
+                            self.c.BWHITE + '   [-] Trying pass ' + self.c.YELLOW + '%s'.ljust(50) % pwd + self.c.WHITE, end="\r")
 
-                            if word_start == '' or word_start == pwd:
-                                word_start = ''
-                                if self.verbose == 1:
-                                    print(self.c.WHITE+'Password: %s' %
-                                          pwd.ljust(50))
-                                    print(self.c.WHITE+'Expected hash: %s' %
-                                          (response))
-                                if response == calculateHash(username, realm, pwd, method, uri, nonce, algorithm, cnonce, nc, qop, self.verbose, ''):
-                                    fd.close()
-                                    self.save_file(
-                                        self.wordlist, username, pwd)
-                                    return pwd
+                        if word_start == '' or word_start == pwd:
+                            word_start = ''
+                            if self.verbose == 1:
+                                print(self.c.WHITE+'Password: %s' %
+                                    pwd.ljust(50))
+                                print(self.c.WHITE+'Expected hash: %s' %
+                                    (response))
+                            if response == calculateHash(username, realm, pwd, method, uri, nonce, algorithm, cnonce, nc, qop, self.verbose, ''):
+                                fd.close()
+                                self.save_file(self.wordlist, username, pwd)
+                                return pwd
                     except KeyboardInterrupt:
                         fd.close()
                         self.save_file(self.wordlist, username, pwd)

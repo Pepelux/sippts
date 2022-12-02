@@ -48,7 +48,6 @@ class SipRemoteCrack:
         self.extens = []
 
         self.totaltime = 0
-        self.num_lines = 0
         self.found = []
         self.line = ['-', '\\', '|', '/']
         self.pos = 0
@@ -315,10 +314,6 @@ class SipRemoteCrack:
         print(self.c.BYELLOW + '\nPress Ctrl+C to stop\n')
         print(self.c.WHITE)
 
-        print(self.c.BGREEN + 'Reading wordlist. It may take some time. Please wait ...\n')
-        print(self.c.WHITE)
-        self.num_lines = sum(1 for line in open(self.wordlist))
-
         threads = list()
         t = threading.Thread(target=self.crack, daemon=True)
         threads.append(t)
@@ -415,75 +410,56 @@ class SipRemoteCrack:
 
         if self.run == True:
             with open(self.wordlist, 'rb') as f:
-                for x in range (self.num_lines):
-                    pwd = ''
-
-                    try:
-                        pwd = f.readline()
-
-                        if self.run == True:
-                            try:
-                                x = pwd.decode('ascii')
-                                isascii = 1
-                            except:
-                                isascii = 0
-                                pwd = '#'
-
-                            pwd = pwd.decode()
+                for pwd in f:
+                    if self.run == True:
+                        try:
+                            pwd = pwd.decode('ascii')
                             pwd = pwd.replace('\'', '')
                             pwd = pwd.replace('"', '')
                             pwd = pwd.replace('<', '')
                             pwd = pwd.replace('>', '')
-
-                            try:
-                                m = re.search('^\n$', pwd.replace(' ', ''))
-                                if m:
-                                    pwd = '#'
-                            except:
-                                pass
-
                             pwd = pwd.replace('\n', '')
                             pwd = pwd.strip()
                             pwd = pwd[0:50]
 
-                            if pwd != '' and pwd != '#' and isascii == 1:
-                                if self.run == True:
-                                    try:
-                                        self.pos += 1
-                                        if self.pos > 3:
-                                            self.pos = 0
+                            if self.run == True:
+                                try:
+                                    self.pos += 1
+                                    if self.pos > 3:
+                                        self.pos = 0
 
-                                        if self.contact_domain == '':
-                                            self.contact_domain = '10.0.0.1'
+                                    if self.contact_domain == '':
+                                        self.contact_domain = '10.0.0.1'
 
-                                        if self.authuser == '':
-                                            auth_user = to_user
-                                        else:
-                                            auth_user = self.authuser
+                                    if self.authuser == '':
+                                        auth_user = to_user
+                                    else:
+                                        auth_user = self.authuser
 
-                                        data = self.register(
-                                            ipaddr, to_user, pwd)
+                                    data = self.register(
+                                        ipaddr, to_user, pwd)
 
-                                        str = self.c.BYELLOW+'[%s] ' % self.line[self.pos] + self.c.BWHITE+'Scanning ' + self.c.BYELLOW+'%s:%s/%s' % (
-                                            ipaddr, self.rport, self.proto) + self.c.BWHITE + ' => Exten/Pass: ' + self.c.BGREEN + '%s/%s' % (auth_user, pwd) + self.c.BBLUE + ' - %s %s' % (data['code'], data['text'])
-                                        print(str.ljust(200), end="\r")
+                                    str = self.c.BYELLOW+'[%s] ' % self.line[self.pos] + self.c.BWHITE+'Scanning ' + self.c.BYELLOW+'%s:%s/%s' % (
+                                        ipaddr, self.rport, self.proto) + self.c.BWHITE + ' => Exten/Pass: ' + self.c.BGREEN + '%s/%s' % (auth_user, pwd) + self.c.BBLUE + ' - %s %s' % (data['code'], data['text'])
+                                    print(str.ljust(200), end="\r")
 
-                                        if data and data['code'] == '200':
-                                            print(self.c.WHITE)
-                                            pre = ''
-                                            print(self.c.BWHITE + '%s' % pre + self.c.WHITE+'Password for user ' + self.c.BBLUE + '%s' %
-                                                  auth_user + self.c.WHITE + ' found: ' + self.c.BRED + '%s' % pwd + self.c.WHITE)
-                                            line = '%s###%s###%s###%s###%s' % (
-                                                ipaddr, self.rport, self.proto, auth_user, pwd)
-                                            self.found.append(line)
+                                    if data and data['code'] == '200':
+                                        print(self.c.WHITE)
+                                        pre = ''
+                                        print(self.c.BWHITE + '%s' % pre + self.c.WHITE+'Password for user ' + self.c.BBLUE + '%s' %
+                                                auth_user + self.c.WHITE + ' found: ' + self.c.BRED + '%s' % pwd + self.c.WHITE)
+                                        line = '%s###%s###%s###%s###%s' % (
+                                            ipaddr, self.rport, self.proto, auth_user, pwd)
+                                        self.found.append(line)
 
-                                            f.close()
-                                            return
-                                    except:
-                                        pass
-                    except:
-                        pass
+                                        f.close()
+                                        return
+                                except:
+                                    pass
+                        except:
+                            pass
 
+        print(self.c.WHITE)
         f.close()
 
     def print(self):
