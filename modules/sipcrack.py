@@ -296,6 +296,8 @@ class SipDigestCrack:
                 pass
         else:
             with open(self.wordlist, 'rb') as fd:
+                for x in range (self.num_lines):
+                    pwd = ''
 
                     if self.run == False:
                         return ''
