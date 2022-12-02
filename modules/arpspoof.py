@@ -81,8 +81,12 @@ class ArpSpoof:
               self.c.GREEN + '%s' % current_user)
         print(self.c.BWHITE + '[✓] Local IP address: ' +
               self.c.GREEN + '%s' % local_ip)
-        print(self.c.BWHITE + '[✓] Target IP/range: ' +
-              self.c.GREEN + '%s' % self.ip)
+        if self.file != '' and self.ip == None:
+            print(self.c.BWHITE + '[✓] Target IP/range: ' +
+                self.c.GREEN + 'In file \'%s\'' % self.file)
+        else:
+            print(self.c.BWHITE + '[✓] Target IP/range: ' +
+                self.c.GREEN + '%s' % self.ip)
         print(self.c.BWHITE + '[✓] Gateway: ' + self.c.GREEN + '%s' % self.gw)
         print(self.c.WHITE)
 
@@ -96,31 +100,46 @@ class ArpSpoof:
                     hosts = []
 
                     while (line):
-                        if self.run == True:
-                            try:
-                                i = socket.gethostbyname(line)
-                            except:
-                                pass
-                            hlist = list(ipaddress.ip_network(str(i)).hosts())
+                        error = 0
 
-                            if hlist == []:
-                                hosts.append(i)
-                            else:
-                                for h in hlist:
-                                    hosts.append(h)
+                        try:
+                            if self.run == True:
+                                try:
+                                    ip = socket.gethostbyname(line)
+                                    self.ip = IP(ip, make_net=True)
+                                except:
+                                    try:
+                                        self.ip = IP(line, make_net=True)
 
-                            last = len(hosts)-1
-                            start_ip = hosts[0]
-                            end_ip = hosts[last]
+                                    except:
+                                        if line.find('-') > 0:
+                                            val = line.split('-')
+                                            start_ip = val[0]
+                                            end_ip = val[1]
+                                            self.ip = line
 
-                            ipini = int(ip2long(str(start_ip)))
-                            ipend = int(ip2long(str(end_ip)))
+                                            error = 1
 
-                            for ip in range(ipini, ipend+1):
-                                # if ip != local_ip:
-                                if ip != local_ip and ip != self.gw:
-                                    self.ips.append(long2ip(ip))
-                                    self.ips.append('')
+                                if error == 0:
+                                    hosts = list(ipaddress.ip_network(
+                                        str(self.ip)).hosts())
+
+                                    if hosts == []:
+                                        hosts.append(self.ip)
+
+                                    last = len(hosts)-1
+                                    start_ip = hosts[0]
+                                    end_ip = hosts[last]
+
+                                ipini = int(ip2long(str(start_ip)))
+                                ipend = int(ip2long(str(end_ip)))
+
+                                for i in range(ipini, ipend+1):
+                                    if i != local_ip and i != self.gw:
+                                        self.ips.append(long2ip(i))
+                                        self.ips.append('')
+                        except:
+                            pass
 
                         line = f.readline()
 
