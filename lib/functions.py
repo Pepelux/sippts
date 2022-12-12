@@ -239,7 +239,7 @@ def generate_random_integer(len_ini, len_end):
     return randint(len_ini, len_end)
 
 
-def create_message(method, ip_sdp, contactdomain, fromuser, fromname, fromdomain, touser, toname, todomain, proto, domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, auth_type, referto, withsdp, via, rr, ppi, pai):
+def create_message(method, ip_sdp, contactdomain, fromuser, fromname, fromdomain, touser, toname, todomain, proto, domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, auth_type, referto, withsdp, via, rr, ppi, pai, header):
     if method == 'REGISTER' or method == 'NOTIFY' or method == 'ACK':
         starting_line = '%s sip:%s SIP/2.0' % (method, domain)
     else:
@@ -342,6 +342,9 @@ def create_message(method, ip_sdp, contactdomain, fromuser, fromname, fromdomain
         if m:
             name = 'Route'
         msg += '%s: %s\r\n' % (name, value)
+
+    if header != '':
+        msg += '%s\r\n' % header
 
     sdp = ''
     if withsdp == 1:

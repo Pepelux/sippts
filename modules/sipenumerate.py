@@ -182,7 +182,7 @@ class SipEnumerate:
                     to_user = self.to_user
 
             msg = create_message(method, '', self.contact_domain, from_user, self.from_name, self.domain,
-                                 to_user, self.to_name, self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', self.route, '', '')
+                                 to_user, self.to_name, self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', self.route, '', '', '')
 
             if self.verbose == 1:
                 print(self.c.BWHITE + '[+] Sending to %s:%s/%s ...' %

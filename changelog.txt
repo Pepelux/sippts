@@ -6,6 +6,8 @@ devel:
 - sipexten: 
   - added param -ofile to save results
   - added param -f to filter response code
+- ssipsend: 
+  - added param -header to insert custom headers
 v3.3 (Nov/2022):
 - sipflood: 
   - added param -th to allow threads
