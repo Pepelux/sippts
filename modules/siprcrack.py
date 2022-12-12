@@ -91,7 +91,7 @@ class SipRemoteCrack:
             data = dict()
 
             msg = create_message('REGISTER', self.contact_domain, to_user, '', self.domain,
-                                 to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', '', 1, '', 0, '', self.route)
+                                 to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', '', 1, '', 0, '', self.route, '', '')
 
             if self.verbose == 1:
                 print(self.c.BWHITE + '[+] Sending to %s:%d/%s ...' %
@@ -182,7 +182,7 @@ class SipRemoteCrack:
                             digest += ', nc=%s' % nc
 
                         msg = create_message('REGISTER', self.contact_domain, to_user, '', self.domain,
-                                             to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', callid, '', '1', '', digest, auth_type, '', 0, '', self.route)
+                                             to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', callid, '', '1', '', digest, auth_type, '', 0, '', self.route, '', '')
 
                         if self.verbose == 1:
                             print(self.c.BWHITE + '[+] Sending to %s:%d/%s ...' %

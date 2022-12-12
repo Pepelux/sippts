@@ -66,6 +66,8 @@ UDP, TCP and TLS protocols.
     parser.add_argument('-o', '--output_file', type=str, help='Save data into a log file', dest='ofile', default='')
     parser.add_argument('-fp', help='Try to fingerprinting', dest='fp', action="count")
     parser.add_argument('-random', help='Randomize target hosts', dest='random', action="count")
+    parser.add_argument('-ppi', type=str, help='P-Preferred-Identity', dest='ppi', default='')
+    parser.add_argument('-pai', type=str, help='P-Asserted-Identity', dest='pai', default='')
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -102,8 +104,10 @@ UDP, TCP and TLS protocols.
         OFILE = args.ofile
         FP = args.fp
         RANDOM = args.random
+        PPI = args.ppi
+        PAI = args.pai
 
-        return IPADDR, HOST, PROXY, PORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, THREADS, VERBOSE, PING, FILE, NOCOLOR, OFILE, FP, RANDOM
+        return IPADDR, HOST, PROXY, PORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, THREADS, VERBOSE, PING, FILE, NOCOLOR, OFILE, FP, RANDOM, PPI, PAI
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -279,16 +283,18 @@ possible and can recover most passwords based on the challenge response.
     parser.add_argument('-td', '--to_domain', type=str, help='To Domain. Ex: 10.0.0.1', dest='to_domain', default='')
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
     parser.add_argument('-o', '--output_file', type=str, help='Save digest to file in SipCrack format', dest='ofile', default='')
-    parser.add_argument('--local-ip', type=str, help='Set local IP address (by default try to get it)', dest='localip', default='')
-    parser.add_argument('--user', type=str, help='Authentication user', dest='user', default='')
-    parser.add_argument('--pass', type=str, help='Authentication password', dest='pwd', default='')
-    parser.add_argument('--auth', type=str, help='Authentication mode [www|proxy] (default: www)', dest='auth', default='www')
-    parser.add_argument('--sdp', help='Send SDP in INVITE messages', dest='sdp', action="count")
-    parser.add_argument('--sdes', help='Send SDES in SDP', dest='sdes', action="count")
+    parser.add_argument('-local-ip', type=str, help='Set local IP address (by default try to get it)', dest='localip', default='')
+    parser.add_argument('-user', type=str, help='Authentication user', dest='user', default='')
+    parser.add_argument('-pass', type=str, help='Authentication password', dest='pwd', default='')
+    parser.add_argument('-auth', type=str, help='Authentication mode [www|proxy] (default: www)', dest='auth', default='www')
+    parser.add_argument('-sdp', help='Send SDP in INVITE messages', dest='sdp', action="count")
+    parser.add_argument('-sdes', help='Send SDES in SDP', dest='sdes', action="count")
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
     parser.add_argument('-f', '--file', type=str, help='File with several IPs (format: ip:port/proto ... one per line)', dest='file', default='')
     parser.add_argument('-l', '--log_file', type=str, help='Save result into a file', dest='lfile', default='')
     parser.add_argument('-ping', help='Ping host before send attack', dest='ping', action="count")
+    parser.add_argument('-ppi', type=str, help='P-Preferred-Identity', dest='ppi', default='')
+    parser.add_argument('-pai', type=str, help='P-Asserted-Identity', dest='pai', default='')
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -324,8 +330,10 @@ possible and can recover most passwords based on the challenge response.
         VERBOSE = args.verbose
         FILE = args.file
         PING = args.ping
+        PPI = args.ppi
+        PAI = args.pai
 
-        return IPADDR, HOST, PROXY, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, LOCALIP, OFILE, LFILE, USER, PWD, AUTH, VERBOSE, SDP, SDES, FILE, PING
+        return IPADDR, HOST, PROXY, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, LOCALIP, OFILE, LFILE, USER, PWD, AUTH, VERBOSE, SDP, SDES, FILE, PING, PPI, PAI
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -367,16 +375,18 @@ the call to a second external number.
     parser.add_argument('-tu', '--to-user', type=str, help='Destination numbers to call (To). Ex: 100 | 100,102,105 | 100000000-199999999', dest="to_user", default='100')
     parser.add_argument('-td', '--to_domain', type=str, help='To Domain. Ex: 10.0.0.1', dest='to_domain', default='')
     parser.add_argument('-t', '--transfer', type=str, help='Phone number to transfer the call', dest='transfer_number', default='')
-    parser.add_argument('--user', type=str, help='Authentication user', dest='user', default='')
-    parser.add_argument('--pass', type=str, help='Authentication password', dest='pwd', default='')
+    parser.add_argument('-user', type=str, help='Authentication user', dest='user', default='')
+    parser.add_argument('-pass', type=str, help='Authentication password', dest='pwd', default='')
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
-    parser.add_argument('--local-ip', type=str, help='Set local IP address (by default try to get it)', dest='localip', default='')
+    parser.add_argument('-local-ip', type=str, help='Set local IP address (by default try to get it)', dest='localip', default='')
     parser.add_argument('-th', '--threads', type=int, help='Number of threads (default: 200)', dest='threads', default=200)
-    parser.add_argument('--no-sdp', help='Do not send SDP (by default is included)', dest='nosdp', action="count")
+    parser.add_argument('-no-sdp', help='Do not send SDP (by default is included)', dest='nosdp', action="count")
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
-    parser.add_argument('--sdes', help='Use SDES in SDP protocol', dest='sdes', action="count")
+    parser.add_argument('-sdes', help='Use SDES in SDP protocol', dest='sdes', action="count")
     parser.add_argument('-nocolor', help='Show result without colors', dest='nocolor', action="count")
     parser.add_argument('-o', '--output_file', type=str, help='Save data into a log file', dest='ofile', default='')
+    parser.add_argument('-ppi', type=str, help='P-Preferred-Identity', dest='ppi', default='')
+    parser.add_argument('-pai', type=str, help='P-Asserted-Identity', dest='pai', default='')
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -406,9 +416,10 @@ the call to a second external number.
         SDES = args.sdes
         NOCOLOR = args.nocolor
         OFILE = args.ofile
+        PPI = args.ppi
+        PAI = args.pai
 
-
-        return IPADDR, HOST, PROXY, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, TRANSFER, USER, PWD, UA, LOCALIP, THREADS, NOSDP, VERBOSE, SDES, NOCOLOR, OFILE
+        return IPADDR, HOST, PROXY, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, TRANSFER, USER, PWD, UA, LOCALIP, THREADS, NOSDP, VERBOSE, SDES, NOCOLOR, OFILE, PPI, PAI
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -518,18 +529,20 @@ SIP Send allow us to send a customized SIP message and analyze the response.
     parser.add_argument('-tu', '--to_user', type=str, help='To User (default: 100)', dest='to_user', default='100')
     parser.add_argument('-td', '--to_domain', type=str, help='To Domain. Ex: 10.0.0.1', dest='to_domain', default='')
     parser.add_argument('-tt', '--to_tag', type=str, help='To Tag', dest='to_tag', default='')
-    parser.add_argument('--user', type=str, help='Authentication user', dest='user', default='')
-    parser.add_argument('--pass', type=str, help='Authentication password', dest='pwd', default='')
-    parser.add_argument('--digest', type=str, help='Add a customized Digest header', dest='digest', default='')
-    parser.add_argument('--branch', type=str, help='Customize Branch header', dest='branch', default='')
+    parser.add_argument('-user', type=str, help='Authentication user', dest='user', default='')
+    parser.add_argument('-pass', type=str, help='Authentication password', dest='pwd', default='')
+    parser.add_argument('-digest', type=str, help='Add a customized Digest header', dest='digest', default='')
+    parser.add_argument('-branch', type=str, help='Customize Branch header', dest='branch', default='')
     parser.add_argument('-cid', '--callid', type=str, help='Customize CallID header', dest='callid', default='')
-    parser.add_argument('--cseq', type=str, help='Customize Seq number', dest='cseq', default='')
-    parser.add_argument('--sdp', help='Include SDP', dest='sdp', action="count")
-    parser.add_argument('--sdes', help='Use SDES in SDP protocol', dest='sdes', action="count")
+    parser.add_argument('-cseq', type=str, help='Customize Seq number', dest='cseq', default='')
+    parser.add_argument('-sdp', help='Include SDP', dest='sdp', action="count")
+    parser.add_argument('-sdes', help='Use SDES in SDP protocol', dest='sdes', action="count")
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
-    parser.add_argument('--local-ip', type=str, help='Set local IP address (by default try to get it)', dest='localip', default='')
+    parser.add_argument('-local-ip', type=str, help='Set local IP address (by default try to get it)', dest='localip', default='')
     parser.add_argument('-nocolor', help='Show result without colors', dest='nocolor', action="count")
     parser.add_argument('-o', '--output_file', type=str, help='Save data into a log file', dest='ofile', default='')
+    parser.add_argument('-ppi', type=str, help='P-Preferred-Identity', dest='ppi', default='')
+    parser.add_argument('-pai', type=str, help='P-Asserted-Identity', dest='pai', default='')
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -562,8 +575,10 @@ SIP Send allow us to send a customized SIP message and analyze the response.
     LOCALIP = args.localip
     NOCOLOR = args.nocolor
     OFILE = args.ofile
+    PPI = args.ppi
+    PAI = args.pai
 
-    return IPADDR, HOST, PROXY, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, SDP, SDES, UA, LOCALIP, NOCOLOR, OFILE
+    return IPADDR, HOST, PROXY, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, SDP, SDES, UA, LOCALIP, NOCOLOR, OFILE, PPI, PAI
 
 
 def get_sipenumerate_args():
@@ -698,7 +713,7 @@ SIP Flood send messages with a selected method
     parser.add_argument('-tn', '--to_name', type=str, help='To Name. Ex: Alice', dest='to_name', default='')
     parser.add_argument('-tu', '--to_user', type=str, help='To User (default: 100)', dest='to_user', default='100')
     parser.add_argument('-td', '--to_domain', type=str, help='To Domain. Ex: 10.0.0.1', dest='to_domain', default='')
-    parser.add_argument('--digest', type=str, help='Digest', dest='digest', default='')
+    parser.add_argument('-digest', type=str, help='Digest', dest='digest', default='')
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
     parser.add_argument('-th', '--threads', type=int, help='Number of threads (default: 200)', dest='threads', default=200)
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
@@ -1127,16 +1142,18 @@ Simple Ping to test if the server/device is available.
     parser.add_argument('-tu', '--to_user', type=str, help='To User (default: 100)', dest='to_user', default='100')
     parser.add_argument('-td', '--to_domain', type=str, help='To Domain. Ex: 10.0.0.1', dest='to_domain', default='')
     parser.add_argument('-tt', '--to_tag', type=str, help='To Tag', dest='to_tag', default='')
-    parser.add_argument('--user', type=str, help='Authentication user', dest='user', default='')
-    parser.add_argument('--pass', type=str, help='Authentication password', dest='pwd', default='')
-    parser.add_argument('--digest', type=str, help='Add a customized Digest header', dest='digest', default='')
-    parser.add_argument('--branch', type=str, help='Customize Branch header', dest='branch', default='')
+    parser.add_argument('-user', type=str, help='Authentication user', dest='user', default='')
+    parser.add_argument('-pass', type=str, help='Authentication password', dest='pwd', default='')
+    parser.add_argument('-digest', type=str, help='Add a customized Digest header', dest='digest', default='')
+    parser.add_argument('-branch', type=str, help='Customize Branch header', dest='branch', default='')
     parser.add_argument('-cid', '--callid', type=str, help='Customize CallID header', dest='callid', default='')
-    parser.add_argument('--cseq', type=str, help='Customize Seq number', dest='cseq', default='')
+    parser.add_argument('-cseq', type=str, help='Customize Seq number', dest='cseq', default='')
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
-    parser.add_argument('--local-ip', type=str, help='Set local IP address (by default try to get it)', dest='localip', default='')
+    parser.add_argument('-local-ip', type=str, help='Set local IP address (by default try to get it)', dest='localip', default='')
     parser.add_argument('-n', '--number', type=int, help='Number of requests (default: non stop)', dest='number', default=0)
     parser.add_argument('-in', '--interval', type=int, help='Wait interval seconds between sending each packet (default: 1 sec)', dest='interval', default=1)
+    parser.add_argument('-ppi', type=str, help='P-Preferred-Identity', dest='ppi', default='')
+    parser.add_argument('-pai', type=str, help='P-Asserted-Identity', dest='pai', default='')
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -1167,8 +1184,10 @@ Simple Ping to test if the server/device is available.
     LOCALIP = args.localip
     NUMBER = args.number
     INTERVAL = args.interval
+    PPI = args.ppi
+    PAI = args.pai
 
-    return IPADDR, HOST, PROXY, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, UA, LOCALIP, NUMBER, INTERVAL
+    return IPADDR, HOST, PROXY, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, UA, LOCALIP, NUMBER, INTERVAL, PPI, PAI
 
 
 def get_wssend_args():
@@ -1209,6 +1228,8 @@ Send SIP messages over WebSockets.
     parser.add_argument('-td', '--to_domain', type=str, help='To Domain. Ex: 10.0.0.1', dest='to_domain', default='')
     parser.add_argument('-tt', '--to_tag', type=str, help='To Tag', dest='to_tag', default='')
     parser.add_argument('-ua', '--user_agent', type=str, help='User-Agent header (default: pplsip)', dest='user_agent', default='pplsip')
+    parser.add_argument('-ppi', type=str, help='P-Preferred-Identity', dest='ppi', default='')
+    parser.add_argument('-pai', type=str, help='P-Asserted-Identity', dest='pai', default='')
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -1230,8 +1251,10 @@ Send SIP messages over WebSockets.
     TOTAG = args.to_tag
     TODOMAIN = args.to_domain
     UA = args.user_agent
+    PPI = args.ppi
+    PAI = args.pai
 
-    return IPADDR, PORT, PATH, VERBOSE, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TOTAG, TODOMAIN, UA
+    return IPADDR, PORT, PATH, VERBOSE, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TOTAG, TODOMAIN, UA, PPI, PAI
 
 
 def get_sipfuzzer_args():

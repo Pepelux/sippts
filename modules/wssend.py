@@ -37,6 +37,8 @@ class WsSend:
         self.to_tag = ''
         self.user_agent = 'pplsip'
         self.verbose = '0'
+        self.ppi = ''
+        self.pai = ''
 
         self.msg = ''
         self.c = Color()
@@ -117,7 +119,7 @@ class WsSend:
             self.contact_domain = local_ip
 
         self.msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
-                                  self.domain, self.user_agent, lport, '', '', self.from_tag, '1', self.to_tag, '', 1, '', 0, '', '')
+                                  self.domain, self.user_agent, lport, '', '', self.from_tag, '1', self.to_tag, '', 1, '', 0, '', '', self.ppi, self.pai)
 
         try:
             custom_protocol = "sip"

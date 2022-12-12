@@ -48,6 +48,8 @@ class SipScan:
         self.ofile = ''
         self.fp = '0'
         self.random = 0
+        self.ppi = ''
+        self.pai = ''
 
         self.found = []
         self.line = ['-', '\\', '|', '/']
@@ -427,7 +429,7 @@ class SipScan:
                 self.route = '<sip:%s;lr>' % self.proxy
 
             msg = create_message(self.method, contact_domain, self.from_user, self.from_name, fdomain,
-                                 self.to_user, self.to_name, tdomain, proto, domain, self.user_agent, lport, '', '', '', '1', '', '', 1, '', 0, '', self.route)
+                                 self.to_user, self.to_name, tdomain, proto, domain, self.user_agent, lport, '', '', '', '1', '', '', 1, '', 0, '', self.route, self.ppi, self.pai)
 
             try:
                 sock.settimeout(2)

@@ -12,7 +12,7 @@ import sys
 import ssl
 import time
 import signal
-from lib.functions import create_message, get_free_port, parse_message, parse_digest, generate_random_string, calculateHash, get_machine_default_ip
+from lib.functions import create_message, get_free_port, parse_message, generate_random_string, get_machine_default_ip
 from lib.color import Color
 from lib.logos import Logo
 from datetime import datetime
@@ -47,6 +47,8 @@ class SipPing:
         self.localip = ''
         self.number = 0
         self.interval = 1
+        self.ppi = ''
+        self.pai = ''
 
         self.run = True
 
@@ -183,7 +185,7 @@ class SipPing:
             lport = get_free_port()
 
             msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
-                                 self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, self.to_tag, self.digest, 1, '', 0, '', self.route)
+                                 self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, self.to_tag, self.digest, 1, '', 0, '', self.route, self.ppi, self.pai)
 
             try:
                 sock.bind((bind, lport))

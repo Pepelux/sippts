@@ -239,7 +239,7 @@ def generate_random_integer(len_ini, len_end):
     return randint(len_ini, len_end)
 
 
-def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser, toname, todomain, proto, domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, auth_type, referto, withsdp, via, rr):
+def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser, toname, todomain, proto, domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, auth_type, referto, withsdp, via, rr, ppi, pai):
     if method == 'REGISTER' or method == 'NOTIFY' or method == 'ACK':
         starting_line = '%s sip:%s SIP/2.0' % (method, domain)
     else:
@@ -325,6 +325,13 @@ def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser
         headers['Content-Type'] = 'application/sdp'
         headers['Accept'] = 'application/sdp, application/dtmf-relay'
 
+    if method == 'INVITE':
+        if ppi != '':
+            headers['P-Preferred-Identity'] = '<sip:%s@telefonica.net>' % ppi
+
+        if pai != '':
+            headers['P-Asserted-Identity'] = '<sip:%s@telefonica.net>' % pai
+
     msg = starting_line+'\r\n'
     for h in headers.items():
         # msg += '%s: %s\r\n' % h
@@ -341,7 +348,7 @@ def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser
         # Use RTP
         sdp = '\r\n'
         sdp += 'v=0\r\n'
-        sdp += 'o=anonymous 1312841870 1312841870 IN IP4 %s\r\n' % contactdomain
+        sdp += 'o=%s 1312841870 1312841870 IN IP4 %s\r\n' % (fromuser, contactdomain)
         sdp += 's=SIPPTS\r\n'
         sdp += 'c=IN IP4 %s\r\n' % contactdomain
         sdp += 't=0 0\r\n'
@@ -380,7 +387,11 @@ def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser
         sdp += 'a=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:4EvYRd22P8n36wRrlWCMZIWegovyv7iWm464D4Pt\r\n'
         sdp += 'a=crypto:2 AES_CM_128_HMAC_SHA1_32 inline:mWQ4cakWKOnfH9Tji2pEF87JtVFUqBAMPqub9roe\r\n'
 
-    msg += 'Content-Length: ' + str(len(sdp)) + '\r\n'
+    clen = len(sdp)-2
+    if clen < 0:
+        clen = 0
+
+    msg += 'Content-Length: ' + str(clen) + '\r\n'
     msg += sdp
 
     msg += '\r\n'

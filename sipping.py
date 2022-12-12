@@ -12,7 +12,7 @@ from lib.params import get_sipping_args
 
 
 def main():
-    ip, host, proxy, rport, proto, method, domain, contact_domain, from_name, from_user, from_domain, from_tag, to_name, to_user, to_domain, to_tag, user, pwd, digest, branch, callid, cseq, user_agent, localip, number, interval = get_sipping_args()
+    ip, host, proxy, rport, proto, method, domain, contact_domain, from_name, from_user, from_domain, from_tag, to_name, to_user, to_domain, to_tag, user, pwd, digest, branch, callid, cseq, user_agent, localip, number, interval, ppi, pai = get_sipping_args()
 
     s = SipPing()
     s.ip = ip
@@ -41,6 +41,8 @@ def main():
     s.cseq = cseq
     s.number = number
     s.interval = interval
+    s.ppi = ppi
+    s.pai = pai
 
     s.start()
 

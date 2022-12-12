@@ -46,6 +46,8 @@ class SipDigestLeak:
         self.sdes = 0
         self.verbose = 0
         self.file = ''
+        self.ppi = ''
+        self.pai = ''
 
         self.quit = False
         self.found = []
@@ -259,7 +261,7 @@ class SipDigestLeak:
         tag = generate_random_string(8, 8, 'hex')
 
         msg = create_message('INVITE', self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                             self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, cseq, '', '', 1, '', self.sdp, '', self.route)
+                             self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, cseq, '', '', 1, '', self.sdp, '', self.route, self.ppi, self.pai)
 
         print(self.c.YELLOW + '[=>] Request INVITE' + self.c.WHITE)
 
@@ -314,7 +316,7 @@ class SipDigestLeak:
                 # send ACK
                 print(self.c.YELLOW + '[=>] Request ACK')
                 msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                                     self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, cseq, totag, '', 1, '', 0, via, rr)
+                                     self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, cseq, totag, '', 1, '', 0, via, rr, '', '')
 
                 if self.verbose == 1:
                     print(self.c.BWHITE + '[+] Sending to %s:%s/%s ...' %
@@ -361,7 +363,7 @@ class SipDigestLeak:
                     print(self.c.YELLOW + '[=>] Request INVITE' + self.c.WHITE)
 
                     msg = create_message('INVITE', self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
-                                         self.domain, self.user_agent, lport, branch, callid, tag, cseq, '', digest, auth_type, '', self.sdp, via, self.route)
+                                         self.domain, self.user_agent, lport, branch, callid, tag, cseq, '', digest, auth_type, '', self.sdp, via, self.route, self.ppi, self.pai)
 
                     if self.verbose == 1:
                         print(self.c.BWHITE + '[+] Sending to %s:%s/%s ...' %
@@ -412,7 +414,7 @@ class SipDigestLeak:
                                     print(self.c.YELLOW + '[=>] Request ACK')
 
                                     msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                                                         self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, cseq, totag, '', 1, '', 0, via, rr)
+                                                         self.to_user, self.to_name, self.to_domain, proto, self.domain, self.user_agent, lport, branch, callid, tag, cseq, totag, '', 1, '', 0, via, rr, '', '')
 
                                     if self.verbose == 1:
                                         print(self.c.BWHITE + '[+] Sending to %s:%s/%s ...' %
@@ -446,7 +448,7 @@ class SipDigestLeak:
                 print(self.c.YELLOW + '[=>] Request ACK')
 
                 msg = create_message('ACK', self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                                     self.to_user, self.to_name, self.to_domain, proto, cdomain, self.user_agent, lport, branch, callid, tag, cseq, totag, digest, auth_type, '', 0, via, rr)
+                                     self.to_user, self.to_name, self.to_domain, proto, cdomain, self.user_agent, lport, branch, callid, tag, cseq, totag, digest, auth_type, '', 0, via, rr, '', '')
 
                 if self.verbose == 1:
                     print(self.c.BWHITE + '[+] Sending to %s:%s/%s ...' %

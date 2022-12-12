@@ -13,7 +13,7 @@ from lib.params import get_sipdigestleak_args
 
 
 def main():
-    ip, host, proxy, rport, proto, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, user_agent, localip, ofile, lfile, user, pwd, auth, verbose, sdp, sdes, file, ping = get_sipdigestleak_args()
+    ip, host, proxy, rport, proto, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, user_agent, localip, ofile, lfile, user, pwd, auth, verbose, sdp, sdes, file, ping, ppi, pai = get_sipdigestleak_args()
 
     s = SipDigestLeak()
     s.ip = ip
@@ -41,6 +41,8 @@ def main():
     s.sdes = sdes
     s.file = file
     s.ping = ping
+    s.ppi = ppi
+    s.pai = pai
 
     s.start()
 

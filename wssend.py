@@ -12,7 +12,7 @@ from lib.params import get_wssend_args
 
 
 def main():
-    ip, rport, path, verbose, proto, method, domain, contact_domain, from_name, from_user, from_domain, from_tag, to_name, to_user, to_tag, to_domain, user_agent = get_wssend_args()
+    ip, rport, path, verbose, proto, method, domain, contact_domain, from_name, from_user, from_domain, from_tag, to_name, to_user, to_tag, to_domain, user_agent, ppi, pai = get_wssend_args()
 
     s = WsSend()
     s.ip = ip
@@ -32,6 +32,8 @@ def main():
     s.to_tag = to_tag
     s.user_agent = user_agent
     s.verbose = verbose
+    s.ppi = ppi
+    s.pai = pai
 
     s.start()
 
