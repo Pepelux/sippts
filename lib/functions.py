@@ -316,7 +316,7 @@ def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser
     if method != 'ACK':
         headers['User-Agent'] = '%s' % useragent
         if method != 'CANCEL':
-            headers['Allow'] = 'INVITE,REGISTER,ACK,CANCEL,BYE,NOTIFY,REFER,OPTIONS,INFO,SUBSCRIBE,UPDATE,PRACK,MESSAGE'
+            headers['Allow'] = 'INVITE, REGISTER, ACK, CANCEL, BYE, NOTIFY, REFER, OPTIONS, INFO, SUBSCRIBE, UPDATE, PRACK, MESSAGE'
 
     if method == 'REGISTER':
         headers['Expires'] = '10'
