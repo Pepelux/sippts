@@ -149,6 +149,8 @@ or not. Sipexten uses multithread and can check several IPs and port ranges.
     parser.add_argument('-th', '--threads', type=int, help='Number of threads (default: 200)', dest='threads', default=200)
     parser.add_argument('-v', '--verbose', help='Increase verbosity', dest='verbose', action="count")
     parser.add_argument('-vv', '--more_verbose', help='Increase more verbosity', dest='more_verbose', action="count")
+    parser.add_argument('-o', '--output_file', type=str, help='Save data into a log file', dest='ofile', default='')
+    parser.add_argument('-f', '--filter', help='Filter response code (ex: 200)', dest='filter', default='')
     parser.add_argument('-nocolor', help='Show result without colors', dest='nocolor', action="count")
 
     # Array for all arguments passed to script
@@ -173,8 +175,10 @@ or not. Sipexten uses multithread and can check several IPs and port ranges.
         if MORE_VERBOSE == 1:
             VERBOSE = 2
         NOCOLOR = args.nocolor
+        FILTER = args.filter
+        OFILE = args.ofile
 
-        return IPADDR, HOST, PROXY, RPORT, EXTEN, PREFIX, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMUSER, UA, THREADS, VERBOSE, NOCOLOR
+        return IPADDR, HOST, PROXY, RPORT, EXTEN, PREFIX, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMUSER, UA, THREADS, VERBOSE, NOCOLOR, OFILE, FILTER
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)

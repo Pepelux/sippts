@@ -38,6 +38,8 @@ class SipExten:
         self.threads = '500'
         self.verbose = '0'
         self.nocolor = ''
+        self.ofile = ''
+        self.filter = ''
 
         self.totaltime = 0
         self.found = []
@@ -157,6 +159,12 @@ class SipExten:
         if nthreads > 800:
             print(self.c.BRED +
                   '[x] More than 800 threads can cause socket problems')
+        if self.filter != '':
+            print(self.c.BWHITE +
+                  '[✓] Filter response by code: ' + self.c.CYAN + '%s' % self.filter)
+        if self.ofile != '':
+            print(self.c.BWHITE +
+                  '[✓] Saving logs info file: ' + self.c.CYAN + '%s' % self.ofile)
         print(self.c.WHITE)
 
         values = product(ips, extens)
@@ -301,15 +309,17 @@ class SipExten:
 
                 if headers:
                     if headers['response_code'] != '404':
-                        response = '%s %s' % (
-                            headers['response_code'], headers['response_text'])
-                        line = '%s###%d###%s###%s###%s###%s' % (
-                            ipaddr, rport, self.proto, to_user, response, headers['ua'])
-                        self.found.append(line)
+                        if self.filter == '' or self.filter == headers['response_code']:
+                            response = '%s %s' % (
+                                headers['response_code'], headers['response_text'])
+                            line = '%s###%d###%s###%s###%s###%s' % (
+                                ipaddr, rport, self.proto, to_user, response, headers['ua'])
+                            self.found.append(line)
 
                     if self.verbose == 1:
-                        print(self.c.WHITE+'[Exten %s] Response <%s %s> from %s:%d/%s' %
-                              (to_user, headers['response_code'], headers['response_text'], ipaddr, rport, self.proto))
+                        if self.filter == '' or self.filter == headers['response_code']:
+                            print(self.c.WHITE+'[Exten %s] Response <%s %s> from %s:%d/%s' %
+                                  (to_user, headers['response_code'], headers['response_text'], ipaddr, rport, self.proto))
 
                 return headers
             except socket.timeout:
@@ -357,6 +367,9 @@ class SipExten:
             print(self.c.WHITE + '| ' + self.c.WHITE +
                   'Nothing found'.ljust(tlen-2) + ' |')
         else:
+            if self.ofile != '':
+                f = open(self.ofile, 'a+')
+
             for x in self.found:
                 (ip, port, proto, exten, res, ua) = x.split('###')
 
@@ -367,6 +380,13 @@ class SipExten:
                       ' | ' + self.c.BGREEN + '%s' % exten.ljust(exlen) + self.c.WHITE +
                       ' | ' + self.c.BLUE + '%s' % res.ljust(relen) + self.c.WHITE +
                       ' | ' + self.c.YELLOW + '%s' % ua.ljust(ualen) + self.c.WHITE + ' |')
+
+                if self.ofile != '':
+                    f.write('%s:%s/%s => %s - %s (%s)\n' %
+                            (ip, port, proto, exten, res, ua))
+
+            if self.ofile != '':
+                f.close()
 
         print(self.c.WHITE + ' ' + '-' * tlen)
         print(self.c.WHITE)
