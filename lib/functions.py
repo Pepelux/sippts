@@ -257,7 +257,7 @@ def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser
 
     headers = dict()
     if via == '':
-        headers['Via'] = 'SIP/2.0/%s %s:%s;branch=%s' % (
+        headers['Via'] = 'SIP/2.0/%s %s:%s;branch=%s;rport' % (
             proto.upper(), contactdomain, fromport, branch)
     else:
         headers['Via'] = via
@@ -348,7 +348,7 @@ def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser
         # Use RTP
         sdp = '\r\n'
         sdp += 'v=0\r\n'
-        sdp += 'o=%s 1312841870 1312841870 IN IP4 %s\r\n' % (fromuser, contactdomain)
+        sdp += 'o=%s 8000 8000 IN IP4 %s\r\n' % (fromuser, contactdomain)
         sdp += 's=SIPPTS\r\n'
         sdp += 'c=IN IP4 %s\r\n' % contactdomain
         sdp += 't=0 0\r\n'
@@ -408,7 +408,7 @@ def create_response_error(message, fromuser, touser, proto, domain, fromport, cs
 
     headers = dict()
     if via == '':
-        headers['Via'] = 'SIP/2.0/%s %s:%s;branch=%s' % (
+        headers['Via'] = 'SIP/2.0/%s %s:%s;branch=%s;rport' % (
             proto.upper(), domain, fromport, branch)
     else:
         vias = via.split("#")
