@@ -184,7 +184,7 @@ class SipPing:
             bind = '0.0.0.0'
             lport = get_free_port()
 
-            msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
+            msg = create_message(self.method, '', self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
                                  self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, self.to_tag, self.digest, 1, '', 0, '', self.route, self.ppi, self.pai)
 
             try:

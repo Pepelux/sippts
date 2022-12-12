@@ -428,7 +428,7 @@ class SipScan:
             if self.proxy != '':
                 self.route = '<sip:%s;lr>' % self.proxy
 
-            msg = create_message(self.method, contact_domain, self.from_user, self.from_name, fdomain,
+            msg = create_message(self.method, '', contact_domain, self.from_user, self.from_name, fdomain,
                                  self.to_user, self.to_name, tdomain, proto, domain, self.user_agent, lport, '', '', '', '1', '', '', 1, '', 0, '', self.route, self.ppi, self.pai)
 
             try:

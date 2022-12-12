@@ -239,7 +239,7 @@ def generate_random_integer(len_ini, len_end):
     return randint(len_ini, len_end)
 
 
-def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser, toname, todomain, proto, domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, auth_type, referto, withsdp, via, rr, ppi, pai):
+def create_message(method, ip_sdp, contactdomain, fromuser, fromname, fromdomain, touser, toname, todomain, proto, domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, auth_type, referto, withsdp, via, rr, ppi, pai):
     if method == 'REGISTER' or method == 'NOTIFY' or method == 'ACK':
         starting_line = '%s sip:%s SIP/2.0' % (method, domain)
     else:
@@ -348,9 +348,9 @@ def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser
         # Use RTP
         sdp = '\r\n'
         sdp += 'v=0\r\n'
-        sdp += 'o=%s 8000 8000 IN IP4 %s\r\n' % (fromuser, contactdomain)
+        sdp += 'o=%s 8000 8000 IN IP4 %s\r\n' % (fromuser, ip_sdp)
         sdp += 's=SIPPTS\r\n'
-        sdp += 'c=IN IP4 %s\r\n' % contactdomain
+        sdp += 'c=IN IP4 %s\r\n' % ip_sdp
         sdp += 't=0 0\r\n'
         sdp += 'm=audio 2362 RTP/AVP 0\r\n'
         sdp += 'a=rtpmap:18 G729/8000\r\n'
@@ -358,14 +358,15 @@ def create_message(method, contactdomain, fromuser, fromname, fromdomain, touser
         sdp += 'a=rtpmap:8 PCMA/8000\r\n'
         sdp += 'a=rtpmap:3 GSM/8000\r\n'
         sdp += 'a=rtpmap:101 telephone-event/8000\r\n'
+        sdp += 'a=sendrecv\r\n'
 
     if withsdp == 2:
         # Use SRTP
         sdp = '\r\n'
         sdp += 'v=0\r\n'
-        sdp += 'o=anonymous 1312841870 1312841870 IN IP4 %s\r\n' % contactdomain
+        sdp += 'o=anonymous 1312841870 1312841870 IN IP4 %s\r\n' % ipaddr
         sdp += 's=SIPPTS\r\n'
-        sdp += 'c=IN IP4 %s\r\n' % contactdomain
+        sdp += 'c=IN IP4 %s\r\n' % ipaddr
         sdp += 't=0 0\r\n'
         sdp += 'm=audio 2362 RTP/AVP 0\r\n'
         sdp += 'a=sendrecv\r\n'

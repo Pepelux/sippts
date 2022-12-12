@@ -118,7 +118,7 @@ class WsSend:
         if self.contact_domain == '':
             self.contact_domain = local_ip
 
-        self.msg = create_message(self.method, self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
+        self.msg = create_message(self.method, local_ip, self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
                                   self.domain, self.user_agent, lport, '', '', self.from_tag, '1', self.to_tag, '', 1, '', 0, '', '', self.ppi, self.pai)
 
         try:
