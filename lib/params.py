@@ -365,6 +365,7 @@ the call to a second external number.
     parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
     parser.add_argument('-proxy', '--outbound_proxy', type=str, help='Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)', dest="proxy", default="")
     parser.add_argument('-r', '--remote_port', type=int, help='Remote port (default: 5060)', dest='rport', default=5060)
+    parser.add_argument('-l', '--local_port', type=int, help='Local port (default: first free)', dest='lport')
     parser.add_argument('-p', '--proto', type=str, help='Protocol: udp|tcp|tls (default: udp)', dest='proto', default='udp')
     parser.add_argument('-d', '--domain', type=str, help='SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)', dest='domain', default='')
     parser.add_argument('-cd', '--contact_domain', type=str, help='Domain or IP address for Contact header. Ex: 10.0.1.2', dest='contact_domain', default='')
@@ -396,6 +397,7 @@ the call to a second external number.
         HOST = args.ipaddr
         PROXY = args.proxy
         RPORT = args.rport
+        LPORT = args.lport
         PROTO = args.proto
         DOMAIN = args.domain
         CONTACTDOMAIN = args.contact_domain
@@ -419,7 +421,7 @@ the call to a second external number.
         PPI = args.ppi
         PAI = args.pai
 
-        return IPADDR, HOST, PROXY, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, TRANSFER, USER, PWD, UA, LOCALIP, THREADS, NOSDP, VERBOSE, SDES, NOCOLOR, OFILE, PPI, PAI
+        return IPADDR, HOST, PROXY, RPORT, LPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, TRANSFER, USER, PWD, UA, LOCALIP, THREADS, NOSDP, VERBOSE, SDES, NOCOLOR, OFILE, PPI, PAI
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)
@@ -516,7 +518,8 @@ SIP Send allow us to send a customized SIP message and analyze the response.
     # Add arguments
     parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
     parser.add_argument('-proxy', '--outbound_proxy', type=str, help='Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)', dest="proxy", default="")
-    parser.add_argument('-r', '--port', type=int, help='Remote port (default: 5060)', dest='rport', default=5060)
+    parser.add_argument('-r', '--remote_port', type=int, help='Remote port (default: 5060)', dest='rport', default=5060)
+    parser.add_argument('-l', '--local_port', type=int, help='Local port (default: first free)', dest='lport')
     parser.add_argument('-p', '--proto', type=str, help='Protocol: udp|tcp|tls (default: udp)', dest='proto', default='udp')
     parser.add_argument('-m', '--method', type=str, help='SIP Method: options|invite|register|subscribe|cancel|bye|...', dest='method', required=True)
     parser.add_argument('-d', '--domain', type=str, help='SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)', dest='domain', default='')
@@ -551,6 +554,7 @@ SIP Send allow us to send a customized SIP message and analyze the response.
     HOST = args.ipaddr
     PROXY = args.proxy
     RPORT = args.rport
+    LPORT = args.lport
     PROTO = args.proto
     METHOD = args.method
     DOMAIN = args.domain
@@ -578,7 +582,7 @@ SIP Send allow us to send a customized SIP message and analyze the response.
     PPI = args.ppi
     PAI = args.pai
 
-    return IPADDR, HOST, PROXY, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, SDP, SDES, UA, LOCALIP, NOCOLOR, OFILE, PPI, PAI
+    return IPADDR, HOST, PROXY, RPORT, LPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, SDP, SDES, UA, LOCALIP, NOCOLOR, OFILE, PPI, PAI
 
 
 def get_sipenumerate_args():

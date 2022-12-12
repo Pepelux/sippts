@@ -1,3 +1,8 @@
+devel:
+- added param -ppi for P-Preferred-Identity 
+- added param -pai for P-Asserted-Identity 
+- sipsend: added param --local_port to force local port
+- sipinvite: added param --local_port to force local port
 v3.3 (Nov/2022):
 - sipflood: 
   - added param -th to allow threads

@@ -22,6 +22,7 @@ class SipSend:
         self.proxy = ''
         self.route = ''
         self.rport = '5060'
+        self.lport = ''
         self.proto = 'UDP'
         self.method = ''
         self.domain = ''
@@ -184,7 +185,11 @@ class SipSend:
             self.from_user = self.user
 
         bind = '0.0.0.0'
-        lport = get_free_port()
+
+        if self.lport == '':
+            lport = get_free_port()
+        else:
+            lport = self.lport
 
         try:
             sock.bind((bind, lport))

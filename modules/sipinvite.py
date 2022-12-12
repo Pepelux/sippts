@@ -42,6 +42,7 @@ class SipInvite:
         self.proxy = ''
         self.route = ''
         self.rport = '5060'
+        self.lport = ''
         self.proto = 'UDP'
         self.domain = ''
         self.contact_domain = ''
@@ -83,11 +84,8 @@ class SipInvite:
                 sys.exit(1)
 
             bind = '0.0.0.0'
-            lport = 5060
 
-            try:
-                sock.bind((bind, lport))
-            except:
+            if self.lport == '':
                 try:
                     # First try
                     lport = get_free_port()
@@ -96,6 +94,9 @@ class SipInvite:
                     # Second try
                     lport = get_free_port()
                     sock.bind((bind, lport))
+            else:
+                lport = self.lport
+                sock.bind((bind, lport))
 
             if self.proxy == '':
                 host = (str(self.ip), int(self.rport))
