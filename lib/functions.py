@@ -364,9 +364,9 @@ def create_message(method, ip_sdp, contactdomain, fromuser, fromname, fromdomain
         # Use SRTP
         sdp = '\r\n'
         sdp += 'v=0\r\n'
-        sdp += 'o=anonymous 1312841870 1312841870 IN IP4 %s\r\n' % ipaddr
+        sdp += 'o=anonymous 1312841870 1312841870 IN IP4 %s\r\n' % ip_sdp
         sdp += 's=SIPPTS\r\n'
-        sdp += 'c=IN IP4 %s\r\n' % ipaddr
+        sdp += 'c=IN IP4 %s\r\n' % ip_sdp
         sdp += 't=0 0\r\n'
         sdp += 'm=audio 2362 RTP/AVP 0\r\n'
         sdp += 'a=sendrecv\r\n'
@@ -388,11 +388,7 @@ def create_message(method, ip_sdp, contactdomain, fromuser, fromname, fromdomain
         sdp += 'a=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:4EvYRd22P8n36wRrlWCMZIWegovyv7iWm464D4Pt\r\n'
         sdp += 'a=crypto:2 AES_CM_128_HMAC_SHA1_32 inline:mWQ4cakWKOnfH9Tji2pEF87JtVFUqBAMPqub9roe\r\n'
 
-    clen = len(sdp)-2
-    if clen < 0:
-        clen = 0
-
-    msg += 'Content-Length: ' + str(clen) + '\r\n'
+    msg += 'Content-Length: ' + str(len(sdp)) + '\r\n'
     msg += sdp
 
     msg += '\r\n'
