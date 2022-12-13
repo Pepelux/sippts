@@ -185,9 +185,9 @@ class SipScan:
                 print('Error reading file %s' % self.file)
                 exit()
         else:
-            ips = []
-            hosts = []
             for i in self.ip.split(','):
+                ips = []
+                hosts = []
                 error = 0
 
                 try:
