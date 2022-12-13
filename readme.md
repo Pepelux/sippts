@@ -44,6 +44,10 @@ Sippts is a set of tools to audit VoIP servers and devices using SIP protocol. S
 
 [Click here to read more about SIPSend](https://github.com/Pepelux/sippts/wiki/SIPSend)
 
+  * _**WsSend**_ Allow us to send a customized SIP message over WebSockets and analyze the response.
+
+[Click here to read more about WsSend](https://github.com/Pepelux/sippts/wiki/WsSend)
+
   * _**SipEnumerate**_ Enumerate available methods of a SIP service/server.
 
 [Click here to read more about SIPEnumerate](https://github.com/Pepelux/sippts/wiki/SIPEnumerate)
@@ -71,6 +75,10 @@ Sippts is a set of tools to audit VoIP servers and devices using SIP protocol. S
   * _**RTPBleedFlood**_ to exploit RTPBleed vulnerability flooding a RTP port with an active dialog.
 
 [Click here to read more about RTPBleedFlood](https://github.com/Pepelux/sippts/wiki/RTPBleedFlood)
+
+* _**RTPBleedInject**_ to exploit RTPBleed vulnerability injecting RTP traffic.
+
+[Click here to read more about RTPBleedInject](https://github.com/Pepelux/sippts/wiki/RTPBleedInject)
 
 ## Operating System ##
 Sippts has been tested on:
