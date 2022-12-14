@@ -1,7 +1,9 @@
 devel:
 - added param -ppi for P-Preferred-Identity 
 - added param -pai for P-Asserted-Identity 
-- sipsend: added param --local_port to force local port
+- sipsend: 
+  - added param --local_port to force local port
+  - added param --no_contact to send message without contact header
 - sipinvite: added param --local_port to force local port
 - sipexten: 
   - added param -ofile to save results

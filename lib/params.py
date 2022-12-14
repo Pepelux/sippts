@@ -550,7 +550,8 @@ SIP Send allow us to send a customized SIP message and analyze the response.
     parser.add_argument('-o', '--output_file', type=str, help='Save data into a log file', dest='ofile', default='')
     parser.add_argument('-ppi', type=str, help='P-Preferred-Identity', dest='ppi', default='')
     parser.add_argument('-pai', type=str, help='P-Asserted-Identity', dest='pai', default='')
-    parser.add_argument('-header', type=str, help='Add custom header (ex: "Allow-Events: presence"', dest='header', default='')
+    parser.add_argument('-header', type=str, help='Add custom header (ex: "Allow-Events: presence")', dest='header', default='')
+    parser.add_argument('-nc', '--no_contact', help='Don\'t send Contact header', dest='nocontact', action="count")
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -587,8 +588,9 @@ SIP Send allow us to send a customized SIP message and analyze the response.
     PPI = args.ppi
     PAI = args.pai
     HEADER = args.header
+    NOCONTACT = args.nocontact
 
-    return IPADDR, HOST, PROXY, RPORT, LPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, SDP, SDES, UA, LOCALIP, NOCOLOR, OFILE, PPI, PAI, HEADER
+    return IPADDR, HOST, PROXY, RPORT, LPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, SDP, SDES, UA, LOCALIP, NOCOLOR, OFILE, PPI, PAI, HEADER, NOCONTACT
 
 
 def get_sipenumerate_args():

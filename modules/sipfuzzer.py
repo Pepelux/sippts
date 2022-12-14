@@ -104,7 +104,7 @@ class SipFuzzer:
                 sock_ssl.connect(host)
 
             ping = create_message('OPTIONS', '', self.ip, '100', '', self.ip, '100', '', self.ip,
-                                  self.proto, self.ip, self.user_agent, lport, '', '', '', 1, '', '', 1, '', 0, '', self.route, '', '', '')
+                                  self.proto, self.ip, self.user_agent, lport, '', '', '', 1, '', '', 1, '', 0, '', self.route, '', '', '', 1)
 
             try:
                 if self.proto == 'TLS':

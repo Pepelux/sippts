@@ -199,7 +199,7 @@ class SipFlood:
                         self.route = '<sip:%s;lr>' % self.proxy
 
                     msg = create_message(self.method, '', self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                                         self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', self.route, '', '', '')
+                                         self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', self.digest, 1, '', 0, '', self.route, '', '', '', 1)
 
                     method_label = self.method
 
@@ -276,7 +276,7 @@ class SipFlood:
                             rr = self.route
 
                         msg = create_message(method, '', contactdomain, fromuser, fromname, fromdomain, touser, toname, todomain, proto,
-                                             domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, auth_type, referto, withsdp, via, rr, '', '', '')
+                                             domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, auth_type, referto, withsdp, via, rr, '', '', '', 1)
 
                     if self.verbose == 2:
                         print(self.c.BWHITE + '[+] Sending %s to %s:%s ...' %

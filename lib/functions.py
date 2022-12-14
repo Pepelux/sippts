@@ -239,7 +239,7 @@ def generate_random_integer(len_ini, len_end):
     return randint(len_ini, len_end)
 
 
-def create_message(method, ip_sdp, contactdomain, fromuser, fromname, fromdomain, touser, toname, todomain, proto, domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, auth_type, referto, withsdp, via, rr, ppi, pai, header):
+def create_message(method, ip_sdp, contactdomain, fromuser, fromname, fromdomain, touser, toname, todomain, proto, domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, auth_type, referto, withsdp, via, rr, ppi, pai, header, withcontact):
     expires = '60'
 
     if method == 'REGISTER' or method == 'NOTIFY' or method == 'ACK':
@@ -292,11 +292,12 @@ def create_message(method, ip_sdp, contactdomain, fromuser, fromname, fromdomain
                 headers['To'] = '%s <sip:%s@%s>;tag=%s' % (
                     toname, touser, todomain, totag)
 
-    m = re.search('^contact:\s*(.+)', header.lower())
-    if not m:
-        if method != 'CANCEL' and method != 'ACK':
-            headers['Contact'] = '<sip:%s@%s:%d;transport=%s>;expires=%s' % (
-                fromuser, contactdomain, fromport, proto, expires)
+    if withcontact == 1:
+        m = re.search('^contact:\s*(.+)', header.lower())
+        if not m:
+            if method != 'CANCEL' and method != 'ACK':
+                headers['Contact'] = '<sip:%s@%s:%d;transport=%s>;expires=%s' % (
+                    fromuser, contactdomain, fromport, proto, expires)
 
     headers['Call-ID'] = '%s' % callid
 
