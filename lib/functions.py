@@ -241,7 +241,7 @@ def generate_random_integer(len_ini, len_end):
 
 def create_message(method, ip_sdp, contactdomain, fromuser, fromname, fromdomain, touser, toname, todomain, proto, domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, auth_type, referto, withsdp, via, rr, ppi, pai, header):
     expires = '60'
-    
+
     if method == 'REGISTER' or method == 'NOTIFY' or method == 'ACK':
         starting_line = '%s sip:%s SIP/2.0' % (method, domain)
     else:
@@ -273,24 +273,30 @@ def create_message(method, ip_sdp, contactdomain, fromuser, fromname, fromdomain
             count += 1
             headers['Route %s' % str(count)] = rr
 
-    headers['From'] = '%s <sip:%s@%s>;tag=%s' % (
-        fromname, fromuser, fromdomain, tag)
+    m = re.search('^from:\s*(.+)', header.lower())
+    if not m:
+        headers['From'] = '%s <sip:%s@%s>;tag=%s' % (
+            fromname, fromuser, fromdomain, tag)
 
-    if method == 'NOTIFY':
-        if totag == '':
-            headers['To'] = '<sip:%s>' % todomain
+    m = re.search('^to:\s*(.+)', header.lower())
+    if not m:
+        if method == 'NOTIFY':
+            if totag == '':
+                headers['To'] = '<sip:%s>' % todomain
+            else:
+                headers['To'] = '<sip:%s>;tag=%s' % (todomain, totag)
         else:
-            headers['To'] = '<sip:%s>;tag=%s' % (todomain, totag)
-    else:
-        if totag == '':
-            headers['To'] = '%s <sip:%s@%s>' % (toname, touser, todomain)
-        else:
-            headers['To'] = '%s <sip:%s@%s>;tag=%s' % (
-                toname, touser, todomain, totag)
+            if totag == '':
+                headers['To'] = '%s <sip:%s@%s>' % (toname, touser, todomain)
+            else:
+                headers['To'] = '%s <sip:%s@%s>;tag=%s' % (
+                    toname, touser, todomain, totag)
 
-    if method != 'CANCEL' and method != 'ACK':
-        headers['Contact'] = '<sip:%s@%s:%d;transport=%s>;expires=%s' % (
-            fromuser, contactdomain, fromport, proto, expires)
+    m = re.search('^contact:\s*(.+)', header.lower())
+    if not m:
+        if method != 'CANCEL' and method != 'ACK':
+            headers['Contact'] = '<sip:%s@%s:%d;transport=%s>;expires=%s' % (
+                fromuser, contactdomain, fromport, proto, expires)
 
     headers['Call-ID'] = '%s' % callid
 
@@ -905,7 +911,8 @@ def fingerprinting(method, msg, headers, verbose):
         m = re.search('^0\.0\.0\.0\+1\+[0-9a-z]{7,8}\+[0-9a-z]{7,8}$', tag)
         if m:
             fp.append('Calix')
-        m = re.search('^[0-9a-f]{7}-[0-9]{1}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{6}$', tag)
+        m = re.search(
+            '^[0-9a-f]{7}-[0-9]{1}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{6}$', tag)
         if m:
             fp.append('ShoreGear')
 
@@ -999,7 +1006,8 @@ def fingerprinting(method, msg, headers, verbose):
         m = re.search('^[0-9A-F]{3,4}$', tag)
         if m:
             fp.append('OneAccess')
-        m = re.search('^[0-9A-F]{1}-[0-9A-F]{8}-[0-9A-F]{16}-[0-9A-F]{8}$', tag)
+        m = re.search(
+            '^[0-9A-F]{1}-[0-9A-F]{8}-[0-9A-F]{16}-[0-9A-F]{8}$', tag)
         if m:
             fp.append('Yeti')
         m = re.search('^[0-9a-z]{10}$', tag)
