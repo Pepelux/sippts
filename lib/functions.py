@@ -240,6 +240,8 @@ def generate_random_integer(len_ini, len_end):
 
 
 def create_message(method, ip_sdp, contactdomain, fromuser, fromname, fromdomain, touser, toname, todomain, proto, domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, auth_type, referto, withsdp, via, rr, ppi, pai, header):
+    expires = '60'
+    
     if method == 'REGISTER' or method == 'NOTIFY' or method == 'ACK':
         starting_line = '%s sip:%s SIP/2.0' % (method, domain)
     else:
@@ -287,8 +289,8 @@ def create_message(method, ip_sdp, contactdomain, fromuser, fromname, fromdomain
                 toname, touser, todomain, totag)
 
     if method != 'CANCEL' and method != 'ACK':
-        headers['Contact'] = '<sip:%s@%s:%d;transport=%s>' % (
-            fromuser, contactdomain, fromport, proto)
+        headers['Contact'] = '<sip:%s@%s:%d;transport=%s>;expires=%s' % (
+            fromuser, contactdomain, fromport, proto, expires)
 
     headers['Call-ID'] = '%s' % callid
 
@@ -319,7 +321,7 @@ def create_message(method, ip_sdp, contactdomain, fromuser, fromname, fromdomain
             headers['Allow'] = 'INVITE, REGISTER, ACK, CANCEL, BYE, NOTIFY, REFER, OPTIONS, INFO, SUBSCRIBE, UPDATE, PRACK, MESSAGE'
 
     if method == 'REGISTER':
-        headers['Expires'] = '10'
+        headers['Expires'] = '%s' % expires
 
     if withsdp == 1:
         headers['Content-Type'] = 'application/sdp'
