@@ -353,7 +353,10 @@ def create_message(method, ip_sdp, contactdomain, fromuser, fromname, fromdomain
         msg += '%s: %s\r\n' % (name, value)
 
     if header != '':
-        msg += '%s\r\n' % header
+        h = header.split('&')
+
+        for hdr in h:
+            msg += '%s\r\n' % hdr
 
     sdp = ''
     if withsdp == 1:
