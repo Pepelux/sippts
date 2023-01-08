@@ -190,7 +190,12 @@ class SipExten:
                             if self.quit == False:
                                 for i, val2 in enumerate(values2):
                                     val_ipaddr = val2[0]
-                                    val_exten = int(val2[1])
+
+                                    try:
+                                        val_exten = int(val2[1])
+                                    except:
+                                        print(self.c.RED + 'Extension must be numeric. Maybe you want to use a prefix (-pr)')
+                                        sys.exit()
                                     if val_exten != 0:
                                         to_user = '%s%s' % (
                                             self.prefix, val_exten)

@@ -209,7 +209,7 @@ passwords for several users using bruteforce.
     parser.add_argument('-i', '--ip', type=str, help='Target IP address', dest="ipaddr", required=True)
     parser.add_argument('-proxy', '--outbound_proxy', type=str, help='Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)', dest="proxy", default="")
     parser.add_argument('-r', '--remote_port', type=int, help='Remote port (default: 5060)', dest='remote_port', default=5060)
-    parser.add_argument('-e', '--exten', type=str, help='Extensions to attack. Ex: 100 | 100,102,105 | 100-200 | 100,102,200-300', dest='exten', required=True)
+    parser.add_argument('-e', '--exten', type=str, help='Extensions or users to attack. Ex: 100 | 100,102,105 | 100-200 | user100', dest='exten', required=True)
     parser.add_argument('-au', '--auth-user', type=str, help='Use a custom SIP Auth User instead the extension', dest='authuser', default="")
     parser.add_argument('-pr', '--prefix', type=str, help='Prefix for auth user, used for authentication', dest='prefix', default='')
     parser.add_argument('-l', '--lenght', type=str, help='Lenght of the extensions (if set, left padding with 0\'s)', dest='lenght', default='')
