@@ -68,6 +68,7 @@ UDP, TCP and TLS protocols.
     parser.add_argument('-random', help='Randomize target hosts', dest='random', action="count")
     parser.add_argument('-ppi', type=str, help='P-Preferred-Identity', dest='ppi', default='')
     parser.add_argument('-pai', type=str, help='P-Asserted-Identity', dest='pai', default='')
+    parser.add_argument('-local-ip', type=str, help='Set local IP address (by default try to get it)', dest='localip', default='')
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -106,8 +107,9 @@ UDP, TCP and TLS protocols.
         RANDOM = args.random
         PPI = args.ppi
         PAI = args.pai
+        LOCALIP = args.localip
 
-        return IPADDR, HOST, PROXY, PORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, THREADS, VERBOSE, PING, FILE, NOCOLOR, OFILE, FP, RANDOM, PPI, PAI
+        return IPADDR, HOST, PROXY, PORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, THREADS, VERBOSE, PING, FILE, NOCOLOR, OFILE, FP, RANDOM, PPI, PAI, LOCALIP
     except ValueError:
         print('[-] Error: Bad IP format')
         sys.exit(1)

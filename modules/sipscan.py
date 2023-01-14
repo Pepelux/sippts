@@ -50,6 +50,7 @@ class SipScan:
         self.random = 0
         self.ppi = ''
         self.pai = ''
+        self.localip = ''
 
         self.found = []
         self.line = ['-', '\\', '|', '/']
@@ -86,7 +87,10 @@ class SipScan:
             sys.exit()
 
         # my IP address
-        local_ip = get_machine_default_ip()
+        local_ip = self.localip
+        if self.localip == '':
+            local_ip = get_machine_default_ip()
+            self.localip = local_ip
 
         # if rport is by default but we want to scan TLS protocol, also try with port 5061
         if self.rport == '5060' and (self.proto == 'TLS' or self.proto == 'ALL'):
@@ -162,7 +166,7 @@ class SipScan:
                                 ipend = int(ip2long(str(end_ip)))
 
                                 for i in range(ipini, ipend+1):
-                                    if i != local_ip and long2ip(i)[-2:] != '.0' and long2ip(i)[-4:] != '.255':
+                                    if i != self.localip and long2ip(i)[-2:] != '.0' and long2ip(i)[-4:] != '.255':
                                         if self.ping == 'False':
                                             ips.append(long2ip(i))
                                         else:
@@ -222,7 +226,7 @@ class SipScan:
                     iplist = i
 
                     for i in range(ipini, ipend+1):
-                        if i != local_ip and long2ip(i)[-2:] != '.0' and long2ip(i)[-4:] != '.255':
+                        if i != self.localip and long2ip(i)[-2:] != '.0' and long2ip(i)[-4:] != '.255':
                             if self.ping == 'False':
                                 ips.append(long2ip(i))
                             else:

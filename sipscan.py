@@ -12,7 +12,7 @@ from lib.params import get_sipscan_args
 
 
 def main():
-    ip, host, proxy, rport, proto, method, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, user_agent, nthreads, verbose, ping, file, nocolor, ofile, fp, random, ppi, pai = get_sipscan_args()
+    ip, host, proxy, rport, proto, method, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, user_agent, nthreads, verbose, ping, file, nocolor, ofile, fp, random, ppi, pai, local_ip = get_sipscan_args()
 
     s = SipScan()
     s.ip = ip
@@ -40,6 +40,7 @@ def main():
     s.random = random
     s.ppi = ppi
     s.pai = pai
+    s.local_ip = local_ip
 
     s.start()
 
