@@ -40,7 +40,7 @@ def main():
     s.random = random
     s.ppi = ppi
     s.pai = pai
-    s.local_ip = local_ip
+    s.localip = local_ip
 
     s.start()
 
