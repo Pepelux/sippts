@@ -1,20 +1,21 @@
 devel:
-- added param -ppi for P-Preferred-Identity 
-- added param -pai for P-Asserted-Identity 
-- sipsend: 
+- added param -ppi for P-Preferred-Identity
+- added param -pai for P-Asserted-Identity
+- sipsend:
   - added param --local_port to force local port
   - added param --no_contact to send message without contact header
 - sipinvite: added param --local_port to force local port
-- sipexten: 
+- sipexten:
   - added param -ofile to save results
   - added param -f to filter response code
-- ssipsend: 
+- sipsend:
   - added param -header to insert custom headers
+
 v3.3 (Nov/2022):
-- sipflood: 
+- sipflood:
   - added param -th to allow threads
   - added params -b -a -min -max to create malformed headers
-- sipscan: 
+- sipscan:
   - manage large ranges of IP networks. Fixed memory leak problems
   - can now run faster. Supports 800 threads without memory consumption
   - added param -random to randomize target hosts
@@ -28,7 +29,7 @@ v3.3 (Nov/2022):
 - sipping:
   - new module to check if a server/device is alive
 - rtpbleedinject:
-  - new module to inject RTP frames when RTPBleed vulnerability is present 
+  - new module to inject RTP frames when RTPBleed vulnerability is present
 - wssend:
   - new module to send SIP messages over WebSockets
 - sipfuzzer:
@@ -37,19 +38,19 @@ v3.3 (Nov/2022):
   - bug fixes
 
 v3.2 (Sep/2022)
-- sipsend: 
+- sipsend:
   - added params from_tag, to_tag, branch, callid, cseq, sdp
   - added params user and pass to send a second message with auth if we obtain a code 401/407
   - added param --sdes to send cipher keys in SDP
   - added param --local-ip to force it in case of multiple IP addresses
-- sipinvite: 
+- sipinvite:
   - added param --no-sdp to send the INVITE without SDP
   - added param --sdes to send cipher keys in SDP
   - now it is possible to send to a range of callers (To-User) and a range of callees (From-User)
   - added param --local-ip to force it in case of multiple IP addresses
 - sipenumerate:
   - added verbose mode
-- siprcrack: 
+- siprcrack:
   - added param lenght to force the size of extensions
   - added param user to set the From and To user (by default is prefix+extension). If is set, the prefix only will be applied to Auth User
 - siptshark:
@@ -126,7 +127,7 @@ v1.2.7 (May/2019)
 - Don't save data into database bt default
 
 v1.2.6 (Jan/2019)
-- New script (sipdigestleak.pl) to exploit the vulnerability discovered by 
+- New script (sipdigestleak.pl) to exploit the vulnerability discovered by
   Sandro Gauci that affects a large number of hardware and software devices
 
 v1.2.2 (Dec/2018)
