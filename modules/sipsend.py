@@ -193,7 +193,7 @@ class SipSend:
 
         bind = '0.0.0.0'
 
-        if self.lport == '':
+        if self.lport == '' or self.lport == None:
             lport = get_free_port()
         else:
             lport = self.lport

@@ -85,7 +85,7 @@ class SipInvite:
 
             bind = '0.0.0.0'
 
-            if self.lport == '':
+            if self.lport == '' or self.lport == None:
                 try:
                     # First try
                     lport = get_free_port()
@@ -97,7 +97,7 @@ class SipInvite:
             else:
                 lport = self.lport
                 sock.bind((bind, lport))
-
+    
             if self.proxy == '':
                 host = (str(self.ip), int(self.rport))
             else:
