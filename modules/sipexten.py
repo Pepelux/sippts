@@ -300,7 +300,7 @@ class SipExten:
 
                     headers = parse_message(resp.decode())
 
-                    if headers:
+                    if headers and headers['response_code'] != '':
                         response = '%s %s' % (
                             headers['response_code'], headers['response_text'])
                         rescode = headers['response_code']
@@ -312,7 +312,7 @@ class SipExten:
 
                 headers = parse_message(resp.decode())
 
-                if headers:
+                if headers and headers['response_code'] != '':
                     if headers['response_code'] != '404':
                         if self.filter == '' or self.filter == headers['response_code']:
                             response = '%s %s' % (

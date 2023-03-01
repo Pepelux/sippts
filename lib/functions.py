@@ -481,6 +481,8 @@ def parse_message(buffer):
     headers = buffer.split('\r\n')
 
     data = dict()
+    data['response_text'] = ''
+    data['response_code'] = ''
     data['sipuser'] = ''
     data['sipdomain'] = ''
     data['ua'] = ''

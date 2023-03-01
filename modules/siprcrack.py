@@ -123,19 +123,19 @@ class SipRemoteCrack:
 
                     headers = parse_message(resp.decode())
 
-                    if headers:
+                    if headers and headers['response_code'] != '':
                         response = '%s %s' % (
                             headers['response_code'], headers['response_text'])
                         rescode = headers['response_code']
 
                         if self.verbose == 2:
                             print(self.c.BWHITE + '[-] Receiving from %s:%s/%s ...' %
-                                  (ip, self.rport, self.proto))
+                                    (ip, self.rport, self.proto))
                             print(self.c.GREEN + resp.decode() + self.c.WHITE)
 
                 headers = parse_message(resp.decode())
 
-                if headers:
+                if headers and headers['response_code'] != '':
                     auth_header = ''
                     try:
                         auth_header = headers['auth']
@@ -182,11 +182,11 @@ class SipRemoteCrack:
                             digest += ', nc=%s' % nc
 
                         msg = create_message('REGISTER', '', self.contact_domain, to_user, '', self.domain,
-                                             to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', callid, '', '1', '', digest, auth_type, '', 0, '', self.route, '', '', '', 1)
+                                                to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', callid, '', '1', '', digest, auth_type, '', 0, '', self.route, '', '', '', 1)
 
                         if self.verbose == 1:
                             print(self.c.BWHITE + '[+] Sending to %s:%d/%s ...' %
-                                  (ip, self.rport, self.proto))
+                                    (ip, self.rport, self.proto))
                             print(self.c.YELLOW + msg)
 
                         if self.proto == 'TLS':
@@ -194,19 +194,28 @@ class SipRemoteCrack:
                         else:
                             sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
-                        if self.proto == 'TLS':
-                            resp = sock_ssl.recv(4096)
-                        else:
-                            resp = sock.recv(4096)
+                        rescode = '100'
 
-                        if self.verbose == 1:
-                            print(self.c.BWHITE + '[+] Receiving from %s:%d ...' %
-                                  (ip, self.rport))
-                            print(self.c.GREEN + resp.decode())
+                        while rescode[:1] == '1':
+                            # receive temporary code
+                            if self.proto == 'TLS':
+                                resp = sock_ssl.recv(4096)
+                            else:
+                                resp = sock.recv(4096)
 
-                    headers = parse_message(resp.decode())
-                    data['code'] = headers['response_code']
-                    data['text'] = headers['response_text']
+                            headers = parse_message(resp.decode())
+
+                            if headers and headers['response_code'] != '':
+                                response = '%s %s' % (
+                                    headers['response_code'], headers['response_text'])
+                                rescode = headers['response_code']
+                                if self.verbose == 1:
+                                    print(self.c.BWHITE + '[+] Receiving from %s:%d ...' %
+                                            (ip, self.rport))
+                                    print(self.c.GREEN + resp.decode())
+
+                                data['code'] = headers['response_code']
+                                data['text'] = headers['response_text']
 
                 return data
             except socket.timeout:

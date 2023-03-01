@@ -467,7 +467,7 @@ class SipScan:
 
                     headers = parse_message(resp.decode())
 
-                    if headers:
+                    if headers and headers['response_code'] != '':
                         response = '%s %s' % (
                             headers['response_code'], headers['response_text'])
                         rescode = headers['response_code']
@@ -479,7 +479,7 @@ class SipScan:
 
                 headers = parse_message(resp.decode())
 
-                if headers:
+                if headers and headers['response_code'] != '':
                     sip_type = headers['type']
                     if self.method == 'REGISTER':
                         if headers['response_code'] == '405':
