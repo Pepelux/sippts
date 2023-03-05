@@ -148,31 +148,50 @@ class ArpSpoof:
                 print('Error reading file %s' % self.file)
                 exit()
         else:
-            hosts = []
             for i in self.ip.split(','):
+                ips = []
+                hosts = []
+                error = 0
+
                 try:
-                    i = socket.gethostbyname(i)
+                    if i.find('/') < 1:
+                        i = socket.gethostbyname(i)
+                        i = IP(i, make_net=True)
+                    else:
+                        i = IP(i, make_net=True)
+                except:
+                    if i.find('-') > 0:
+                        val = i.split('-')
+                        start_ip = val[0]
+                        end_ip = val[1]
+
+                        error = 1
+
+                try:
+                    if error == 0:
+                        hlist = list(ipaddress.ip_network(str(i)).hosts())
+
+                        if hlist == []:
+                            hosts.append(i)
+                        else:
+                            for h in hlist:
+                                hosts.append(h)
+
+                        last = len(hosts)-1
+                        start_ip = hosts[0]
+                        end_ip = hosts[last]
+
+                    ipini = int(ip2long(str(start_ip)))
+                    ipend = int(ip2long(str(end_ip)))
+                    iplist = i
+
+                    for i in range(ipini, ipend+1):
+                        if i != local_ip and i != self.gw:
+                            self.ips.append(long2ip(i))
+                            self.ips.append('')
+
                 except:
                     pass
-                hlist = list(ipaddress.ip_network(str(i)).hosts())
-
-                if hlist == []:
-                    hosts.append(i)
-                else:
-                    for h in hlist:
-                        hosts.append(h)
-
-                last = len(hosts)-1
-                start_ip = hosts[0]
-                end_ip = hosts[last]
-
-                ipini = int(ip2long(str(start_ip)))
-                ipend = int(ip2long(str(end_ip)))
-
-                for ip in range(ipini, ipend+1):
-                    if ip != local_ip and ip != self.gw:
-                        self.ips.append(long2ip(ip))
-                        self.ips.append('')
 
         threads = list()
 
