@@ -10,6 +10,8 @@ devel:
   - added param -f to filter response code
 - sipsend:
   - added param -header to insert custom headers
+- global:
+  - bug fixes
 
 v3.3 (Nov/2022):
 - sipflood:
