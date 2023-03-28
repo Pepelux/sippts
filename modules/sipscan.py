@@ -117,7 +117,7 @@ class SipScan:
             m = re.search('([0-9]+)-([0-9]+)', p)
             if m:
                 for x in range(int(m.group(1)), int(m.group(2))+1):
-                    ports.append(x)
+                    ports.append(str(x))
             else:
                 ports.append(p)
 
