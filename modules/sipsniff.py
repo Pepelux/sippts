@@ -70,6 +70,8 @@ class SipSniff:
         logo = Logo('sipsniff')
         logo.print()
 
+        self.proto = self.proto.upper()
+
         signal.signal(signal.SIGINT, self.signal_handler)
         print(self.c.BYELLOW + '\nPress Ctrl+C to stop')
         print(self.c.WHITE)
@@ -83,12 +85,11 @@ class SipSniff:
         print(self.c.BWHITE + '[✓] Listening on: ' +
               self.c.GREEN + '%s' % networkInterface)
 
-        if self.proto == 'all':
+        if self.proto == 'ALL':
             print(self.c.BWHITE + '[✓] Protocols: ' +
                   self.c.GREEN + 'UDP, TCP, TLS')
         else:
-            print(self.c.BWHITE + '[✓] Protocol: ' + self.c.GREEN + '%s' %
-                  self.proto.upper())
+            print(self.c.BWHITE + '[✓] Protocol: ' + self.c.GREEN + '%s' % self.proto)
 
         if self.ofile != '':
             print(
