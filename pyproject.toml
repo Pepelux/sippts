@@ -1,0 +1,88 @@
+[project]
+name = "sippts"
+version = "3.4.dev0"
+description = "Tools to audit VoIP servers and devices using SIP protocol"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {file = "LICENSE.txt"}
+dynamic = ["dependencies"]
+
+authors = [
+  {name = "Jose Luis Verdeguer", email = "pepeluxx@gmail.com" }
+]
+
+maintainers = [
+  {name = "Victor Seva", email = "linuxmaniac@torreviejawireless.org" }
+]
+
+# Classifiers help users find your project by categorizing it.
+#
+# For a list of valid classifiers, see https://pypi.org/classifiers/
+# classifiers = [  # Optional
+#   # How mature is this project? Common values are
+#   #   3 - Alpha
+#   #   4 - Beta
+#   #   5 - Production/Stable
+#   "Development Status :: 3 - Alpha",
+# 
+#   # Indicate who your project is intended for
+#   "Intended Audience :: Developers",
+#   "Topic :: Software Development :: Build Tools",
+# 
+#   # Pick your license as you wish
+#   "License :: OSI Approved :: MIT License",
+# 
+#   # Specify the Python versions you support here. In particular, ensure
+#   # that you indicate you support Python 3. These classifiers are *not*
+#   # checked by "pip install". See instead "python_requires" below.
+#   "Programming Language :: Python :: 3",
+#   "Programming Language :: Python :: 3.7",
+#   "Programming Language :: Python :: 3.8",
+#   "Programming Language :: Python :: 3.9",
+#   "Programming Language :: Python :: 3.10",
+#   "Programming Language :: Python :: 3.11",
+#   "Programming Language :: Python :: 3 :: Only",
+# ]
+
+# List additional groups of dependencies here (e.g. development
+# dependencies). Users will be able to install these using the "extras"
+# syntax, for example:
+#
+#   $ pip install sampleproject[dev]
+#
+# Similar to `dependencies` above, these must be valid existing
+# projects.
+#[project.optional-dependencies] # Optional
+#dev = ["check-manifest"]
+#test = ["coverage"]
+
+# List URLs that are relevant to your project
+#
+# This field corresponds to the "Project-URL" and "Home-Page" metadata fields:
+# https://packaging.python.org/specifications/core-metadata/#project-url-multiple-use
+# https://packaging.python.org/specifications/core-metadata/#home-page-optional
+#
+# Examples listed include a pattern for specifying where the package tracks
+# issues, where the source is hosted, where to say thanks to the package
+# maintainers, and where to support the project financially. The key is
+# what's used to render the link text on PyPI.
+[project.urls]  # Optional
+"Homepage" = "https://github.com/Pepelux/sippts"
+"Bug Reports" = "https://github.com/Pepelux/sippts/issues"
+
+# This is configuration specific to the `setuptools` build backend.
+# If you are using a different build backend, you will need to change this.
+[tool.setuptools]
+# If there are data files included in your packages that need to be
+# installed, specify them here.
+#package-data = {"sample" = ["*.dat"]}
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"] }
+
+[build-system]
+# These are the assumed default build requirements from pip:
+# https://pip.pypa.io/en/stable/reference/pip/#pep-517-and-518-support
+requires = ["setuptools>=43.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
