@@ -90,6 +90,7 @@ Sippts has been tested on:
   * Python 3
   
 ## Instalation & Usage ##
-  * Clone or download the repository
-  * pip3 install -r requirements.txt
-  * Enjoy
+  $ git clone https://github.com/Pepelux/sippts.git
+  $ pip3 install -v -e .
+
+
