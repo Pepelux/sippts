@@ -83,14 +83,17 @@ Sippts is a set of tools to audit VoIP servers and devices using SIP protocol. S
 ## Operating System ##
 Sippts has been tested on:
   * Linux
-  * Mac OS X
+  * MacOS
   * Windows
 
 ## Requirements ##
   * Python 3
   
-## Instalation & Usage ##
+## Instalation ##
   $ git clone https://github.com/Pepelux/sippts.git
   $ pip3 install -v -e .
 
+## MacOS ##
+  Edit requirements.txt and comment next line before install:
+  # pyradamsa
 
