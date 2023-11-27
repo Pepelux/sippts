@@ -95,5 +95,6 @@ Sippts has been tested on:
 
 ## MacOS ##
   Edit requirements.txt and comment next line before install:
-  # pyradamsa
+  
+  \# pyradamsa
 
