@@ -91,6 +91,7 @@ Sippts has been tested on:
   
 ## Instalation ##
   $ git clone https://github.com/Pepelux/sippts.git
+  $ cd sippts
   $ pip3 install -v -e .
 
 ## MacOS ##
