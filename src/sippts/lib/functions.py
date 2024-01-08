@@ -633,7 +633,7 @@ def parse_digest(buffer):
     data['algorithm'] = 'MD5'
 
     for header in headers:
-        m = re.search('username=\"([a-z|A-Z|0-9|-|_]+)\"', header)
+        m = re.search('username=\"([a-z|A-Z|0-9|-|_|\.|:]+)\"', header)
         if m:
             data['username'] = '%s' % (m.group(1))
         else:
@@ -645,7 +645,7 @@ def parse_digest(buffer):
         else:
             data['realm'] = ''
 
-        m = re.search('nonce=\"([a-z|A-Z|0-9|\/|\+|\=]+)\"', header)
+        m = re.search('nonce=\"([a-z|A-Z|0-9|\/|\+|\=|:|\|_|-|\.]+)\"', header)
         if m:
             data['nonce'] = '%s' % (m.group(1))
         else:
