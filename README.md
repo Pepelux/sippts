@@ -95,9 +95,6 @@ Sippts has been tested on:
   $ cd sippts
   $ pip3 install .
 
-  Installing via pip:
-  $ pip3 install sippts
-
 ## MacOS ##
   Edit requirements.txt and comment next line before install:
   
