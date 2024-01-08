@@ -74,8 +74,9 @@ UDP, TCP and TLS protocols.
     args = parser.parse_args()
 
     if not args.ipaddr and not args.file:
-        print(
-            'error: one of the following arguments are required: -i/--ip, -f/--file')
+        print(RED + 'Error! ')
+        print(WHITE + 'One of the following arguments are required: ' + GREEN + '-i/--ip' + WHITE + ',' + GREEN + '-f/--file')
+        print(WHITE + 'Use ' + CYAN + '-h/--help' + WHITE + ' for help')
         sys.exit()
 
     try:
@@ -111,7 +112,8 @@ UDP, TCP and TLS protocols.
 
         return IPADDR, HOST, PROXY, PORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, THREADS, VERBOSE, PING, FILE, NOCOLOR, OFILE, FP, RANDOM, PPI, PAI, LOCALIP
     except ValueError:
-        print('[-] Error: Bad IP format')
+        print(RED + 'Error! Bad IP format' + WHITE)
+        print(WHITE + 'Use ' + CYAN + '-h/--help' + WHITE + ' for help')
         sys.exit(1)
 
 
@@ -182,7 +184,8 @@ or not. Sipexten uses multithread and can check several IPs and port ranges.
 
         return IPADDR, HOST, PROXY, RPORT, EXTEN, PREFIX, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMUSER, UA, THREADS, VERBOSE, NOCOLOR, OFILE, FILTER
     except ValueError:
-        print('[-] Error: Bad IP format')
+        print(RED + 'Error! Bad IP format' + WHITE)
+        print(WHITE + 'Use ' + CYAN + '-h/--help' + WHITE + ' for help')
         sys.exit(1)
 
 
@@ -247,7 +250,9 @@ passwords for several users using bruteforce.
 
         return IPADDR, HOST, PROXY, RPORT, EXTEN, PREFIX, AUTHUSER, LENGHT, PROTO, DOMAIN, CONTACTDOMAIN, UA, WORDLIST, THREADS, VERBOSE, NOCOLOR
     except ValueError:
-        print('[-] Error: Bad IP format')
+        print(RED + 'Error! Bad IP format' + WHITE)
+        print(WHITE + 'One of the following arguments are required: ' + GREEN + '-i/--ip' + WHITE + ',' + GREEN + '-f/--file')
+        print(WHITE + 'Use ' + CYAN + '-h/--help' + WHITE + ' for help')
         sys.exit(1)
 
 
@@ -306,8 +311,9 @@ possible and can recover most passwords based on the challenge response.
     args = parser.parse_args()
 
     if not args.ipaddr and not args.file:
-        print(
-            'error: one of the following arguments are required: -i/--ip, -f/--file')
+        print(RED + 'Error!')
+        print(WHITE + 'One of the following arguments are required: ' + GREEN + '-i/--ip' + WHITE + ',' + GREEN + '-f/--file')
+        print(WHITE + 'Use ' + CYAN + '-h/--help' + WHITE + ' for help')
         sys.exit()
 
     try:
@@ -341,7 +347,8 @@ possible and can recover most passwords based on the challenge response.
 
         return IPADDR, HOST, PROXY, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, LOCALIP, OFILE, LFILE, USER, PWD, AUTH, VERBOSE, SDP, SDES, FILE, PING, PPI, PAI
     except ValueError:
-        print('[-] Error: Bad IP format')
+        print(RED + 'Error! Bad IP format' + WHITE)
+        print(WHITE + 'Use ' + CYAN + '-h/--help' + WHITE + ' for help')
         sys.exit(1)
 
 
@@ -429,7 +436,8 @@ the call to a second external number.
 
         return IPADDR, HOST, PROXY, RPORT, LPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, TRANSFER, USER, PWD, UA, LOCALIP, THREADS, NOSDP, VERBOSE, SDES, NOCOLOR, OFILE, PPI, PAI
     except ValueError:
-        print('[-] Error: Bad IP format')
+        print(RED + 'Error! Bad IP format' + WHITE)
+        print(WHITE + 'Use ' + CYAN + '-h/--help' + WHITE + ' for help')
         sys.exit(1)
 
 
@@ -480,8 +488,9 @@ alphabet=0123456789abcdef # Custom alphabet
     args = parser.parse_args()
 
     if not args.bruteforce and not args.wordlist:
-        print(
-            'error: one of the following arguments are required: -bf/--bruteforce, -w/--wordlist')
+        print(RED + 'Error!')
+        print(WHITE + 'One of the following arguments are required: ' + GREEN + '-bf/--bruteforce' + WHITE + ',' + GREEN + '-w/--wordlist')
+        print(WHITE + 'Use ' + CYAN + '-h/--help' + WHITE + ' for help')
         sys.exit()
 
     try:
@@ -497,7 +506,8 @@ alphabet=0123456789abcdef # Custom alphabet
 
         return FILE, VERBOSE, WORDLIST, BRUTEFORCE, CHARSET, MAX, MIN, PREFIX, SUFFIX
     except ValueError:
-        print('[-] Error')
+        print(RED + 'Error!' + WHITE)
+        print(WHITE + 'Use ' + CYAN + '-h/--help' + WHITE + ' for help')
         sys.exit(1)
 
 
@@ -653,7 +663,8 @@ Enumerate available methods of a SIP service/server.
 
         return IPADDR, HOST, PROXY, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, VERBOSE
     except ValueError:
-        print('[-] Error: Bad IP format')
+        print(RED + 'Error! Bad IP format' + WHITE)
+        print(WHITE + 'Use ' + CYAN + '-h/--help' + WHITE + ' for help')
         sys.exit(1)
 
 
@@ -690,7 +701,8 @@ Extracts SIP Digest authentications from a PCAP file
 
         return FILE, OFILE
     except ValueError:
-        print('[-] Error')
+        print(RED + 'Error!' + WHITE)
+        print(WHITE + 'Use ' + CYAN + '-h/--help' + WHITE + ' for help')
         sys.exit(1)
 
 
@@ -770,7 +782,8 @@ SIP Flood send messages with a selected method
 
         return IPADDR, HOST, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, DIGEST, UA, THREADS, VERBOSE, NUMBER, BAD, ALPHABET, MAX, MIN
     except ValueError:
-        print('[-] Error: Bad IP format')
+        print(RED + 'Error! Bad IP format' + WHITE)
+        print(WHITE + 'Use ' + CYAN + '-h/--help' + WHITE + ' for help')
         sys.exit(1)
 
 
@@ -997,18 +1010,21 @@ rtp                 Show all RTP streams
     args = parser.parse_args()
 
     if args.rtpextract and (not args.rtpport or not args.ofile):
-        print(
-            'error: -rtp_extract requires -r/--rtp_port and -o/--output_file')
+        print(RED + 'Error!')
+        print(WHITE + 'One of the following arguments are required: ' + GREEN + '-r/--rtp_port' + WHITE + ',' + GREEN + '-o/--output_file')
+        print(WHITE + 'Use ' + CYAN + '-h/--help' + WHITE + ' for help')
         sys.exit()
 
     if not args.rtpextract and (args.rtpport or args.ofile):
-        print(
-            'error: -rtp_extract requires -r/--rtp_port and -o/--output_file')
+        print(RED + 'Error!')
+        print(GREEN + '-rtp_extract' + WHITE + ' requires: ' + GREEN + '-r/--rtp_port' + WHITE + ' and ' + GREEN + '-o/--output_file')
+        print(WHITE + 'Use ' + CYAN + '-h/--help' + WHITE + ' for help')
         sys.exit()
 
     if len(sys.argv) < 4:
-        print(
-            'error: you must write a filter (with -filter). Use -h to show help')
+        print(RED + 'Error!')
+        print(WHITE + 'You must write a filter (with ' + GREEN + '-filter' + WHITE + ')')
+        print(WHITE + 'Use ' + CYAN + '-h/--help' + WHITE + ' for help')
         sys.exit()
 
     try:
@@ -1020,7 +1036,8 @@ rtp                 Show all RTP streams
 
         return FILE, FILTER, RTPPORT, OFILE, NOCOLOR
     except ValueError:
-        print('[-] Error')
+        print(RED + 'Error!' + WHITE)
+        print(WHITE + 'Use ' + CYAN + '-h/--help' + WHITE + ' for help')
         sys.exit(1)
 
 
@@ -1057,8 +1074,9 @@ of a legitimate computer or server on the network.
     args = parser.parse_args()
 
     if not args.ipaddr and not args.file:
-        print(
-            'error: one of the following arguments are required: -i/--ip, -f/--file')
+        print(RED + 'Error!')
+        print(WHITE + 'One of the following arguments are required: ' + GREEN + '-i/--ip' + WHITE + ',' + GREEN + '-f/--file')
+        print(WHITE + 'Use ' + CYAN + '-h/--help' + WHITE + ' for help')
         sys.exit()
 
     IPADDR = args.ipaddr
@@ -1117,7 +1135,8 @@ Network sniffer for SIP protocol.
 
         return DEV, OFILE, AUTH, VERBOSE, PROTO
     except ValueError:
-        print('[-] Error')
+        print(RED + 'Error!' + WHITE)
+        print(WHITE + 'Use ' + CYAN + '-h/--help' + WHITE + ' for help')
         sys.exit(1)
 
 def get_sipping_args():
