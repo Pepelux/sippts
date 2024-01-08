@@ -7,14 +7,14 @@ __license__ = "GPL"
 __copyright__ = "Copyright (C) 2015-2022, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
 
-from sippts.sipdump import SipDump
-from sippts.lib.params import get_sipdump_args
+from sippts.sippcapdump import SipPCAPDump
+from sippts.lib.params import get_sippcapdump_args
 
 
 def main():
-    file, ofile = get_sipdump_args()
+    file, ofile = get_sippcapdump_args()
 
-    s = SipDump()
+    s = SipPCAPDump()
     s.file = file
     s.ofile = ofile
 

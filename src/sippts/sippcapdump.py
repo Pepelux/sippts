@@ -14,7 +14,7 @@ from .lib.color import Color
 from .lib.logos import Logo
 
 
-class SipDump:
+class SipPCAPDump:
     def __init__(self):
         self.file = ''
         self.ofile = ''
@@ -22,9 +22,9 @@ class SipDump:
         self.c = Color()
 
     def start(self):
-        tmpfile = 'sipdump.tmp'
+        tmpfile = 'sippcapdump.tmp'
 
-        logo = Logo('sipdump')
+        logo = Logo('sippcapdump')
         logo.print()
 
         print(self.c.BWHITE+'[✓] Input file: %s ...' % self.file)

@@ -433,7 +433,7 @@ the call to a second external number.
         sys.exit(1)
 
 
-def get_sipcrack_args():
+def get_sipdigestcrack_args():
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
             prog, max_help_position=50),
@@ -657,7 +657,7 @@ Enumerate available methods of a SIP service/server.
         sys.exit(1)
 
 
-def get_sipdump_args():
+def get_sippcapdump_args():
     parser = argparse.ArgumentParser(
         formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
             prog, max_help_position=50),

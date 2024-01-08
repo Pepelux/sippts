@@ -7,13 +7,13 @@ __license__ = "GPL"
 __copyright__ = "Copyright (C) 2015-2022, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
 
-from sippts.sipcrack import SipDigestCrack
-from sippts.lib.params import get_sipcrack_args
+from sippts.sipdigestcrack import SipDigestCrack
+from sippts.lib.params import get_sipdigestcrack_args
 
 
 def main():
     # Values
-    file, verbose, wordlist, bruteforce, charset, max, min, prefix, suffix = get_sipcrack_args()
+    file, verbose, wordlist, bruteforce, charset, max, min, prefix, suffix = get_sipdigestcrack_args()
 
     s = SipDigestCrack()
     s.file = file

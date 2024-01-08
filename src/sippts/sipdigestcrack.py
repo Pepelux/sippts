@@ -142,7 +142,7 @@ class SipDigestCrack:
                         word_start = ''
 
                         try:
-                            with io.open("sipcrack.res", "r", newline=None, encoding="latin-1") as fd:
+                            with io.open("sipdigestcrack.res", "r", newline=None, encoding="latin-1") as fd:
                                 for pline in fd:
                                     try:
                                         pl = pline.replace('\n', '')
@@ -200,7 +200,7 @@ class SipDigestCrack:
         print(self.c.WHITE + '\nSaving restore data ...')
 
         try:
-            with io.open("sipcrack.res", "r", newline=None, encoding="latin-1") as fd:
+            with io.open("sipdigestcrack.res", "r", newline=None, encoding="latin-1") as fd:
                 for pline in fd:
                     try:
                         pl = pline.replace('\n', '')
@@ -238,7 +238,7 @@ class SipDigestCrack:
                     self.charset, self.prefix, self.suffix, usr, b64pwd)
             lines.append(pl)
 
-        with open('sipcrack.res', 'w+') as f:
+        with open('sipdigestcrack.res', 'w+') as f:
             for l in lines:
                 f.write(l+'\n')
 

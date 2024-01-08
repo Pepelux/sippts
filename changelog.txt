@@ -12,6 +12,8 @@ devel:
   - added param -header to insert custom headers
 - global:
   - bug fixes
+- Renamed script sipdump to sippcapdump
+- Renamed script sipcrack to sipdigestcrack
 
 v3.3 (Nov/2022):
 - sipflood:
