@@ -52,13 +52,13 @@ Sippts is a set of tools to audit VoIP servers and devices using SIP protocol. S
 
 [Click here to read more about SIPEnumerate](https://github.com/Pepelux/sippts/wiki/SIPEnumerate)
 
-  * _**SipDump**_ Extracts SIP Digest authentications from a PCAP file.
+  * _**SipPCAPDump**_ Extracts SIP Digest authentications from a PCAP file.
 
-[Click here to read more about SIPDump](https://github.com/Pepelux/sippts/wiki/SIPDump)
+[Click here to read more about SIPPCAPDump](https://github.com/Pepelux/sippts/wiki/SIPDump)
 
-  * _**SipCrack**_ Cracking tool to crack the digest authentications within the SIP protocol.
+  * _**SipDigestCrack**_ Cracking tool to crack the digest authentications within the SIP protocol.
 
-[Click here to read more about SIPCrack](https://github.com/Pepelux/sippts/wiki/SIPCrack)
+[Click here to read more about SIPDigestCrack](https://github.com/Pepelux/sippts/wiki/SIPCrack)
 
   * _**SipTshark**_ Extract data of SIP protocol from a PCAP file.
 
