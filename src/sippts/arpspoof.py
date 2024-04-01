@@ -96,11 +96,11 @@ class ArpSpoof:
             try:
                 with open(self.file) as f:
                     line = f.readline()
-                    line = line.replace('\n', '')
                     hosts = []
 
                     while (line):
                         error = 0
+                        line = line.replace('\n', '')
 
                         try:
                             if self.run == True:

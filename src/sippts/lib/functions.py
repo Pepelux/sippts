@@ -943,6 +943,9 @@ def fingerprinting(method, msg, headers, verbose):
 
         hdr = msg.split('\r\n')
         for h in hdr:
+            if h.lower().find('realm="3cxphonesystem"') > 0:
+                fp.clear()
+                fp.append('3CX Phone System')
             if h.lower().find('x-grandstream-pbx:') == 0:
                 fp.append('Grandstream ')
 
