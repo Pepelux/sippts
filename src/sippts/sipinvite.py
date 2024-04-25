@@ -132,8 +132,12 @@ class SipInvite:
                 sock.connect(host)
 
             if self.proto == 'TLS':
-                sock_ssl = ssl.wrap_socket(
-                    sock, ssl_version=ssl.PROTOCOL_TLS, ciphers=None, cert_reqs=ssl.CERT_NONE)
+                context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+                context.check_hostname = False
+                context.verify_mode = ssl.CERT_NONE
+                context.load_default_certs()
+
+                sock_ssl = context.wrap_socket(sock, server_hostname=str(host[0]))
                 sock_ssl.connect(host)
 
             try:
