@@ -300,7 +300,7 @@ class SipExten:
                         (ipaddr, rport) = host
                     else:
                         (resp, addr) = sock.recvfrom(4096)
-                        (ipaddr, rport) = addr
+                        (ipaddr, rport) = host
 
                     headers = parse_message(resp.decode())
 

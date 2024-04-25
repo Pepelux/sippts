@@ -467,7 +467,7 @@ class SipScan:
                         (ip, rport) = host
                     else:
                         (resp, addr) = sock.recvfrom(4096)
-                        (ip, rport) = addr
+                        (ip, rport) = host
 
                     headers = parse_message(resp.decode())
 

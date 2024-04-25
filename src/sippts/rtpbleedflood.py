@@ -76,7 +76,7 @@ class RTPBleedFlood:
 
                 try:
                     (msg, addr) = sock.recvfrom(4096)
-                    (ipaddr, rport) = addr
+                    (ipaddr, rport) = host
                     size = len(msg)
 
                     if size >= 12:
