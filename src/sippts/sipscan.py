@@ -475,7 +475,6 @@ class SipScan:
                         response = '%s %s' % (
                             headers['response_code'], headers['response_text'])
                         rescode = headers['response_code']
-                        print(self.c.RED + '\nEmpty response code: ' + self.c.CYAN + '%s:%d/%s: %s\n' % (self.line[self.pos], ipaddr, port, proto, resp) + self.c.WHITE)
 
                     if self.verbose == 2:
                         print(self.c.BWHITE + '[-] Receiving from %s:%s/%s ...' %
@@ -484,6 +483,7 @@ class SipScan:
 
                     if headers['response_code'] == '':
                         rescode = ''
+                        print(self.c.RED + '\nEmpty response code: ' + self.c.CYAN + '%s:%d/%s: %s\n' % (self.line[self.pos], ipaddr, port, proto, resp) + self.c.WHITE)
 
                 headers = parse_message(resp.decode())
 
