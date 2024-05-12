@@ -250,11 +250,11 @@ class SipPing:
                 totaltime = end - start
 
                 self.pingcount += 1
-                print(self.c.CYAN + '[%s UTC] ' % datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S") + self.c.GREEN + '%s ' % response + self.c.WHITE + 'from ' + self.c.YELLOW + '%s' % ip + self.c.WHITE + ' cseq=' +
+                print(self.c.CYAN + '[%s UTC] ' % datetime.now().strftime("%Y-%m-%d %H:%M:%S") + self.c.GREEN + '%s ' % response + self.c.WHITE + 'from ' + self.c.YELLOW + '%s' % ip + self.c.WHITE + ' cseq=' +
                       self.c.YELLOW + '%d' % self.pingcount + self.c.WHITE + ' time=' + self.c.YELLOW + '%fms' % totaltime + self.c.WHITE)
             except socket.timeout:
                 self.pingcount += 1
-                print(self.c.CYAN + '[%s UTC] ' % datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S") + self.c.WHITE + 'From ' + self.c.YELLOW + '%s' % ip + self.c.WHITE + ' cseq=' + self.c.YELLOW +
+                print(self.c.CYAN + '[%s UTC] ' % datetime.now().strftime("%Y-%m-%d %H:%M:%S") + self.c.WHITE + 'From ' + self.c.YELLOW + '%s' % ip + self.c.WHITE + ' cseq=' + self.c.YELLOW +
                       '%d' % self.pingcount + self.c.WHITE + ' Destination Host Unreachable' + self.c.WHITE)
                 pass
             except KeyboardInterrupt:
@@ -262,13 +262,13 @@ class SipPing:
                 sys.exit()
             except:
                 self.pingcount += 1
-                print(self.c.CYAN + '[%s UTC] ' % datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S") + self.c.WHITE + 'From ' + self.c.YELLOW + '%s' % ip + self.c.WHITE + ' cseq=' + self.c.YELLOW +
+                print(self.c.CYAN + '[%s UTC] ' % datetime.now().strftime("%Y-%m-%d %H:%M:%S") + self.c.WHITE + 'From ' + self.c.YELLOW + '%s' % ip + self.c.WHITE + ' cseq=' + self.c.YELLOW +
                       '%d' % self.pingcount + self.c.WHITE + ' Destination Host Unreachable' + self.c.WHITE)
                 pass
 
             time.sleep(self.interval)
 
-        sock.close()
+            sock.close()
 
     def signal_handler(self, sig, frame):
         self.stop()
