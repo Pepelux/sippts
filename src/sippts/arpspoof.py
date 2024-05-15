@@ -67,7 +67,13 @@ class ArpSpoof:
         print(self.c.WHITE)
 
         # my IP address
-        local_ip = get_machine_default_ip()
+        try:
+            local_ip = get_machine_default_ip()
+        except:
+            print(self.c.BRED + 'Error getting local IP')
+            print(self.c.BWHITE + 'Try with ' + self.c.BYELLOW + '-local-ip' + self.cBWHITE + ' param')
+            print(self.c.WHITE)
+            exit()
 
         if self.gw == '':
             if ops == 'Linux':

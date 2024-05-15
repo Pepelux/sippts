@@ -70,7 +70,13 @@ class SipPing:
         # my IP address
         local_ip = self.localip
         if self.localip == '':
-            local_ip = get_machine_default_ip()
+            try:
+                local_ip = get_machine_default_ip()
+            except:
+                print(self.c.BRED + 'Error getting local IP')
+                print(self.c.BWHITE + 'Try with ' + self.c.BYELLOW + '-local-ip' + self.cBWHITE + ' param')
+                print(self.c.WHITE)
+                exit()
 
         # if rport is by default but we want to scan TLS protocol, use port 5061
         if self.rport == 5060 and self.proto == 'TLS':

@@ -303,7 +303,7 @@ def main():
         s.max = max
         s.min = min
     elif params[0] == 'wssend':
-        (cmd, ip, rport, path, verbose, proto, method, domain, contact_domain, from_name, from_user, from_domain, from_tag, to_name, to_user, to_tag, to_domain, user_agent, ppi, pai) = params
+        (cmd, ip, rport, path, verbose, proto, method, domain, contact_domain, from_name, from_user, from_domain, from_tag, to_name, to_user, to_tag, to_domain, user_agent, localip, ppi, pai) = params
 
         from sippts.wssend import WsSend
 
@@ -324,6 +324,7 @@ def main():
         s.to_domain = to_domain
         s.to_tag = to_tag
         s.user_agent = user_agent
+        s.localip = localip
         s.verbose = verbose
         s.ppi = ppi
         s.pai = pai

@@ -377,6 +377,7 @@ Usage examples:
     log.add_argument('-v'       , help='Increase verbosity', dest='verbose', action="count")
 
     other = parser_wssend.add_argument_group('Other options')
+    other.add_argument('-local-ip', metavar='IP', type=str, help='Set local IP address (by default try to get it)', dest='localip', default='')
     other.add_argument('-h', '--help', help='Show this help', dest='help', action='count')
 
 
@@ -1169,10 +1170,11 @@ Payloads
         TOTAG = args.to_tag
         TODOMAIN = args.to_domain
         UA = args.user_agent
+        LOCALIP = args.localip
         PPI = args.ppi
         PAI = args.pai
 
-        return COMMAND, IPADDR, PORT, PATH, VERBOSE, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TOTAG, TODOMAIN, UA, PPI, PAI
+        return COMMAND, IPADDR, PORT, PATH, VERBOSE, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TOTAG, TODOMAIN, UA, LOCALIP, PPI, PAI
     elif COMMAND == 'enumerate':
         if args.help == 1:
             parser_enumerate.print_help()

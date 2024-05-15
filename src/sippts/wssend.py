@@ -39,6 +39,7 @@ class WsSend:
         self.verbose = '0'
         self.ppi = ''
         self.pai = ''
+        self.localip = ''
 
         self.msg = ''
         self.c = Color()
@@ -52,7 +53,23 @@ class WsSend:
         self.proto = self.proto.upper()
 
         # my IP address
-        local_ip = get_machine_default_ip()
+        local_ip = self.localip
+        if self.localip == '':
+            try:
+                local_ip = get_machine_default_ip()
+            except:
+                print(self.c.BRED + 'Error getting local IP')
+                print(self.c.BWHITE + 'Try with ' + self.c.BYELLOW + '-local-ip' + self.cBWHITE + ' param')
+                print(self.c.WHITE)
+                exit()
+
+        try:
+            local_ip = get_machine_default_ip()
+        except:
+            print(self.c.BRED + 'Error getting local IP')
+            print(self.c.BWHITE + 'Try with ' + self.c.BYELLOW + '-local-ip' + self.cBWHITE + ' param')
+            print(self.c.WHITE)
+            exit()
 
         # check method
         if self.method not in supported_methods:
