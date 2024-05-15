@@ -5,4 +5,3 @@ scapy
 ArpSpoof
 websocket-client
 rel
-#pyradamsa

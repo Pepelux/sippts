@@ -1,7 +1,7 @@
 [project]
 name = "sippts"
-version = "3.4.dev0"
-description = "Tools to audit VoIP servers and devices using SIP protocol"
+version = "4.0.dev0"
+description = "SIPPTS is a set of tools for auditing VoIP systems based on the SIP protocol"
 readme = "README.md"
 requires-python = ">=3.7"
 license = {file = "LICENSE.txt"}
@@ -12,7 +12,8 @@ authors = [
 ]
 
 maintainers = [
-  {name = "Victor Seva", email = "linuxmaniac@torreviejawireless.org" }
+  {name = "Victor Seva", email = "linuxmaniac@torreviejawireless.org" },
+  {name = "Jose Luis Verdeguer", email = "pepeluxx@gmail.com" }
 ]
 
 # Classifiers help users find your project by categorizing it.
@@ -41,6 +42,7 @@ maintainers = [
 #   "Programming Language :: Python :: 3.9",
 #   "Programming Language :: Python :: 3.10",
 #   "Programming Language :: Python :: 3.11",
+#   "Programming Language :: Python :: 3.12",
 #   "Programming Language :: Python :: 3 :: Only",
 # ]
 
