@@ -923,7 +923,7 @@ Payloads
         path = sysconfig.get_paths()["purelib"] + '/sippts/data/cve.csv'
         modulepath = sysconfig.get_paths()["purelib"] + '/sippts/'
         binpath = sysconfig.get_paths()["scripts"] + '/sippts'
-        giturl = 'https://raw.githubusercontent.com/Pepelux/sippts/4.0/'
+        giturl = 'https://raw.githubusercontent.com/Pepelux/sippts/master/'
         
         download_file(giturl + 'bin/sippts', binpath, 'bin/sippts')
 
