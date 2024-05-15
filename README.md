@@ -13,6 +13,151 @@ Yes. You can freely use, modify and distribute. If modified, please put a refere
 
 The purpose of this tool is to audit your own systems or to perform penetration tests on systems for which you have received express authorisation. I am not responsible for the misuse of this tool.
 
+# Usage #
+
+Show help:
+
+```
+sippts -h
+usage: sippts [-h] [-up] {scan,exten,rcrack,send,wssend,enumerate,leak,ping,invite,dump,dcrack,flood,sniff,spoof,tshark,rtpbleed,rtcpbleed,rtpbleedflood,rtpbleedinject} ...
+
+
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⣀⣀⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣄⣀⣀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣤⠤⠶⠒⠛⠉⠉⠉⠉⠀⠀⢀⣀⣀⣀⣤⣤⣤⣤⣤⣤⣤⣤⣬⣍⣙⣳⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⠴⠒⠋⠉⠀⠀⠀⢀⣀⣠⡤⠴⠖⠚⠛⠉⠉⠉⠀⣠⡶⠖⠲⣄⠀⠀⠀⠀⠀⠀⠀⠈⠉⢷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⡤⠖⠋⠁⠀⠀⠀⣀⣤⠴⠖⣛⣉⣁⠀⠀⠀⠀⠀⠀⠀⣀⣀⣠⡇⢹⡄⠀⠸⡆⠀⠀⠀⠀⠀⠀⠀⠀⠈⢿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⣀⡤⠞⠋⠀⠀⠀⢀⣠⠴⠚⠋⠁⠀⠀⡿⡏⠀⠈⣧⣤⠴⠖⠚⠛⠉⠉⠳⢄⡀⠀⣧⠀⠀⢷⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣷⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⢠⡞⠧⣄⠀⢀⣠⠴⠚⠉⠀⠀⠀⠀⠀⢀⣴⠇⢹⠀⠀⢸⡆⠀⠀⠀⠀⠀⠀⠀⠀⠉⣲⣿⣀⣠⣼⣦⣤⣀⣀⣀⡀⠀⢀⣀⣠⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⢀⡿⠀⠀⠈⣿⠉⠀⠀⠀⠀⠀⠀⠙⢄⣰⠏⠀⠀⠘⡇⠀⠀⣇⢀⣀⡤⠤⠖⠒⠛⠉⠉⠉⣁⣀⠀⠀⠀⠉⠙⠛⢿⣿⡛⠛⠛⢻⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⣸⣧⣄⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⢈⣿⡄⠀⠀⠀⣷⠴⠚⠋⠉⠀⠀⢀⣠⣴⡖⠛⠉⠿⢻⣿⣉⡉⠙⠓⢲⠦⢤⣈⠙⢶⣶⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⣰⡟⠿⡍⢷⢀⡇⠀⠀⠀⠀⠀⠀⠀⣠⣾⠏⣧⠀⢀⡞⠁⠀⠀⠀⠀⢠⡴⠋⠛⠻⣧⣤⡶⢿⡹⡟⠛⢯⣉⣿⢾⣧⣄⡈⠙⠲⢝⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⢠⣏⠙⢦⣹⣼⠀⠀⠀⠀⠀⠀⢀⣴⣾⠟⠁⢀⡏⢀⡞⠀⠀⠀⠀⠀⣰⣯⡟⡀⠀⣼⡏⢘⡢⢠⣷⣾⡿⠿⠿⣷⣤⣞⠀⠙⢦⡀⠀⠙⢿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⣿⣍⡓⣄⣿⣧⣤⣤⣤⣶⣶⠿⠟⠋⠀⠀⣠⣎⣠⠎⠘⢄⠀⠀⠀⢀⡏⠛⠙⠋⢸⠋⠧⠤⠗⣾⢻⠁⠀⠀⠀⠀⠈⠻⡳⡀⠀⠙⢦⠀⣠⡹⡟⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⣷⣤⣙⢾⣿⣭⡉⠉⠉⠁⠀⠀⣀⣠⠴⠚⠉⠉⠀⠀⠀⠈⠳⡀⠀⠘⣧⣤⢀⠀⢸⡶⣏⠙⣦⠹⡜⢦⡀⠀⠀⠀⠀⢀⡇⣿⣶⣶⣾⣿⣥⡇⠹⡌⠻⣄⠀⠀⠀⠀⠀⠀⠀⠀
+⣿⠤⢬⣿⣇⠈⢹⡟⠛⠛⠛⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢆⠀⢻⡹⡎⠃⠀⠳⡄⣽⠛⠦⠉⠲⣍⣓⣒⢒⣒⣉⡴⠋⣟⠙⢲⣿⠘⠃⠀⣷⠀⠙⢧⡀⠀⠀⠀⠀⠀⠀
+⣿⠶⠒⠺⣿⡀⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢣⡀⠳⡄⢀⡀⠀⠙⠮⣗⠚⢠⡖⠲⣌⣉⡭⣍⡡⣞⠓⣾⠉⣽⠃⢠⡄⣼⣿⠀⠀⠈⠳⡄⠀⠀⠀⠀⠀
+⠸⡟⠉⣉⣻⣧⣼⠿⣦⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⣄⠙⢮⡿⢿⡃⠀⠈⠑⠶⢽⣒⣃⣘⣲⣤⣗⣈⣹⠵⠛⠁⠀⠀⡴⣻⠃⠀⠀⠀⠀⠹⣆⠀⠀⠀⠀
+⠀⠹⣯⣁⣠⠼⠿⣿⡲⠿⠷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢦⠀⠙⠳⣄⡀⠀⣄⣶⣄⠀⠉⠉⠉⣉⡉⠉⠀⠀⠘⣶⣴⣦⠞⠁⠀⠀⠀⠀⠀⠀⠘⣧⠀⠀⠀
+⠀⠀⠘⣧⡤⠖⢋⣩⠿⣶⣤⣈⣙⣷⣤⣀⣠⣤⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢳⡀⠀⠀⠉⠓⠶⢽⣼⣆⡀⠀⠀⢿⣿⣶⣀⣀⡬⠷⠚⠁⣀⣀⣀⠀⢰⣿⠿⡇⠀⠘⣧⠀⠀
+⠀⠀⠀⠀⠙⠾⣏⣤⠞⢁⡞⠉⣿⠋⣹⠉⢹⠀⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⡄⠀⠀⠀⠀⠀⠀⠉⠉⠉⠉⠉⠉⠉⠉⠀⣤⣤⣄⠀⣿⠙⢻⠆⠀⠓⢒⣁⡤⠴⠺⡆⠀
+⠀⠀⠀⠀⠀⠀⠀⠙⠒⠻⠤⣴⣇⣀⣿⣀⣾⡤⠿⢷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣆⠀⠀⠀⠀⠀⣀⣀⡀⠀⢸⠿⢷⡄⠀⣿⣀⡿⠀⢈⣉⡭⠴⠒⠋⠉⠀⠀⠀⠀⢻⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠻⣦⣀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢆⠀⠀⠀⠰⣟⠛⡇⠀⠘⠧⠞⢁⣀⡤⠴⠒⠋⠉⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣼⠃
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠳⣦⣀⠀⠀⠀⠀⠀⠀⠈⢧⠀⠀⠀⠉⢋⣁⡤⠴⠚⠋⠉⠀⠀⠀⠀⠀⠀⠀⢀⣀⣠⣴⠶⠚⠛⠉⢉⣽⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠷⣤⡀⠀⠀⠀⠀⠘⡆⠴⠒⠋⠉⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣤⠴⠖⠛⠉⠉⠉⠉⠙⠛⠋⠉⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢛⠷⠦⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀⢠⠴⡖⠛⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+                                                               SIPPTS version 4.0 (last version 3.4)
+                                                                  CVE version 0.1 (updated)
+                                                https://github.com/Pepelux/sippts
+                                        by Pepelux - https://twitter.com/pepeluxx
+
+ -= SIPPTS is a set of tools for auditing VoIP systems based on the SIP protocol =-
+
+Commands:
+  {scan,exten,rcrack,send,wssend,enumerate,leak,ping,invite,dump,dcrack,flood,sniff,spoof,tshark,rtpbleed,rtcpbleed,rtpbleedflood,rtpbleedinject}
+    scan                                          Fast SIP scanner
+    exten                                         Search SIP extensions of a PBX
+    rcrack                                        Remote password cracker
+    send                                          Send a customized message
+    wssend                                        Send a customized message over WS
+    enumerate                                     Enumerate methods of a SIP server
+    leak                                          Exploit SIP Digest Leak vulnerability
+    ping                                          SIP ping
+    invite                                        SIP INVITE attack
+    dump                                          Dump SIP digest authentications from a PCAP file
+    dcrack                                        SIP digest authentication cracking
+    flood                                         Flood a SIP server
+    sniff                                         SIP network sniffing
+    spoof                                         ARP Spoofing tool
+    tshark                                        Filter data from a PCAP file with TShark
+    rtpbleed                                      Detect RTPBleed vulnerability (send RTP streams)
+    rtcpbleed                                     Detect RTPBleed vulnerability (send RTCP streams)
+    rtpbleedflood                                 Exploit RTPBleed vulnerability (flood RTP)
+    rtpbleedinject                                Exploit RTPBleed vulnerability (inject WAV file)
+
+Options:
+  -h, --help                                      show this help message and exit
+  -up                                             Update scripts
+
+Command help:
+  sippts <command> -h
+
+Commands usage help:
+  sippts -up
+  sippts scan -h
+  sippts rtpbleed -h
+```
+Show help for command sipscan:
+
+```
+sippts scan -h
+usage: sippts scan [-i IP|HOST] [-f FILE] [-r REMOTE_PORT] [-p PROTOCOL] [-proxy IP:PORT] [-m METHOD] [-d DOMAIN] [-cd CONTACT_DOMAIN] [-fn FROM_NAME] [-fu FROM_USER] [-fd FROM_DOMAIN] [-tn TO_NAME] [-tu TO_USER] [-td TO_DOMAIN]
+                   [-ua USER_AGENT] [-ppi PPI] [-pai PAI] [-v] [-vv] [-nocolor] [-o FILE] [-cve] [-th THREADS] [-ping] [-fp] [-random] [-local-ip IP] [-h]
+
+
+┏┓┳┏┓  ┏┓┏┓┏┓┳┓
+┗┓┃┃┃  ┗┓┃ ┣┫┃┃
+┗┛┻┣┛  ┗┛┗┛┛┗┛┗
+
+  Module scan is a fast SIP scanner using multithread that can check several IPs and port ranges. It works with UDP, TCP and TLS protocols.
+
+Target:
+  -i IP|HOST          Host/IP address/network (ex: mysipserver.com | 192.168.0.10 | 192.168.0.0/24)
+  -f FILE             File with several IPs or network ranges
+  -r REMOTE_PORT      Ports to scan. Ex: 5060 | 5070,5080 | 5060-5080 | 5060,5062,5070-5080 | ALL for 1-65536 (default: 5060)
+  -p PROTOCOL         Protocol: udp|tcp|tls|all (default: udp)
+  -proxy IP:PORT      Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)
+
+Headers:
+  -m METHOD           Method used to scan: options, invite, register (default: options)
+  -d DOMAIN           SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)
+  -cd CONTACT_DOMAIN  Domain or IP address for Contact header. Ex: 10.0.1.2
+  -fn FROM_NAME       From Name. Ex: Bob
+  -fu FROM_USER       From User (default: 100)
+  -fd FROM_DOMAIN     From Domain. Ex: 10.0.0.1
+  -tn TO_NAME         To Name. Ex: Alice
+  -tu TO_USER         To User (default: 100)
+  -td TO_DOMAIN       To Domain. Ex: 10.0.0.1
+  -ua USER_AGENT      User-Agent header (default: pplsip)
+  -ppi PPI            P-Preferred-Identity
+  -pai PAI            P-Asserted-Identity
+
+Log:
+  -v                  Increase verbosity
+  -vv                 Increase more verbosity
+  -nocolor            Show result without colors
+  -o FILE             Save data into a log file
+  -cve                Show possible CVEs
+
+Other options:
+  -th THREADS         Number of threads (default: 200)
+  -ping               Ping host before scan
+  -fp                 Try to fingerprinting
+  -random             Randomize target hosts
+  -local-ip IP        Set local IP address (by default try to get it)
+  -h, --help          Show this help
+
+Usage examples:
+  Searching for SIP services and devices with default ports (5060/udp) on the local network
+     sippts scan -i 192.168.0.0/24
+  Extend the port range from 5060 to 5080 and look for UDP, TCP and TLS services
+     sippts scan -i 192.168.0.0/24 -r 5060-5080 -p all
+  Load several target IP addresses from a file
+     sippts scan -f targets.txt
+  Random scanning for non-sequential scanning of IP ranges
+     sippts scan -f targets.txt -random
+  Establishing an unidentified user agent as an attack tool
+     sippts scan -ua Grandstream
+  Scan all ports and protocols of an address range using 500 threads (slow)
+     sippts scan -f targets.txt -r all -p all -th 500 -ua Grandstream
+  Typical scanning for large ranges
+     sippts scan -f targets.txt -r 5060-5080 -p all -th 500 -ua Grandstream -v -fp -o output.txt
+```
+Update scripts:
+
+```
+sippts -up
+```
+
 # Set of tools for penetration test over SIP protocol #
 
 Sippts is a set of tools for auditing VoIP servers and devices using the SIP protocol. Sippts is programmed in Python and consists of the following commands or modules:
