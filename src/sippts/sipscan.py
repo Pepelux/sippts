@@ -544,7 +544,8 @@ class SipScan:
                         val = check_model(headers['ua'], fp, sip_type, self.cvelist)
                         if val != '':
                             for v in val:
-                                self.cve.append(v)
+                                if v not in self.cve:
+                                    self.cve.append(v)
             except socket.timeout:
                 pass
             except:
