@@ -11,11 +11,11 @@ Yes. You can freely use, modify and distribute. If modified, please put a refere
 
 # Can be use sippts for illegal purposes? #
 
-Most security tools can be used for illegal purposes, but the purpose of this tool is to check the security of your own servers and not to use to do bad things. I am not responsible for the misuse of this tool.
+The purpose of this tool is to audit your own systems or to perform penetration tests on systems for which you have received express authorisation. I am not responsible for the misuse of this tool.
 
 # Set of tools for penetration test over SIP protocol #
 
-Sippts is a set of tools to audit VoIP servers and devices using SIP protocol. Sippts is programmed in Perl script and the tools are:
+Sippts is a set of tools for auditing VoIP servers and devices using the SIP protocol. Sippts is programmed in Python and consists of the following commands or modules:
   * _**Sipscan**_ is a fast scanner for SIP services that uses multithread. Sipscan can check several IPs and port ranges and it can work over UDP or TCP.
 
 [Click here to read more about SIPscan](https://github.com/Pepelux/sippts/wiki/SIPscan)
@@ -63,6 +63,10 @@ Sippts is a set of tools to audit VoIP servers and devices using SIP protocol. S
   * _**SipTshark**_ Extract data of SIP protocol from a PCAP file.
 
 [Click here to read more about SIPTshark](https://github.com/Pepelux/sippts/wiki/SIPTshark)
+
+  * _**SipPing**_ SIP ping.
+
+[Click here to read more about SIPPing](https://github.com/Pepelux/sippts/wiki/SIPPing)
 
   * _**RTPBleed**_ to exploit RTPBleed vulnerability sending data to RTP ports.
 

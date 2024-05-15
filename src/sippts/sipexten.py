@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 __author__ = 'Jose Luis Verdeguer'
-__version__ = '3.3'
+__version__ = '4.0'
 __license__ = "GPL"
 __copyright__ = "Copyright (C) 2015-2022, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
@@ -156,9 +156,6 @@ class SipExten:
 
         print(self.c.BWHITE + '[✓] Used threads: ' +
               self.c.GREEN + '%d' % nthreads)
-        if nthreads > 800:
-            print(self.c.BRED +
-                  '[x] More than 800 threads can cause socket problems')
         if self.filter != '':
             print(self.c.BWHITE +
                   '[✓] Filter response by code: ' + self.c.CYAN + '%s' % self.filter)

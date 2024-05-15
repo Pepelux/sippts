@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 __author__ = 'Jose Luis Verdeguer'
-__version__ = '3.3'
+__version__ = '4.0'
 __license__ = "GPL"
 __copyright__ = "Copyright (C) 2015-2022, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
@@ -15,7 +15,7 @@ import ssl
 import re
 import time
 from IPy import IP
-from .lib.functions import create_message, parse_message, get_machine_default_ip, ip2long, long2ip, get_free_port, ping, fingerprinting, format_time
+from .lib.functions import create_message, parse_message, get_machine_default_ip, ip2long, long2ip, get_free_port, ping, fingerprinting, format_time, load_cve, check_model
 from .lib.color import Color
 from .lib.logos import Logo
 from itertools import product
@@ -51,12 +51,16 @@ class SipScan:
         self.ppi = ''
         self.pai = ''
         self.localip = ''
+        self.getcve = 'False'
 
         self.found = []
         self.line = ['-', '\\', '|', '/']
         self.pos = 0
         self.quit = False
         self.totaltime = 0
+        self.fail = 0
+        self.cvelist = []
+        self.cve = []            
 
         self.c = Color()
 
@@ -75,6 +79,10 @@ class SipScan:
             self.ping = 'True'
         else:
             self.ping = 'False'
+        if self.getcve == 1:
+            self.getcve = 'True'
+        else:
+            self.getcve = 'False'
 
         # check method
         if self.method not in supported_methods:
@@ -120,6 +128,9 @@ class SipScan:
                     ports.append(x)
             else:
                 ports.append(p)
+                
+        # load cve file
+        self.cvelist = load_cve()
 
         # create a list of IP addresses
         if self.file != '':
@@ -299,9 +310,6 @@ class SipScan:
                   self.c.GREEN + '%s' % self.user_agent)
         print(self.c.BWHITE + '[✓] Used threads: ' +
               self.c.GREEN + '%d' % nthreads)
-        if nthreads > 800:
-            print(self.c.BRED +
-                  '[x] More than 800 threads can cause socket problems')
         if self.file != '':
             print(self.c.BWHITE + '[✓] Loading data from file: ' +
                   self.c.CYAN + '%s' % self.file)
@@ -338,25 +346,26 @@ class SipScan:
                                     random.shuffle(values2)
 
                                 for j, val2 in enumerate(values2):
-                                    val_ipaddr = val2[0]
-                                    val_port = int(val2[1])
-                                    val_proto = val2[2]
-                                    scan = 1
+                                    if self.quit == False:
+                                        val_ipaddr = val2[0]
+                                        val_port = int(val2[1])
+                                        val_proto = val2[2]
+                                        scan = 1
 
-                                    if self.proto == 'ALL' and self.rport == '5060-5061':
-                                        if val_port == 5060 and val_proto == 'TLS':
-                                            scan = 0
-                                        elif val_port == 5061 and (val_proto == 'UDP' or val_proto == 'TCP'):
-                                            scan = 0
+                                        if self.proto == 'ALL' and self.rport == '5060-5061':
+                                            if val_port == 5060 and val_proto == 'TLS':
+                                                scan = 0
+                                            elif val_port == 5061 and (val_proto == 'UDP' or val_proto == 'TCP'):
+                                                scan = 0
 
-                                    if scan == 1:
-                                        if self.host != '' and self.domain == '':
-                                            self.domain = self.host
-                                        if self.domain == '':
-                                            self.domain = val_ipaddr
+                                        if scan == 1:
+                                            if self.host != '' and self.domain == '':
+                                                self.domain = self.host
+                                            if self.domain == '':
+                                                self.domain = val_ipaddr
 
-                                        executor.submit(self.scan_host, val_ipaddr,
-                                                        val_port, val_proto)
+                                            executor.submit(self.scan_host, val_ipaddr,
+                                                            val_port, val_proto)
                     except KeyboardInterrupt:
                         print(self.c.RED + '\nYou pressed Ctrl+C!' + self.c.WHITE)
                         self.quit = True
@@ -369,6 +378,8 @@ class SipScan:
 
         self.found.sort()
         self.print()
+        if len(self.cve) > 0:
+            self.print_cve()
 
     def scan_host(self, ipaddr, port, proto):
         if self.quit == False:
@@ -384,6 +395,12 @@ class SipScan:
                 else:
                     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             except socket.error:
+                self.fail += 1
+                
+                if self.fail > 50:
+                    print(self.c.RED + 'Too many socket connection errors. Consider reducing the number of threads or increasing the number of connections using ulimit')
+                    self.quit = True
+                    return
                 print(self.c.RED + 'Failed to create socket')
                 return
 
@@ -497,18 +514,16 @@ class SipScan:
 
                     response = '%s %s' % (
                         headers['response_code'], headers['response_text'])
-                    if self.fp == 1:
-                        fps = fingerprinting(
-                            self.method, resp.decode(), headers, self.verbose)
-                        
-                        fp = ''
-                        for f in fps:
-                            if f == '':
-                                fp = '%s' % f
-                            else:
-                                fp += '/%s' % f
-                    else:
-                        fp = ''
+
+                    fps = fingerprinting(
+                        self.method, resp.decode(), headers, self.verbose)
+                    
+                    fp = ''
+                    for f in fps:
+                        if f == '':
+                            fp = '%s' % f
+                        else:
+                            fp += '/%s' % f
 
                     if fp[0:1] == '/':
                         fp = fp[1:]
@@ -524,6 +539,12 @@ class SipScan:
                         else:
                             print(self.c.WHITE + 'Response <%s %s> from %s:%d/%s without User-Agent' %
                                   (headers['response_code'], headers['response_text'], ip, rport, proto))
+
+                    if headers['ua'] != '' and self.getcve == "True":
+                        val = check_model(headers['ua'], fp, sip_type, self.cvelist)
+                        if val != '':
+                            for v in val:
+                                self.cve.append(v)
             except socket.timeout:
                 pass
             except:
@@ -642,3 +663,72 @@ class SipScan:
             f.close()
 
         self.found.clear()
+
+
+    def print_cve(self):
+        delen = len('Device')
+        velen = len('Version')
+        cvlen = len('CVE')
+        tylen = len('Type')
+        urlen = len('URL')
+
+        for x in self.cve:
+            (de, ve, cv, ty, ur) = x.split('###')
+            if len(de) > delen:
+                delen = len(de)
+            if len(ve) > velen:
+                velen = len(ve)
+            if len(cv) > cvlen:
+                cvlen = len(cv)
+            if len(ty) > tylen:
+                tylen = len(ty)
+            if len(ur) > urlen:
+                urlen = len(ur)
+
+        tlen = delen+velen+cvlen+tylen+urlen+14
+
+        print(self.c.WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE + '| ' + self.c.BYELLOW + 'Potential known vulnerabilities'.ljust(tlen-2) + self.c.WHITE + ' |')
+        print(self.c.WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE +
+                '| ' + self.c.BWHITE + 'Device'.ljust(delen) + self.c.WHITE +
+                ' | ' + self.c.BWHITE + 'Version'.ljust(velen) + self.c.WHITE +
+                ' | ' + self.c.BWHITE + 'CVE'.ljust(cvlen) + self.c.WHITE +
+                ' | ' + self.c.BWHITE + 'Type'.ljust(tylen) + self.c.WHITE +
+                ' | ' + self.c.BWHITE + 'URL'.ljust(urlen) + self.c.WHITE + ' |')
+        print(self.c.WHITE + ' ' + '-' * tlen)
+
+        if self.ofile != '':
+            f = open(self.ofile, 'a+')
+
+        if len(self.cve) == 0:
+            print(self.c.WHITE + '| ' + self.c.WHITE +
+                  'Nothing found'.ljust(tlen-2) + ' |')
+        else:
+            if self.ofile != '' and len(self.cve) > 0:
+                f.write('-----\n')
+
+            for x in self.cve:
+                (de, ve, cv, ty, ur) = x.split('###')
+
+                print(self.c.WHITE +
+                        '| ' + self.c.BGREEN + '%s' % de.ljust(delen) + self.c.WHITE +
+                        ' | ' + self.c.GREEN + '%s' % ve.ljust(velen) + self.c.WHITE +
+                        ' | ' + self.c.GREEN + '%s' % cv.ljust(cvlen) + self.c.WHITE +
+                        ' | ' + self.c.GREEN + '%s' % ty.ljust(tylen) + self.c.WHITE +
+                        ' | ' + self.c.CYAN + '%s' % ur.ljust(urlen) + self.c.WHITE + ' |')
+
+                if self.ofile != '':
+                    f.write('%s %s => %s - %s - %s\n' %
+                            (de, ve, cv, ty, ur))
+
+            if self.ofile != '' and len(self.cve) > 0:
+                f.write('-----\n')
+
+        print(self.c.WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE)
+
+        if self.ofile != '':
+            f.close()
+
+        self.cve.clear()

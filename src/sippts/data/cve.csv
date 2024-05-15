@@ -1,0 +1,377 @@
+version;0.1;;;
+Asterisk;<= 1.4.11;CVE-2008-5744;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2008-5744
+Asterisk;>= 1.2 and <= 1.2.27;CVE-2008-5744;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2008-5744
+Asterisk;>= 1.2.26 and <= 1.2.30.2;CVE-2008-5558;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2008-5558
+Asterisk;<= 1.4.11;CVE-2008-5396;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2008-5396
+Asterisk;>= 1.2 and <= 1.2.27;CVE-2008-5396;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2008-5396
+Asterisk;>= 1.2.0 and <= 1.2.30.3;CVE-2009-0041;Enumerate valid usernames;https://www.cvedetails.com/cve/CVE-2009-0041
+Asterisk;>= 1.4 and <= 1.4.19;CVE-2009-0041;Enumerate valid usernames;https://www.cvedetails.com/cve/CVE-2009-0041
+Asterisk;>= 1.6.0 and <= 1.6.0.3;CVE-2009-0041;Enumerate valid usernames;https://www.cvedetails.com/cve/CVE-2009-0041
+Asterisk;>= 1.2.0 and < 1.2.34;CVE-2009-2346;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2009-2346
+Asterisk;>= 1.4.0 and < 1.4.23;CVE-2009-2346;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2009-2346
+Asterisk;>= 1.6.0 and < 1.6.1;CVE-2009-2346;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2009-2346
+Asterisk;>= 1.3 and < 1.3.0.2;CVE-2009-2346;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2009-2346
+Asterisk;>= 1.6.1 and < 1.6.1.8;CVE-2009-3723;Allow calls on prohibited networks;https://www.cvedetails.com/cve/CVE-2009-3723
+Asterisk;>= 1.6.0 and <= 1.6.10;CVE-2010-0441;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2010-0441
+Asterisk;1.8.7;CVE-2011-4063;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2011-4063
+Asterisk;10.0.0;CVE-2011-4063;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2011-4063
+Asterisk;10.0.0;CVE-2012-0885;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2012-0885
+Asterisk;>= 1.8.0 and <= 1.8.8.1;CVE-2012-0885;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2012-0885
+Asterisk;<= 10.7.0;CVE-2012-2186;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2012-2186
+Asterisk;<= 1.8.15.0;CVE-2012-2186;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2012-2186
+Asterisk;>= 10.0.0 and <= 10.3.0;CVE-2012-2414;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2012-2414
+Asterisk;>= 1.8.0 and <= 1.8.11.0;CVE-2012-2414;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2012-2414
+Asterisk;>= 1.6.2.0 and <= 1.6.2.23;CVE-2012-2414;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2012-2414
+Asterisk;>= 10.0.0 and <= 10.3.0;CVE-2012-2415;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2012-2415
+Asterisk;>= 1.8.0 and <= 1.8.11.0;CVE-2012-2415;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2012-2415
+Asterisk;>= 1.6.2.0 and <= 1.6.2.23;CVE-2012-2415;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2012-2415
+Asterisk;>= 10.0.0 and <= 10.3.0;CVE-2012-2416;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2012-2416
+Asterisk;>= 1.8.0 and <= 1.8.10;CVE-2012-2416;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2012-2416
+Asterisk;>= 1.6.2.0 and <= 1.6.2.23;CVE-2012-2416;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2012-2416
+Asterisk;<= 10.4.0;CVE-2012-2948;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2012-2948
+Asterisk;<= 1.8.12.0;CVE-2012-2948;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2012-2948
+Asterisk;>= 11.0.0 and <= 11.2.1;CVE-2013-2264;Enumerate account names;https://www.cvedetails.com/cve/CVE-2013-2264
+Asterisk;>= 10.0.0 and <= 10.12.1;CVE-2013-2264;Enumerate account names;https://www.cvedetails.com/cve/CVE-2013-2264
+Asterisk;>= 1.8.0 and <= 1.8.20.1;CVE-2013-2264;Enumerate account names;https://www.cvedetails.com/cve/CVE-2013-2264
+Asterisk;>= 11.0.0 and <= 11.2.1;CVE-2013-2685;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2013-2685
+Asterisk;>=11.0.0 and >= 11.2.1;CVE-2013-2686;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2013-2686
+Asterisk;>= 1.8.0 and <= 1.8.20.1;CVE-2013-2686;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2013-2686
+Asterisk;>= 10.0.0 and <= 10.12.1;CVE-2013-2686;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2013-2686
+Asterisk;= 13.0.0 and <= 14.4.0;CVE-2017-9358;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2017-9358
+Asterisk;>= 15.0 and < 15.4.1;CVE-2018-12228;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2018-12228
+Asterisk;>= 17.0 and < 17.8.1;CVE-2020-28242;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2020-28242
+Asterisk;>= 18.0 and < 18.0.1;CVE-2020-28242;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2020-28242
+Asterisk;>= 16.0 and < 16.14.1;CVE-2020-28242;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2020-28242
+Asterisk;>= 13.0 and < 13.37.1;CVE-2020-28242;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2020-28242
+Asterisk;<= 16.8.0;CVE-2020-28242;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2020-28242
+Asterisk;>= 16.0.0 and < 16.14.1;CVE-2020-28327;Remote code execution (DoS);https://www.cvedetails.com/cve/CVE-2020-28327
+Asterisk;>= 18.0.0 and < 18.0.1;CVE-2020-28327;Remote code execution (DoS);https://www.cvedetails.com/cve/CVE-2020-28327
+Asterisk;>= 17.0.0 and < 17.8.1;CVE-2020-28327;Remote code execution (DoS);https://www.cvedetails.com/cve/CVE-2020-28327
+Asterisk;>= 13.0.0 and < 13.37.1;CVE-2020-28327;Remote code execution (DoS);https://www.cvedetails.com/cve/CVE-2020-28327
+Asterisk;<= 16.8.0;CVE-2021-37706;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2021-37706
+Asterisk;16.8.0;CVE-2021-46837;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2021-46837
+Asterisk;16.8.0;CVE-2022-21723;Out-of-bound read access;https://www.cvedetails.com/cve/CVE-2022-21723
+Asterisk;<= 16.8.0;CVE-2022-23608;Hash key shared;https://www.cvedetails.com/cve/CVE-2022-23608
+Cisco Spa 8000;<= 6.1.10;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 8000;6.1.3;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 8000;5.1.12;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 8000;;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 8800;<= 6.1.7;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 8800;;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 2102;<= 5.2.12;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 2102;5.2.10;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 2102;5.2.5;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 2102;5.2.3;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 2102;;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 3102;<= 5.1.10;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 3102;3.3.6;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 3102;5.1.7;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 3102;;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 500;<= 7.4.8;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 500;7.4.6;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 500;7.4.4;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 500;7.4.3;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 500;7.3.7;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 500;7.4.7;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 501g;;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 502g;;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 504g;;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 508g;;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 509g;;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 512g;;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 514g;;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 525g;;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 525g2;;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
+Cisco Spa 501g;;CVE-2014-3312;Gain privilege;https://www.cvedetails.com/cve/CVE-2014-3312
+Cisco Spa 502g;;CVE-2014-3312;Gain privilege;https://www.cvedetails.com/cve/CVE-2014-3312
+Cisco Spa 504g;;CVE-2014-3312;Gain privilege;https://www.cvedetails.com/cve/CVE-2014-3312
+Cisco Spa 508g;;CVE-2014-3312;Gain privilege;https://www.cvedetails.com/cve/CVE-2014-3312
+Cisco Spa 509g;;CVE-2014-3312;Gain privilege;https://www.cvedetails.com/cve/CVE-2014-3312
+Cisco Spa 512g;;CVE-2014-3312;Gain privilege;https://www.cvedetails.com/cve/CVE-2014-3312
+Cisco Spa 514g;;CVE-2014-3312;Gain privilege;https://www.cvedetails.com/cve/CVE-2014-3312
+Cisco Spa 525g;;CVE-2014-3312;Gain privilege;https://www.cvedetails.com/cve/CVE-2014-3312
+Cisco Spa 525g2;;CVE-2014-3312;Gain privilege;https://www.cvedetails.com/cve/CVE-2014-3312
+Cisco Spa 962;;CVE-2014-3312;Gain privilege;https://www.cvedetails.com/cve/CVE-2014-3312
+Cisco Spa 942;;CVE-2014-3312;Gain privilege;https://www.cvedetails.com/cve/CVE-2014-3312
+Cisco Spa 941;;CVE-2014-3312;Gain privilege;https://www.cvedetails.com/cve/CVE-2014-3312
+Cisco Spa 922;;CVE-2014-3312;Gain privilege;https://www.cvedetails.com/cve/CVE-2014-3312
+Cisco Spa 901;;CVE-2014-3312;Gain privilege;https://www.cvedetails.com/cve/CVE-2014-3312
+Cisco Spa 303;;CVE-2014-3312;Gain privilege;https://www.cvedetails.com/cve/CVE-2014-3312
+Cisco Spa 301;;CVE-2014-3312;Gain privilege;https://www.cvedetails.com/cve/CVE-2014-3312
+Cisco Spa 501g;;CVE-2014-3313;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2014-3313
+Cisco Spa 502g;;CVE-2014-3313;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2014-3313
+Cisco Spa 504g;;CVE-2014-3313;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2014-3313
+Cisco Spa 508g;;CVE-2014-3313;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2014-3313
+Cisco Spa 509g;;CVE-2014-3313;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2014-3313
+Cisco Spa 512g;;CVE-2014-3313;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2014-3313
+Cisco Spa 514g;;CVE-2014-3313;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2014-3313
+Cisco Spa 525g;;CVE-2014-3313;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2014-3313
+Cisco Spa 525g2;;CVE-2014-3313;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2014-3313
+Cisco Spa 962;;CVE-2014-3313;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2014-3313
+Cisco Spa 942;;CVE-2014-3313;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2014-3313
+Cisco Spa 941;;CVE-2014-3313;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2014-3313
+Cisco Spa 922;;CVE-2014-3313;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2014-3313
+Cisco Spa 901;;CVE-2014-3313;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2014-3313
+Cisco Spa 303;;CVE-2014-3313;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2014-3313
+Cisco Spa 301;;CVE-2014-3313;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2014-3313
+Cisco Spa 501g;;CVE-2015-0670;Gain privilege;https://www.cvedetails.com/cve/CVE-2015-0670
+Cisco Spa 502g;;CVE-2015-0670;Gain privilege;https://www.cvedetails.com/cve/CVE-2015-0670
+Cisco Spa 504g;;CVE-2015-0670;Gain privilege;https://www.cvedetails.com/cve/CVE-2015-0670
+Cisco Spa 508g;;CVE-2015-0670;Gain privilege;https://www.cvedetails.com/cve/CVE-2015-0670
+Cisco Spa 509g;;CVE-2015-0670;Gain privilege;https://www.cvedetails.com/cve/CVE-2015-0670
+Cisco Spa 512g;;CVE-2015-0670;Gain privilege;https://www.cvedetails.com/cve/CVE-2015-0670
+Cisco Spa 514g;;CVE-2015-0670;Gain privilege;https://www.cvedetails.com/cve/CVE-2015-0670
+Cisco Spa 525g;;CVE-2015-0670;Gain privilege;https://www.cvedetails.com/cve/CVE-2015-0670
+Cisco Spa 525g2;;CVE-2015-0670;Gain privilege;https://www.cvedetails.com/cve/CVE-2015-0670
+Cisco Spa 303;;CVE-2015-0670;Gain privilege;https://www.cvedetails.com/cve/CVE-2015-0670
+Cisco Spa 301;;CVE-2015-0670;Gain privilege;https://www.cvedetails.com/cve/CVE-2015-0670
+Cisco Spa 300;7.5.5;CVE-2015-0670;Gain privilege;https://www.cvedetails.com/cve/CVE-2015-0670
+Cisco Spa 302d;;CVE-2015-0670;Gain privilege;https://www.cvedetails.com/cve/CVE-2015-0670
+Cisco Spa 500;7.5.5;CVE-2015-0670;Gain privilege;https://www.cvedetails.com/cve/CVE-2015-0670
+Digium;16.8;CVE-2020-28327;Remote code execution (DoS);https://www.cvedetails.com/cve/CVE-2020-28327
+Digium;>= 18.0.0 and < 18.2.2;CVE-2021-46837;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2021-46837
+Digium;>= 17.0.0 and < 17.9.3;CVE-2021-46837;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2021-46837
+Digium;>= 16.0.0 and < 16.16.2;CVE-2021-46837;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2021-46837
+Freeswitch;1.2;CVE-2013-2238;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2013-2238
+Freeswitch;<= 1.4.21;CVE-2015-7392;Execute code;https://www.cvedetails.com/cve/CVE-2015-7392
+Freeswitch;1.6.0;CVE-2015-7392;Execute code;https://www.cvedetails.com/cve/CVE-2015-7392
+Freeswitch;<= 1.8.2;CVE-2018-19911;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2018-19911
+Freeswitch;>= 1.6.10;CVE-2019-19492;Default password;https://www.cvedetails.com/cve/CVE-2019-19492
+Freeswitch;<= 1.10.1;CVE-2019-19492;Default password;https://www.cvedetails.com/cve/CVE-2019-19492
+Freeswitch;< 1.10.7;CVE-2021-37624;Gain privilege;https://www.cvedetails.com/cve/CVE-2021-37624
+Freeswitch;< 1.10.7;CVE-2021-41105;Denial of service(DoS);https://www.cvedetails.com/cve/CVE-2021-41105
+Freeswitch;< 1.10.7;CVE-2021-41145;Denial of service(DoS);https://www.cvedetails.com/cve/CVE-2021-41145
+Freeswitch;< 1.10.6;CVE-2021-41157;Gain privilege;https://www.cvedetails.com/cve/CVE-2021-41157
+Freeswitch;< 1.10.7;CVE-2021-41158;Information leak;https://www.cvedetails.com/cve/CVE-2021-41158
+Freeswitch;< 1.10.10;CVE-2023-40018;Memory corruption;https://www.cvedetails.com/cve/CVE-2023-40018
+Freeswitch;< 1.10.10;CVE-2023-40019;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2023-40019
+Freeswitch;< 1.10.11;CVE-2023-51443;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2023-51443
+Grandstream Budgetone 101;<= 1.0.6.7;CVE-2005-2581;Denial of service(DoS);https://www.cvedetails.com/cve/CVE-2005-2581
+Grandstream Bt-100;;CVE-2005-2182;Spoof messages;https://www.cvedetails.com/cve/CVE-2005-2182
+Grandstream Budgetone 102;<= 1.0.6.7;CVE-2005-2581;Denial of service(DoS);https://www.cvedetails.com/cve/CVE-2005-2581
+Grandstream GXP2000;1.1.0.5;CVE-2006-5231;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2006-5231
+Grandstream Budgetone 200;1.1.1.5;CVE-2007-1590;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2007-1590
+Grandstream Budgetone 200;1.1.1.14;CVE-2007-1590;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2007-1590
+Grandstream Gxv-3000;1.0.0.18;CVE-2007-4498;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2007-4498
+Grandstream Gxv-3000;1.0.0.6;CVE-2007-4498;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2007-4498
+Grandstream Gxv-3000;1.0.1.7;CVE-2007-4498;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2007-4498
+Grandstream Ht488;0.1;CVE-2007-5788;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2007-5788
+Grandstream Ht488;0.1;CVE-2007-5789;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2007-5789
+Grandstream GXV3501;;CVE-2013-3962;Cross-site scripting (XSS);https://www.cvedetails.com/cve/CVE-2013-3962
+Grandstream GXV3504;;CVE-2013-3962;Cross-site scripting (XSS);https://www.cvedetails.com/cve/CVE-2013-3962
+Grandstream GXV3601;;CVE-2013-3962;Cross-site scripting (XSS);https://www.cvedetails.com/cve/CVE-2013-3962
+Grandstream GXV3601hd/ll;;CVE-2013-3962;Cross-site scripting (XSS);https://www.cvedetails.com/cve/CVE-2013-3962
+Grandstream GXV3611hd/ll;;CVE-2013-3962;Cross-site scripting (XSS);https://www.cvedetails.com/cve/CVE-2013-3962
+Grandstream GXV3615w/p;;CVE-2013-3962;Cross-site scripting (XSS);https://www.cvedetails.com/cve/CVE-2013-3962
+Grandstream GXV3651fhd;;CVE-2013-3962;Cross-site scripting (XSS);https://www.cvedetails.com/cve/CVE-2013-3962
+Grandstream GXV3662hd;;CVE-2013-3962;Cross-site scripting (XSS);https://www.cvedetails.com/cve/CVE-2013-3962
+Grandstream GXV3615wp;;CVE-2013-3962;Cross-site scripting (XSS);https://www.cvedetails.com/cve/CVE-2013-3962
+Grandstream GXV3500;;CVE-2013-3962;Cross-site scripting (XSS);https://www.cvedetails.com/cve/CVE-2013-3962
+Grandstream GXV3501;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream GXV3504;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream GXV3601;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream GXV3601hd/ll;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream GXV3611hd/ll;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream GXV3615w/p;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream GXV3651fhd;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream GXV3662hd;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream GXV3615wp;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream GXV3500;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv;<= 1.0.4.43;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv;1.0.4.38;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv;1.0.4.37;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv;1.0.4.34;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv;1.0.4.27;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv;1.0.4.39;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv;1.0.4.16;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv;1.0.4.7;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv;1.0.3.9;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv;1.0.2.3;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv;1.0.4.42;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv;1.0.4.11;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv;1.0.4.6;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv3501;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv3504;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv3601;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv3601hd/ll;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv3611hd/ll;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv3615w/p;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv3662hd;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv3651fhd;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv3615wp Hd;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv3500;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv3611;<= 1.0.3.6;CVE-2015-2866;SQL Injection;https://www.cvedetails.com/cve/CVE-2015-2866
+Grandstream Wave;<= 1.0.1.26;CVE-2016-1518;System log access;https://www.cvedetails.com/cve/CVE-2016-1518
+Grandstream Wave;<= 1.0.1.26;CVE-2016-1519;Incorrect validation of SSL certificates;https://www.cvedetails.com/cve/CVE-2016-1519
+Grandstream Wave;<= 1.0.1.26;CVE-2016-1520;HTTP connection (no SSL);https://www.cvedetails.com/cve/CVE-2016-1520
+Grandstream Ht802;;CVE-2017-16563;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2017-16563
+Grandstream Ht802;;CVE-2017-16564;Cross-site scripting (XSS);https://www.cvedetails.com/cve/CVE-2017-16564
+Grandstream Ht802;;CVE-2017-16565;Default password;https://www.cvedetails.com/cve/CVE-2017-16565
+Grandstream Gxp1610;1.0.4.128;CVE-2018-17563;Dump configuration in clear text;https://www.cvedetails.com/cve/CVE-2018-17563
+Grandstream Gxp1615;1.0.4.128;CVE-2018-17563;Dump configuration in clear text;https://www.cvedetails.com/cve/CVE-2018-17563
+Grandstream Gxp1620;1.0.4.128;CVE-2018-17563;Dump configuration in clear text;https://www.cvedetails.com/cve/CVE-2018-17563
+Grandstream Gxp1625;1.0.4.128;CVE-2018-17563;Dump configuration in clear text;https://www.cvedetails.com/cve/CVE-2018-17563
+Grandstream Gxp1628;1.0.4.128;CVE-2018-17563;Dump configuration in clear text;https://www.cvedetails.com/cve/CVE-2018-17563
+Grandstream Gxp1630;1.0.4.128;CVE-2018-17563;Dump configuration in clear text;https://www.cvedetails.com/cve/CVE-2018-17563
+Grandstream Gxp1610;1.0.4.128;CVE-2018-17564;Gain admin access;https://www.cvedetails.com/cve/CVE-2018-17564
+Grandstream Gxp1615;1.0.4.128;CVE-2018-17564;Gain admin access;https://www.cvedetails.com/cve/CVE-2018-17564
+Grandstream Gxp1620;1.0.4.128;CVE-2018-17564;Gain admin access;https://www.cvedetails.com/cve/CVE-2018-17564
+Grandstream Gxp1625;1.0.4.128;CVE-2018-17564;Gain admin access;https://www.cvedetails.com/cve/CVE-2018-17564
+Grandstream Gxp1628;1.0.4.128;CVE-2018-17564;Gain admin access;https://www.cvedetails.com/cve/CVE-2018-17564
+Grandstream Gxp1630;1.0.4.128;CVE-2018-17564;Gain admin access;https://www.cvedetails.com/cve/CVE-2018-17564
+Grandstream Gxp1610;1.0.4.128;CVE-2018-17565;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2018-17565
+Grandstream Gxp1615;1.0.4.128;CVE-2018-17565;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2018-17565
+Grandstream Gxp1620;1.0.4.128;CVE-2018-17565;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2018-17565
+Grandstream Gxp1625;1.0.4.128;CVE-2018-17565;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2018-17565
+Grandstream Gxp1628;1.0.4.128;CVE-2018-17565;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2018-17565
+Grandstream Gxp1630;1.0.4.128;CVE-2018-17565;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2018-17565
+Grandstream Gwn7000;< 1.0.6.32;CVE-2019-10656;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2019-10656
+Grandstream Gwn7000;< 1.0.6.32;CVE-2019-10657;Password discovery;https://www.cvedetails.com/cve/CVE-2019-10657
+Grandstream Gwn7610;< 1.0.8.18;CVE-2019-10657;Password discovery;https://www.cvedetails.com/cve/CVE-2019-10657
+Grandstream Gwn7610;< 1.0.8.18;CVE-2019-10658;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2019-10658
+Grandstream Gxv3370;< 1.0.1.41;CVE-2019-10659;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2019-10659
+Grandstream Wp820;< 1.0.3.6;CVE-2019-10659;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2019-10659
+Grandstream Gxv3611ir Hd;< 1.0.3.23;CVE-2019-10660;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2019-10660
+Grandstream Gxv3611ir Hd;< 1.0.3.23;CVE-2019-10661;No root password;https://www.cvedetails.com/cve/CVE-2019-10661
+Grandstream Ucm6204;< 1.0.19.20;CVE-2019-10662;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2019-10662
+Grandstream Ucm6204;< 1.0.19.20;CVE-2019-10663;SQL Injection;https://www.cvedetails.com/cve/CVE-2019-10663
+Grandstream GAC2500;<= 1.0.3.35;CVE-2019-10655;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2019-10655
+Grandstream GXP2200;<= 1.0.3.27;CVE-2019-10655;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2019-10655
+Grandstream GVC3202;<= 1.0.3.51;CVE-2019-10655;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2019-10655
+Grandstream GXV3275;<= 1.0.3.219;CVE-2019-10655;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2019-10655
+Grandstream GXV3240;<= 1.0.3.219;CVE-2019-10655;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2019-10655
+Grandstream Ucm6200;< 1.0.19.20;CVE-2020-5722;SQL Injection;https://www.cvedetails.com/cve/CVE-2020-5722
+Grandstream Ucm6204;< 1.0.20.22;CVE-2020-5723;Unencrypted user passwords in SQLite;https://www.cvedetails.com/cve/CVE-2020-5723
+Grandstream Ucm6202;< 1.0.20.22;CVE-2020-5723;Unencrypted user passwords in SQLite;https://www.cvedetails.com/cve/CVE-2020-5723
+Grandstream Ucm6208;< 1.0.20.22;CVE-2020-5723;Unencrypted user passwords in SQLite;https://www.cvedetails.com/cve/CVE-2020-5723
+Grandstream Ucm6204;< 1.0.20.22;CVE-2020-5724;SQL Injection;https://www.cvedetails.com/cve/CVE-2020-5724
+Grandstream Ucm6202;< 1.0.20.22;CVE-2020-5724;SQL Injection;https://www.cvedetails.com/cve/CVE-2020-5724
+Grandstream Ucm6208;< 1.0.20.22;CVE-2020-5724;SQL Injection;https://www.cvedetails.com/cve/CVE-2020-5724
+Grandstream Ucm6204;< 1.0.20.22;CVE-2020-5725;SQL Injection;https://www.cvedetails.com/cve/CVE-2020-5725
+Grandstream Ucm6202;< 1.0.20.22;CVE-2020-5725;SQL Injection;https://www.cvedetails.com/cve/CVE-2020-5725
+Grandstream Ucm6208;< 1.0.20.22;CVE-2020-5725;SQL Injection;https://www.cvedetails.com/cve/CVE-2020-5725
+Grandstream Ucm6204;< 1.0.20.22;CVE-2020-5726;SQL Injection;https://www.cvedetails.com/cve/CVE-2020-5726
+Grandstream Ucm6202;< 1.0.20.22;CVE-2020-5726;SQL Injection;https://www.cvedetails.com/cve/CVE-2020-5726
+Grandstream Ucm6208;< 1.0.20.22;CVE-2020-5726;SQL Injection;https://www.cvedetails.com/cve/CVE-2020-5726
+Grandstream GXP1600;<= 1.0.4.152;CVE-2020-5738;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5738
+Grandstream GXP1610;<= 1.0.4.152;CVE-2020-5738;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5738
+Grandstream GXP1615;<= 1.0.4.152;CVE-2020-5738;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5738
+Grandstream GXP1620;<= 1.0.4.152;CVE-2020-5738;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5738
+Grandstream GXP1625;<= 1.0.4.152;CVE-2020-5738;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5738
+Grandstream GXP1628;<= 1.0.4.152;CVE-2020-5738;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5738
+Grandstream GXP1630;<= 1.0.4.152;CVE-2020-5738;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5738
+Grandstream GXP1600;<= 1.0.4.152;CVE-2020-5739;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5739
+Grandstream GXP1610;<= 1.0.4.152;CVE-2020-5739;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5739
+Grandstream GXP1615;<= 1.0.4.152;CVE-2020-5739;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5739
+Grandstream GXP1620;<= 1.0.4.152;CVE-2020-5739;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5739
+Grandstream GXP1625;<= 1.0.4.152;CVE-2020-5739;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5739
+Grandstream GXP1628;<= 1.0.4.152;CVE-2020-5739;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5739
+Grandstream GXP1630;<= 1.0.4.152;CVE-2020-5739;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5739
+Grandstream Gwn7000;<= 1.0.9.4;CVE-2020-5756;Command Injection;https://www.cvedetails.com/cve/CVE-2020-5756
+Grandstream Ucm6204;<= 1.0.20.23;CVE-2020-5757;Command Injection;https://www.cvedetails.com/cve/CVE-2020-5757
+Grandstream Ucm6202;<= 1.0.20.23;CVE-2020-5757;Command Injection;https://www.cvedetails.com/cve/CVE-2020-5757
+Grandstream Ucm6208;<= 1.0.20.23;CVE-2020-5757;Command Injection;https://www.cvedetails.com/cve/CVE-2020-5757
+Grandstream Ucm6204;<= 1.0.20.23;CVE-2020-5758;Command Injection;https://www.cvedetails.com/cve/CVE-2020-5758
+Grandstream Ucm6202;<= 1.0.20.23;CVE-2020-5758;Command Injection;https://www.cvedetails.com/cve/CVE-2020-5758
+Grandstream Ucm6208;<= 1.0.20.23;CVE-2020-5758;Command Injection;https://www.cvedetails.com/cve/CVE-2020-5758
+Grandstream Ucm6204;<= 1.0.20.23;CVE-2020-5759;Command Injection;https://www.cvedetails.com/cve/CVE-2020-5759
+Grandstream Ucm6202;<= 1.0.20.23;CVE-2020-5759;Command Injection;https://www.cvedetails.com/cve/CVE-2020-5759
+Grandstream Ucm6208;<= 1.0.20.23;CVE-2020-5759;Command Injection;https://www.cvedetails.com/cve/CVE-2020-5759
+Grandstream Ht802;<= 1.0.17.5;CVE-2020-5760;Command Injection;https://www.cvedetails.com/cve/CVE-2020-5760
+Grandstream Ht801;<= 1.0.17.5;CVE-2020-5760;Command Injection;https://www.cvedetails.com/cve/CVE-2020-5760
+Grandstream Ht812;<= 1.0.17.5;CVE-2020-5760;Command Injection;https://www.cvedetails.com/cve/CVE-2020-5760
+Grandstream Ht814;<= 1.0.17.5;CVE-2020-5760;Command Injection;https://www.cvedetails.com/cve/CVE-2020-5760
+Grandstream Ht818;<= 1.0.17.5;CVE-2020-5760;Command Injection;https://www.cvedetails.com/cve/CVE-2020-5760
+Grandstream Ht813;<= 1.0.17.5;CVE-2020-5760;Command Injection;https://www.cvedetails.com/cve/CVE-2020-5760
+Grandstream Ht802;<= 1.0.17.5;CVE-2020-5761;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2020-5761
+Grandstream Ht801;<= 1.0.17.5;CVE-2020-5761;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2020-5761
+Grandstream Ht812;<= 1.0.17.5;CVE-2020-5761;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2020-5761
+Grandstream Ht814;<= 1.0.17.5;CVE-2020-5761;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2020-5761
+Grandstream Ht818;<= 1.0.17.5;CVE-2020-5761;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2020-5761
+Grandstream Ht813;<= 1.0.17.5;CVE-2020-5761;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2020-5761
+Grandstream Ht802;<= 1.0.17.5;CVE-2020-5762;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2020-5762
+Grandstream Ht801;<= 1.0.17.5;CVE-2020-5762;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2020-5762
+Grandstream Ht812;<= 1.0.17.5;CVE-2020-5762;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2020-5762
+Grandstream Ht814;<= 1.0.17.5;CVE-2020-5762;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2020-5762
+Grandstream Ht818;<= 1.0.17.5;CVE-2020-5762;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2020-5762
+Grandstream Ht813;<= 1.0.17.5;CVE-2020-5762;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2020-5762
+Grandstream Ht802;<= 1.0.17.5;CVE-2020-5763;Backdoor;https://www.cvedetails.com/cve/CVE-2020-5763
+Grandstream Ht801;<= 1.0.17.5;CVE-2020-5763;Backdoor;https://www.cvedetails.com/cve/CVE-2020-5763
+Grandstream Ht812;<= 1.0.17.5;CVE-2020-5763;Backdoor;https://www.cvedetails.com/cve/CVE-2020-5763
+Grandstream Ht814;<= 1.0.17.5;CVE-2020-5763;Backdoor;https://www.cvedetails.com/cve/CVE-2020-5763
+Grandstream Ht818;<= 1.0.17.5;CVE-2020-5763;Backdoor;https://www.cvedetails.com/cve/CVE-2020-5763
+Grandstream Ht813;<= 1.0.17.5;CVE-2020-5763;Backdoor;https://www.cvedetails.com/cve/CVE-2020-5763
+Grandstream Grp2612;1.0.3.6;CVE-2020-25217;Command Injection;https://www.cvedetails.com/cve/CVE-2020-25217
+Grandstream Grp2612p;1.0.3.6;CVE-2020-25217;Command Injection;https://www.cvedetails.com/cve/CVE-2020-25217
+Grandstream Grp2612w;1.0.3.6;CVE-2020-25217;Command Injection;https://www.cvedetails.com/cve/CVE-2020-25217
+Grandstream Grp2613;1.0.3.6;CVE-2020-25217;Command Injection;https://www.cvedetails.com/cve/CVE-2020-25217
+Grandstream Grp2614;1.0.3.6;CVE-2020-25217;Command Injection;https://www.cvedetails.com/cve/CVE-2020-25217
+Grandstream Grp2615;1.0.3.6;CVE-2020-25217;Command Injection;https://www.cvedetails.com/cve/CVE-2020-25217
+Grandstream Grp2616;1.0.3.6;CVE-2020-25217;Command Injection;https://www.cvedetails.com/cve/CVE-2020-25217
+Grandstream Grp2612;1.0.3.6;CVE-2020-25218;Authentication Bypass;https://www.cvedetails.com/cve/CVE-2020-25218
+Grandstream Grp2612p;1.0.3.6;CVE-2020-25218;Authentication Bypass;https://www.cvedetails.com/cve/CVE-2020-25218
+Grandstream Grp2612w;1.0.3.6;CVE-2020-25218;Authentication Bypass;https://www.cvedetails.com/cve/CVE-2020-25218
+Grandstream Grp2613;1.0.3.6;CVE-2020-25218;Authentication Bypass;https://www.cvedetails.com/cve/CVE-2020-25218
+Grandstream Grp2614;1.0.3.6;CVE-2020-25218;Authentication Bypass;https://www.cvedetails.com/cve/CVE-2020-25218
+Grandstream Grp2615;1.0.3.6;CVE-2020-25218;Authentication Bypass;https://www.cvedetails.com/cve/CVE-2020-25218
+Grandstream Grp2616;1.0.3.6;CVE-2020-25218;Authentication Bypass;https://www.cvedetails.com/cve/CVE-2020-25218
+Grandstream HT801;< 1.0.29;CVE-2021-37748;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2021-37748
+Grandstream HT801;< 1.0.29.8;CVE-2021-37915;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2021-37915
+Grandstream GDS3710;1.0.11.13;CVE-2022-2025;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2022-2025
+Grandstream GDS3710;1.0.11.13;CVE-2022-2070;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2022-2070
+Grandstream Gxp1610;;CVE-2023-50015;Privilege Escalation;https://www.cvedetails.com/cve/CVE-2023-50015
+Grandstream Gxp1615;;CVE-2023-50015;Privilege Escalation;https://www.cvedetails.com/cve/CVE-2023-50015
+Grandstream Gxp1620;;CVE-2023-50015;Privilege Escalation;https://www.cvedetails.com/cve/CVE-2023-50015
+Grandstream Gxp1625;;CVE-2023-50015;Privilege Escalation;https://www.cvedetails.com/cve/CVE-2023-50015
+Grandstream Gxp1628;;CVE-2023-50015;Privilege Escalation;https://www.cvedetails.com/cve/CVE-2023-50015
+Grandstream Gxp1630;;CVE-2023-50015;Privilege Escalation;https://www.cvedetails.com/cve/CVE-2023-50015
+Grandstream Ucm6204;< 1.0.20.52;CVE-2024-0840;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2024-0840
+Grandstream Ucm6202;< 1.0.20.52;CVE-2024-0840;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2024-0840
+Grandstream Ucm6208;< 1.0.20.52;CVE-2024-0840;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2024-0840
+Grandstream Ucm6510;< 1.0.20.52;CVE-2024-0840;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2024-0840
+Kamailio;4.0.1-1;CVE-2013-7426;Insecure temporary file vulnerability;https://www.cvedetails.com/cve/CVE-2013-7426
+Kamailio;<= 4.2.8;CVE-2015-1590;kamcmd vulnerability;https://www.cvedetails.com/cve/CVE-2015-1590
+Kamailio;<= 4.2.0-1.1;CVE-2015-1591;Privilege Escalation;https://www.cvedetails.com/cve/CVE-2015-1591
+Kamailio;<= 4.3.4;CVE-2016-2385;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2016-2385
+Kamailio;< 5.0.7;CVE-2018-14767;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2018-14767
+Kamailio;>= 5.1.0 and < 5.1.4;CVE-2018-14767;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2018-14767
+Kamailio;< 5.0.7;CVE-2018-16657;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2018-16657
+Kamailio;>= 5.1.0 and < 5.1.4;CVE-2018-16657;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2018-16657
+Kamailio;< 5.5.0;CVE-2020-27507;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2020-27507
+Kamailio;< 5.4.0;CVE-2020-28361;Bypass of a header-removal protection mechanism;https://www.cvedetails.com/cve/CVE-2020-28361
+Linksys Spa-2102;3.3.6;CVE-2008-2092;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2008-2092
+Opensips;< 1.10;CVE-2013-3722;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2013-3722
+Opensips;>= 3.2.0 and < 3.2.5;CVE-2023-27596;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2023-27596
+Opensips;< 3.1.8;CVE-2023-27596;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2023-27596
+Opensips;>= 3.2.0 and < 3.2.5;CVE-2023-27597;Input validation;https://www.cvedetails.com/cve/CVE-2023-27597
+Opensips;< 3.1.8;CVE-2023-27597;Input validation;https://www.cvedetails.com/cve/CVE-2023-27597
+Opensips;>= 3.2.0 and < 3.2.4;CVE-2023-27598;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2023-27598
+Opensips;< 3.1.7;CVE-2023-27598;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2023-27598
+Opensips;>= 3.2.0 and < 3.2.4;CVE-2023-27599;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2023-27599
+Opensips;< 3.1.7;CVE-2023-27599;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2023-27599
+Opensips;>= 3.2.0 and < 3.2.4;CVE-2023-27600;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2023-27600
+Opensips;< 3.1.7;CVE-2023-27600;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2023-27600
+Opensips;>= 3.2.0 and < 3.2.4;CVE-2023-27601;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2023-27601
+Opensips;< 3.1.7;CVE-2023-27601;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2023-27601
+Opensips;>= 3.2.0 and < 3.2.4;CVE-2023-28095;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2023-28095
+Opensips;< 3.1.7;CVE-2023-28095;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2023-28095
+Opensips;>= 3.2.0 and < 3.2.5;CVE-2023-28096;Memory leak;https://www.cvedetails.com/cve/CVE-2023-28096
+Opensips;< 3.1.8;CVE-2023-28096;Memory leak;https://www.cvedetails.com/cve/CVE-2023-28096
+Opensips;>= 3.2.0 and < 3.2.6;CVE-2023-28097;Memory corruption;https://www.cvedetails.com/cve/CVE-2023-28097
+Opensips;< 3.1.9;CVE-2023-28097;Memory corruption;https://www.cvedetails.com/cve/CVE-2023-28097
+Opensips;>= 3.2.0 and < 3.2.4;CVE-2023-28098;Input validation;https://www.cvedetails.com/cve/CVE-2023-28098
+Opensips;< 3.1.7;CVE-2023-28098;Input validation;https://www.cvedetails.com/cve/CVE-2023-28098
+Opensips;>= 3.2.0 and < 3.2.6;CVE-2023-28099;Input validation;https://www.cvedetails.com/cve/CVE-2023-28099
+Opensips;3.1.9;CVE-2023-28099;Input validation;https://www.cvedetails.com/cve/CVE-2023-28099
+Sangoma;>= 18.0.0 and < 18.10.1;CVE-2021-37706;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2021-37706
+Sangoma;>= 19.0.0 and < 19.2.1;CVE-2021-37706;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2021-37706
+Sangoma;>= 16.0.0 and < 16.24.1;CVE-2021-37706;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2021-37706
+Sangoma;>= 18.0.0 and < 18.10.1;CVE-2022-21723;Out-of-bound read access;https://www.cvedetails.com/cve/CVE-2022-21723
+Sangoma;>= 19.0.0 and < 19.2.1;CVE-2022-21723;Out-of-bound read access;https://www.cvedetails.com/cve/CVE-2022-21723
+Sangoma;>= 16.0.0 and < 16.24.1;CVE-2022-21723;Out-of-bound read access;https://www.cvedetails.com/cve/CVE-2022-21723
+Sangoma;>= 19.0.0 and < 19.2.1;CVE-2022-23608;Hash key shared;https://www.cvedetails.com/cve/CVE-2022-23608
+Sangoma;>= 18.0.0 and < 18.10.1;CVE-2022-23608;Hash key shared;https://www.cvedetails.com/cve/CVE-2022-23608
+Sangoma;>= 16.0.0 and < 16.24.1;CVE-2022-23608;Hash key shared;https://www.cvedetails.com/cve/CVE-2022-23608
+Teluu;<= 2.11.1;CVE-2021-37706;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2021-37706
+Teluu;<= 2.11.1;CVE-2022-21723;Out-of-bound read access;https://www.cvedetails.com/cve/CVE-2022-21723
+Teluu;<= 2.11.1;CVE-2022-23608;Hash key shared;https://www.cvedetails.com/cve/CVE-2022-23608

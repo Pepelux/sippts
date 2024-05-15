@@ -1,3 +1,8 @@
+v4.0 (May/2024):
+- Unify scripts into one: sippts
+- bug fixes
+- Deleted script sipfuzzer
+
 v3.4 (Feb/2024):
 - added param -ppi for P-Preferred-Identity
 - added param -pai for P-Asserted-Identity

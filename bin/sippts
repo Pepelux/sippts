@@ -1,0 +1,411 @@
+#!/opt/homebrew/opt/python@3.12/bin/python3.12
+# -*- coding: utf-8 -*-
+
+__author__ = 'Jose Luis Verdeguer'
+__version__ = '4.0'
+__license__ = "GPL"
+__copyright__ = "Copyright (C) 2015-2024, SIPPTS"
+__email__ = "pepeluxx@gmail.com"
+
+from sippts.lib.params import get_sippts_args
+
+
+def main():
+    params = get_sippts_args()
+    
+    if params[0] == 'scan':
+        (cmd, ip, host, proxy, rport, proto, method, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, user_agent, nthreads, verbose, ping, file, nocolor, ofile, fp, random, ppi, pai, local_ip, cve) = params
+        
+        from sippts.sipscan import SipScan
+
+        s = SipScan()
+        s.ip = ip
+        s.host = host
+        s.proxy = proxy
+        s.rport = rport
+        s.proto = proto
+        s.method = method
+        s.domain = domain
+        s.contact_domain = contact_domain
+        s.from_name = from_name
+        s.to_name = to_name
+        s.from_user = from_user
+        s.from_domain = from_domain
+        s.to_user = to_user
+        s.to_domain = to_domain
+        s.user_agent = user_agent
+        s.threads = nthreads
+        s.verbose = verbose
+        s.ping = ping
+        s.file = file
+        s.nocolor = nocolor
+        s.ofile = ofile
+        s.fp = fp
+        s.random = random
+        s.ppi = ppi
+        s.pai = pai
+        s.localip = local_ip
+        s.getcve = cve
+    elif params[0] == 'exten':
+        (cmd, ip, host, proxy, rport, rexten, prefix, proto, method, domain, contact_domain, from_user, user_agent, nthreads, verbose, nocolor, ofile, filter) = params
+
+        from sippts.sipexten import SipExten
+
+        s = SipExten()
+        s.ip = ip
+        s.host = host
+        s.proxy = proxy
+        s.rport = rport
+        s.proto = proto
+        s.method = method
+        s.domain = domain
+        s.contact_domain = contact_domain
+        s.exten = rexten
+        s.prefix = prefix
+        s.from_user = from_user
+        s.user_agent = user_agent
+        s.threads = nthreads
+        s.verbose = verbose
+        s.nocolor = nocolor
+        s.ofile = ofile
+        s.filter = filter
+    elif params[0] == 'rcrack':
+        (cmd, ip, host, proxy, rport, rexten, prefix, authuser, ext_len, proto, domain, contact_domain, user_agent, wordlist, nthreads, verbose, nocolor) = params
+
+        from sippts.siprcrack import SipRemoteCrack
+
+        s = SipRemoteCrack()
+        s.ip = ip
+        s.host = host
+        s.proxy = proxy
+        s.rport = rport
+        s.proto = proto
+        s.domain = domain
+        s.contact_domain = contact_domain
+        s.exten = rexten
+        s.prefix = prefix
+        s.authuser = authuser
+        s.ext_len = ext_len
+        s.user_agent = user_agent
+        s.threads = nthreads
+        s.wordlist = wordlist
+        s.verbose = verbose
+        s.nocolor = nocolor
+    elif params[0] == 'send':
+        (cmd, ip, host, proxy, rport, lport, proto, method, domain, contact_domain, from_name, from_user, from_domain, from_tag, to_name, to_user, to_domain, to_tag, user, pwd, digest, branch, callid, cseq, sdp, sdes, user_agent, localip, nocolor, ofile, ppi, pai, header, nocontact) = params
+
+        from sippts.sipsend import SipSend
+
+        s = SipSend()
+        s.ip = ip
+        s.host = host
+        s.proxy = proxy
+        s.rport = rport
+        s.lport = lport
+        s.proto = proto
+        s.method = method
+        s.domain = domain
+        s.contact_domain = contact_domain
+        s.from_name = from_name
+        s.from_domain = from_domain
+        s.from_tag = from_tag
+        s.to_name = to_name
+        s.from_user = from_user
+        s.to_user = to_user
+        s.to_domain = to_domain
+        s.to_tag = to_tag
+        s.user = user
+        s.pwd = pwd
+        s.user_agent = user_agent
+        s.localip = localip
+        s.digest = digest
+        s.branch = branch
+        s.callid = callid
+        s.cseq = cseq
+        s.sdp = sdp
+        s.sdes = sdes
+        s.nocolor = nocolor
+        s.ofile = ofile
+        s.ppi = ppi
+        s.pai = pai
+        s.header = header
+        s.nocontact = nocontact
+    elif params[0] == 'enumerate':
+        (cmd, ip, host, proxy, rport, proto, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, user_agent, verbose) = params
+
+        from sippts.sipenumerate import SipEnumerate
+
+        s = SipEnumerate()
+        s.ip = ip
+        s.host = host
+        s.proxy = proxy
+        s.rport = rport
+        s.proto = proto
+        s.domain = domain
+        s.contact_domain = contact_domain
+        s.from_name = from_name
+        s.from_user = from_user
+        s.from_domain = from_domain
+        s.to_user = to_user
+        s.to_name = to_name
+        s.to_domain = to_domain
+        s.user_agent = user_agent
+        s.verbose = verbose
+    elif params[0] == 'leak':
+        (cmd, ip, host, proxy, rport, proto, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, user_agent, localip, ofile, lfile, user, pwd, auth, verbose, sdp, sdes, file, ping, ppi, pai) = params
+
+        from sippts.sipdigestleak import SipDigestLeak
+
+        s = SipDigestLeak()
+        s.ip = ip
+        s.host = host
+        s.proxy = proxy
+        s.rport = rport
+        s.proto = proto
+        s.domain = domain
+        s.contact_domain = contact_domain
+        s.from_name = from_name
+        s.from_user = from_user
+        s.from_domain = from_domain
+        s.to_name = to_name
+        s.to_user = to_user
+        s.to_domain = to_domain
+        s.user_agent = user_agent
+        s.ofile = ofile
+        s.lfile = lfile
+        s.localip = localip
+        s.user = user
+        s.pwd = pwd
+        s.auth_code = auth
+        s.verbose = verbose
+        s.sdp = sdp
+        s.sdes = sdes
+        s.file = file
+        s.ping = ping
+        s.ppi = ppi
+        s.pai = pai
+    elif params[0] == 'ping':
+        (cmd, ip, host, proxy, rport, proto, method, domain, contact_domain, from_name, from_user, from_domain, from_tag, to_name, to_user, to_domain, to_tag, user, pwd, digest, branch, callid, cseq, user_agent, localip, number, interval, ppi, pai) = params
+
+        from sippts.sipping import SipPing
+
+        s = SipPing()
+        s.ip = ip
+        s.host = host
+        s.proxy = proxy
+        s.rport = rport
+        s.proto = proto
+        s.method = method
+        s.domain = domain
+        s.contact_domain = contact_domain
+        s.from_name = from_name
+        s.from_domain = from_domain
+        s.from_tag = from_tag
+        s.to_name = to_name
+        s.from_user = from_user
+        s.to_user = to_user
+        s.to_domain = to_domain
+        s.to_tag = to_tag
+        s.user = user
+        s.pwd = pwd
+        s.user_agent = user_agent
+        s.localip = localip
+        s.digest = digest
+        s.branch = branch
+        s.callid = callid
+        s.cseq = cseq
+        s.number = number
+        s.interval = interval
+        s.ppi = ppi
+        s.pai = pai
+    elif params[0] == 'invite':
+        (cmd, ip, host, proxy, rport, lport, proto, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, transfer, auth_user, auth_pwd, user_agent, localip, threads, nosdp, verbose, sdes, nocolor, ofile, ppi, pai) = params
+
+        from sippts.sipinvite import SipInvite
+
+        s = SipInvite()
+        s.ip = ip
+        s.host = host
+        s.proxy = proxy
+        s.rport = rport
+        s.lport = lport
+        s.proto = proto
+        s.domain = domain
+        s.contact_domain = contact_domain
+        s.from_name = from_name
+        s.from_user = from_user
+        s.from_domain = from_domain
+        s.to_name = to_name
+        s.to_user = to_user
+        s.to_domain = to_domain
+        s.transfer = transfer
+        s.auth_user = auth_user
+        s.auth_pwd = auth_pwd
+        s.user_agent = user_agent
+        s.localip = localip
+        s.threads = threads
+        s.nosdp = nosdp
+        s.verbose = verbose
+        s.sdes = sdes
+        s.nocolor = nocolor
+        s.ofile = ofile
+        s.ppi = ppi
+        s.pai = pai
+    elif params[0] == 'dump':
+        (cmd, file, ofile) = params
+
+        from sippts.sippcapdump import SipPCAPDump
+
+        s = SipPCAPDump()
+        s.file = file
+        s.ofile = ofile
+    elif params[0] == 'dcrack':
+        (cmd, file, verbose, wordlist, bruteforce, charset, max, min, prefix, suffix) = params
+
+        from sippts.sipdigestcrack import SipDigestCrack
+
+        s = SipDigestCrack()
+        s.file = file
+        s.verbose = verbose
+        s.wordlist = wordlist
+        s.bruteforce = bruteforce
+        s.charset = charset
+        s.max = max
+        s.min = min
+        s.prefix = prefix
+        s.suffix = suffix    
+    elif params[0] == 'flood':
+        (cmd, ip, host, rport, proto, method, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, digest, user_agent, nthreads, verbose, number, bad, alphabet, max, min) = params
+
+        from sippts.sipflood import SipFlood
+
+        s = SipFlood()
+        s.ip = ip
+        s.host = host
+        s.rport = rport
+        s.proto = proto
+        s.method = method
+        s.domain = domain
+        s.contact_domain = contact_domain
+        s.from_name = from_name
+        s.from_user = from_user
+        s.from_domain = from_domain
+        s.to_name = to_name
+        s.to_user = to_user
+        s.to_domain = to_domain
+        s.user_agent = user_agent
+        s.nthreads = nthreads
+        s.digest = digest
+        s.verbose = verbose
+        s.number = number
+        s.bad = bad
+        s.alphabet = alphabet
+        s.max = max
+        s.min = min
+    elif params[0] == 'wssend':
+        (cmd, ip, rport, path, verbose, proto, method, domain, contact_domain, from_name, from_user, from_domain, from_tag, to_name, to_user, to_tag, to_domain, user_agent, ppi, pai) = params
+
+        from sippts.wssend import WsSend
+
+        s = WsSend()
+        s.ip = ip
+        s.path = path
+        s.rport = rport
+        s.proto = proto
+        s.method = method
+        s.domain = domain
+        s.contact_domain = contact_domain
+        s.from_name = from_name
+        s.from_domain = from_domain
+        s.from_tag = from_tag
+        s.to_name = to_name
+        s.from_user = from_user
+        s.to_user = to_user
+        s.to_domain = to_domain
+        s.to_tag = to_tag
+        s.user_agent = user_agent
+        s.verbose = verbose
+        s.ppi = ppi
+        s.pai = pai
+    elif params[0] == 'sniff':
+        (cmd, dev, ofile, auth, verbose, proto) = params
+
+        from sippts.sipsniff import SipSniff
+
+        s = SipSniff()
+        s.dev = dev
+        s.ofile = ofile
+        s.auth = auth
+        s.verbose = verbose
+        s.proto = proto
+    elif params[0] == 'spoof':
+        (cmd, ip, verbose, gw, file) = params
+
+        from sippts.arpspoof import ArpSpoof
+
+        s = ArpSpoof()
+        s.ip = ip
+        s.verbose = verbose
+        s.gw = gw
+        s.file = file
+    elif params[0] == 'tshark':
+        (cmd, file, filter, rport, ofile, nocolor) = params
+
+        from sippts.siptshark import SipShark
+
+        s = SipShark()
+        s.file = file
+        s.filter = filter
+        s.rport = rport
+        s.ofile = ofile
+        s.nocolor = nocolor
+    elif params[0] == 'rtpbleed':
+        (cmd, ip, start_port, end_port, loops, payload, delay) = params
+
+        from sippts.rtpbleed import RTPBleed
+
+        s = RTPBleed()
+        s.ip = ip
+        s.start_port = start_port
+        s.end_port = end_port
+        s.loops = loops
+        s.payload = payload
+        s.delay = delay
+    elif params[0] == 'rtcpbleed':
+        (cmd, ip, start_port, end_port, delay) = params
+
+        from sippts.rtcpbleed import RTCPBleed
+
+        s = RTCPBleed()
+        s.ip = ip
+        s.start_port = start_port
+        s.end_port = end_port
+        s.delay = delay
+    elif params[0] == 'rtpbleedflood':
+        (cmd, ip, port, payload, verbose) = params
+
+        from sippts.rtpbleedflood import RTPBleedFlood
+
+        s = RTPBleedFlood()
+        s.ip = ip
+        s.port = port
+        s.payload = payload
+        s.verbose = verbose
+    elif params[0] == 'rtpbleedinject':
+        (cmd, ip, port, payload, file) = params
+
+        from sippts.rtpbleedinject import RTPBleedInject
+
+        s = RTPBleedInject()
+        s.ip = ip
+        s.port = port
+        s.payload = payload
+        s.file = file
+    else:
+        print('Error loading module ' + params[0])
+        exit()
+        
+    s.start()
+
+if __name__ == '__main__':
+    main()
