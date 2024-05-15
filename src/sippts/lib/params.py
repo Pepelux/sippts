@@ -1580,10 +1580,20 @@ Payloads
         exit()
 
 def download_file(url, path, file):
-    print(WHITE + 'Updating ' + file)
+    command = ['curl', url]
+    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
-    r = requests.get(url)
-    open(path, 'wb').write(r.content)
+    output = result.stdout
+    error = result.stderr
+
+    if result.returncode != 0 or output == '404: Not Found':
+        print(BRED + 'Error downloading file ' + BGREEN + url)
+
+    else:
+        print(WHITE + 'Updating ' + file)
+
+        r = requests.get(url)
+        open(path, 'wb').write(r.content)
 
 
 logo_scan = '''
