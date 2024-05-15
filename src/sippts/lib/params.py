@@ -918,37 +918,39 @@ Payloads
 
     # Update scripts
     if args.update == 1:
+
         import sysconfig
         path = sysconfig.get_paths()["purelib"] + '/sippts/data/cve.csv'
         modulepath = sysconfig.get_paths()["purelib"] + '/sippts/'
-        binpath = sysconfig.get_paths()["scripts"] + '/sippts/sippts'
+        binpath = sysconfig.get_paths()["scripts"] + '/sippts'
+        giturl = 'https://raw.githubusercontent.com/Pepelux/sippts/4.0/'
         
-        download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/bin/sippts', binpath)+ 'sippts'
+        download_file(giturl + 'bin/sippts', binpath, 'bin/sippts')
 
-        download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/src/sippts/lib/color.py', modulepath)+ 'lib/color.py'
-        download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/src/sippts/lib/functions.py', modulepath)+ 'lib/functions.py'
-        download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/src/sippts/lib/logos.py', modulepath)+ 'lib/logos.py'
-        download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/src/sippts/lib/params.py', modulepath)+ 'lib/params.py'
+        download_file(giturl + 'src/sippts/lib/color.py', modulepath + 'lib/color.py', 'lib/color.py')
+        download_file(giturl + 'src/sippts/lib/functions.py', modulepath + 'lib/functions.py', 'lib/functions.py')
+        download_file(giturl + 'src/sippts/lib/logos.py', modulepath + 'lib/logos.py', 'lib/logos.py')
+        download_file(giturl + 'src/sippts/lib/params.py', modulepath + 'lib/params.py', 'lib/params.py')
 
-        download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/src/sippts/arpspoof.py', modulepath)+ 'arpspoof.py'
-        download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/src/sippts/rtcpbleed.py', modulepath)+ 'rtcpbleed.py'
-        download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/src/sippts/rtpbleed.py', modulepath)+ 'rtpbleed.py'
-        download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/src/sippts/rtpbleedflood.py', modulepath)+ 'rtpbleedflood.py'
-        download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/src/sippts/rtpbleedinject.py', modulepath)+ 'rtpbleedinject.py'
-        download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/src/sippts/sipdigestcrack.py', modulepath)+ 'sipdigestcrack.py'
-        download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/src/sippts/sipdigestleak.py', modulepath)+ 'sipdigestleak.py'
-        download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/src/sippts/sipenumerate.py', modulepath)+ 'sipenumerate.py'
-        download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/src/sippts/sipexten.py', modulepath)+ 'sipexten.py'
-        download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/src/sippts/sipflood.py', modulepath)+ 'sipflood.py'
-        download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/src/sippts/sipinvite.py', modulepath)+ 'sipinvite.py'
-        download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/src/sippts/sippcapdump.py', modulepath)+ 'sippcapdump.py'
-        download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/src/sippts/sipping.py', modulepath)+ 'sipping.py'
-        download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/src/sippts/siprcrack.py', modulepath)+ 'siprcrack.py'
-        download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/src/sippts/sipscan.py', modulepath)+ 'sipscan.py'
-        download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/src/sippts/sipsend.py', modulepath)+ 'sipsend.py'
-        download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/src/sippts/sipsniff.py', modulepath)+ 'sipsniff.py'
-        download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/src/sippts/siptshark.py', modulepath)+ 'siptshark.py'
-        download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/src/sippts/wssend.py', modulepath)+ 'wssend.py'
+        download_file(giturl + 'src/sippts/arpspoof.py', modulepath + 'arpspoof.py', 'arpspoof.py')
+        download_file(giturl + 'src/sippts/rtcpbleed.py', modulepath + 'rtcpbleed.py', 'rtcpbleed.py')
+        download_file(giturl + 'src/sippts/rtpbleed.py', modulepath + 'rtpbleed.py', 'rtpbleed.py')
+        download_file(giturl + 'src/sippts/rtpbleedflood.py', modulepath + 'rtpbleedflood.py', 'rtpbleedflood.py')
+        download_file(giturl + 'src/sippts/rtpbleedinject.py', modulepath + 'rtpbleedinject.py', 'rtpbleedinject.py')
+        download_file(giturl + 'src/sippts/sipdigestcrack.py', modulepath + 'sipdigestcrack.py', 'sipdigestcrack.py')
+        download_file(giturl + 'src/sippts/sipdigestleak.py', modulepath + 'sipdigestleak.py', 'sipdigestleak.py')
+        download_file(giturl + 'src/sippts/sipenumerate.py', modulepath + 'sipenumerate.py', 'sipenumerate.py')
+        download_file(giturl + 'src/sippts/sipexten.py', modulepath + 'sipexten.py', 'sipexten.py')
+        download_file(giturl + 'src/sippts/sipflood.py', modulepath + 'sipflood.py', 'sipflood.py')
+        download_file(giturl + 'src/sippts/sipinvite.py', modulepath + 'sipinvite.py', 'sipinvite.py')
+        download_file(giturl + 'src/sippts/sippcapdump.py', modulepath + 'sippcapdump.py', 'sippcapdump.py')
+        download_file(giturl + 'src/sippts/sipping.py', modulepath + 'sipping.py', 'sipping.py')
+        download_file(giturl + 'src/sippts/siprcrack.py', modulepath + 'siprcrack.py', 'siprcrack.py')
+        download_file(giturl + 'src/sippts/sipscan.py', modulepath + 'sipscan.py', 'sipscan.py')
+        download_file(giturl + 'src/sippts/sipsend.py', modulepath + 'sipsend.py', 'sipsend.py')
+        download_file(giturl + 'src/sippts/sipsniff.py', modulepath + 'sipsniff.py', 'sipsniff.py')
+        download_file(giturl + 'src/sippts/siptshark.py', modulepath + 'siptshark.py', 'siptshark.py')
+        download_file(giturl + 'src/sippts/wssend.py', modulepath + 'wssend.py', 'wssend.py')
 
         print(BYELLOW + 'SIPPTS has been updated')
 
@@ -956,7 +958,7 @@ Payloads
         local_cve_version = load_cve_version()
         
         try:
-            command = ["curl", "https://raw.githubusercontent.com/Pepelux/sippts/master/cveversion"]
+            command = ['curl', giturl + 'cveversion']
             result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
             output = result.stdout
@@ -972,7 +974,7 @@ Payloads
             sys.exit()
 
         if local_cve_version != current_cve_version:
-            download_file('https://raw.githubusercontent.com/Pepelux/sippts/master/src/sippts/data/cve.csv', path)
+            download_file(giturl + 'src/sippts/data/cve.csv', path)
             print(BYELLOW + 'CVE file has been updated')
         else:
             print(BYELLOW + 'CVE file is updated')
@@ -1577,9 +1579,11 @@ Payloads
         parser.print_help()
         exit()
 
-def download_file(url, path):
+def download_file(url, path, file):
+    print(WHITE + 'Updating ' + file)
+
     r = requests.get(url)
-    open(path, 'w').write(r.content)
+    open(path, 'wb').write(r.content)
 
 
 logo_scan = '''
