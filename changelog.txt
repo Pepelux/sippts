@@ -2,6 +2,8 @@ v4.0 (May/2024):
 - Unify scripts into one: sippts
 - bug fixes
 - Deleted script sipfuzzer
+- added param -cve in scan script to show possible CVEs
+- added param -up for update scripts and cve file
 
 v3.4 (Feb/2024):
 - added param -ppi for P-Preferred-Identity
