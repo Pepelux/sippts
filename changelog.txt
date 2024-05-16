@@ -1,7 +1,20 @@
 devel:
 - scan:
   - added param -t to set sockets timeout
-- bug fixes
+- leak:
+  - added param -t to set sockets timeout
+- enumerate:
+  - added param -t to set sockets timeout
+-	exten:
+  - added param -t to set sockets timeout
+- ping:
+  - added param -t to set sockets timeout
+- rcrack:
+  - added param -t to set sockets timeout
+- send:
+  - added param -t to set sockets timeout
+- global:
+  - bug fixes
 
 v4.0 (May/2024):
 - Unify scripts into one: sippts
