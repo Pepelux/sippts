@@ -86,7 +86,7 @@ Commands usage help:
   sippts scan -h
   sippts rtpbleed -h
 ```
-Show help for command sipscan:
+Show help for command scan:
 
 ```
 sippts scan -h
@@ -161,73 +161,73 @@ sippts -up
 # Set of tools for penetration test over SIP protocol #
 
 Sippts is a set of tools for auditing VoIP servers and devices using the SIP protocol. Sippts is programmed in Python and consists of the following commands or modules:
-  * _**Sipscan**_ is a fast scanner for SIP services that uses multithread. Sipscan can check several IPs and port ranges and it can work over UDP or TCP.
+  * _**scan**_ is a fast scanner for SIP services that uses multithread. Scan can check several IPs and port ranges and it can work over UDP or TCP.
 
-[Click here to read more about SIPscan](https://github.com/Pepelux/sippts/wiki/SIPscan)
+[Click here to read more about scan](https://github.com/Pepelux/sippts/wiki/Command-scan)
 
-  * _**Sipexten**_ identifies extensions on a SIP server. Also tells you if the extension line requires authentication or not. Sipexten can check several IPs and port ranges.
+  * _**exten**_ identifies extensions on a SIP server. Also tells you if the extension line requires authentication or not. Exten can check several IPs and port ranges.
 
-[Click here to read more about SIPexten](https://github.com/Pepelux/sippts/wiki/SIPexten)
+[Click here to read more about exten](https://github.com/Pepelux/sippts/wiki/Command-exten)
 
-  * _**Siprcrack**_ is a remote password cracker. Siprcrack can test passwords for several users in different IPs and port ranges.
+  * _**rcrack**_ is a remote password cracker. Rcrack can test passwords for several users in different IPs and port ranges.
 
-[Click here to read more about SIPRcrack](https://github.com/Pepelux/sippts/wiki/SIPRCrack)
+[Click here to read more about rcrack](https://github.com/Pepelux/sippts/wiki/Command-rcrack)
 
-  * _**Sipinvite**_ checks if a server allow us to make calls without authentication. If the SIP server has a bad configuration, it will allow us to make calls to external numbers. Also it can allow us to transfer the call to a second external number.
+  * _**invite**_ checks if a server allow us to make calls without authentication. If the SIP server has a bad configuration, it will allow us to make calls to external numbers. Also it can allow us to transfer the call to a second external number.
 
-[Click here to read more about SIPinvite](https://github.com/Pepelux/sippts/wiki/SIPinvite)
+[Click here to read more about invite](https://github.com/Pepelux/sippts/wiki/Command-invite)
 
-  * _**SipDigestLeak**_ Exploits the SIP digest leak vulnerability discovered by Sandro Gauci that affects a large number of hardware and software devices.
+  * _**leak**_ Exploits the SIP Digest Leak vulnerability discovered by Sandro Gauci that affects a large number of hardware and software devices.
 
-[Click here to read more about SIPDigestLeak](https://github.com/Pepelux/sippts/wiki/SIPDigestLeak)
+[Click here to read more about leak](https://github.com/Pepelux/sippts/wiki/Command-leak)
 
-  * _**SipFlood**_ Send unlimited messages to the target.
+  * _**flood**_ Send unlimited messages to the target.
 
-[Click here to read more about SIPFlood](https://github.com/Pepelux/sippts/wiki/SIPFlood)
+[Click here to read more about flood](https://github.com/Pepelux/sippts/wiki/Command-flood)
 
-  * _**SipSend**_ Allow us to send a customized SIP message and analyze the response.
+  * _**send**_ Allow us to send a customized SIP message and analyze the response.
 
-[Click here to read more about SIPSend](https://github.com/Pepelux/sippts/wiki/SIPSend)
+[Click here to read more about SIPSend](https://github.com/Pepelux/sippts/wiki/Command-send)
 
-  * _**WsSend**_ Allow us to send a customized SIP message over WebSockets and analyze the response.
+  * _**wssend**_ Allow us to send a customized SIP message over WebSockets and analyze the response.
 
-[Click here to read more about WsSend](https://github.com/Pepelux/sippts/wiki/WsSend)
+[Click here to read more about WsSend](https://github.com/Pepelux/sippts/wiki/Command-wssend)
 
-  * _**SipEnumerate**_ Enumerate available methods of a SIP service/server.
+  * _**enumerate**_ Enumerate available methods of a SIP service/server.
 
-[Click here to read more about SIPEnumerate](https://github.com/Pepelux/sippts/wiki/SIPEnumerate)
+[Click here to read more about enumerate](https://github.com/Pepelux/sippts/wiki/Command-enumerate)
 
-  * _**SipPCAPDump**_ Extracts SIP Digest authentications from a PCAP file.
+  * _**dump**_ Extracts SIP Digest authentications from a PCAP file.
 
-[Click here to read more about SIPPCAPDump](https://github.com/Pepelux/sippts/wiki/SIPDump)
+[Click here to read more about dump](https://github.com/Pepelux/sippts/wiki/Command-dump)
 
-  * _**SipDigestCrack**_ Cracking tool to crack the digest authentications within the SIP protocol.
+  * _**dcrack**_ Cracking tool to crack the digest authentications within the SIP protocol.
 
-[Click here to read more about SIPDigestCrack](https://github.com/Pepelux/sippts/wiki/SIPCrack)
+[Click here to read more about dcrack](https://github.com/Pepelux/sippts/wiki/Command-dcrack)
 
-  * _**SipTshark**_ Extract data of SIP protocol from a PCAP file.
+  * _**tshark**_ Extract data of SIP protocol from a PCAP file.
 
-[Click here to read more about SIPTshark](https://github.com/Pepelux/sippts/wiki/SIPTshark)
+[Click here to read more about tshark](https://github.com/Pepelux/sippts/wiki/Command-tshark)
 
-  * _**SipPing**_ SIP ping.
+  * _**ping**_ SIP ping.
 
-[Click here to read more about SIPPing](https://github.com/Pepelux/sippts/wiki/SIPPing)
+[Click here to read more about ping](https://github.com/Pepelux/sippts/wiki/Command-ping)
 
-  * _**RTPBleed**_ to exploit RTPBleed vulnerability sending data to RTP ports.
+  * _**rtpbleed**_ to exploit RTP Bleed vulnerability sending data to RTP ports.
 
-[Click here to read more about RTPBleed](https://github.com/Pepelux/sippts/wiki/RTPBleed)
+[Click here to read more about rtpbleed](https://github.com/Pepelux/sippts/wiki/Command-rtpbleed)
 
-  * _**RTCPBleed**_ to exploit RTPBleed vulnerability sending data to RTCP ports.
+  * _**rtcpbleed**_ to exploit RTP bleed vulnerability sending data to RTCP ports.
 
-[Click here to read more about RTCPBleed](https://github.com/Pepelux/sippts/wiki/RTCPBleed)
+[Click here to read more about rtcpbleed](https://github.com/Pepelux/sippts/wiki/Command-rtcpbleed)
 
-  * _**RTPBleedFlood**_ to exploit RTPBleed vulnerability flooding a RTP port with an active dialog.
+  * _**rtpbleedflood**_ to exploit RTP Bleed vulnerability flooding a RTP port with an active dialog.
 
-[Click here to read more about RTPBleedFlood](https://github.com/Pepelux/sippts/wiki/RTPBleedFlood)
+[Click here to read more about rtpbleedflood](https://github.com/Pepelux/sippts/wiki/Commmand-rtpbleedflood)
 
-* _**RTPBleedInject**_ to exploit RTPBleed vulnerability injecting RTP traffic.
+* _**rtpbleedinject**_ to exploit RTP Bleed vulnerability injecting RTP traffic.
 
-[Click here to read more about RTPBleedInject](https://github.com/Pepelux/sippts/wiki/RTPBleedInject)
+[Click here to read more about rtpbleedinject](https://github.com/Pepelux/sippts/wiki/Command-rtpbleedinject)
 
 ## Operating System ##
 Sippts has been tested on:
@@ -243,9 +243,4 @@ Sippts has been tested on:
   * $ git clone https://github.com/Pepelux/sippts.git
   * $ cd sippts
   * $ pip3 install .
-
-## MacOS ##
-  Edit requirements.txt and comment next line before install:
-  
-  \# pyradamsa
 
