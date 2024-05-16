@@ -49,6 +49,7 @@ class SipPing:
         self.interval = 1
         self.ppi = ''
         self.pai = ''
+        self.timeout = 5
 
         self.run = True
 
@@ -211,7 +212,7 @@ class SipPing:
                 host = (str(proxy_ip), int(proxy_port))
 
             try:
-                sock.settimeout(2)
+                sock.settimeout(self.timeout)
 
                 if self.proto == 'TCP':
                     sock.connect(host)

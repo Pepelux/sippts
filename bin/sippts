@@ -48,7 +48,7 @@ def main():
         s.localip = local_ip
         s.getcve = cve
     elif params[0] == 'exten':
-        (cmd, ip, host, proxy, rport, rexten, prefix, proto, method, domain, contact_domain, from_user, user_agent, nthreads, verbose, nocolor, ofile, filter) = params
+        (cmd, ip, host, proxy, rport, rexten, prefix, proto, method, domain, contact_domain, from_user, user_agent, nthreads, verbose, nocolor, ofile, filter, timeout) = params
 
         from sippts.sipexten import SipExten
 
@@ -70,8 +70,9 @@ def main():
         s.nocolor = nocolor
         s.ofile = ofile
         s.filter = filter
+        s.timeout = timeout
     elif params[0] == 'rcrack':
-        (cmd, ip, host, proxy, rport, rexten, prefix, authuser, ext_len, proto, domain, contact_domain, user_agent, wordlist, nthreads, verbose, nocolor) = params
+        (cmd, ip, host, proxy, rport, rexten, prefix, authuser, ext_len, proto, domain, contact_domain, user_agent, wordlist, nthreads, verbose, nocolor, timeout) = params
 
         from sippts.siprcrack import SipRemoteCrack
 
@@ -92,8 +93,9 @@ def main():
         s.wordlist = wordlist
         s.verbose = verbose
         s.nocolor = nocolor
+        s.timeout = timeout
     elif params[0] == 'send':
-        (cmd, ip, host, proxy, rport, lport, proto, method, domain, contact_domain, from_name, from_user, from_domain, from_tag, to_name, to_user, to_domain, to_tag, user, pwd, digest, branch, callid, cseq, sdp, sdes, user_agent, localip, nocolor, ofile, ppi, pai, header, nocontact) = params
+        (cmd, ip, host, proxy, rport, lport, proto, method, domain, contact_domain, from_name, from_user, from_domain, from_tag, to_name, to_user, to_domain, to_tag, user, pwd, digest, branch, callid, cseq, sdp, sdes, user_agent, localip, nocolor, ofile, ppi, pai, header, nocontact, timeout) = params
 
         from sippts.sipsend import SipSend
 
@@ -131,8 +133,9 @@ def main():
         s.pai = pai
         s.header = header
         s.nocontact = nocontact
+        s.timeout = timeout
     elif params[0] == 'enumerate':
-        (cmd, ip, host, proxy, rport, proto, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, user_agent, verbose) = params
+        (cmd, ip, host, proxy, rport, proto, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, user_agent, verbose, timeout) = params
 
         from sippts.sipenumerate import SipEnumerate
 
@@ -152,6 +155,7 @@ def main():
         s.to_domain = to_domain
         s.user_agent = user_agent
         s.verbose = verbose
+        s.timeout = timeout
     elif params[0] == 'leak':
         (cmd, ip, host, proxy, rport, proto, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, user_agent, localip, ofile, lfile, user, pwd, auth, verbose, sdp, sdes, file, ping, ppi, pai) = params
 
@@ -186,7 +190,7 @@ def main():
         s.ppi = ppi
         s.pai = pai
     elif params[0] == 'ping':
-        (cmd, ip, host, proxy, rport, proto, method, domain, contact_domain, from_name, from_user, from_domain, from_tag, to_name, to_user, to_domain, to_tag, user, pwd, digest, branch, callid, cseq, user_agent, localip, number, interval, ppi, pai) = params
+        (cmd, ip, host, proxy, rport, proto, method, domain, contact_domain, from_name, from_user, from_domain, from_tag, to_name, to_user, to_domain, to_tag, user, pwd, digest, branch, callid, cseq, user_agent, localip, number, interval, ppi, pai, timeout) = params
 
         from sippts.sipping import SipPing
 
@@ -219,6 +223,7 @@ def main():
         s.interval = interval
         s.ppi = ppi
         s.pai = pai
+        s.timeout = timeout
     elif params[0] == 'invite':
         (cmd, ip, host, proxy, rport, lport, proto, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, transfer, auth_user, auth_pwd, user_agent, localip, threads, nosdp, verbose, sdes, nocolor, ofile, ppi, pai) = params
 

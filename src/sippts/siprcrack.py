@@ -41,6 +41,7 @@ class SipRemoteCrack:
         self.threads = '100'
         self.verbose = '0'
         self.nocolor = ''
+        self.timeout = 5
 
         self.run = True
 
@@ -99,7 +100,7 @@ class SipRemoteCrack:
                 print(self.c.YELLOW + msg)
 
             try:
-                sock.settimeout(5)
+                sock.settimeout(self.timeout)
 
                 if self.proto == 'TCP':
                     sock.connect(host)

@@ -36,6 +36,7 @@ class SipEnumerate:
         self.user_agent = 'pplsip'
         self.digest = ''
         self.verbose = '0'
+        self.timeout = 5
 
         self.totaltime = 0
         self.quit = False
@@ -157,7 +158,7 @@ class SipEnumerate:
                 host = (str(proxy_ip), int(proxy_port))
 
             try:
-                sock.settimeout(5)
+                sock.settimeout(self.timeout)
 
                 if self.proto == 'TCP':
                     sock.connect(host)

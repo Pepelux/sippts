@@ -51,6 +51,7 @@ class SipSend:
         self.pai = ''
         self.header = ''
         self.nocontact = 0
+        self.timeout = 5
 
         self.withcontact = 1
 
@@ -246,7 +247,7 @@ class SipSend:
                              self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, self.to_tag, self.digest, 1, '', self.sdp, '', self.route, self.ppi, self.pai, self.header, self.withcontact)
 
         try:
-            sock.settimeout(5)
+            sock.settimeout(self.timeout)
 
             if self.proto == 'TCP':
                 sock.connect(host)

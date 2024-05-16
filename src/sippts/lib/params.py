@@ -226,6 +226,7 @@ Usage examples:
 
     other = parser_exten.add_argument_group('Other options')
     other.add_argument('-th'      , metavar='THREADS', type=int, help='Number of threads (default: 200)', dest='threads', default=200)
+    other.add_argument('-t'       , metavar='TIMEOUT', type=int, help='Sockets timeout (default: 5)', dest='timeout', default=5)
     other.add_argument('-h', '--help', help='Show this help', dest='help', action='count')
 
 
@@ -270,6 +271,7 @@ Usage examples:
 
     other = parser_rcrack.add_argument_group('Other options')
     other.add_argument('-th'      , metavar='THREADS', type=int, help='Number of threads (default: 200)', dest='threads', default=200)
+    other.add_argument('-t'       , metavar='TIMEOUT', type=int, help='Sockets timeout (default: 5)', dest='timeout', default=5)
     other.add_argument('-h', '--help', help='Show this help', dest='help', action='count')
 
 
@@ -331,6 +333,7 @@ Usage examples:
     log.add_argument('-o'       , metavar='FILE', type=str, help='Save data into a log file', dest='ofile', default='')
 
     other = parser_send.add_argument_group('Other options')
+    other.add_argument('-t'       , metavar='TIMEOUT', type=int, help='Sockets timeout (default: 5)', dest='timeout', default=5)
     other.add_argument('-local-ip', metavar='IP', type=str, help='Set local IP address (by default try to get it)', dest='localip', default='')
     other.add_argument('-h', '--help', help='Show this help', dest='help', action='count')
 
@@ -420,6 +423,7 @@ Usage examples:
     log.add_argument('-v'       , help='Increase verbosity', dest='verbose', action="count")
 
     other = parser_enumerate.add_argument_group('Other options')
+    other.add_argument('-t'       , metavar='TIMEOUT', type=int, help='Sockets timeout (default: 5)', dest='timeout', default=5)
     other.add_argument('-h', '--help', help='Show this help', dest='help', action='count')
 
 
@@ -532,6 +536,7 @@ Usage examples:
     auth.add_argument('-pass'      , metavar='AUTH_PASS', type=str, help='Authentication password', dest='pwd', default='')
 
     other = parser_ping.add_argument_group('Other options')
+    other.add_argument('-t'       , metavar='TIMEOUT', type=int, help='Sockets timeout (default: 5)', dest='timeout', default=5)
     other.add_argument('-local-ip'   , metavar='IP', type=str, help='Set local IP address (by default try to get it)', dest='localip', default='')
     other.add_argument('-n'          , metavar='REQUESTS', type=int, help='Number of requests (default: non stop)', dest='number', default=0)
     other.add_argument('-in'         , metavar='INTERVAL', type=int, help='Wait interval seconds between sending each packet (default: 1 sec)', dest='interval', default=1)
@@ -1081,8 +1086,9 @@ Payloads
         NOCOLOR = args.nocolor
         FILTER = args.filter
         OFILE = args.ofile
+        TIMEOUT = args.timeout
 
-        return COMMAND, IPADDR, HOST, PROXY, RPORT, EXTEN, PREFIX, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMUSER, UA, THREADS, VERBOSE, NOCOLOR, OFILE, FILTER
+        return COMMAND, IPADDR, HOST, PROXY, RPORT, EXTEN, PREFIX, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMUSER, UA, THREADS, VERBOSE, NOCOLOR, OFILE, FILTER, TIMEOUT
     elif COMMAND == 'rcrack':
         if args.help == 1:
             parser_rcrack.print_help()
@@ -1111,8 +1117,9 @@ Payloads
         THREADS = args.threads
         VERBOSE = args.verbose
         NOCOLOR = args.nocolor
+        TIMEOUT = args.timeout
 
-        return COMMAND, IPADDR, HOST, PROXY, RPORT, EXTEN, PREFIX, AUTHUSER, LENGHT, PROTO, DOMAIN, CONTACTDOMAIN, UA, WORDLIST, THREADS, VERBOSE, NOCOLOR
+        return COMMAND, IPADDR, HOST, PROXY, RPORT, EXTEN, PREFIX, AUTHUSER, LENGHT, PROTO, DOMAIN, CONTACTDOMAIN, UA, WORDLIST, THREADS, VERBOSE, NOCOLOR, TIMEOUT
     elif COMMAND == 'send':
         if args.help == 1:
             parser_send.print_help()
@@ -1158,8 +1165,9 @@ Payloads
         PAI = args.pai
         HEADER = args.header
         NOCONTACT = args.nocontact
+        TIMEOUT = args.timeout
 
-        return COMMAND, IPADDR, HOST, PROXY, RPORT, LPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, SDP, SDES, UA, LOCALIP, NOCOLOR, OFILE, PPI, PAI, HEADER, NOCONTACT
+        return COMMAND, IPADDR, HOST, PROXY, RPORT, LPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, SDP, SDES, UA, LOCALIP, NOCOLOR, OFILE, PPI, PAI, HEADER, NOCONTACT, TIMEOUT
     elif COMMAND == 'wssend':
         if args.help == 1:
             parser_wssend.print_help()
@@ -1220,8 +1228,9 @@ Payloads
         TODOMAIN = args.to_domain
         UA = args.user_agent
         VERBOSE = args.verbose
+        TIMEOUT = args.timeout
 
-        return COMMAND, IPADDR, HOST, PROXY, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, VERBOSE
+        return COMMAND, IPADDR, HOST, PROXY, RPORT, PROTO, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, VERBOSE, TIMEOUT
     elif COMMAND == 'leak':
         if args.help == 1:
             parser_leak.print_help()
@@ -1303,8 +1312,9 @@ Payloads
         INTERVAL = args.interval
         PPI = args.ppi
         PAI = args.pai
+        TIMEOUT = args.timeout
 
-        return COMMAND, IPADDR, HOST, PROXY, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, UA, LOCALIP, NUMBER, INTERVAL, PPI, PAI
+        return COMMAND, IPADDR, HOST, PROXY, RPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, UA, LOCALIP, NUMBER, INTERVAL, PPI, PAI, TIMEOUT
     elif COMMAND == 'invite':
         if args.help == 1:
             parser_invite.print_help()

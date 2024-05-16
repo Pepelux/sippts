@@ -278,7 +278,7 @@ class SipDigestLeak:
             print(self.c.YELLOW + msg + self.c.WHITE)
 
         try:
-            sock.settimeout(15)
+            sock.settimeout(30)
 
             # send INVITE
             if proto == 'TCP':

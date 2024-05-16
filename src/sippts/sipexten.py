@@ -40,6 +40,7 @@ class SipExten:
         self.nocolor = ''
         self.ofile = ''
         self.filter = ''
+        self.timeout = 5
 
         self.totaltime = 0
         self.found = []
@@ -266,7 +267,7 @@ class SipExten:
                                  to_user, '', self.domain, self.proto, self.domain, self.user_agent, lport, '', '', '', '1', '', '', 1, '', 0, '', self.route, '', '', '', 1)
 
             try:
-                sock.settimeout(5)
+                sock.settimeout(self.timeout)
 
                 if self.proto == 'TCP':
                     sock.connect(host)
