@@ -23,11 +23,11 @@ CYAN = '\033[0;36;20m'
 BWHITE = '\033[1;37;20m'
 WHITE = '\033[0;37;20m'
 
-local_version = '4.0'
+local_version = '4.0.1'
 
 def get_sippts_args():
     try:
-        command = ["curl", "https://raw.githubusercontent.com/Pepelux/sippts/master/version"]
+        command = ["curl", "https://raw.githubusercontent.com/Pepelux/sippts/master/version", "-H 'Cache-Control: no-cache, no-store'"]
         result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         output = result.stdout
@@ -48,7 +48,7 @@ def get_sippts_args():
     local_cve_version = load_cve_version()
     
     try:
-        command = ["curl", "https://raw.githubusercontent.com/Pepelux/sippts/master/cveversion"]
+        command = ["curl", "https://raw.githubusercontent.com/Pepelux/sippts/master/cveversion", "-H 'Cache-Control: no-cache, no-store'"]
         result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         output = result.stdout
@@ -925,7 +925,7 @@ Payloads
         giturl = 'https://raw.githubusercontent.com/Pepelux/sippts/master/'
             
         try:
-            command = ["curl", "https://raw.githubusercontent.com/Pepelux/sippts/master/version"]
+            command = ["curl", "https://raw.githubusercontent.com/Pepelux/sippts/master/version", "-H 'Cache-Control: no-cache, no-store'"]
             result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
             output = result.stdout
@@ -976,7 +976,7 @@ Payloads
         local_cve_version = load_cve_version()
         
         try:
-            command = ['curl', giturl + 'cveversion']
+            command = ['curl', giturl + 'cveversion', "-H 'Cache-Control: no-cache, no-store'"]
             result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
             output = result.stdout
@@ -1598,7 +1598,7 @@ Payloads
         exit()
 
 def download_file(url, path, file):
-    command = ['curl', url]
+    command = ['curl', url, "-H 'Cache-Control: no-cache, no-store'"]
     result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
     output = result.stdout
