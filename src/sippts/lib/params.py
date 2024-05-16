@@ -23,9 +23,9 @@ CYAN = '\033[0;36;20m'
 BWHITE = '\033[1;37;20m'
 WHITE = '\033[0;37;20m'
 
-def get_sippts_args():
-    local_version = '4.0'
+local_version = '4.0'
 
+def get_sippts_args():
     try:
         command = ["curl", "https://raw.githubusercontent.com/Pepelux/sippts/master/version"]
         result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -377,7 +377,6 @@ Usage examples:
     log.add_argument('-v'       , help='Increase verbosity', dest='verbose', action="count")
 
     other = parser_wssend.add_argument_group('Other options')
-    other.add_argument('-local-ip', metavar='IP', type=str, help='Set local IP address (by default try to get it)', dest='localip', default='')
     other.add_argument('-h', '--help', help='Show this help', dest='help', action='count')
 
 
@@ -919,41 +918,59 @@ Payloads
 
     # Update scripts
     if args.update == 1:
-
         import sysconfig
         path = sysconfig.get_paths()["purelib"] + '/sippts/data/cve.csv'
         modulepath = sysconfig.get_paths()["purelib"] + '/sippts/'
         binpath = sysconfig.get_paths()["scripts"] + '/sippts'
         giturl = 'https://raw.githubusercontent.com/Pepelux/sippts/master/'
-        
-        download_file(giturl + 'bin/sippts', binpath, 'bin/sippts')
+            
+        try:
+            command = ["curl", "https://raw.githubusercontent.com/Pepelux/sippts/master/version"]
+            result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
-        download_file(giturl + 'src/sippts/lib/color.py', modulepath + 'lib/color.py', 'lib/color.py')
-        download_file(giturl + 'src/sippts/lib/functions.py', modulepath + 'lib/functions.py', 'lib/functions.py')
-        download_file(giturl + 'src/sippts/lib/logos.py', modulepath + 'lib/logos.py', 'lib/logos.py')
-        download_file(giturl + 'src/sippts/lib/params.py', modulepath + 'lib/params.py', 'lib/params.py')
+            output = result.stdout
+            error = result.stderr
 
-        download_file(giturl + 'src/sippts/arpspoof.py', modulepath + 'arpspoof.py', 'arpspoof.py')
-        download_file(giturl + 'src/sippts/rtcpbleed.py', modulepath + 'rtcpbleed.py', 'rtcpbleed.py')
-        download_file(giturl + 'src/sippts/rtpbleed.py', modulepath + 'rtpbleed.py', 'rtpbleed.py')
-        download_file(giturl + 'src/sippts/rtpbleedflood.py', modulepath + 'rtpbleedflood.py', 'rtpbleedflood.py')
-        download_file(giturl + 'src/sippts/rtpbleedinject.py', modulepath + 'rtpbleedinject.py', 'rtpbleedinject.py')
-        download_file(giturl + 'src/sippts/sipdigestcrack.py', modulepath + 'sipdigestcrack.py', 'sipdigestcrack.py')
-        download_file(giturl + 'src/sippts/sipdigestleak.py', modulepath + 'sipdigestleak.py', 'sipdigestleak.py')
-        download_file(giturl + 'src/sippts/sipenumerate.py', modulepath + 'sipenumerate.py', 'sipenumerate.py')
-        download_file(giturl + 'src/sippts/sipexten.py', modulepath + 'sipexten.py', 'sipexten.py')
-        download_file(giturl + 'src/sippts/sipflood.py', modulepath + 'sipflood.py', 'sipflood.py')
-        download_file(giturl + 'src/sippts/sipinvite.py', modulepath + 'sipinvite.py', 'sipinvite.py')
-        download_file(giturl + 'src/sippts/sippcapdump.py', modulepath + 'sippcapdump.py', 'sippcapdump.py')
-        download_file(giturl + 'src/sippts/sipping.py', modulepath + 'sipping.py', 'sipping.py')
-        download_file(giturl + 'src/sippts/siprcrack.py', modulepath + 'siprcrack.py', 'siprcrack.py')
-        download_file(giturl + 'src/sippts/sipscan.py', modulepath + 'sipscan.py', 'sipscan.py')
-        download_file(giturl + 'src/sippts/sipsend.py', modulepath + 'sipsend.py', 'sipsend.py')
-        download_file(giturl + 'src/sippts/sipsniff.py', modulepath + 'sipsniff.py', 'sipsniff.py')
-        download_file(giturl + 'src/sippts/siptshark.py', modulepath + 'siptshark.py', 'siptshark.py')
-        download_file(giturl + 'src/sippts/wssend.py', modulepath + 'wssend.py', 'wssend.py')
+            if result.returncode == 0 and output != '404: Not Found':
+                current_cve_version = output.replace('\n', '')
+            else:
+                print(BRED + "Error downloading scripts")
+                print(WHITE)
+                sys.exit()
+        except:
+            sys.exit()
 
-        print(BYELLOW + 'SIPPTS has been updated')
+        if local_version != current_version:
+            download_file(giturl + 'bin/sippts', binpath, 'bin/sippts')
+
+            download_file(giturl + 'src/sippts/lib/color.py', modulepath + 'lib/color.py', 'lib/color.py')
+            download_file(giturl + 'src/sippts/lib/functions.py', modulepath + 'lib/functions.py', 'lib/functions.py')
+            download_file(giturl + 'src/sippts/lib/logos.py', modulepath + 'lib/logos.py', 'lib/logos.py')
+            download_file(giturl + 'src/sippts/lib/params.py', modulepath + 'lib/params.py', 'lib/params.py')
+
+            download_file(giturl + 'src/sippts/arpspoof.py', modulepath + 'arpspoof.py', 'arpspoof.py')
+            download_file(giturl + 'src/sippts/rtcpbleed.py', modulepath + 'rtcpbleed.py', 'rtcpbleed.py')
+            download_file(giturl + 'src/sippts/rtpbleed.py', modulepath + 'rtpbleed.py', 'rtpbleed.py')
+            download_file(giturl + 'src/sippts/rtpbleedflood.py', modulepath + 'rtpbleedflood.py', 'rtpbleedflood.py')
+            download_file(giturl + 'src/sippts/rtpbleedinject.py', modulepath + 'rtpbleedinject.py', 'rtpbleedinject.py')
+            download_file(giturl + 'src/sippts/sipdigestcrack.py', modulepath + 'sipdigestcrack.py', 'sipdigestcrack.py')
+            download_file(giturl + 'src/sippts/sipdigestleak.py', modulepath + 'sipdigestleak.py', 'sipdigestleak.py')
+            download_file(giturl + 'src/sippts/sipenumerate.py', modulepath + 'sipenumerate.py', 'sipenumerate.py')
+            download_file(giturl + 'src/sippts/sipexten.py', modulepath + 'sipexten.py', 'sipexten.py')
+            download_file(giturl + 'src/sippts/sipflood.py', modulepath + 'sipflood.py', 'sipflood.py')
+            download_file(giturl + 'src/sippts/sipinvite.py', modulepath + 'sipinvite.py', 'sipinvite.py')
+            download_file(giturl + 'src/sippts/sippcapdump.py', modulepath + 'sippcapdump.py', 'sippcapdump.py')
+            download_file(giturl + 'src/sippts/sipping.py', modulepath + 'sipping.py', 'sipping.py')
+            download_file(giturl + 'src/sippts/siprcrack.py', modulepath + 'siprcrack.py', 'siprcrack.py')
+            download_file(giturl + 'src/sippts/sipscan.py', modulepath + 'sipscan.py', 'sipscan.py')
+            download_file(giturl + 'src/sippts/sipsend.py', modulepath + 'sipsend.py', 'sipsend.py')
+            download_file(giturl + 'src/sippts/sipsniff.py', modulepath + 'sipsniff.py', 'sipsniff.py')
+            download_file(giturl + 'src/sippts/siptshark.py', modulepath + 'siptshark.py', 'siptshark.py')
+            download_file(giturl + 'src/sippts/wssend.py', modulepath + 'wssend.py', 'wssend.py')
+
+            print(BYELLOW + 'SIPPTS has been updated')
+        else:
+            print(BYELLOW + 'SIPPTS is in the last version')
 
         # CVE file
         local_cve_version = load_cve_version()
@@ -978,7 +995,7 @@ Payloads
             download_file(giturl + 'src/sippts/data/cve.csv', path)
             print(BYELLOW + 'CVE file has been updated')
         else:
-            print(BYELLOW + 'CVE file is updated')
+            print(BYELLOW + 'CVE file is in the last version')
             
         print(WHITE)
 
@@ -1170,11 +1187,10 @@ Payloads
         TOTAG = args.to_tag
         TODOMAIN = args.to_domain
         UA = args.user_agent
-        LOCALIP = args.localip
         PPI = args.ppi
         PAI = args.pai
 
-        return COMMAND, IPADDR, PORT, PATH, VERBOSE, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TOTAG, TODOMAIN, UA, LOCALIP, PPI, PAI
+        return COMMAND, IPADDR, PORT, PATH, VERBOSE, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TOTAG, TODOMAIN, UA, PPI, PAI
     elif COMMAND == 'enumerate':
         if args.help == 1:
             parser_enumerate.print_help()
