@@ -8,6 +8,20 @@ scripts=[
 
 if __name__ == "__main__":
   setup(scripts=scripts,
-        include_package_data=True,
-        package_data={'sippts': ['data/cve.csv']}
-        )
+    name='SIPPTS',
+      author='Jose Luis Verdeguer - Pepelux',
+      version='4.0',
+      install_requires=[     
+        'netifaces',
+        'IPy',
+        'scapy',
+        'websocket-client',
+        'rel'
+      ],
+      extra_requires=[
+        'pyshark',
+        'ArpSpoof'
+      ],
+    include_package_data=True,
+    package_data={'sippts': ['data/cve.csv']}
+    )
