@@ -40,7 +40,7 @@ class SipScan:
         self.to_name = ''
         self.to_domain = ''
         self.user_agent = 'pplsip'
-        self.threads = '500'
+        self.threads = 200
         self.verbose = '0'
         self.ping = 'False'
         self.file = ''
@@ -52,6 +52,7 @@ class SipScan:
         self.pai = ''
         self.localip = ''
         self.getcve = 'False'
+        self.timeout = 5
 
         self.found = []
         self.line = ['-', '\\', '|', '/']
@@ -263,7 +264,7 @@ class SipScan:
         max_values = 100000
 
         # threads to use
-        nthreads = int(self.threads)
+        nthreads = self.threads
         total = len(list(product(ips, ports, protos)))
         if nthreads > total:
             nthreads = total
@@ -459,7 +460,7 @@ class SipScan:
                                  self.to_user, self.to_name, tdomain, proto, domain, self.user_agent, lport, '', '', '', '1', '', '', 1, '', 0, '', self.route, self.ppi, self.pai, '', 1)
 
             try:
-                sock.settimeout(2)
+                sock.settimeout(self.timeout)
 
                 if proto == 'TCP':
                     sock.connect(host)

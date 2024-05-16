@@ -175,6 +175,7 @@ Usage examples:
 
     other = parser_scan.add_argument_group('Other options')
     other.add_argument('-th'      , metavar='THREADS', type=int, help='Number of threads (default: 200)', dest='threads', default=200)
+    other.add_argument('-t'       , metavar='TIMEOUT', type=int, help='Sockets timeout (default: 5)', dest='timeout', default=5)
     other.add_argument('-ping'    , help='Ping host before scan', dest='ping', action="count")
     other.add_argument('-fp'      , help='Try to fingerprinting', dest='fp', action="count")
     other.add_argument('-random'  , help='Randomize target hosts', dest='random', action="count")
@@ -1031,6 +1032,7 @@ Payloads
         TODOMAIN = args.to_domain
         UA = args.user_agent
         THREADS = args.threads
+        TIMEOUT = args.timeout
         VERBOSE = args.verbose
         MORE_VERBOSE = args.more_verbose
         if MORE_VERBOSE == 1:
@@ -1046,7 +1048,7 @@ Payloads
         LOCALIP = args.localip
         CVE = args.cve
 
-        return COMMAND, IPADDR, HOST, PROXY, PORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, THREADS, VERBOSE, PING, FILE, NOCOLOR, OFILE, FP, RANDOM, PPI, PAI, LOCALIP, CVE
+        return COMMAND, IPADDR, HOST, PROXY, PORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, THREADS, TIMEOUT, VERBOSE, PING, FILE, NOCOLOR, OFILE, FP, RANDOM, PPI, PAI, LOCALIP, CVE
     elif COMMAND == 'exten':
         if args.help == 1:
             parser_exten.print_help()
