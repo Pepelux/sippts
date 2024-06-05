@@ -224,7 +224,7 @@ class SipRemoteCrack:
 
                 return data
             except socket.timeout:
-                print('Socket timeout error')
+                print(self.c.RED + '\nSocket timeout error')
                 if self.run == True:
                     exit()
                 else:
@@ -454,7 +454,7 @@ class SipRemoteCrack:
                                         ipaddr, to_user, pwd)
 
                                     str = self.c.BYELLOW+'[%s] ' % self.line[self.pos] + self.c.BWHITE+'Scanning ' + self.c.BYELLOW+'%s:%s/%s' % (
-                                        ipaddr, self.rport, self.proto) + self.c.BWHITE + ' => Exten/Pass: ' + self.c.BGREEN + '%s/%s' % (auth_user, pwd) + self.c.BBLUE + ' - %s %s' % (data['code'], data['text'])
+                                        ipaddr, self.rport, self.proto) + self.c.BWHITE + ' => Exten/Pass: ' + self.c.BGREEN + '%s/%s' % (to_user, pwd) + self.c.BBLUE + ' - %s %s' % (data['code'], data['text'])
                                     print(str.ljust(200), end="\r")
 
                                     if data and data['code'] == '200':
