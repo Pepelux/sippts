@@ -8,7 +8,7 @@ __copyright__ = "Copyright (C) 2015-2022, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
 
 import os
-import re
+import pyshark
 from .lib.functions import parse_digest
 from .lib.color import Color
 from .lib.logos import Logo
@@ -22,8 +22,6 @@ class SipPCAPDump:
         self.c = Color()
 
     def start(self):
-        tmpfile = 'sippcapdump.tmp'
-
         logo = Logo('sippcapdump')
         logo.print()
 
@@ -31,53 +29,50 @@ class SipPCAPDump:
         print(self.c.BWHITE+'[✓] Output file: %s ...\n' % self.ofile)
         print(self.c.WHITE)
 
-        os.system(
-            "tshark -r %s -Y sip -T fields -e ip.src -e ip.dst -e sip.Method -e sip.auth |grep username |sort |uniq |sed 's/\\\\r\\\\n/\\n/g' > %s" % (self.file, tmpfile))
-
         fw = open(self.ofile, 'w')
+        
+        capture = pyshark.FileCapture(self.file, display_filter='sip')
 
-        with open(tmpfile) as f:
-            line = f.readline()
+        for packet in capture:
+            ipsrc = packet.ip.src
+            ipdst = packet.ip.dst
+            try:
+                ua = packet.sip.ua
+            except:
+                ua = ''
+            try:
+                method = packet.sip.Method
+            except:
+                method = ''
+            try:
+                auth = packet.sip.auth
+            except:
+                auth = ''
 
-            while line:
-                line = line.replace('\n', '')
+            if method != '' and auth != '':
+                headers_auth = parse_digest(auth)
+                if headers_auth:
+                    username = headers_auth['username']
+                    realm = headers_auth['realm']
+                    uri = headers_auth['uri']
+                    nonce = headers_auth['nonce']
+                    cnonce = headers_auth['cnonce']
+                    nc = headers_auth['nc']
+                    qop = headers_auth['qop']
+                    algorithm = headers_auth['algorithm']
+                    response = headers_auth['response']
 
-                m = re.search(
-                    '([0-9|\.]*)[\s|\t]*([0-9|\.]*)[\s|\t]*([A-Z]+)[\s|\t]*(.*)', line)
-                if m:
-                    ipsrc = '%s' % (m.group(1))
-                    ipdst = '%s' % (m.group(2))
-                    method = '%s' % (m.group(3))
-                    auth = '%s' % (m.group(4))
+                    # File format:
+                    # ipsrc"ipdst"username"realm"method"uri"nonce"cnonce"nc"qop"auth"response
+                    authline = '%s"%s"%s"%s"%s"%s"%s"%s"%s"%s"%s"%s\n' % (
+                        ipsrc, ipdst, username, realm, method, uri, nonce, cnonce, nc, qop, algorithm, response)
 
-                    headers_auth = parse_digest(auth)
-                    if headers_auth:
+                    print(self.c.WHITE + '[' + self.c.YELLOW + '%s' % ipsrc + self.c.WHITE + '->' + self.c.YELLOW + '%s' % ipdst + self.c.WHITE + '] ' +
+                            self.c.GREEN + '%s' % username + self.c.WHITE + ':' + self.c.RED + '%s' % response + self.c.WHITE)
 
-                        username = headers_auth['username']
-                        realm = headers_auth['realm']
-                        uri = headers_auth['uri']
-                        nonce = headers_auth['nonce']
-                        cnonce = headers_auth['cnonce']
-                        nc = headers_auth['nc']
-                        qop = headers_auth['qop']
-                        algorithm = headers_auth['algorithm']
-                        response = headers_auth['response']
+                    fw.write(authline)
 
-                        # File format:
-                        # ipsrc"ipdst"username"realm"method"uri"nonce"cnonce"nc"qop"auth"response
-                        authline = '%s"%s"%s"%s"%s"%s"%s"%s"%s"%s"%s"%s\n' % (
-                            ipsrc, ipdst, username, realm, method, uri, nonce, cnonce, nc, qop, algorithm, response)
+        print(self.c.WHITE)
+        print('The found data has been saved')
 
-                        print(self.c.WHITE + '[' + self.c.YELLOW + '%s' % ipsrc + self.c.WHITE + '->' + self.c.YELLOW + '%s' % ipdst + self.c.WHITE + '] ' +
-                              self.c.GREEN + '%s' % username + self.c.WHITE + ':' + self.c.RED + '%s' % response)
-
-                        fw.write(authline)
-
-                line = f.readline()
-
-            print(self.c.WHITE)
-            print('The found data has been saved')
-
-        f.close()
         fw.close()
-        os.remove(tmpfile)

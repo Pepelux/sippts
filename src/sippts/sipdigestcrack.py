@@ -11,6 +11,7 @@ from curses.ascii import isascii
 import io
 import base64
 from nis import cat
+import os
 import re
 import time
 from .lib.functions import calculateHash, format_time
@@ -43,6 +44,10 @@ class SipDigestCrack:
         self.c = Color()
 
     def start(self):
+        if not os.path.isfile(self.file):
+            print(self.c.RED + f'[-] File {self.file} not found')
+            exit()
+
         if self.charset == 'digits':
             self.chars = string.digits
         elif self.charset == 'ascii_letters':

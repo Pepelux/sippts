@@ -15,6 +15,8 @@ devel:
   - added param -t to set sockets timeout
 - tshark:
   - added param -rtp_extract to extract RTP frames info WAV files
+- dcrack:
+  - Use pyshark library instead tshark application
 - global:
   - bug fixes
 
