@@ -13,6 +13,8 @@ devel:
   - added param -t to set sockets timeout
 - send:
   - added param -t to set sockets timeout
+- tshark:
+  - added param -rtp_extract to extract RTP frames info WAV files
 - global:
   - bug fixes
 
