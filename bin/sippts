@@ -260,9 +260,9 @@ def main():
     elif params[0] == 'dump':
         (cmd, file, ofile) = params
 
-        from sippts.sippcapdump import SipPCAPDump
+        from sippts.sipdump import SipDump
 
-        s = SipPCAPDump()
+        s = SipDump()
         s.file = file
         s.ofile = ofile
     elif params[0] == 'dcrack':
@@ -355,17 +355,19 @@ def main():
         s.verbose = verbose
         s.gw = gw
         s.file = file
-    elif params[0] == 'tshark':
-        (cmd, file, filter, rtpextract, ofile, nocolor) = params
+    elif params[0] == 'pcapdump':
+        (cmd, file, folder, verbose, rtpextract, nocolor, sip, rtp) = params
 
-        from sippts.siptshark import SipShark
+        from sippts.sippcapdump import SipPcapDump
 
-        s = SipShark()
+        s = SipPcapDump()
         s.file = file
-        s.filter = filter
+        s.folder = folder
+        s.verbose = verbose
         s.rtp_extract = rtpextract
-        s.ofile = ofile
         s.nocolor = nocolor
+        s.sip = sip
+        s.rtp = rtp
     elif params[0] == 'rtpbleed':
         (cmd, ip, start_port, end_port, loops, payload, delay) = params
 

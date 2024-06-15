@@ -23,7 +23,7 @@ CYAN = '\033[0;36;20m'
 BWHITE = '\033[1;37;20m'
 WHITE = '\033[0;37;20m'
 
-local_version = '4.0.2'
+local_version = '4.0.3'
 
 def get_sippts_args():
     try:
@@ -767,37 +767,29 @@ Usage examples:
     other.add_argument('-h', '--help', help='Show this help', dest='help', action='count')
 
 
-    ##################
-    # tshark command #
-    ##################
-    parser_tshark = subparsers.add_parser('tshark', 
+    ####################
+    # pcapdump command #
+    ####################
+    parser_pcapdump = subparsers.add_parser('pcapdump', 
         formatter_class=argparse.RawTextHelpFormatter, 
-        help='Filter data from a PCAP file with TShark', 
+        help='Extract data from a PCAP file', 
         add_help=False,
-        description = RED + logo_tshark + YELLOW + '''
-  Module ''' + BYELLOW + '''tshark''' + YELLOW + ''' allow PCAP manipulation.''' + WHITE,
-    epilog='''
-Filters:
--------
-stats               SIP packet statistics
-auth                Show auth digest
-messages            Show all SIP messages
-frame <id>          Show a SIP message filtering by frame number
-method <method>     Filter frames by method: register, invite, ...
-callids             Show all call-ID
-callid <cid>        Filter by call-ID
-rtp                 Show all RTP streams
-''')
+        description = RED + logo_pcapdump + YELLOW + '''
+  Module ''' + BYELLOW + '''pcapdump''' + YELLOW + ''' extracts data from a PCAP file.''' + WHITE)
 
-    target = parser_tshark.add_argument_group('Target')
+    target = parser_pcapdump.add_argument_group('Target')
     target.add_argument('-f'      , metavar='FILE', type=str, help='PCAP file to analyze', dest='file', default='')
-    target.add_argument('-filter' , metavar='FILTER', help='Filter data to show', dest='filter', default='')
+    target.add_argument('-sip', help='Show SIP frames', dest='sip', action="count")
+    target.add_argument('-rtp', help='Show RTP frames', dest='rtp', action="count")
 
-    rtp = parser_tshark.add_argument_group('RTP')
-    rtp.add_argument('-o'    , metavar='FILE', type=str, help='Save RTP streams into a PCAP file', dest='ofile', default='')
-    rtp.add_argument('-rtp_extract', help='Extract RTP streams into WAV files', dest='rtp_extract', action="count")
+    rtp = parser_pcapdump.add_argument_group('RTP')
+    rtp.add_argument('-r', '-rtp_extract', help='Extract RTP streams into WAV files', dest='rtp_extract', action="count")
 
-    other = parser_tshark.add_argument_group('Other options')
+    log = parser_pcapdump.add_argument_group('Log')
+    log.add_argument('-v', help='Increase verbosity', dest='verbose', action="count")
+    log.add_argument('-o', metavar='FOLDER', type=str, help='Save data into a folder', dest='folder', default='')
+
+    other = parser_pcapdump.add_argument_group('Other options')
     other.add_argument('-nocolor'    , help='Show result without colors', dest='nocolor', action="count")
     other.add_argument('-h', '--help', help='Show this help', dest='help', action='count')
 
@@ -965,13 +957,13 @@ Payloads
             download_file(giturl + 'src/sippts/sipexten.py', modulepath + 'sipexten.py', 'sipexten.py')
             download_file(giturl + 'src/sippts/sipflood.py', modulepath + 'sipflood.py', 'sipflood.py')
             download_file(giturl + 'src/sippts/sipinvite.py', modulepath + 'sipinvite.py', 'sipinvite.py')
+            download_file(giturl + 'src/sippts/sipdump.py', modulepath + 'sipdump.py', 'sipdump.py')
             download_file(giturl + 'src/sippts/sippcapdump.py', modulepath + 'sippcapdump.py', 'sippcapdump.py')
             download_file(giturl + 'src/sippts/sipping.py', modulepath + 'sipping.py', 'sipping.py')
             download_file(giturl + 'src/sippts/siprcrack.py', modulepath + 'siprcrack.py', 'siprcrack.py')
             download_file(giturl + 'src/sippts/sipscan.py', modulepath + 'sipscan.py', 'sipscan.py')
             download_file(giturl + 'src/sippts/sipsend.py', modulepath + 'sipsend.py', 'sipsend.py')
             download_file(giturl + 'src/sippts/sipsniff.py', modulepath + 'sipsniff.py', 'sipsniff.py')
-            download_file(giturl + 'src/sippts/siptshark.py', modulepath + 'siptshark.py', 'siptshark.py')
             download_file(giturl + 'src/sippts/wssend.py', modulepath + 'wssend.py', 'wssend.py')
 
             print(BYELLOW + 'SIPPTS has been updated')
@@ -1487,31 +1479,34 @@ Payloads
             VERBOSE = 2
 
         return COMMAND, IPADDR, VERBOSE, GW, FILE
-    elif COMMAND == 'tshark':
+    elif COMMAND == 'pcapdump':
         if args.help == 1:
-            parser_tshark.print_help()
+            parser_pcapdump.print_help()
             exit()
-        if not args.file or (not args.filter and not args.rtp_extract):
-            parser_tshark.print_help()
+        if not args.file:
+            parser_pcapdump.print_help()
             print(RED)
             print('Param error!')
-            print(BWHITE + COMMAND + ':' + WHITE + ' Mandatory params: ' + GREEN + '-f <FILE>' + WHITE + ' and ' + GREEN + '-filter <FILTER>')
+            print(BWHITE + COMMAND + ':' + WHITE + ' Mandatory params: ' + GREEN + '-f <FILE>' + WHITE)
             print(WHITE + 'Use ' + CYAN + 'sippts ' + COMMAND + ' -h/--help' + WHITE + ' for help')
             exit()
-        if len(sys.argv) < 4:
-            parser_tshark.print_help()
-            print(RED + 'Param error!')
-            print(WHITE + 'You must write a filter (with ' + GREEN + '-filter' + WHITE + ')')
-            print(WHITE + 'Use ' + CYAN + 'sippts -h/--help' + WHITE + ' for help')
+        if not args.sip and not args.rtp and not args.rtp_extract:
+            parser_pcapdump.print_help()
+            print(RED)
+            print('Param error!')
+            print(BWHITE + COMMAND + ':' + WHITE + ' Mandatory params: ' + GREEN + '-sip' + WHITE + ' or ' + GREEN + '-rtp' + WHITE + ' or ' + GREEN + '-r' + WHITE)
+            print(WHITE + 'Use ' + CYAN + 'sippts ' + COMMAND + ' -h/--help' + WHITE + ' for help')
             exit()
 
         FILE = args.file
-        FILTER = args.filter
+        SIP = args.sip
+        RTP = args.rtp
+        VERBOSE = args.verbose
+        FOLDER = args.folder
         RTPEXTRACT = args.rtp_extract
-        OFILE = args.ofile
         NOCOLOR = args.nocolor
 
-        return COMMAND, FILE, FILTER, RTPEXTRACT, OFILE, NOCOLOR
+        return COMMAND, FILE, FOLDER, VERBOSE, RTPEXTRACT, NOCOLOR, SIP, RTP
     elif COMMAND == 'rtpbleed':
         if args.help == 1:
             parser_rtpbleed.print_help()
@@ -1699,12 +1694,6 @@ logo_spoof = '''
 ┛┗┛┗┣┛  ┗┛┣┛┗┛┗┛┻ 
 '''
 
-logo_tshark = '''
-┏┓┳┏┓  ┏┳┓┏┓┓┏┏┓┳┓┓┏┓
-┗┓┃┃┃   ┃ ┗┓┣┫┣┫┣┫┃┫ 
-┗┛┻┣┛   ┻ ┗┛┛┗┛┗┛┗┛┗┛
-'''
-
 logo_rtpbleed = '''
 ┳┓┏┳┓┏┓  ┳┓┓ ┏┓┏┓┳┓
 ┣┫ ┃ ┃┃  ┣┫┃ ┣ ┣ ┃┃
@@ -1729,3 +1718,8 @@ logo_rtpbleedinject = '''
 ┛┗┗┛┣┛  ┻┛┗┛┗┛┗┛┻┛  ┻┛┗┗┛┗┛┗┛ ┻ 
 '''
 
+logo_pcapdump = '''
+┏┓┳┏┓  ┏┓┏┓┏┓┏┓  ┳┓┳┳┳┳┓┏┓
+┗┓┃┃┃  ┃┃┃ ┣┫┃┃  ┃┃┃┃┃┃┃┃┃
+┗┛┻┣┛  ┣┛┗┛┛┗┣┛  ┻┛┗┛┛ ┗┣┛
+            '''

@@ -1,4 +1,7 @@
 devel:
+- renamed module sippcapdump to sipdump
+- removed tshark module
+- addded module pcapdump to dump data from a PCAP file (SIP, RTP and RTP-to-WAV)
 - scan:
   - added param -t to set sockets timeout
 - leak:
@@ -13,8 +16,6 @@ devel:
   - added param -t to set sockets timeout
 - send:
   - added param -t to set sockets timeout
-- tshark:
-  - added param -rtp_extract to extract RTP frames info WAV files
 - dcrack:
   - Use pyshark library instead tshark application
 - global:

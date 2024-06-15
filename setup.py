@@ -15,11 +15,11 @@ if __name__ == "__main__":
         'netifaces',
         'IPy',
         'scapy',
+        'pyshark',
         'websocket-client',
         'rel'
       ],
       extra_requires=[
-        'pyshark',
         'ArpSpoof'
       ],
     include_package_data=True,
