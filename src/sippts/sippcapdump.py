@@ -196,7 +196,11 @@ class SipPcapDump:
         if self.folder != '':
             fw = open(f'{self.folder}/auth.txt', 'w')
 
+        cont = 0
+        
         for packet in capture:
+            cont = cont + 1
+            
             ipsrc = packet.ip.src
             ipdst = packet.ip.dst
             try:
@@ -234,6 +238,10 @@ class SipPcapDump:
         if self.folder != '':
             fw.close()
         
+        if cont > 0:
+            print(self.c.WHITE)
+            print(f'{self.c.BWHITE}To crack hashes use \'{self.c.BGREEN}sippts dump{self.c.BWHITE}\' and \'{self.c.BGREEN}sippts dcrack{self.c.WHITE}\'')
+            
         capture.clear()    
         capture.close()
         
