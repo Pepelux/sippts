@@ -99,19 +99,31 @@ class SipPcapDump:
                 ua = ''
 
             try:
-                sipfrom = f'{packet.sip.From_User}@{packet.sip.From_Host}'
+                sipfrom = f'{packet.sip.From}'
+                pos = sipfrom.find(';')
+                if pos > 0:
+                    sipfrom = sipfrom[0:pos]
             except:
                 sipfrom = ''
 
             try:
-                sipto = f'{packet.sip.To_User}@{packet.sip.To_Host}'
+                sipto = f'{packet.sip.To}'
+                pos = sipto.find(';')
+                if pos > 0:
+                    sipto = sipto[0:pos]
             except:
                 sipto = ''
 
             try:
-                sipcontact = f'{packet.sip.Contact_User}@{packet.sip.Contact_Host}'
+                sipcontact = f'{packet.sip.Contact}'
+                pos = sipcontact.find('>')
+                if pos > 0:
+                    sipcontact = sipcontact[0:pos+1]
             except:
-                sipcontact = ''
+                try:
+                    sipcontact = f'{packet.sip.Contact_User}@{packet.sip.Contact_Host}'
+                except:
+                    sipcontact = ''
 
             try:
                 firstline = packet.sip.Request_Line
@@ -174,7 +186,7 @@ class SipPcapDump:
 
         for line in sipua:
             (ip, ua) = line.split('###')
-            print(f'{self.c.BYELLOW}{ip}{self.c.WHITE} => {self.c.BCYAN}{ua}{self.c.WHITE}')
+            print(f'{self.c.BYELLOW}{ip}{self.c.WHITE} => {self.c.BMAGENTA}{ua}{self.c.WHITE}')
 
             if self.folder != '':
                 fw.write(f'{ip} => {ua}\n')
@@ -197,6 +209,7 @@ class SipPcapDump:
             fw = open(f'{self.folder}/auth.txt', 'w')
 
         cont = 0
+        sipauth = []
         
         for packet in capture:
             cont = cont + 1
@@ -230,10 +243,13 @@ class SipPcapDump:
                     authline = '%s"%s"%s"%s"%s"%s"%s"%s"%s"%s"%s"%s\n' % (
                         ipsrc, ipdst, username, realm, method, uri, nonce, cnonce, nc, qop, algorithm, response)
 
-                    print(f'{self.c.WHITE}[{self.c.BYELLOW}{ipsrc}{self.c.WHITE} => {self.c.BYELLOW}{ipdst}{self.c.WHITE}] User: {self.c.BGREEN}{username}{self.c.WHITE} - Hash: {self.c.BRED}{response}{self.c.WHITE}')
+                    if response not in sipauth:
+                        sipauth.append(response)
 
-                    if self.folder != '':
-                        fw.write(authline + '\n')
+                        print(f'{self.c.WHITE}[{self.c.BYELLOW}{ipsrc}{self.c.WHITE} => {self.c.BYELLOW}{ipdst}{self.c.WHITE}] User: {self.c.BGREEN}{username}{self.c.WHITE} - Hash: {self.c.BRED}{response}{self.c.WHITE}')
+
+                        if self.folder != '':
+                            fw.write(authline + '\n')
 
         if self.folder != '':
             fw.close()

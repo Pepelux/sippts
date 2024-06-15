@@ -32,6 +32,8 @@ class SipDump:
         
         capture = pyshark.FileCapture(self.file, display_filter='sip')
 
+        sipauth = []
+
         for packet in capture:
             ipsrc = packet.ip.src
             ipdst = packet.ip.dst
@@ -62,9 +64,12 @@ class SipDump:
                     authline = '%s"%s"%s"%s"%s"%s"%s"%s"%s"%s"%s"%s\n' % (
                         ipsrc, ipdst, username, realm, method, uri, nonce, cnonce, nc, qop, algorithm, response)
 
-                    print(f'{self.c.WHITE}[{self.c.BYELLOW}{ipsrc}{self.c.WHITE} => {self.c.BYELLOW}{ipdst}{self.c.WHITE}] {self.c.BGREEN}{username}{self.c.WHITE}:{self.c.BRED}{response}{self.c.WHITE}')
+                    if response not in sipauth:
+                        sipauth.append(response)
 
-                    fw.write(authline)
+                        print(f'{self.c.WHITE}[{self.c.BYELLOW}{ipsrc}{self.c.WHITE} => {self.c.BYELLOW}{ipdst}{self.c.WHITE}] {self.c.BGREEN}{username}{self.c.WHITE}:{self.c.BRED}{response}{self.c.WHITE}')
+
+                        fw.write(authline)
 
         capture.clear()
         capture.close()
