@@ -62,8 +62,7 @@ class SipDump:
                     authline = '%s"%s"%s"%s"%s"%s"%s"%s"%s"%s"%s"%s\n' % (
                         ipsrc, ipdst, username, realm, method, uri, nonce, cnonce, nc, qop, algorithm, response)
 
-                    print(self.c.WHITE + '[' + self.c.YELLOW + '%s' % ipsrc + self.c.WHITE + '->' + self.c.YELLOW + '%s' % ipdst + self.c.WHITE + '] ' +
-                            self.c.GREEN + '%s' % username + self.c.WHITE + ':' + self.c.RED + '%s' % response + self.c.WHITE)
+                    print(f'{self.c.WHITE}[{self.c.BYELLOW}{ipsrc}{self.c.WHITE} => {self.c.BYELLOW}{ipdst}{self.c.WHITE}] {self.c.BGREEN}{username}{self.c.WHITE}:{self.c.BRED}{response}{self.c.WHITE}')
 
                     fw.write(authline)
 
