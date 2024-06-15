@@ -94,6 +94,9 @@ class SipSend:
             print(self.c.BRED + 'Protocol %s is not supported' % self.proto)
             sys.exit()
 
+        if self.method == 'INVITE' and self.timeout == 5:
+            self.timeout = 30
+
         try:
             if self.proto == 'UDP':
                 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -300,7 +303,7 @@ class SipSend:
                         fw.write(resp.decode() + '\n')
 
                     totag = headers['totag']
-
+            
             if self.user != '' and self.pwd != '' and (headers['response_code'] == '401' or headers['response_code'] == '407'):
                 # send ACK
                 print(self.c.BWHITE + '[+] Request ACK')
@@ -395,6 +398,35 @@ class SipSend:
                                     fw.write(resp.decode() + '\n')
                     except:
                         print(self.c.WHITE)
+
+            # receive 200 Ok - call answered
+            if headers['response_code'] == '200':
+                cuser = headers['contactuser']
+                cdomain = headers['contactdomain']
+                if cdomain == '':
+                    cdomain = self.domain
+                else:
+                    if cuser != None and cuser != '':
+                        cdomain = cuser + '@' + cdomain
+
+                totag = headers['totag']
+
+                # send ACK
+                print(self.c.YELLOW + '[=>] Request ACK')
+
+                msg = create_message('ACK', self.localip, self.contact_domain, self.from_user, self.from_name, self.from_domain,
+                                        self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, totag, '', 1, '', 0, via, self.route, '', '', self.header, self.withcontact)
+
+                print(self.c.YELLOW + msg)
+
+                if self.ofile != '':
+                    fw.write('[+] Request ACK\n')
+                    fw.write(msg + '\n')
+
+                if self.proto == 'TLS':
+                    sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
+                else:
+                    sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
         except socket.timeout:
             pass
