@@ -52,11 +52,11 @@ class SipPcapDump:
        
     
     def sip_frames(self):
-        print(self.c.BWHITE + 'SIP frames:' + self.c.WHITE)
-
         capture = pyshark.FileCapture(self.file, display_filter='sip')
 
         if self.verbose == 1:
+            print(self.c.BWHITE + 'SIP frames:' + self.c.WHITE)
+            
             if self.folder != '':
                 fw = open(f'{self.folder}/sip_frames_full.txt', 'w')
 
@@ -74,17 +74,24 @@ class SipPcapDump:
             capture.clear()
             capture.close()
 
+        print(self.c.BWHITE + 'SIP dialogs:' + self.c.WHITE)
+
         if self.folder != '':
             fw = open(f'{self.folder}/sip_frames.txt', 'w')
 
         capture = pyshark.FileCapture(self.file, display_filter='sip')
 
+        sipcid = []
+        sipdata = []
+        sipua = []
+        
         for packet in capture:
             protocol = packet.transport_layer
             srcip = packet.ip.src
             dstip = packet.ip.dst
             srcport = packet[protocol].srcport
             dstport = packet[protocol].dstport
+            cid = packet.sip.call_id
             
             try:
                 ua = packet.sip.User_Agent
@@ -114,34 +121,72 @@ class SipPcapDump:
                 except:
                     firstline = ''
             
-            data = f'[{self.c.BYELLOW}{srcip}{self.c.WHITE}:{self.c.BYELLOW}{srcport}{self.c.WHITE} => {self.c.BYELLOW}{dstip}{self.c.WHITE}:{self.c.BYELLOW}{dstport}{self.c.WHITE} {self.c.BWHITE}{protocol}{self.c.WHITE}] {self.c.BGREEN}{firstline}{self.c.WHITE}'
-            dataf = f'[{srcip}:{srcport} => {dstip}:{dstport} {protocol}] {firstline}'
             if ua != '':
-                data = f'{data} - UA: {self.c.BMAGENTA}{ua}{self.c.WHITE}'
-                dataf = f'{dataf} - UA: {ua}'
-            if sipfrom != '':
-                data = f'{data} - From: {self.c.BCYAN}{sipfrom}{self.c.WHITE}'
-                dataf = f'{dataf} - From: {sipfrom}'
-            if sipto != '':
-                data = f'{data} - To: {self.c.BCYAN}{sipto}{self.c.WHITE}'
-                dataf = f'{dataf} - To: {sipto}'
-            if sipcontact != '':
-                data = f'{data} - Contact: {self.c.BCYAN}{sipcontact}{self.c.WHITE}'
-                dataf = f'{dataf} - Contact: {sipcontact}'
+                ipua = f'{srcip}###{ua}'
+                if ipua not in sipua:
+                    sipua.append(ipua)
             
-            print(data)
+            if cid not in sipcid:
+                sipcid.append(cid)
+            sipdata.append(f'{cid}###{srcip}###{srcport}###{dstip}###{dstport}###{protocol}###{firstline}')
+            
+            for cid in sipcid:
+                cont = 0
+                
+                for line in sipdata:
+                    if line.find(cid) > -1:
+                        cont = cont + 1
 
-            if self.folder != '':
-                fw.write(dataf + '\n')
+                        (c, srcip, srcport, dstip, dstport, protocol, firstline) = line.split('###')
+
+                        data = f'{self.c.BWHITE}{str(cont)}{self.c.WHITE} [{self.c.BYELLOW}{srcip}{self.c.WHITE}:{self.c.BYELLOW}{srcport}{self.c.WHITE} => {self.c.BYELLOW}{dstip}{self.c.WHITE}:{self.c.BYELLOW}{dstport}{self.c.WHITE} {self.c.BWHITE}{protocol}{self.c.WHITE}] {self.c.BGREEN}{firstline}{self.c.WHITE}'
+                        dataf = f'{str(cont)} [{srcip}:{srcport} => {dstip}:{dstport} {protocol}] {firstline}'
+                        if ua != '':
+                            data = f'{data} - UA: {self.c.BMAGENTA}{ua}{self.c.WHITE}'
+                            dataf = f'{dataf} - UA: {ua}'
+                        if sipfrom != '':
+                            data = f'{data} - From: {self.c.BCYAN}{sipfrom}{self.c.WHITE}'
+                            dataf = f'{dataf} - From: {sipfrom}'
+                        if sipto != '':
+                            data = f'{data} - To: {self.c.BCYAN}{sipto}{self.c.WHITE}'
+                            dataf = f'{dataf} - To: {sipto}'
+                        if sipcontact != '':
+                            data = f'{data} - Contact: {self.c.BCYAN}{sipcontact}{self.c.WHITE}'
+                            dataf = f'{dataf} - Contact: {sipcontact}'
+
+                        print(data)
+
+                        if self.folder != '':
+                            fw.write(dataf + '\n')
+                
+                print(self.c.WHITE)
+
+                if self.folder != '':
+                    fw.write('\n')
 
         if self.folder != '':
             fw.close()
-        
+
+        print(self.c.BWHITE + 'SIP devices:' + self.c.WHITE)
+
+        if self.folder != '':
+            fw = open(f'{self.folder}/sip_devices.txt', 'w')
+
+        for line in sipua:
+            (ip, ua) = line.split('###')
+            print(f'{self.c.BYELLOW}{ip}{self.c.WHITE} => {self.c.BCYAN}{ua}{self.c.WHITE}')
+
+            if self.folder != '':
+                fw.write(f'{ip} => {ua}\n')
+
+        if self.folder != '':
+            fw.close()
+
+        print(self.c.WHITE)
+
         capture.clear()
         capture.close()
-        
-        print(self.c.WHITE)
-    
+            
     
     def sip_auth(self):
         print(self.c.BWHITE + 'SIP authentications:' + self.c.WHITE)
@@ -181,8 +226,7 @@ class SipPcapDump:
                     authline = '%s"%s"%s"%s"%s"%s"%s"%s"%s"%s"%s"%s\n' % (
                         ipsrc, ipdst, username, realm, method, uri, nonce, cnonce, nc, qop, algorithm, response)
 
-                    print(self.c.WHITE + '[' + self.c.YELLOW + '%s' % ipsrc + self.c.WHITE + '->' + self.c.YELLOW + '%s' % ipdst + self.c.WHITE + '] ' +
-                            self.c.GREEN + '%s' % username + self.c.WHITE + ':' + self.c.RED + '%s' % response + self.c.WHITE)
+                    print(f'{self.c.WHITE}[{self.c.BYELLOW}{ipsrc}{self.c.WHITE} => {self.c.BYELLOW}{ipdst}{self.c.WHITE}] User: {self.c.BGREEN}{username}{self.c.WHITE} - Hash: {self.c.BRED}{response}{self.c.WHITE}')
 
                     if self.folder != '':
                         fw.write(authline + '\n')
