@@ -30,15 +30,6 @@ BWHITE = '\033[1;37;20m'
 WHITE = '\033[0;37;20m'
 
 
-def screen_clear():
-    # for mac and linux(here, os.name is 'posix')
-    if os.name == 'posix' or os.name == 'Linux':
-        _ = os.system('clear')
-    else:
-        # for windows platfrom
-        _ = os.system('cls')
-
-
 def get_free_port():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.bind(('', 0))
