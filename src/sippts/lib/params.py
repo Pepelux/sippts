@@ -23,7 +23,7 @@ CYAN = '\033[0;36;20m'
 BWHITE = '\033[1;37;20m'
 WHITE = '\033[0;37;20m'
 
-local_version = '4.0.1'
+local_version = '4.0.2'
 
 def get_sippts_args():
     try:
@@ -795,8 +795,7 @@ rtp                 Show all RTP streams
 
     rtp = parser_tshark.add_argument_group('RTP')
     rtp.add_argument('-o'    , metavar='FILE', type=str, help='Save RTP streams into a PCAP file', dest='ofile', default='')
-    rtp.add_argument('-rtp_extract', help='Extract RTP streams. Ex: -rtp_extract -r 1210 -o rtp.pcap', dest='rtpextract', action="count")
-    rtp.add_argument('-r'          , metavar='PORT', type=str, help='RTP port to extract streams', dest='rtpport', default='')
+    rtp.add_argument('-rtp_extract', help='Extract RTP streams into WAV files', dest='rtp_extract', action="count")
 
     other = parser_tshark.add_argument_group('Other options')
     other.add_argument('-nocolor'    , help='Show result without colors', dest='nocolor', action="count")
@@ -1492,24 +1491,12 @@ Payloads
         if args.help == 1:
             parser_tshark.print_help()
             exit()
-        if not args.file or not args.filter:
+        if not args.file or (not args.filter and not args.rtp_extract):
             parser_tshark.print_help()
             print(RED)
             print('Param error!')
             print(BWHITE + COMMAND + ':' + WHITE + ' Mandatory params: ' + GREEN + '-f <FILE>' + WHITE + ' and ' + GREEN + '-filter <FILTER>')
             print(WHITE + 'Use ' + CYAN + 'sippts ' + COMMAND + ' -h/--help' + WHITE + ' for help')
-            exit()
-        if args.rtpextract and (not args.rtpport or not args.ofile):
-            parser_tshark.print_help()
-            print(RED + 'Param error!')
-            print(WHITE + 'One of the following arguments are required: ' + GREEN + '-r/--rtp_port' + WHITE + ',' + GREEN + '-o/--output_file')
-            print(WHITE + 'Use ' + CYAN + 'sippts -h/--help' + WHITE + ' for help')
-            exit()
-        if not args.rtpextract and (args.rtpport or args.ofile):
-            parser_tshark.print_help()
-            print(RED + 'Param error!')
-            print(GREEN + '-rtp_extract' + WHITE + ' requires: ' + GREEN + '-r/--rtp_port' + WHITE + ' and ' + GREEN + '-o/--output_file')
-            print(WHITE + 'Use ' + CYAN + 'sippts -h/--help' + WHITE + ' for help')
             exit()
         if len(sys.argv) < 4:
             parser_tshark.print_help()
@@ -1520,11 +1507,11 @@ Payloads
 
         FILE = args.file
         FILTER = args.filter
-        RTPPORT = args.rtpport
+        RTPEXTRACT = args.rtp_extract
         OFILE = args.ofile
         NOCOLOR = args.nocolor
 
-        return COMMAND, FILE, FILTER, RTPPORT, OFILE, NOCOLOR
+        return COMMAND, FILE, FILTER, RTPEXTRACT, OFILE, NOCOLOR
     elif COMMAND == 'rtpbleed':
         if args.help == 1:
             parser_rtpbleed.print_help()

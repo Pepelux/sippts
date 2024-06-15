@@ -356,14 +356,14 @@ def main():
         s.gw = gw
         s.file = file
     elif params[0] == 'tshark':
-        (cmd, file, filter, rport, ofile, nocolor) = params
+        (cmd, file, filter, rtpextract, ofile, nocolor) = params
 
         from sippts.siptshark import SipShark
 
         s = SipShark()
         s.file = file
         s.filter = filter
-        s.rport = rport
+        s.rtp_extract = rtpextract
         s.ofile = ofile
         s.nocolor = nocolor
     elif params[0] == 'rtpbleed':

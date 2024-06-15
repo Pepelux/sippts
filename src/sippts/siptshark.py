@@ -8,6 +8,7 @@ __copyright__ = "Copyright (C) 2015-2022, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
 
 import os
+import re
 from .lib.color import Color
 from .lib.logos import Logo
 
@@ -18,13 +19,12 @@ class SipShark:
     def __init__(self):
         self.file = ''
         self.ofile = ''
-        self.rport = ''
         self.filter = 'None'
 
         self.cid = ''
         self.method = ''
         self.frame = ''
-        self.rtp_extract = 'False'
+        self.rtp_extract = 0
 
         self.nocolor = ''
         self.c = Color()
@@ -35,6 +35,10 @@ class SipShark:
 
         logo = Logo('siptshark')
         logo.print()
+
+        if self.which('tshark') == None:
+            print('Error: tshark not found')
+            exit()
 
         if self.filter.lower()[0:6] == 'method':
             (self.filter, self.method) = self.filter.split(' ')
@@ -98,7 +102,73 @@ class SipShark:
                 "tshark -r %s -Y sip -T fields -e sip.auth |grep username |sort |uniq |sed 's/\\\\r\\\\n/\\n/g'" % self.file)
             print(self.c.WHITE)
 
-        if self.ofile != '' and self.rport != '':
-            os.system("tshark -r %s -Y udp.port=='%s' -d udp.port=='%s,rtp' -T fields -e rtp.payload -w %s" %
-                      (self.file, self.rport, self.rport, self.ofile))
-            print('\nRTP stream has been saved info %s. You can use tools/pcap2wav.sh to try to convert it to a WAV file' % self.ofile)
+        if self.rtp_extract == 1:
+            self.extract_rtp()
+       
+    
+    # Check if apps are installed
+    def which(self, program):
+        import os
+        def is_exe(fpath):
+            return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+        fpath, fname = os.path.split(program)
+        if fpath:
+            if is_exe(program):
+                return program
+        else:
+            for path in os.environ.get("PATH", "").split(os.pathsep):
+                exe_file = os.path.join(path, program)
+                if is_exe(exe_file):
+                    return exe_file
+
+        return None
+    
+    
+    def extract_rtp(self):
+        print(self.c.BYELLOW + 'Looking for RTP conversations ...' + self.c.WHITE)
+
+        if self.which('sox') == None:
+            print('Error: sox not found')
+            exit()
+        
+        if self.which('ffmpeg') == None:
+            print('Error: ffmpeg not found')
+            exit()
+
+        ssrc = []
+
+        pos = self.file.rfind('.')
+        self.folder = self.file[0:pos]
+        pos = self.folder.rfind('/')
+        if pos > -1:
+            self.folder = self.folder[pos+1:]
+
+        if not os.path.isdir(self.folder):
+            try:
+                os.mkdir(self.folder)
+            except:
+                print(f'Error making folder {self.folder}')
+                exit()
+
+        os.system(f'tshark -i - < {self.file} > sippts_tshark.txt 2>/dev/null')
+
+        f = open('sippts_tshark.txt', 'r')
+        for line in f:
+            line = line.replace('\n', '')
+            m = re.search(r'.*RTP.*SSRC=(0x[a-f|A-F|0-9]*),.*', line)
+            if m:
+                val = m.group(1)
+                if val not in ssrc:
+                    ssrc.append(val)
+            
+        f.close()
+        os.remove('sippts_tshark.txt')
+
+        for s in ssrc:
+            name = s[2:]
+            os.system(f"tshark -n -r {self.file} -2 -R rtp -R 'rtp.ssrc == {s}' -T fields -e rtp.payload | tr -d '\n',':' | xxd -r -ps >{self.folder}/{name}.rtp")
+            os.system(f"sox -t ul -r 8000 -c 1 {self.folder}/{name}.rtp {self.folder}/{name}_sox.wav")
+            os.system(f"ffmpeg -f g722 -i {self.folder}/{name}.rtp -acodec pcm_s16le -ar 16000 -ac 1 {self.folder}/{name}_ffmpeg.wav")
+
+            os.remove(f'{self.folder}/{name}.rtp')
