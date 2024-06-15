@@ -7,7 +7,6 @@ __license__ = "GPL"
 __copyright__ = "Copyright (C) 2015-2022, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
 
-import os
 import pyshark
 from .lib.functions import parse_digest
 from .lib.color import Color
@@ -36,10 +35,6 @@ class SipPCAPDump:
         for packet in capture:
             ipsrc = packet.ip.src
             ipdst = packet.ip.dst
-            try:
-                ua = packet.sip.ua
-            except:
-                ua = ''
             try:
                 method = packet.sip.Method
             except:
