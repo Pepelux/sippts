@@ -83,7 +83,7 @@ class SipPcapDump:
 
         sipcid = []
         sipdata = []
-        sipua = []
+        sipdevices = []
         
         for packet in capture:
             protocol = packet.transport_layer
@@ -91,7 +91,11 @@ class SipPcapDump:
             dstip = packet.ip.dst
             srcport = packet[protocol].srcport
             dstport = packet[protocol].dstport
-            cid = packet.sip.call_id
+            
+            try:
+                cid = packet.sip.call_id
+            except:
+                cid = ''
             
             try:
                 ua = packet.sip.User_Agent
@@ -133,10 +137,9 @@ class SipPcapDump:
                 except:
                     firstline = ''
             
-            if ua != '':
-                ipua = f'{srcip}###{ua}'
-                if ipua not in sipua:
-                    sipua.append(ipua)
+            ipua = f'{srcip}###{ua}'
+            if ipua not in sipdevices:
+                sipdevices.append(ipua)
             
             if cid not in sipcid:
                 sipcid.append(cid)
@@ -184,9 +187,15 @@ class SipPcapDump:
         if self.folder != '':
             fw = open(f'{self.folder}/sip_devices.txt', 'w')
 
-        for line in sipua:
+        ips = []
+        
+        for line in sipdevices:
             (ip, ua) = line.split('###')
-            print(f'{self.c.BYELLOW}{ip}{self.c.WHITE} => {self.c.BMAGENTA}{ua}{self.c.WHITE}')
+            
+            if ip not in ips:
+                print(f'{self.c.BYELLOW}{ip}{self.c.WHITE} => {self.c.BMAGENTA}{ua}{self.c.WHITE}')
+                if ua != '':
+                    ips.append(ip)
 
             if self.folder != '':
                 fw.write(f'{ip} => {ua}\n')
