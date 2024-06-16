@@ -64,10 +64,10 @@ class SipDump:
                     authline = '%s"%s"%s"%s"%s"%s"%s"%s"%s"%s"%s"%s\n' % (
                         ipsrc, ipdst, username, realm, method, uri, nonce, cnonce, nc, qop, algorithm, response)
 
-                    if response not in sipauth:
-                        sipauth.append(response)
+                    if f'{username}#{uri}' not in sipauth:
+                        sipauth.append(f'{username}#{uri}')
 
-                        print(f'{self.c.WHITE}[{self.c.BYELLOW}{ipsrc}{self.c.WHITE} => {self.c.BYELLOW}{ipdst}{self.c.WHITE}] {self.c.BGREEN}{username}{self.c.WHITE}:{self.c.BRED}{response}{self.c.WHITE}')
+                        print(f'{self.c.WHITE}[{self.c.BYELLOW}{ipsrc}{self.c.WHITE} => {self.c.BYELLOW}{ipdst}{self.c.WHITE}] User: {self.c.BGREEN}{username}{self.c.WHITE} - URI: {self.c.BCYAN}{uri}{self.c.WHITE} - Hash: {self.c.BRED}{response}{self.c.WHITE}')
 
                         fw.write(authline)
 
