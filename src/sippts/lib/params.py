@@ -67,7 +67,7 @@ def get_sippts_args():
     else:
         local_cve_version_status = ''' (updated)'''
     
-    line = BYELLOW + '''                                                               SIPPTS version ''' + local_version + local_version_status + WHITE + '''
+    line = BYELLOW + '''                                                             SIPPTS version ''' + local_version + local_version_status + WHITE + '''
     ''' + BYELLOW + '''                                                              CVE version ''' + local_cve_version + local_cve_version_status + WHITE + '''
     ''' + BGREEN   + '''                                            https://github.com/Pepelux/sippts''' + WHITE + '''
     ''' + BBLUE    + '''                                    by Pepelux - https://twitter.com/pepeluxx''' + WHITE
