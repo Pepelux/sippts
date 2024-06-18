@@ -1,4 +1,6 @@
 import argparse
+import os
+import random
 import sys
 import subprocess
 import requests
@@ -24,7 +26,7 @@ CYAN = '\033[0;36;20m'
 BWHITE = '\033[1;37;20m'
 WHITE = '\033[0;37;20m'
 
-local_version = '4.0.5'
+local_version = '4.0.4'
 
 def get_sippts_args():
     try:
@@ -42,9 +44,9 @@ def get_sippts_args():
         current_version = local_version
 
     if local_version != current_version:
-        local_version_status = RED + ''' (last version ''' + current_version + ''')'''
+        local_version_status = BRED + ''' (last version ''' + current_version + ''')'''
     else:
-        local_version_status = ''' (updated)'''
+        local_version_status = BWHITE + ''' (updated)'''
 
     local_cve_version = load_cve_version()
     
@@ -63,18 +65,30 @@ def get_sippts_args():
         current_cve_version = local_cve_version
 
     if local_cve_version != current_cve_version:
-        local_cve_version_status = RED + ''' (last version ''' + current_cve_version + ''')'''
+        local_cve_version_status = BRED + ''' (last version ''' + current_cve_version + ''')'''
     else:
-        local_cve_version_status = ''' (updated)'''
+        local_cve_version_status = BWHITE + ''' (updated)'''
     
     line = BYELLOW + '''                                                             SIPPTS version ''' + local_version + local_version_status + WHITE + '''
-    ''' + BYELLOW + '''                                                              CVE version ''' + local_cve_version + local_cve_version_status + WHITE + '''
+    ''' + BCYAN + '''                                                              CVE version ''' + local_cve_version + local_cve_version_status + WHITE + '''
     ''' + BGREEN   + '''                                            https://github.com/Pepelux/sippts''' + WHITE + '''
     ''' + BBLUE    + '''                                    by Pepelux - https://twitter.com/pepeluxx''' + WHITE
 
+    rnd = random.randint(1, 5)
+    if rnd == 1:
+        color = RED
+    elif rnd == 2:
+        color = GREEN
+    elif rnd == 3:
+        color = BLUE
+    elif rnd == 4:
+        color = CYAN
+    else:
+        color = YELLOW
+
     parser = argparse.ArgumentParser(
         formatter_class = lambda prog: argparse.RawDescriptionHelpFormatter(prog, max_help_position=50),
-        description = YELLOW + Logo('sippts').get_logo() + line + '''
+        description = color + Logo('sippts').get_logo() + line + '''
 
 ''' + BWHITE + ''' -= ''' + BGREEN + '''SIPPTS''' + BWHITE + ''' is a set of tools for auditing VoIP systems based on the SIP protocol =- ''' + WHITE,
         epilog=WHITE + '''Command help:
@@ -895,8 +909,17 @@ Payloads
     if args.update == 1:
         import sysconfig
         path = sysconfig.get_paths()["purelib"] + '/sippts/data/cve.csv'
+        if not os.path.isfile(path):
+            path = path.replace('/usr/', '/usr/local/').replace('site-packages', 'dist-packages')
+
         modulepath = sysconfig.get_paths()["purelib"] + '/sippts/'
+        if not os.path.isfile(modulepath):
+            modulepath = modulepath.replace('/usr/', '/usr/local/').replace('site-packages', 'dist-packages')
+
         binpath = sysconfig.get_paths()["scripts"] + '/sippts'
+        if not os.path.isfile(binpath):
+            binpath = binpath.replace('/usr/', '/usr/local/').replace('site-packages', 'dist-packages')
+
         giturl = 'https://raw.githubusercontent.com/Pepelux/sippts/master/'
             
         try:
