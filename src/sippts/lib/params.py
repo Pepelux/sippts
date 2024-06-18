@@ -913,9 +913,10 @@ Payloads
             path = path.replace('/usr/', '/usr/local/').replace('site-packages', 'dist-packages')
 
         modulepath = sysconfig.get_paths()["purelib"] + '/sippts/'
-        if not os.path.isfile(modulepath):
+        if not os.path.isdir(modulepath):
             modulepath = modulepath.replace('/usr/', '/usr/local/').replace('site-packages', 'dist-packages')
 
+        exit()
         binpath = sysconfig.get_paths()["scripts"] + '/sippts'
         if not os.path.isfile(binpath):
             binpath = binpath.replace('/usr/', '/usr/local/').replace('site-packages', 'dist-packages')
