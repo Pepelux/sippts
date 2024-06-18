@@ -1125,6 +1125,12 @@ def load_cve_version():
     import sysconfig
     path = sysconfig.get_paths()["purelib"] + '/sippts/data/cve.csv'
     
+    if not os.path.isfile(path):
+        path = path.replace('/usr/', '/usr/local/').replace('site-packages', 'dist-packages')
+
+    if not os.path.isfile(path):
+        return 'Unknown'
+    
     with open(path) as f:
         line = f.readline().strip('\n')    
    
@@ -1138,6 +1144,12 @@ def load_cve_version():
 def load_cve():
     import sysconfig
     path = sysconfig.get_paths()["purelib"] + '/sippts/data/cve.csv'
+    
+    if not os.path.isfile(path):
+        path = path.replace('/usr/', '/usr/local/').replace('site-packages', 'dist-packages')
+
+    if not os.path.isfile(path):
+        return []
     
     cve = []
     
