@@ -153,7 +153,7 @@ Usage examples:
     target.add_argument('-proxy'   , metavar='IP:PORT', type=str, help='Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)', dest="proxy", default='')
 
     headers = parser_scan.add_argument_group('Headers')
-    headers.add_argument('-m'       , metavar='METHOD', type=str.upper, help='Method used to scan: options, invite, register (default: options)', dest='method', choices=['OPTIONS', 'REGISTER', 'INVITE'], default='options')
+    headers.add_argument('-m'       , metavar='METHOD', type=str.upper, help='SIP method: options, invite, register (default: options)', dest='method', choices=['OPTIONS', 'REGISTER', 'INVITE'], default='options')
     headers.add_argument('-d'       , metavar='DOMAIN', type=str, help='SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)', dest='domain', default='')
     headers.add_argument('-cd'      , metavar='CONTACT_DOMAIN', type=str, help='Domain or IP address for Contact header. Ex: 10.0.1.2', dest='contact_domain', default='')
     headers.add_argument('-fn'      , metavar='FROM_NAME', type=str, help='From Name. Ex: Bob', dest='from_name', default='')
@@ -211,7 +211,7 @@ Usage examples:
     target.add_argument('-proxy'   , metavar='IP:PORT', type=str, help='Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)', dest="proxy", default='')
 
     headers = parser_exten.add_argument_group('Headers')
-    headers.add_argument('-m'       , metavar='METHOD', type=str.upper, help='Method used to scan: options, invite, register (default: register)', dest='method', choices=['OPTIONS', 'REGISTER', 'INVITE'], default='register')
+    headers.add_argument('-m'       , metavar='METHOD', type=str.upper, help='SIP method: options, invite, register (default: register)', dest='method', choices=['OPTIONS', 'REGISTER', 'INVITE'], default='register')
     headers.add_argument('-d'       , metavar='DOMAIN', type=str, help='SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)', dest='domain', default='')
     headers.add_argument('-cd'      , metavar='CONTACT_DOMAIN', type=str, help='Domain or IP address for Contact header. Ex: 10.0.1.2', dest='contact_domain', default='')
     headers.add_argument('-fu'      , metavar='FROM_USER', type=str, help='From User (default: 100)', dest='from_user', default='100')
@@ -300,7 +300,7 @@ Usage examples:
     target.add_argument('-proxy'   , metavar='IP:PORT', type=str, help='Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)', dest="proxy", default='')
 
     headers = parser_send.add_argument_group('Headers')
-    headers.add_argument('-m'       , metavar='METHOD', type=str, help='Method used to scan: options, invite, register, bye, ... (default: options)', dest='method', default='options')
+    headers.add_argument('-m'       , metavar='METHOD', type=str, help='SIP method: options, invite, register, bye, ... (default: options)', dest='method', default='options')
     headers.add_argument('-d'       , metavar='DOMAIN', type=str, help='SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)', dest='domain', default='')
     headers.add_argument('-cd'      , metavar='CONTACT_DOMAIN', type=str, help='Domain or IP address for Contact header. Ex: 10.0.1.2', dest='contact_domain', default='')
     headers.add_argument('-fn'      , metavar='FROM_NAME', type=str, help='From Name. Ex: Bob', dest='from_name', default='')
@@ -362,7 +362,7 @@ Usage examples:
     target.add_argument('-path'    , metavar='PATH', type=str, help='WS path (Ex: /ws)', dest='path', default='')
 
     headers = parser_wssend.add_argument_group('Headers')
-    headers.add_argument('-m'       , metavar='METHOD', type=str.upper, help='Method used to scan: options, invite, register (default: options)', dest='method', choices=['OPTIONS', 'REGISTER', 'INVITE'], default='options')
+    headers.add_argument('-m'       , metavar='METHOD', type=str.upper, help='SIP method: options, invite, register (default: options)', dest='method', choices=['OPTIONS', 'REGISTER', 'INVITE'], default='options')
     headers.add_argument('-d'       , metavar='DOMAIN', type=str, help='SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)', dest='domain', default='')
     headers.add_argument('-cd'      , metavar='CONTACT_DOMAIN', type=str, help='Domain or IP address for Contact header. Ex: 10.0.1.2', dest='contact_domain', default='')
     headers.add_argument('-fn'      , metavar='FROM_NAME', type=str, help='From Name. Ex: Bob', dest='from_name', default='')
@@ -513,7 +513,7 @@ Usage examples:
     target.add_argument('-proxy'   , metavar='IP:PORT', type=str, help='Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)', dest="proxy", default='')
 
     headers = parser_ping.add_argument_group('Headers')
-    headers.add_argument('-m'       , metavar='METHOD', type=str.upper, help='Method used to scan: options, invite, register (default: options)', dest='method', choices=['OPTIONS', 'INVITE', 'REGISTER'], default='options')
+    headers.add_argument('-m'       , metavar='METHOD', type=str.upper, help='SIP method: options, invite, register (default: options)', dest='method', choices=['OPTIONS', 'INVITE', 'REGISTER'], default='options')
     headers.add_argument('-d'       , metavar='DOMAIN', type=str, help='SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)', dest='domain', default='')
     headers.add_argument('-cd'      , metavar='CONTACT_DOMAIN', type=str, help='Domain or IP address for Contact header. Ex: 10.0.1.2', dest='contact_domain', default='')
     headers.add_argument('-fn'      , metavar='FROM_NAME', type=str, help='From Name. Ex: Bob', dest='from_name', default='')
@@ -689,7 +689,7 @@ Usage examples:
     target.add_argument('-p'       , metavar='PROTOCOL', type=str.upper, help='Protocol: udp|tcp|tls (default: udp)', dest='proto', choices=['UDP', 'TCP', 'TLS'], default='udp')
 
     headers = parser_flood.add_argument_group('Headers')
-    headers.add_argument('-m'       , metavar='METHOD', type=str.upper, help='Method used to scan: options, invite, register (default: options)', dest='method', choices=['OPTIONS', 'REGISTER', 'INVITE'], default='options')
+    headers.add_argument('-m'       , metavar='METHOD', type=str.upper, help='SIP method: options, invite, register (default: options)', dest='method', choices=['OPTIONS', 'REGISTER', 'INVITE'], default='options')
     headers.add_argument('-d'       , metavar='DOMAIN', type=str, help='SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)', dest='domain', default='')
     headers.add_argument('-cd'      , metavar='CONTACT_DOMAIN', type=str, help='Domain or IP address for Contact header. Ex: 10.0.1.2', dest='contact_domain', default='')
     headers.add_argument('-fn'      , metavar='FROM_NAME', type=str, help='From Name. Ex: Bob', dest='from_name', default='')
