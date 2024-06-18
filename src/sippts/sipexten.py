@@ -360,7 +360,9 @@ class SipExten:
                 ualen = len(ua)
 
         tlen = iplen+polen+prlen+exlen+relen+ualen+17
-        print(self.c.WHITE + ' ' + '-' * tlen)
+
+        print(self.c.WHITE + '+' + '-' * (iplen+2) + '+' + '-' * (polen+2) + '+' + '-' * (prlen+2) + '+' + '-' * (exlen+2) + '+' + '-' * (relen+2) + '+' + '-' * (ualen+2) + '+')
+
         print(self.c.WHITE +
               '| ' + self.c.BWHITE + 'IP address'.ljust(iplen) + self.c.WHITE +
               ' | ' + self.c.BWHITE + 'Port'.ljust(polen) + self.c.WHITE +
@@ -368,7 +370,8 @@ class SipExten:
               ' | ' + self.c.BWHITE + 'Extension'.ljust(exlen) + self.c.WHITE +
               ' | ' + self.c.BWHITE + 'Response'.ljust(relen) + self.c.WHITE +
               ' | ' + self.c.BWHITE + 'User-Agent'.ljust(ualen) + self.c.WHITE + ' |')
-        print(self.c.WHITE + ' ' + '-' * tlen)
+
+        print(self.c.WHITE + '+' + '-' * (iplen+2) + '+' + '-' * (polen+2) + '+' + '-' * (prlen+2) + '+' + '-' * (exlen+2) + '+' + '-' * (relen+2) + '+' + '-' * (ualen+2) + '+')
 
         if len(self.found) == 0:
             print(self.c.WHITE + '| ' + self.c.WHITE +
@@ -382,11 +385,11 @@ class SipExten:
 
                 print(self.c.WHITE +
                       '| ' + self.c.BGREEN + '%s' % ip.ljust(iplen) + self.c.WHITE +
-                      ' | ' + self.c.GREEN + '%s' % port.ljust(polen) + self.c.WHITE +
-                      ' | ' + self.c.GREEN + '%s' % proto.ljust(prlen) + self.c.WHITE +
-                      ' | ' + self.c.BGREEN + '%s' % exten.ljust(exlen) + self.c.WHITE +
-                      ' | ' + self.c.BLUE + '%s' % res.ljust(relen) + self.c.WHITE +
-                      ' | ' + self.c.YELLOW + '%s' % ua.ljust(ualen) + self.c.WHITE + ' |')
+                      ' | ' + self.c.BMAGENTA + '%s' % port.ljust(polen) + self.c.WHITE +
+                      ' | ' + self.c.BYELLOW + '%s' % proto.ljust(prlen) + self.c.WHITE +
+                      ' | ' + self.c.BCYAN + '%s' % exten.ljust(exlen) + self.c.WHITE +
+                      ' | ' + self.c.BRED + '%s' % res.ljust(relen) + self.c.WHITE +
+                      ' | ' + self.c.BBLUE + '%s' % ua.ljust(ualen) + self.c.WHITE + ' |')
 
                 if self.ofile != '':
                     f.write('%s:%s/%s => %s - %s (%s)\n' %
@@ -395,7 +398,7 @@ class SipExten:
             if self.ofile != '':
                 f.close()
 
-        print(self.c.WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE + '+' + '-' * (iplen+2) + '+' + '-' * (polen+2) + '+' + '-' * (prlen+2) + '+' + '-' * (exlen+2) + '+' + '-' * (relen+2) + '+' + '-' * (ualen+2) + '+')
         print(self.c.WHITE)
 
         print(self.c.BWHITE + 'Time elapsed: ' + self.c.YELLOW + '%s' %

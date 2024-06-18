@@ -498,14 +498,18 @@ class SipRemoteCrack:
                 pwlen = len(pwd)
 
         tlen = iplen+polen+prlen+uslen+pwlen+14
-        print(self.c.WHITE + ' ' + '-' * tlen)
+
+        print(self.c.WHITE)
+        print(self.c.WHITE + '+' + '-' * (iplen+2) + '+' + '-' * (polen+2) + '+' + '-' * (prlen+2) + '+' + '-' * (uslen+2) + '+' + '-' * (pwlen+2) + '+')
+
         print(self.c.WHITE +
               '| ' + self.c.BWHITE + 'IP address'.ljust(iplen) + self.c.WHITE +
               ' | ' + self.c.BWHITE + 'Port'.ljust(polen) + self.c.WHITE +
               ' | ' + self.c.BWHITE + 'Proto'.ljust(prlen) + self.c.WHITE +
               ' | ' + self.c.BWHITE + 'User'.ljust(uslen) + self.c.WHITE +
               ' | ' + self.c.BWHITE + 'Password'.ljust(pwlen) + self.c.WHITE + ' |')
-        print(self.c.WHITE + ' ' + '-' * tlen)
+
+        print(self.c.WHITE + '+' + '-' * (iplen+2) + '+' + '-' * (polen+2) + '+' + '-' * (prlen+2) + '+' + '-' * (uslen+2) + '+' + '-' * (pwlen+2) + '+')
 
         if len(self.found) == 0:
             print(self.c.WHITE + '| ' + self.c.WHITE +
@@ -516,12 +520,12 @@ class SipRemoteCrack:
 
                 print(self.c.WHITE +
                       '| ' + self.c.BGREEN + '%s' % ip.ljust(iplen) + self.c.WHITE +
-                      ' | ' + self.c.GREEN + '%s' % port.ljust(polen) + self.c.WHITE +
-                      ' | ' + self.c.GREEN + '%s' % proto.ljust(prlen) + self.c.WHITE +
+                      ' | ' + self.c.BMAGENTA + '%s' % port.ljust(polen) + self.c.WHITE +
+                      ' | ' + self.c.BYELLOW + '%s' % proto.ljust(prlen) + self.c.WHITE +
                       ' | ' + self.c.BBLUE + '%s' % user.ljust(uslen) + self.c.WHITE +
                       ' | ' + self.c.BRED + '%s' % pwd.ljust(pwlen) + self.c.WHITE + ' |')
 
-        print(self.c.WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE + '+' + '-' * (iplen+2) + '+' + '-' * (polen+2) + '+' + '-' * (prlen+2) + '+' + '-' * (uslen+2) + '+' + '-' * (pwlen+2) + '+')
         print(self.c.WHITE)
 
         print(self.c.BWHITE + 'Time elapsed: ' + self.c.YELLOW + '%s' %

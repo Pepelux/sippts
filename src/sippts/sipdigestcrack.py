@@ -357,13 +357,15 @@ class SipDigestCrack:
 
         tlen = slen+dlen+ulen+plen+11
 
-        print(self.c.WHITE + '\n ' + '-' * tlen)
+        print(self.c.WHITE + '+' + '-' * (slen+2) + '+' + '-' * (dlen+2) + '+' + '-' * (ulen+2) + '+' + '-' * (plen+2) + '+')
+
         print(self.c.WHITE +
               '| ' + self.c.BWHITE + 'Source IP'.ljust(slen) + self.c.WHITE +
               ' | ' + self.c.BWHITE + 'Destination IP'.ljust(dlen) + self.c.WHITE +
               ' | ' + self.c.BWHITE + 'Username'.ljust(ulen) + self.c.WHITE +
               ' | ' + self.c.BWHITE + 'Password'.ljust(plen) + self.c.WHITE + ' |')
-        print(self.c.WHITE + ' ' + '-' * tlen)
+
+        print(self.c.WHITE + '+' + '-' * (slen+2) + '+' + '-' * (dlen+2) + '+' + '-' * (ulen+2) + '+' + '-' * (plen+2) + '+')
 
         if len(self.found) == 0:
             print(self.c.WHITE + '| ' + self.c.WHITE +
@@ -379,11 +381,11 @@ class SipDigestCrack:
 
                 print(self.c.WHITE +
                       '| ' + self.c.BGREEN + '%s' % ip.ljust(slen) + self.c.WHITE +
-                      ' | ' + self.c.YELLOW + '%s' % port.ljust(dlen) + self.c.WHITE +
-                      ' | ' + self.c.YELLOW + '%s' % proto.ljust(ulen) + self.c.WHITE +
+                      ' | ' + self.c.BMAGENTA + '%s' % port.ljust(dlen) + self.c.WHITE +
+                      ' | ' + self.c.BYELLOW + '%s' % proto.ljust(ulen) + self.c.WHITE +
                       ' | ' + colorres + '%s' % res.ljust(plen) + self.c.WHITE + ' |')
 
-        print(self.c.WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE + '+' + '-' * (slen+2) + '+' + '-' * (dlen+2) + '+' + '-' * (ulen+2) + '+' + '-' * (plen+2) + '+')
         print(self.c.WHITE)
 
         print(self.c.BWHITE + 'Time elapsed: ' + self.c.YELLOW + '%s' %

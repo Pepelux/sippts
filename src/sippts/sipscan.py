@@ -596,7 +596,11 @@ class SipScan:
         else:
             tlen = iplen+polen+prlen+relen+ualen+tplen+17
 
-        print(self.c.WHITE + ' ' + '-' * tlen)
+        if self.fp == 1:
+            print(self.c.WHITE + '+' + '-' * (iplen+2) + '+' + '-' * (polen+2) + '+' + '-' * (prlen+2) + '+' + '-' * (relen+2) + '+' + '-' * (ualen+2) + '+' + '-' * (tplen+2) + '+' + '-' * (fplen+2) + '+')
+        else:
+            print(self.c.WHITE + '+' + '-' * (iplen+2) + '+' + '-' * (polen+2) + '+' + '-' * (prlen+2) + '+' + '-' * (relen+2) + '+' + '-' * (ualen+2) + '+' + '-' * (tplen+2) + '+')
+
         if self.fp == 1:
             print(self.c.WHITE +
                   '| ' + self.c.BWHITE + 'IP address'.ljust(iplen) + self.c.WHITE +
@@ -614,7 +618,12 @@ class SipScan:
                   ' | ' + self.c.BWHITE + 'Response'.ljust(relen) + self.c.WHITE +
                   ' | ' + self.c.BWHITE + 'User-Agent'.ljust(ualen) + self.c.WHITE +
                   ' | ' + self.c.BWHITE + 'Type'.ljust(tplen) + self.c.WHITE + ' |')
-        print(self.c.WHITE + ' ' + '-' * tlen)
+
+        if self.fp == 1:
+            print(self.c.WHITE + '+' + '-' * (iplen+2) + '+' + '-' * (polen+2) + '+' + '-' * (prlen+2) + '+' + '-' * (relen+2) + '+' + '-' * (ualen+2) + '+' + '-' * (tplen+2) + '+' + '-' * (fplen+2) + '+')
+        else:
+            print(self.c.WHITE + '+' + '-' * (iplen+2) + '+' + '-' * (polen+2) + '+' + '-' * (prlen+2) + '+' + '-' * (relen+2) + '+' + '-' * (ualen+2) + '+' + '-' * (tplen+2) + '+')
+
 
         if self.ofile != '':
             f = open(self.ofile, 'a+')
@@ -629,12 +638,12 @@ class SipScan:
                 if self.fp == 1:
                     print(self.c.WHITE +
                           '| ' + self.c.BGREEN + '%s' % ip.ljust(iplen) + self.c.WHITE +
-                          ' | ' + self.c.GREEN + '%s' % port.ljust(polen) + self.c.WHITE +
-                          ' | ' + self.c.GREEN + '%s' % proto.ljust(prlen) + self.c.WHITE +
-                          ' | ' + self.c.BLUE + '%s' % res.ljust(relen) + self.c.WHITE +
-                          ' | ' + self.c.YELLOW + '%s' % ua.ljust(ualen) + self.c.WHITE +
-                          ' | ' + self.c.CYAN + '%s' % type.ljust(tplen) + self.c.WHITE +
-                          ' | ' + self.c.GREEN + '%s' % fp.ljust(fplen) + self.c.WHITE + ' |')
+                          ' | ' + self.c.BMAGENTA + '%s' % port.ljust(polen) + self.c.WHITE +
+                          ' | ' + self.c.BYELLOW + '%s' % proto.ljust(prlen) + self.c.WHITE +
+                          ' | ' + self.c.BBLUE + '%s' % res.ljust(relen) + self.c.WHITE +
+                          ' | ' + self.c.BYELLOW + '%s' % ua.ljust(ualen) + self.c.WHITE +
+                          ' | ' + self.c.BCYAN + '%s' % type.ljust(tplen) + self.c.WHITE +
+                          ' | ' + self.c.BGREEN + '%s' % fp.ljust(fplen) + self.c.WHITE + ' |')
 
                     if self.ofile != '':
                         f.write('%s:%s/%s => %s - %s (%s)\n' %
@@ -642,17 +651,21 @@ class SipScan:
                 else:
                     print(self.c.WHITE +
                           '| ' + self.c.BGREEN + '%s' % ip.ljust(iplen) + self.c.WHITE +
-                          ' | ' + self.c.GREEN + '%s' % port.ljust(polen) + self.c.WHITE +
-                          ' | ' + self.c.GREEN + '%s' % proto.ljust(prlen) + self.c.WHITE +
-                          ' | ' + self.c.BLUE + '%s' % res.ljust(relen) + self.c.WHITE +
-                          ' | ' + self.c.YELLOW + '%s' % ua.ljust(ualen) + self.c.WHITE +
-                          ' | ' + self.c.CYAN + '%s' % type.ljust(tplen) + self.c.WHITE + ' |')
+                          ' | ' + self.c.BMAGENTA + '%s' % port.ljust(polen) + self.c.WHITE +
+                          ' | ' + self.c.BYELLOW + '%s' % proto.ljust(prlen) + self.c.WHITE +
+                          ' | ' + self.c.BBLUE + '%s' % res.ljust(relen) + self.c.WHITE +
+                          ' | ' + self.c.BYELLOW + '%s' % ua.ljust(ualen) + self.c.WHITE +
+                          ' | ' + self.c.BCYAN + '%s' % type.ljust(tplen) + self.c.WHITE + ' |')
 
                     if self.ofile != '':
                         f.write('%s:%s/%s => %s - %s\n' %
                                 (ip, port, proto, res, ua))
 
-        print(self.c.WHITE + ' ' + '-' * tlen)
+        if self.fp == 1:
+            print(self.c.WHITE + '+' + '-' * (iplen+2) + '+' + '-' * (polen+2) + '+' + '-' * (prlen+2) + '+' + '-' * (relen+2) + '+' + '-' * (ualen+2) + '+' + '-' * (tplen+2) + '+' + '-' * (fplen+2) + '+')
+        else:
+            print(self.c.WHITE + '+' + '-' * (iplen+2) + '+' + '-' * (polen+2) + '+' + '-' * (prlen+2) + '+' + '-' * (relen+2) + '+' + '-' * (ualen+2) + '+' + '-' * (tplen+2) + '+')
+
         print(self.c.WHITE)
 
         print(self.c.BWHITE + 'Time elapsed: ' + self.c.YELLOW + '%s' %
@@ -695,16 +708,16 @@ class SipScan:
 
         tlen = delen+velen+cvlen+tylen+urlen+14
 
-        print(self.c.WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE + '+' + '-' * tlen + '+')
         print(self.c.WHITE + '| ' + self.c.BYELLOW + 'Potential known vulnerabilities'.ljust(tlen-2) + self.c.WHITE + ' |')
-        print(self.c.WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE + '+' + '-' * (delen+2) + '+' + '-' * (velen+2) + '+' + '-' * (cvlen+2) + '+' + '-' * (tylen+2) + '+' + '-' * (urlen+2) + '+')
         print(self.c.WHITE +
                 '| ' + self.c.BWHITE + 'Device'.ljust(delen) + self.c.WHITE +
                 ' | ' + self.c.BWHITE + 'Version'.ljust(velen) + self.c.WHITE +
                 ' | ' + self.c.BWHITE + 'CVE'.ljust(cvlen) + self.c.WHITE +
                 ' | ' + self.c.BWHITE + 'Type'.ljust(tylen) + self.c.WHITE +
                 ' | ' + self.c.BWHITE + 'URL'.ljust(urlen) + self.c.WHITE + ' |')
-        print(self.c.WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE + '+' + '-' * (delen+2) + '+' + '-' * (velen+2) + '+' + '-' * (cvlen+2) + '+' + '-' * (tylen+2) + '+' + '-' * (urlen+2) + '+')
 
         if self.ofile != '':
             f = open(self.ofile, 'a+')
@@ -721,10 +734,10 @@ class SipScan:
 
                 print(self.c.WHITE +
                         '| ' + self.c.BGREEN + '%s' % de.ljust(delen) + self.c.WHITE +
-                        ' | ' + self.c.GREEN + '%s' % ve.ljust(velen) + self.c.WHITE +
-                        ' | ' + self.c.GREEN + '%s' % cv.ljust(cvlen) + self.c.WHITE +
-                        ' | ' + self.c.GREEN + '%s' % ty.ljust(tylen) + self.c.WHITE +
-                        ' | ' + self.c.CYAN + '%s' % ur.ljust(urlen) + self.c.WHITE + ' |')
+                        ' | ' + self.c.BMAGENTA + '%s' % ve.ljust(velen) + self.c.WHITE +
+                        ' | ' + self.c.BYELLOW + '%s' % cv.ljust(cvlen) + self.c.WHITE +
+                        ' | ' + self.c.BCYAN + '%s' % ty.ljust(tylen) + self.c.WHITE +
+                        ' | ' + self.c.BBLUE + '%s' % ur.ljust(urlen) + self.c.WHITE + ' |')
 
                 if self.ofile != '':
                     f.write('%s %s => %s - %s - %s\n' %
@@ -733,7 +746,7 @@ class SipScan:
             if self.ofile != '' and len(self.cve) > 0:
                 f.write('-----\n')
 
-        print(self.c.WHITE + ' ' + '-' * tlen)
+        print(self.c.WHITE + '+' + '-' * (delen+2) + '+' + '-' * (velen+2) + '+' + '-' * (cvlen+2) + '+' + '-' * (tylen+2) + '+' + '-' * (urlen+2) + '+')
         print(self.c.WHITE)
 
         if self.ofile != '':

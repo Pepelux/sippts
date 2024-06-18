@@ -47,7 +47,7 @@ class RTCPBleed:
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         except socket.error:
-            print(RED + 'Failed to create socket' + WHITE)
+            print(self.c.RED + 'Failed to create socket' + self.c.WHITE)
             sys.exit(1)
         fcntl.fcntl(sock, fcntl.F_SETFL, os.O_NONBLOCK)
 
