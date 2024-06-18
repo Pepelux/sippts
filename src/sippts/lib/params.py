@@ -3,6 +3,7 @@ import sys
 import subprocess
 import requests
 from sippts.lib.functions import load_cve_version
+from sippts.lib.logos import Logo
 
 BRED = '\033[1;31;20m'
 RED = '\033[0;31;20m'
@@ -23,7 +24,7 @@ CYAN = '\033[0;36;20m'
 BWHITE = '\033[1;37;20m'
 WHITE = '\033[0;37;20m'
 
-local_version = '4.0.3'
+local_version = '4.0.4'
 
 def get_sippts_args():
     try:
@@ -125,7 +126,7 @@ Commands usage help:
         formatter_class=argparse.RawTextHelpFormatter, 
         help='Fast SIP scanner', 
         add_help=False,
-        description = RED + logo_scan + YELLOW + '''
+        description = RED + Logo('sipscan').get_logo() + YELLOW + '''
   Module ''' + BYELLOW + '''scan''' + YELLOW + ''' is a fast SIP scanner using multithread that can check several IPs and port ranges. It works with UDP, TCP and TLS protocols.''' + WHITE,
     epilog='''
 Usage examples:
@@ -190,7 +191,7 @@ Usage examples:
         formatter_class=argparse.RawTextHelpFormatter, 
         help='Search SIP extensions of a PBX', 
         add_help=False,
-        description = RED + logo_exten + YELLOW + '''
+        description = RED + Logo('sipexten').get_logo() + YELLOW + '''
   Module ''' + BYELLOW + '''exten''' + YELLOW + ''' identifies extensions on a SIP server. Also tells you if the extension line requires authentication.''' + WHITE,
     epilog='''
 Usage examples:
@@ -237,7 +238,7 @@ Usage examples:
         formatter_class=argparse.RawTextHelpFormatter, 
         help='Remote password cracker', 
         add_help=False,
-        description = RED + logo_rcrack + YELLOW + '''
+        description = RED + Logo('siprcrack').get_logo() + YELLOW + '''
   Module ''' + BYELLOW + '''rcrack''' + YELLOW + ''' is a remote password cracker making use of digest authentication.''' + WHITE,
     epilog='''
 Usage examples:
@@ -282,7 +283,7 @@ Usage examples:
         formatter_class=argparse.RawTextHelpFormatter, 
         help='Send a customized message', 
         add_help=False,
-        description = RED + logo_send + YELLOW + '''
+        description = RED + Logo('sipsend').get_logo() + YELLOW + '''
   Module ''' + BYELLOW + '''send''' + YELLOW + ''' allow us to send a customized SIP message and analyze the response.''' + WHITE,
     epilog='''
 Usage examples:
@@ -345,7 +346,7 @@ Usage examples:
         formatter_class=argparse.RawTextHelpFormatter, 
         help='Send a customized message over WS', 
         add_help=False,
-        description = RED + logo_wssend + YELLOW + '''
+        description = RED + Logo('wssend').get_logo() + YELLOW + '''
   Module ''' + BYELLOW + '''wssend''' + YELLOW + ''' allow us to send a customized SIP message over WebSockets and analyze the response.''' + WHITE,
     epilog='''
 Usage examples:
@@ -392,7 +393,7 @@ Usage examples:
         formatter_class=argparse.RawTextHelpFormatter, 
         help='Enumerate methods of a SIP server', 
         add_help=False,
-        description = RED + logo_enumerate + YELLOW + '''
+        description = RED + Logo('sipenumerate').get_logo() + YELLOW + '''
   Module ''' + BYELLOW + '''enumerate''' + YELLOW + ''' check the available methods of a SIP service/server.''' + WHITE,
     epilog='''
 Usage examples:
@@ -435,7 +436,7 @@ Usage examples:
         formatter_class=argparse.RawTextHelpFormatter, 
         help='Exploit SIP Digest Leak vulnerability', 
         add_help=False,
-        description = RED + logo_leak + YELLOW + '''
+        description = RED + Logo('sipdigestleak').get_logo() + YELLOW + '''
   Module ''' + BYELLOW + '''leak''' + YELLOW + ''' exploits the SIP Digest Leak vulnerability that affects a large number of SIP Phones.''' + WHITE,
     epilog='''
 Usage examples:
@@ -496,7 +497,7 @@ Usage examples:
         formatter_class=argparse.RawTextHelpFormatter, 
         help='SIP ping', 
         add_help=False,
-        description = RED + logo_ping + YELLOW + '''
+        description = RED + Logo('sipping').get_logo() + YELLOW + '''
   Module ''' + BYELLOW + '''ping''' + YELLOW + ''' send a Ping to test if the server/device is available.''' + WHITE,
     epilog='''
 Usage examples:
@@ -551,7 +552,7 @@ Usage examples:
         formatter_class=argparse.RawTextHelpFormatter, 
         help='SIP INVITE attack', 
         add_help=False,
-        description = RED + logo_invite + YELLOW + '''
+        description = RED + Logo('sipinvite').get_logo() + YELLOW + '''
   Module ''' + BYELLOW + '''invite''' + YELLOW + ''' checks if a server allow us to make calls without authentication.''' + WHITE,
     epilog='''
 Usage examples:
@@ -607,7 +608,7 @@ Usage examples:
         formatter_class=argparse.RawTextHelpFormatter, 
         help='Dump SIP digest authentications from a PCAP file', 
         add_help=False,
-        description = RED + logo_dump + YELLOW + '''
+        description = RED + Logo('sipdump').get_logo() + YELLOW + '''
   Module ''' + BYELLOW + '''dump''' + YELLOW + ''' extracts SIP Digest authentications from a PCAP file.''' + WHITE,
     epilog='''
 Usage examples:
@@ -628,7 +629,7 @@ Usage examples:
         formatter_class=argparse.RawTextHelpFormatter, 
         help='SIP digest authentication cracking', 
         add_help=False,
-        description = RED + logo_dcrack + YELLOW + '''
+        description = RED + Logo('sipdigestcrack').get_logo() + YELLOW + '''
   Module ''' + BYELLOW + '''dcrack''' + YELLOW + ''' is a tool to crack the digest authentications within the SIP protocol.''' + WHITE,
     epilog='''
 Bruteforce charsets
@@ -679,7 +680,7 @@ Usage examples:
         formatter_class=argparse.RawTextHelpFormatter, 
         help='Flood a SIP server', 
         add_help=False,
-        description = RED + logo_flood + YELLOW + '''
+        description = RED + Logo('sipflood').get_logo() + YELLOW + '''
   Module ''' + BYELLOW + '''flood''' + YELLOW + ''' flood a server sending messages with a selected method.''' + WHITE
 )
     
@@ -725,7 +726,7 @@ Usage examples:
         formatter_class=argparse.RawTextHelpFormatter, 
         help='SIP network sniffing', 
         add_help=False,
-        description = RED + logo_sniff + YELLOW + '''
+        description = RED + Logo('sipsniff').get_logo() + YELLOW + '''
   Module ''' + BYELLOW + '''sniff''' + YELLOW + ''' is a network sniffer for SIP protocol.''' + WHITE
 )
     
@@ -750,7 +751,7 @@ Usage examples:
         formatter_class=argparse.RawTextHelpFormatter, 
         help='ARP Spoofing tool', 
         add_help=False,
-        description = RED + logo_spoof + YELLOW + '''
+        description = RED + Logo('arpspoof').get_logo() + YELLOW + '''
   Module ''' + BYELLOW + '''spoof''' + YELLOW + ''' initiates ARP spoofing attack.''' + WHITE
 )
 
@@ -774,7 +775,7 @@ Usage examples:
         formatter_class=argparse.RawTextHelpFormatter, 
         help='Extract data from a PCAP file', 
         add_help=False,
-        description = RED + logo_pcapdump + YELLOW + '''
+        description = RED + Logo('sippcapdump').get_logo() + YELLOW + '''
   Module ''' + BYELLOW + '''pcapdump''' + YELLOW + ''' extracts data from a PCAP file.''' + WHITE)
 
     target = parser_pcapdump.add_argument_group('Target')
@@ -801,7 +802,7 @@ Usage examples:
         formatter_class=argparse.RawTextHelpFormatter, 
         help='Detect RTPBleed vulnerability (send RTP streams)', 
         add_help=False,
-        description = RED + logo_rtpbleed + YELLOW + '''
+        description = RED + Logo('rtpbleed').get_logo() + YELLOW + '''
   Module ''' + BYELLOW + '''rtpbleed''' + YELLOW + ''' detects the RTP Bleed vulnerability sending RTP streams. More info about the vulnerability: https://www.rtpbleed.com/''' + WHITE + '''
 
 Payloads
@@ -851,7 +852,7 @@ Payloads
         formatter_class=argparse.RawTextHelpFormatter, 
         help='Detect RTPBleed vulnerability (send RTCP streams)', 
         add_help=False,
-        description = RED + logo_rtcpbleed + YELLOW + '''
+        description = RED + Logo('rtcpbleed').get_logo() + YELLOW + '''
   Module ''' + BYELLOW + '''rtcpbleed''' + YELLOW + ''' detects the RTP Bleed vulnerability sending RTCP streams. More info about the vulnerability: https://www.rtpbleed.com/''' + WHITE
 )
 
@@ -872,7 +873,7 @@ Payloads
         formatter_class=argparse.RawTextHelpFormatter, 
         help='Exploit RTPBleed vulnerability (flood RTP)', 
         add_help=False,
-        description = RED + logo_rtpbleedflood + YELLOW + '''
+        description = RED + Logo('rtpbleedflood').get_logo() + YELLOW + '''
   Module ''' + BYELLOW + '''rtpbleedflood''' + YELLOW + ''' exploit the RTP Bleed vulnerability sending RTP streams. More info about the vulnerability: https://www.rtpbleed.com/''' + WHITE
 )
 
@@ -895,7 +896,7 @@ Payloads
         formatter_class=argparse.RawTextHelpFormatter, 
         help='Exploit RTPBleed vulnerability (inject WAV file)', 
         add_help=False,
-        description = RED + logo_rtpbleedinject + YELLOW + '''
+        description = RED + Logo('rtpbleedinject').get_logo() + YELLOW + '''
   Module ''' + BYELLOW + '''rtpbleedinject''' + YELLOW + ''' exploit the RTP Bleed vulnerability injecting RTP streams. More info about the vulnerability: https://www.rtpbleed.com/''' + WHITE
 )
 
@@ -1610,117 +1611,3 @@ def download_file(url, path, file):
         r = requests.get(url)
         open(path, 'wb').write(r.content)
 
-
-logo_scan = '''
-┏┓┳┏┓  ┏┓┏┓┏┓┳┓
-┗┓┃┃┃  ┗┓┃ ┣┫┃┃
-┗┛┻┣┛  ┗┛┗┛┛┗┛┗
-'''
-
-logo_exten = '''
-┏┓┳┏┓  ┏┓┏┓┏┓┏┳┓┏┓┳┓
-┗┓┃┃┃  ┣  ┃┃  ┃ ┣ ┃┃
-┗┛┻┣┛  ┗┛┗┛┗┛ ┻ ┗┛┛┗
-'''
-
-logo_rcrack = '''
-┏┓┳┏┓  ┏┓┳┓┏┓┏┓┓┏┓
-┗┓┃┃┃  ┃ ┣┫┣┫┃ ┃┫ 
-┗┛┻┣┛  ┗┛┛┗┛┗┗┛┛┗┛
-'''
-
-logo_send = '''
-┏┓┳┏┓  ┏┓┏┓┳┓┳┓
-┗┓┃┃┃  ┗┓┣ ┃┃┃┃
-┗┛┻┣┛  ┗┛┗┛┛┗┻┛
-'''
-
-logo_wssend = '''
-┓ ┏┏┓┏┓┏┓┳┓┳┓
-┃┃┃┗┓┗┓┣ ┃┃┃┃
-┗┻┛┗┛┗┛┗┛┛┗┻┛
-'''
-
-logo_enumerate = '''
-┏┓┳┏┓  ┏┓┳┓┳┳┳┳┓┏┓┳┓┏┓┏┳┓┏┓
-┗┓┃┃┃  ┣ ┃┃┃┃┃┃┃┣ ┣┫┣┫ ┃ ┣ 
-┗┛┻┣┛  ┗┛┛┗┗┛┛ ┗┗┛┛┗┛┗ ┻ ┗┛
-'''
-
-logo_leak = '''
-┏┓┳┏┓  ┳┓┳┏┓┏┓┏┓┏┳┓  ┓ ┏┓┏┓┓┏┓
-┗┓┃┃┃  ┃┃┃┃┓┣ ┗┓ ┃   ┃ ┣ ┣┫┃┫ 
-┗┛┻┣┛  ┻┛┻┗┛┗┛┗┛ ┻   ┗┛┗┛┛┗┛┗┛
-'''
-
-logo_ping = '''
-┏┓┳┏┓  ┏┓┳┳┓┏┓
-┗┓┃┃┃  ┃┃┃┃┃┃┓
-┗┛┻┣┛  ┣┛┻┛┗┗┛
-'''
-
-logo_invite = '''
-┏┓┳┏┓  ┳┳┓┓┏┳┏┳┓┏┓
-┗┓┃┃┃  ┃┃┃┃┃┃ ┃ ┣ 
-┗┛┻┣┛  ┻┛┗┗┛┻ ┻ ┗┛
-'''
-
-logo_dump = '''
-┏┓┳┏┓  ┳┓┳┳┳┳┓┏┓
-┗┓┃┃┃  ┃┃┃┃┃┃┃┃┃
-┗┛┻┣┛  ┻┛┗┛┛ ┗┣┛
-'''
-
-logo_dcrack = '''
-┏┓┳┏┓  ┳┓┳┏┓┏┓┏┓┏┳┓  ┏┓┳┓┏┓┏┓┓┏┓
-┗┓┃┃┃  ┃┃┃┃┓┣ ┗┓ ┃   ┃ ┣┫┣┫┃ ┃┫ 
-┗┛┻┣┛  ┻┛┻┗┛┗┛┗┛ ┻   ┗┛┛┗┛┗┗┛┛┗┛
-'''
-
-logo_flood = '''
-┏┓┳┏┓  ┏┓┓ ┏┓┏┓┳┓
-┗┓┃┃┃  ┣ ┃ ┃┃┃┃┃┃
-┗┛┻┣┛  ┻ ┗┛┗┛┗┛┻┛
-'''
-
-logo_sniff = '''
-┏┓┳┏┓  ┏┓┳┓┳┏┓┏┓
-┗┓┃┃┃  ┗┓┃┃┃┣ ┣ 
-┗┛┻┣┛  ┗┛┛┗┻┻ ┻
-'''
-
-logo_spoof = '''
-┏┓┳┓┏┓  ┏┓┏┓┏┓┏┓┏┓
-┣┫┣┫┃┃  ┗┓┃┃┃┃┃┃┣ 
-┛┗┛┗┣┛  ┗┛┣┛┗┛┗┛┻ 
-'''
-
-logo_rtpbleed = '''
-┳┓┏┳┓┏┓  ┳┓┓ ┏┓┏┓┳┓
-┣┫ ┃ ┃┃  ┣┫┃ ┣ ┣ ┃┃
-┛┗ ┻ ┣┛  ┻┛┗┛┗┛┗┛┻┛
-'''
-
-logo_rtcpbleed = '''
-┳┓┏┳┓┏┓┏┓  ┳┓┓ ┏┓┏┓┳┓
-┣┫ ┃ ┃ ┃┃  ┣┫┃ ┣ ┣ ┃┃
-┛┗ ┻ ┗┛┣┛  ┻┛┗┛┗┛┗┛┻┛
-'''
-
-logo_rtpbleedflood = '''
-┳┓┏┓┏┓  ┳┓┓ ┏┓┏┓┳┓  ┏┓┓ ┏┓┏┓┳┓
-┣┫┃ ┃┃  ┣┫┃ ┣ ┣ ┃┃  ┣ ┃ ┃┃┃┃┃┃
-┛┗┗┛┣┛  ┻┛┗┛┗┛┗┛┻┛  ┻ ┗┛┗┛┗┛┻┛
-'''
-
-logo_rtpbleedinject = '''
-┳┓┏┓┏┓  ┳┓┓ ┏┓┏┓┳┓  ┳┳┓┏┳┏┓┏┓┏┳┓
-┣┫┃ ┃┃  ┣┫┃ ┣ ┣ ┃┃  ┃┃┃ ┃┣ ┃  ┃ 
-┛┗┗┛┣┛  ┻┛┗┛┗┛┗┛┻┛  ┻┛┗┗┛┗┛┗┛ ┻ 
-'''
-
-logo_pcapdump = '''
-┏┓┳┏┓  ┏┓┏┓┏┓┏┓  ┳┓┳┳┳┳┓┏┓
-┗┓┃┃┃  ┃┃┃ ┣┫┃┃  ┃┃┃┃┃┃┃┃┃
-┗┛┻┣┛  ┣┛┗┛┛┗┣┛  ┻┛┗┛┛ ┗┣┛
-            '''

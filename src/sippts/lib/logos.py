@@ -21,6 +21,7 @@ class Logo:
         print('' + self.c.BBLUE +
               '''🐦 https://twitter.com/pepeluxx\n''' + self.c.WHITE)
 
+
     def get_logo(self):
         if self.script == 'sipscan':
             return '''
