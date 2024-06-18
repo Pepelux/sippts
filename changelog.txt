@@ -16,6 +16,7 @@ devel:
   - added param -t to set sockets timeout
 - send:
   - added param -t to set sockets timeout
+  - added param -v for verbose mode
 - dcrack:
   - Use pyshark library instead tshark application
 - global:
