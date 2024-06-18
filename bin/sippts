@@ -95,7 +95,7 @@ def main():
         s.nocolor = nocolor
         s.timeout = timeout
     elif params[0] == 'send':
-        (cmd, ip, host, proxy, rport, lport, proto, method, domain, contact_domain, from_name, from_user, from_domain, from_tag, to_name, to_user, to_domain, to_tag, user, pwd, digest, branch, callid, cseq, sdp, sdes, user_agent, localip, nocolor, ofile, ppi, pai, header, nocontact, timeout) = params
+        (cmd, ip, host, proxy, rport, lport, proto, method, domain, contact_domain, from_name, from_user, from_domain, from_tag, to_name, to_user, to_domain, to_tag, user, pwd, digest, branch, callid, cseq, sdp, sdes, user_agent, localip, nocolor, ofile, ppi, pai, header, nocontact, timeout, verbose) = params
 
         from sippts.sipsend import SipSend
 
@@ -134,6 +134,7 @@ def main():
         s.header = header
         s.nocontact = nocontact
         s.timeout = timeout
+        s.verbose = verbose
     elif params[0] == 'enumerate':
         (cmd, ip, host, proxy, rport, proto, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, user_agent, verbose, timeout) = params
 

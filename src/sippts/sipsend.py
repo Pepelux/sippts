@@ -52,6 +52,7 @@ class SipSend:
         self.header = ''
         self.nocontact = 0
         self.timeout = 5
+        self.verbose = 0
 
         self.withcontact = 1
 
@@ -267,9 +268,13 @@ class SipSend:
             else:
                 sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
-            print(self.c.BWHITE + '[+] Sending to %s:%s/%s ...' %
-                    (self.ip, self.rport, self.proto))
-            print(self.c.YELLOW + msg + self.c.WHITE)
+            if self.verbose == 1:
+                print(self.c.BWHITE + '[+] Sending to %s:%s/%s ...' %
+                        (self.ip, self.rport, self.proto))
+                print(self.c.YELLOW + msg + self.c.WHITE)
+            else:
+                print(
+                    self.c.BYELLOW + f'[=>] Request {self.method}')
 
             if self.ofile != '':
                 fw.write('[+] Sending to %s:%s/%s ...\n' %
@@ -293,9 +298,13 @@ class SipSend:
                     response = '%s %s' % (
                         headers['response_code'], headers['response_text'])
                     rescode = headers['response_code']
-                    print(self.c.BWHITE + '[-] Receiving from %s:%s/%s ...' %
-                            (self.ip, self.rport, self.proto))
-                    print(self.c.GREEN + resp.decode() + self.c.WHITE)
+                    if self.verbose == 1:
+                        print(self.c.BWHITE + '[-] Receiving from %s:%s/%s ...' %
+                                (self.ip, self.rport, self.proto))
+                        print(self.c.GREEN + resp.decode() + self.c.WHITE)
+                    else:
+                        print(
+                            self.c.BGREEN + f'[<=] Response {response}')
 
                     if self.ofile != '':
                         fw.write('[-] Receiving from %s:%s/%s ...\n' %
@@ -305,22 +314,6 @@ class SipSend:
                     totag = headers['totag']
             
             if self.user != '' and self.pwd != '' and (headers['response_code'] == '401' or headers['response_code'] == '407'):
-                # send ACK
-                print(self.c.BWHITE + '[+] Request ACK')
-                msg = create_message('ACK', self.localip, self.contact_domain, self.from_user, self.from_name, self.from_domain,
-                                        self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, totag, '', 1, '', 0, via, self.route, '', '', self.header, self.withcontact)
-
-                print(self.c.YELLOW + msg)
-
-                if self.ofile != '':
-                    fw.write('[+] Request ACK\n')
-                    fw.write(msg + '\n')
-
-                if self.proto == 'TLS':
-                    sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
-                else:
-                    sock.sendto(bytes(msg[:8192], 'utf-8'), host)
-
                 if headers['auth'] != '':
                     auth = headers['auth']
                     auth_type = headers['auth-type']
@@ -363,9 +356,13 @@ class SipSend:
                             sock.sendto(bytes(msg[:8192], 'utf-8'), host)
 
                         # Send AUTH
-                        print(self.c.BWHITE + '[+] Sending to %s:%s/%s ...' %
-                                (self.ip, self.rport, self.proto))
-                        print(self.c.YELLOW + msg + self.c.WHITE)
+                        if self.verbose == 1:
+                            print(self.c.BWHITE + '[+] Sending to %s:%s/%s ...' %
+                                    (self.ip, self.rport, self.proto))
+                            print(self.c.YELLOW + msg + self.c.WHITE)
+                        else:
+                            print(
+                                self.c.BYELLOW + f'[=>] Request {self.method} (AUTH)')
 
                         if self.ofile != '':
                             fw.write('[+] Sending to %s:%s/%s ...\n' %
@@ -387,10 +384,14 @@ class SipSend:
                                 response = '%s %s' % (
                                     headers['response_code'], headers['response_text'])
                                 rescode = headers['response_code']
-                                print(self.c.BWHITE + '[-] Receiving from %s:%s/%s ...' %
-                                        (self.ip, self.rport, self.proto))
-                                print(self.c.GREEN +
-                                        resp.decode() + self.c.WHITE)
+                                if self.verbose == 1:
+                                    print(self.c.BWHITE + '[-] Receiving from %s:%s/%s ...' %
+                                            (self.ip, self.rport, self.proto))
+                                    print(self.c.GREEN +
+                                            resp.decode() + self.c.WHITE)
+                                else:
+                                    print(
+                                        self.c.BGREEN + f'[<=] Response {response}')
 
                                 if self.ofile != '':
                                     fw.write('[-] Receiving from %s:%s/%s ...\n' %
@@ -401,23 +402,19 @@ class SipSend:
 
             # receive 200 Ok - call answered
             if headers['response_code'] == '200':
-                cuser = headers['contactuser']
-                cdomain = headers['contactdomain']
-                if cdomain == '':
-                    cdomain = self.domain
-                else:
-                    if cuser != None and cuser != '':
-                        cdomain = cuser + '@' + cdomain
-
                 totag = headers['totag']
 
                 # send ACK
-                print(self.c.YELLOW + '[=>] Request ACK')
-
                 msg = create_message('ACK', self.localip, self.contact_domain, self.from_user, self.from_name, self.from_domain,
                                         self.to_user, self.to_name, self.to_domain, self.proto, self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, totag, '', 1, '', 0, via, self.route, '', '', self.header, self.withcontact)
 
-                print(self.c.YELLOW + msg)
+                if self.verbose == 1:
+                    print(self.c.BWHITE + '[+] Sending to %s:%s/%s ...' %
+                            (self.ip, self.rport, self.proto))
+                    print(self.c.YELLOW + msg + self.c.WHITE)
+                else:
+                    print(
+                        self.c.BYELLOW + '[=>] Request ACK')
 
                 if self.ofile != '':
                     fw.write('[+] Request ACK\n')
