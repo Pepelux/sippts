@@ -69,36 +69,24 @@ def get_sippts_args():
     else:
         local_cve_version_status = BWHITE + ''' (updated)'''
     
-    line = BYELLOW + '''                                                             SIPPTS version ''' + local_version + local_version_status + WHITE + '''
-    ''' + BCYAN + '''                                                              CVE version ''' + local_cve_version + local_cve_version_status + WHITE + '''
-    ''' + BGREEN   + '''                                            https://github.com/Pepelux/sippts''' + WHITE + '''
-    ''' + BBLUE    + '''                                    by Pepelux - https://twitter.com/pepeluxx''' + WHITE
-
-    rnd = random.randint(1, 5)
+    rnd = random.randint(1, 4)
     if rnd == 1:
         color = RED
     elif rnd == 2:
         color = GREEN
     elif rnd == 3:
-        color = BLUE
-    elif rnd == 4:
         color = CYAN
     else:
         color = YELLOW
 
     parser = argparse.ArgumentParser(
         formatter_class = lambda prog: argparse.RawDescriptionHelpFormatter(prog, max_help_position=50),
-        description = color + Logo('sippts').get_logo() + line + '''
+        description = color + Logo('sippts').get_logo(color, local_version, local_version_status, local_cve_version, local_cve_version_status) + '''
 
 ''' + BWHITE + ''' -= ''' + BGREEN + '''SIPPTS''' + BWHITE + ''' is a set of tools for auditing VoIP systems based on the SIP protocol =- ''' + WHITE,
         epilog=WHITE + '''Command help:
   sippts <command> -h
 
-Commands usage help:
-  sippts -up
-  sippts scan -h
-  sippts rtpbleed -h
-  
 ''')
 
     ##################
