@@ -904,7 +904,6 @@ Payloads
         if not os.path.isdir(modulepath):
             modulepath = modulepath.replace('/usr/', '/usr/local/').replace('site-packages', 'dist-packages')
 
-        exit()
         binpath = sysconfig.get_paths()["scripts"] + '/sippts'
         if not os.path.isfile(binpath):
             binpath = binpath.replace('/usr/', '/usr/local/').replace('site-packages', 'dist-packages')
