@@ -75,6 +75,10 @@ class SipDigestCrack:
         logo = Logo('sipdigestcrack')
         logo.print()
 
+        print(self.c.BWHITE + '[✓] Input file: ' + self.c.GREEN + '%s' % self.file)
+        print(self.c.BWHITE + '[✓] Wordlist: ' + self.c.GREEN + '%s' % self.wordlist)
+        print(self.c.WHITE)
+
         signal.signal(signal.SIGINT, self.signal_handler)
         print(self.c.BYELLOW + '\nPress Ctrl+C to stop\n')
         print(self.c.WHITE)
@@ -375,9 +379,9 @@ class SipDigestCrack:
                 (ip, port, proto, res) = x.split('###')
 
                 if res == 'No Auth Digest received :(':
-                    colorres = self.c.RED
+                    colorres = self.c.BBLUE
                 else:
-                    colorres = self.c.BLUE
+                    colorres = self.c.BRED
 
                 print(self.c.WHITE +
                       '| ' + self.c.BGREEN + '%s' % ip.ljust(slen) + self.c.WHITE +

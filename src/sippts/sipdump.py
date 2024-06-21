@@ -24,8 +24,8 @@ class SipDump:
         logo = Logo('sipdump')
         logo.print()
 
-        print(self.c.BWHITE+'[✓] Input file: %s ...' % self.file)
-        print(self.c.BWHITE+'[✓] Output file: %s ...\n' % self.ofile)
+        print(self.c.BWHITE + '[✓] Input file: ' + self.c.GREEN + '%s' % self.file)
+        print(self.c.BWHITE + '[✓] Output file: ' + self.c.GREEN + '%s' % self.ofile)
         print(self.c.WHITE)
 
         fw = open(self.ofile, 'w')

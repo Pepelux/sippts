@@ -196,6 +196,7 @@ class SipDigestLeak:
     def call(self, ip, port, proto):
         print(self.c.BWHITE + '[✓] Target: ' + self.c.GREEN + '%s:%s/%s' %
               (ip, port, proto))
+        print(self.c.BWHITE + '[✓] Output file: ' + self.c.GREEN + '%s' % self.ofile)
         if self.proxy != '':
             print(self.c.BWHITE + '[✓] Outbound Proxy: ' + self.c.GREEN + '%s' %
                   self.proxy)
