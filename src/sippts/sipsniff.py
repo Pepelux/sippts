@@ -190,7 +190,7 @@ class SipSniff:
                                     ip = socket.gethostbyname(sipdomain)
                                     if ip != sipdomain:
                                         if self.verbose != 0:
-                                            print(self.c.BLUE + 'Found Domain %s for user %s connecting to %s:%s' %
+                                            print(self.c.CYAN + 'Found Domain %s for user %s connecting to %s:%s' %
                                                   (sipdomain, sipuser, dst_addr, dst_port))
 
                                     try:
