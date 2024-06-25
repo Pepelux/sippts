@@ -291,7 +291,7 @@ Usage examples:
     
     target = parser_send.add_argument_group('Target')
     target.add_argument('-i'       , metavar='IP|HOST', type=str, help='Target IP address', dest="ipaddr")
-    target.add_argument('-template', metavar='FILE', type=str, help='Template with SIP message', dest="template")
+    target.add_argument('-template', metavar='FILE', type=str, help='Template with SIP message', dest="template", default = '')
     target.add_argument('-r'       , metavar='REMOTE_PORT', type=int, help='Remote port (default: 5060)', dest='rport', default=5060)
     target.add_argument('-p'       , metavar='PROTOCOL', type=str.upper, help='Protocol: udp|tcp|tls (default: udp)', dest='proto', choices=['UDP', 'TCP', 'TLS'], default='udp')
     target.add_argument('-l'       , metavar='LOCAL_PORT', type=int, help='Local port (default: first free)', dest='lport')
@@ -1147,13 +1147,6 @@ Payloads
             print(RED)
             print('Param error!')
             print(BWHITE + COMMAND + ':' + WHITE + '  Mandatory params: ' + GREEN + '-i <IP|HOST>')
-            print(WHITE + 'Use ' + CYAN + 'sippts ' + COMMAND + ' -h/--help' + WHITE + ' for help')
-            exit()
-        if args.ipaddr and not args.method:
-            parser_send.print_help()
-            print(RED)
-            print('Param error!')
-            print(BWHITE + COMMAND + ':' + WHITE + '  Mandatory params with -i: ' + GREEN + '-m <METHOD>')
             print(WHITE + 'Use ' + CYAN + 'sippts ' + COMMAND + ' -h/--help' + WHITE + ' for help')
             exit()
 
