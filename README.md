@@ -199,7 +199,6 @@ Sippts is a set of tools for auditing VoIP servers and devices using the SIP pro
 Sippts has been tested on:
   * Linux
   * MacOS
-  * Windows
 
 ## Requirements ##
   * Python 3
