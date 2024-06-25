@@ -48,7 +48,7 @@ class Video:
 
     def scan(self, portstart, portend):
         # SIPPTS SCAN
-        string = f'$ sippts scan -i 192.168.1.0/24 -p all -r {str(portstart)}-{str(portend)} -ua Cisco -th 500 -v -fp'
+        string = f'$ sippts scan -i 192.168.1.0/24 -p all -r {str(portstart)}-{str(portend)} -ua Yealink -th 500 -v -fp'
 
         line = ['-', '\\', '|', '/']
         pos = 0
