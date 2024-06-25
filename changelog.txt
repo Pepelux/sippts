@@ -1,7 +1,8 @@
 devel:
 - renamed module sippcapdump to sipdump
 - removed tshark module
-- addded module pcapdump to dump data from a PCAP file (SIP, RTP and RTP-to-WAV)
+- added module pcapdump to dump data from a PCAP file (SIP, RTP and RTP-to-WAV)
+- added module video to show animated help
 - scan:
   - added param -t to set sockets timeout
 - leak:

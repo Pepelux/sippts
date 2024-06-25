@@ -26,7 +26,7 @@ CYAN = '\033[0;36;20m'
 BWHITE = '\033[1;37;20m'
 WHITE = '\033[0;37;20m'
 
-local_version = '4.0.5'
+local_version = '4.0.6'
 
 def get_sippts_args():
     try:
@@ -97,6 +97,24 @@ def get_sippts_args():
     subparsers = parser.add_subparsers(dest='command')
     parser.add_argument('-up'       , help='Update scripts', dest='update', action='count')
 
+    ##########
+    # videos #
+    ##########
+    parser_video = subparsers.add_parser('video', 
+        formatter_class=argparse.RawTextHelpFormatter, 
+        help='Animated help', 
+        add_help=False)
+    
+    mode = parser_video.add_argument_group('Video')
+    mode.add_argument('-b', help='Scanning, enumeration and cracking', dest='basic', action='count')
+    mode.add_argument('-d', help='Extracting and cracking users of a PCAP file', dest='digest', action='count')
+    mode.add_argument('-l', help='SIP Digest Leak vulnerability attack', dest='leak', action='count')
+    mode.add_argument('-s', help='Spoofing and sniffing data', dest='spoof', action='count')
+
+    other = parser_video.add_argument_group('Other options')
+    other.add_argument('-h', '--help', help='Show this help', dest='help', action='count')
+    
+    
     ################
     # scan command #
     ################
@@ -633,6 +651,7 @@ Usage examples:
 ''')
 
     wlist = parser_dcrack.add_argument_group('Wordlist')
+    wlist.add_argument('-f'          , metavar='FILE', type=str, help='SipCrack format file with SIP Digest hashes', dest='file', default='')
     wlist.add_argument('-w'          , metavar='FILE', help='Wordlist for bruteforce', dest='wordlist', default='')
 
     brute = parser_dcrack.add_argument_group('Bruteforce')
@@ -642,7 +661,6 @@ Usage examples:
     brute.add_argument('-max'        , metavar='NUMBER', type=int, help='Max length for bruteforce (default: 8)', dest='max', default=8)
 
     log = parser_dcrack.add_argument_group('Log')
-    log.add_argument('-f'       , metavar='FILE', type=str, help='SipCrack format file with SIP Digest hashes', dest='file', default='')
     log.add_argument('-v'       , help='Increase verbosity', dest='verbose', action="count")
 
     options = parser_dcrack.add_argument_group('Other options')
@@ -933,6 +951,7 @@ Payloads
             download_file(giturl + 'src/sippts/lib/functions.py', modulepath + 'lib/functions.py', 'lib/functions.py')
             download_file(giturl + 'src/sippts/lib/logos.py', modulepath + 'lib/logos.py', 'lib/logos.py')
             download_file(giturl + 'src/sippts/lib/params.py', modulepath + 'lib/params.py', 'lib/params.py')
+            download_file(giturl + 'src/sippts/lib/videos.py', modulepath + 'lib/videos.py', 'lib/videos.py')
 
             download_file(giturl + 'src/sippts/arpspoof.py', modulepath + 'arpspoof.py', 'arpspoof.py')
             download_file(giturl + 'src/sippts/rtcpbleed.py', modulepath + 'rtcpbleed.py', 'rtcpbleed.py')
@@ -989,7 +1008,25 @@ Payloads
 
     COMMAND = args.command
 
-    if COMMAND == 'scan':
+    if COMMAND == 'video':
+        if args.help == 1:
+            parser_video.print_help()
+            exit()
+        if not args.basic and not args.digest and not args.leak and not args.spoof:
+            parser_video.print_help()
+            print(RED)
+            print('Param error!')
+            print(BWHITE + COMMAND + ':' + WHITE + ' Mandatory params: ' + GREEN + '-b' + WHITE + ' or ' + GREEN + '-d' + WHITE + ' or ' + GREEN + '-l' + WHITE + ' or ' + GREEN + '-s')
+            print(WHITE + 'Use ' + CYAN + 'sippts ' + COMMAND + ' -h/--help' + WHITE + ' for help')
+            exit()
+
+        BASIC = args.basic
+        DIGEST = args.digest
+        LEAK = args.leak
+        SPOOF = args.spoof
+
+        return COMMAND, BASIC, DIGEST, LEAK, SPOOF
+    elif COMMAND == 'scan':
         if args.help == 1:
             parser_scan.print_help()
             exit()

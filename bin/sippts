@@ -8,10 +8,29 @@ __copyright__ = "Copyright (C) 2015-2024, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
 
 from sippts.lib.params import get_sippts_args
-
+from sippts.lib.videos import Video
 
 def main():
     params = get_sippts_args()
+    
+    if params[0] == 'video':
+        (cmd, basic, digest, leak, spoof) = params
+        
+        s = Video()
+        
+        if basic == 1:
+            s.basic()
+        
+        if digest == 1:
+            s.digest()
+        
+        if leak == 1:
+            s.leak()
+        
+        if spoof == 1:
+            s.spoof()
+        
+        exit()
     
     if params[0] == 'scan':
         (cmd, ip, host, proxy, rport, proto, method, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, user_agent, nthreads, timeout, verbose, ping, file, nocolor, ofile, fp, random, ppi, pai, local_ip, cve) = params
