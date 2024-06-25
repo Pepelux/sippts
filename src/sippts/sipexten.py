@@ -82,28 +82,33 @@ class SipExten:
         # create a list of IP addresses
         ips = []
         hosts = []
-        for i in self.ip.split(','):
-            try:
-                i = socket.gethostbyname(i)
-            except:
-                pass
-            hlist = list(ipaddress.ip_network(str(i)).hosts())
+        try:
+            for i in self.ip.split(','):
+                try:
+                    i = socket.gethostbyname(i)
+                except:
+                    pass
 
-            if hlist == []:
-                hosts.append(i)
-            else:
-                for h in hlist:
-                    hosts.append(h)
+                hlist = list(ipaddress.ip_network(str(i)).hosts())
 
-        last = len(hosts)-1
-        start_ip = hosts[0]
-        end_ip = hosts[last]
+                if hlist == []:
+                    hosts.append(i)
+                else:
+                    for h in hlist:
+                        hosts.append(h)
+        except:
+            pass
+        
+        if hosts != []:
+            last = len(hosts)-1
+            start_ip = hosts[0]
+            end_ip = hosts[last]
 
-        ipini = int(ip2long(str(start_ip)))
-        ipend = int(ip2long(str(end_ip)))
+            ipini = int(ip2long(str(start_ip)))
+            ipend = int(ip2long(str(end_ip)))
 
-        for i in range(ipini, ipend+1):
-            ips.append(long2ip(i))
+            for i in range(ipini, ipend+1):
+                ips.append(long2ip(i))
 
         # create a list of extens
         extens = []
@@ -165,6 +170,9 @@ class SipExten:
                   '[✓] Saving logs info file: ' + self.c.CYAN + '%s' % self.ofile)
         print(self.c.WHITE)
 
+
+        if ips == []:
+            ips.append(self.ip)
         values = product(ips, extens)
         values2 = []
         count = 0

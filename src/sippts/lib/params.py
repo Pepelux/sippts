@@ -26,7 +26,7 @@ CYAN = '\033[0;36;20m'
 BWHITE = '\033[1;37;20m'
 WHITE = '\033[0;37;20m'
 
-local_version = '4.0.6'
+local_version = '4.0.8'
 
 def get_sippts_args():
     try:
@@ -291,6 +291,7 @@ Usage examples:
     
     target = parser_send.add_argument_group('Target')
     target.add_argument('-i'       , metavar='IP|HOST', type=str, help='Target IP address', dest="ipaddr")
+    target.add_argument('-template', metavar='FILE', type=str, help='Template with SIP message', dest="template")
     target.add_argument('-r'       , metavar='REMOTE_PORT', type=int, help='Remote port (default: 5060)', dest='rport', default=5060)
     target.add_argument('-p'       , metavar='PROTOCOL', type=str.upper, help='Protocol: udp|tcp|tls (default: udp)', dest='proto', choices=['UDP', 'TCP', 'TLS'], default='udp')
     target.add_argument('-l'       , metavar='LOCAL_PORT', type=int, help='Local port (default: first free)', dest='lport')
@@ -1141,16 +1142,24 @@ Payloads
         if args.help == 1:
             parser_send.print_help()
             exit()
-        if not args.ipaddr or not args.method:
+        if not args.ipaddr:
             parser_send.print_help()
             print(RED)
             print('Param error!')
-            print(BWHITE + COMMAND + ':' + WHITE + '  Mandatory params: ' + GREEN + '-i <IP|HOST>' + WHITE + ' and ' + GREEN + '-m <METHOD>')
+            print(BWHITE + COMMAND + ':' + WHITE + '  Mandatory params: ' + GREEN + '-i <IP|HOST>')
+            print(WHITE + 'Use ' + CYAN + 'sippts ' + COMMAND + ' -h/--help' + WHITE + ' for help')
+            exit()
+        if args.ipaddr and not args.method:
+            parser_send.print_help()
+            print(RED)
+            print('Param error!')
+            print(BWHITE + COMMAND + ':' + WHITE + '  Mandatory params with -i: ' + GREEN + '-m <METHOD>')
             print(WHITE + 'Use ' + CYAN + 'sippts ' + COMMAND + ' -h/--help' + WHITE + ' for help')
             exit()
 
         IPADDR = args.ipaddr
         HOST = args.ipaddr
+        TEMPLATE = args.template
         PROXY = args.proxy
         RPORT = args.rport
         LPORT = args.lport
@@ -1185,7 +1194,7 @@ Payloads
         TIMEOUT = args.timeout
         VERBOSE = args.verbose
 
-        return COMMAND, IPADDR, HOST, PROXY, RPORT, LPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, SDP, SDES, UA, LOCALIP, NOCOLOR, OFILE, PPI, PAI, HEADER, NOCONTACT, TIMEOUT, VERBOSE
+        return COMMAND, IPADDR, HOST, TEMPLATE, PROXY, RPORT, LPORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, FROMTAG, TONAME, TOUSER, TODOMAIN, TOTAG, USER, PWD, DIGEST, BRANCH, CALLID, CSEQ, SDP, SDES, UA, LOCALIP, NOCOLOR, OFILE, PPI, PAI, HEADER, NOCONTACT, TIMEOUT, VERBOSE
     elif COMMAND == 'wssend':
         if args.help == 1:
             parser_wssend.print_help()

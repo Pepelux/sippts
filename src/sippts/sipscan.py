@@ -258,7 +258,10 @@ class SipScan:
 
                     self.prepare_scan(ips, ports, protos, iplist)
                 except:
-                    pass
+                    if ips == []:
+                        ips.append(self.ip)
+                        iplist = self.ip
+                        self.prepare_scan(ips, ports, protos, iplist)
 
     def prepare_scan(self, ips, ports, protos, iplist):
         max_values = 100000

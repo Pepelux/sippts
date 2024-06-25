@@ -19,6 +19,7 @@ class SipSend:
     def __init__(self):
         self.ip = ''
         self.host = ''
+        self.template = ''
         self.proxy = ''
         self.route = ''
         self.rport = '5060'
@@ -115,6 +116,9 @@ class SipSend:
         if self.proxy != '':
             print(self.c.BWHITE + '[✓] Outbound Proxy: ' + self.c.GREEN + '%s' %
                   self.proxy)
+        if self.template != '':
+            print(self.c.BWHITE + '[✓] Template: ' + self.c.GREEN + '%s' %
+                  self.template)
         if self.domain != '' and self.domain != str(self.ip) and self.domain != self.host:
             print(self.c.BWHITE + '[✓] Customized Domain: ' +
                   self.c.GREEN + '%s' % self.domain)
@@ -157,6 +161,8 @@ class SipSend:
                      (self.ip, self.rport, self.proto))
             if self.proxy != '':
                 fw.write('[✓] Outbound Proxy: %s' % self.proxy)
+            if self.template != '':
+                fw.write('[✓] Template: %s' % self.template)
             if self.domain != '' and self.domain != str(self.ip) and self.domain != self.host:
                 fw.write('[✓] Customized Domain: %s\n' % self.domain)
             if self.contact_domain != '':
@@ -241,14 +247,23 @@ class SipSend:
         if self.proxy != '':
             self.route = '<sip:%s;lr>' % self.proxy
 
-        if self.method == 'REGISTER':
-            if self.to_user == '100' and self.from_user != '100':
-                self.to_user = self.from_user
-            if self.to_user != '100' and self.from_user == '100':
-                self.from_user = self.to_user
+        if self.template != '':
+            msg = ''
+            tf = open(self.template, 'r')
+            
+            for line in  tf:
+                msg = msg + line.replace('\n', '\r\n')
+            
+            msg = msg + '\r\n'
+        else:
+            if self.method == 'REGISTER':
+                if self.to_user == '100' and self.from_user != '100':
+                    self.to_user = self.from_user
+                if self.to_user != '100' and self.from_user == '100':
+                    self.from_user = self.to_user
 
-        msg = create_message(self.method, self.localip, self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
-                             self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, self.to_tag, self.digest, 1, '', self.sdp, '', self.route, self.ppi, self.pai, self.header, self.withcontact)
+            msg = create_message(self.method, self.localip, self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
+                                self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, self.to_tag, self.digest, 1, '', self.sdp, '', self.route, self.ppi, self.pai, self.header, self.withcontact)
 
         try:
             sock.settimeout(self.timeout)

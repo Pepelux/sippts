@@ -18,6 +18,7 @@ devel:
 - send:
   - added param -t to set sockets timeout
   - added param -v for verbose mode
+  - added param -template to load SIP messages
 - dcrack:
   - Use pyshark library instead tshark application
 - global:
