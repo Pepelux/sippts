@@ -734,7 +734,6 @@ Usage examples:
 
     log = parser_sniff.add_argument_group('Log')
     log.add_argument('-v'       , help='Increase verbosity', dest='verbose', action="count")
-    log.add_argument('-vv'      , help='Increase more verbosity', dest='more_verbose', action="count")
     log.add_argument('-o'       , metavar='FILE', type=str, help='Save data into a log file', dest='ofile', default='')
 
     other = parser_sniff.add_argument_group('Other options')
@@ -1482,10 +1481,6 @@ Payloads
         PROTO = args.proto
         AUTH = args.auth
         VERBOSE = args.verbose
-
-        MORE_VERBOSE = args.more_verbose
-        if MORE_VERBOSE == 1:
-            VERBOSE = 2
 
         return COMMAND, DEV, OFILE, AUTH, VERBOSE, PROTO
     elif COMMAND == 'spoof':

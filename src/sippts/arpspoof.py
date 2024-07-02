@@ -237,9 +237,9 @@ class ArpSpoof:
             ip = self.ips[x]
             if ip not in self.dropped_ips:
                 if ip != local_ip and ip != self.gw:
-                    self.restore(str(ip), self.gw)
+                    self.restore(str(ip), self.gw, int(self.verbose))
 
-        self.restore(self.gw, str(ip))
+        self.restore(self.gw, str(ip), int(self.verbose))
 
         # disable ip forwarding
         disable_ip_route()
