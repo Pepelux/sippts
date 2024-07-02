@@ -15,6 +15,8 @@ import re
 import threading
 import signal
 import time
+
+import cursor
 from .lib.functions import create_message, parse_message, parse_digest, ip2long, long2ip, generate_random_string, get_free_port, calculateHash, format_time
 from .lib.color import Color
 from .lib.logos import Logo
@@ -396,6 +398,7 @@ class SipRemoteCrack:
                     values2.append(val)
                     count += 1
 
+                cursor.hide()
                 if count == max_values or i+1 == total:
                     try:
                         with ThreadPoolExecutor(max_workers=nthreads) as executor:
@@ -412,6 +415,7 @@ class SipRemoteCrack:
 
                     values2.clear()
                     count = 0
+                cursor.show()
 
         end = time.time()
         self.totaltime = int(end-start)

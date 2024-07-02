@@ -14,6 +14,8 @@ from nis import cat
 import os
 import re
 import time
+
+import cursor
 from .lib.functions import calculateHash, format_time
 import itertools
 import string
@@ -176,8 +178,10 @@ class SipDigestCrack:
                         except:
                             pass
                         
+                        cursor.hide()
                         pwd = self.crack(response, username, realm, method,
                                          uri, nonce, algorithm, cnonce, nc, qop, word_start)
+                        cursor.show()
 
                         if pwd != '':
                             print(self.c.GREEN+'[-] Cleartext password for user %s is %s' %
