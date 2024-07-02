@@ -109,10 +109,6 @@ class SipScan:
                 print(self.c.WHITE)
                 exit()
 
-        # if rport is by default but we want to scan TLS protocol, also try with port 5061
-        if self.rport == '5060' and (self.proto == 'TLS' or self.proto == 'ALL'):
-            self.rport = '5060-5061'
-
         if self.rport.upper() == 'ALL':
             self.rport = '1-65536'
 
@@ -367,20 +363,16 @@ class SipScan:
                                         val_proto = val2[2]
                                         scan = 1
 
-                                        if self.proto == 'ALL' and self.rport == '5060-5061':
-                                            if val_port == 5060 and val_proto == 'TLS':
-                                                scan = 0
-                                            elif val_port == 5061 and (val_proto == 'UDP' or val_proto == 'TCP'):
-                                                scan = 0
+                                        if self.proto == 'ALL' and self.rport == '5060' and val_proto == 'TLS':
+                                            val_port = 5061
 
-                                        if scan == 1:
-                                            if self.host != '' and self.domain == '':
-                                                self.domain = self.host
-                                            if self.domain == '':
-                                                self.domain = val_ipaddr
+                                        if self.host != '' and self.domain == '':
+                                            self.domain = self.host
+                                        if self.domain == '':
+                                            self.domain = val_ipaddr
 
-                                            executor.submit(self.scan_host, val_ipaddr,
-                                                            val_port, val_proto)
+                                        executor.submit(self.scan_host, val_ipaddr,
+                                                        val_port, val_proto)
                     except KeyboardInterrupt:
                         print(self.c.RED + '\nYou pressed Ctrl+C!' + self.c.WHITE)
                         self.quit = True
