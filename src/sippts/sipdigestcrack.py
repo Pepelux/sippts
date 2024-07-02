@@ -293,15 +293,13 @@ class SipDigestCrack:
                         
                         self.pwdvalue = pwd
 
-                        if word_start == '' or word_start == pwd:
-                            word_start = ''
-                            if self.verbose == 1:
-                                print(self.c.WHITE+'Password: %s' % pwd)
-                                print(self.c.WHITE+'Expected hash: %s' %
-                                      response)
-                            if response == calculateHash(username, realm, pwd, method, uri, nonce, algorithm, cnonce, nc, qop, self.verbose, ''):
-                                self.save_file(self.wordlist, username, pwd)
-                                return pwd
+                        if self.verbose == 1:
+                            print(self.c.WHITE+'Password: %s' % pwd)
+                            print(self.c.WHITE+'Expected hash: %s' %
+                                    response)
+                        if response == calculateHash(username, realm, pwd, method, uri, nonce, algorithm, cnonce, nc, qop, self.verbose, ''):
+                            self.save_file(self.wordlist, username, pwd)
+                            return pwd
             except KeyboardInterrupt:
                 self.save_file(self.charset, username, pwd)
                 self.run = False
