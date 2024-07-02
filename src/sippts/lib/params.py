@@ -26,7 +26,7 @@ CYAN = '\033[0;36;20m'
 BWHITE = '\033[1;37;20m'
 WHITE = '\033[0;37;20m'
 
-local_version = '4.0.8'
+local_version = '4.0.9'
 
 def get_sippts_args():
     try:
@@ -168,6 +168,7 @@ Usage examples:
     log.add_argument('-vv'      , help='Increase more verbosity', dest='more_verbose', action="count")
     log.add_argument('-nocolor' , help='Show result without colors', dest='nocolor', action="count")
     log.add_argument('-o'       , metavar='FILE', type=str, help='Save data into a log file', dest='ofile', default='')
+    log.add_argument('-oi'      , metavar='FILE', type=str, help='Save IPs into a log file', dest='oifile', default='')
     log.add_argument('-cve'     , help='Show possible CVEs', dest='cve', action="count")
 
     other = parser_scan.add_argument_group('Other options')
@@ -1064,6 +1065,7 @@ Payloads
         FILE = args.file
         NOCOLOR = args.nocolor
         OFILE = args.ofile
+        OIFILE = args.oifile
         FP = args.fp
         RANDOM = args.random
         PPI = args.ppi
@@ -1071,7 +1073,7 @@ Payloads
         LOCALIP = args.localip
         CVE = args.cve
 
-        return COMMAND, IPADDR, HOST, PROXY, PORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, THREADS, TIMEOUT, VERBOSE, PING, FILE, NOCOLOR, OFILE, FP, RANDOM, PPI, PAI, LOCALIP, CVE
+        return COMMAND, IPADDR, HOST, PROXY, PORT, PROTO, METHOD, DOMAIN, CONTACTDOMAIN, FROMNAME, FROMUSER, FROMDOMAIN, TONAME, TOUSER, TODOMAIN, UA, THREADS, TIMEOUT, VERBOSE, PING, FILE, NOCOLOR, OFILE, OIFILE, FP, RANDOM, PPI, PAI, LOCALIP, CVE
     elif COMMAND == 'exten':
         if args.help == 1:
             parser_exten.print_help()

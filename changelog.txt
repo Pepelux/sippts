@@ -5,6 +5,7 @@ devel:
 - added module video to show animated help
 - scan:
   - added param -t to set sockets timeout
+  - added param -oi to save found ips into a file
 - leak:
   - added param -t to set sockets timeout
 - enumerate:

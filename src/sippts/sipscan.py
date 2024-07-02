@@ -46,6 +46,7 @@ class SipScan:
         self.file = ''
         self.nocolor = ''
         self.ofile = ''
+        self.oifile = ''
         self.fp = '0'
         self.random = 0
         self.ppi = ''
@@ -55,6 +56,7 @@ class SipScan:
         self.timeout = 5
 
         self.found = []
+        self.ipsfound = []
         self.line = ['-', '\\', '|', '/']
         self.pos = 0
         self.quit = False
@@ -326,6 +328,9 @@ class SipScan:
         if self.ofile != '':
             print(self.c.BWHITE + '[✓] Saving logs info file: ' +
                   self.c.CYAN + '%s' % self.ofile)
+        if self.oifile != '':
+            print(self.c.BWHITE + '[✓] Saving IPs info file: ' +
+                  self.c.CYAN + '%s' % self.oifile)
         if self.random == 1:
             print(self.c.BWHITE + '[✓] Random hosts: ' +
                   self.c.GREEN + 'True')
@@ -387,6 +392,7 @@ class SipScan:
         self.totaltime = int(end-start)
 
         self.found.sort()
+        self.ipsfound.sort()
         self.print()
         if len(self.cve) > 0:
             self.print_cve()
@@ -542,6 +548,10 @@ class SipScan:
                         ip, rport, proto, response, headers['ua'], sip_type, fp)
                     self.found.append(line)
 
+                    if self.oifile != '':
+                        if ip not in self.ipsfound:
+                            self.ipsfound.append(ip)
+
                     if self.verbose == 1:
                         if headers['ua'] != '':
                             print(self.c.WHITE + 'Response <%s %s> from %s:%d/%s with User-Agent %s' %
@@ -627,6 +637,14 @@ class SipScan:
         else:
             print(self.c.WHITE + '+' + '-' * (iplen+2) + '+' + '-' * (polen+2) + '+' + '-' * (prlen+2) + '+' + '-' * (relen+2) + '+' + '-' * (ualen+2) + '+' + '-' * (tplen+2) + '+')
 
+        if self.oifile != '':
+            if len(self.ipsfound) > 0:
+                f = open(self.oifile, 'a+')
+
+                for x in self.ipsfound:
+                    f.write(x + '\n')
+
+            f.close()
 
         if self.ofile != '':
             f = open(self.ofile, 'a+')

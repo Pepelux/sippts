@@ -33,7 +33,7 @@ def main():
         exit()
     
     if params[0] == 'scan':
-        (cmd, ip, host, proxy, rport, proto, method, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, user_agent, nthreads, timeout, verbose, ping, file, nocolor, ofile, fp, random, ppi, pai, local_ip, cve) = params
+        (cmd, ip, host, proxy, rport, proto, method, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, user_agent, nthreads, timeout, verbose, ping, file, nocolor, ofile, oifile, fp, random, ppi, pai, local_ip, cve) = params
         
         from sippts.sipscan import SipScan
 
@@ -60,6 +60,7 @@ def main():
         s.file = file
         s.nocolor = nocolor
         s.ofile = ofile
+        s.oifile = oifile
         s.fp = fp
         s.random = random
         s.ppi = ppi
