@@ -378,7 +378,7 @@ def main():
         s.gw = gw
         s.file = file
     elif params[0] == 'pcapdump':
-        (cmd, file, folder, verbose, rtpextract, nocolor, sip, rtp) = params
+        (cmd, file, folder, verbose, rtpextract, nocolor, sip, rtp, auth) = params
 
         from sippts.sippcapdump import SipPcapDump
 
@@ -390,6 +390,7 @@ def main():
         s.nocolor = nocolor
         s.sip = sip
         s.rtp = rtp
+        s.auth = auth
     elif params[0] == 'rtpbleed':
         (cmd, ip, start_port, end_port, loops, payload, delay) = params
 

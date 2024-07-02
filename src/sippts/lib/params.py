@@ -777,9 +777,10 @@ Usage examples:
   Module ''' + BYELLOW + '''pcapdump''' + YELLOW + ''' extracts data from a PCAP file.''' + WHITE)
 
     target = parser_pcapdump.add_argument_group('Target')
-    target.add_argument('-f'      , metavar='FILE', type=str, help='PCAP file to analyze', dest='file', default='')
-    target.add_argument('-sip', help='Show SIP frames', dest='sip', action="count")
-    target.add_argument('-rtp', help='Show RTP frames', dest='rtp', action="count")
+    target.add_argument('-f'   , metavar='FILE', type=str, help='PCAP file to analyze', dest='file', default='')
+    target.add_argument('-sip' , help='Show SIP frames', dest='sip', action="count")
+    target.add_argument('-rtp' , help='Show RTP frames', dest='rtp', action="count")
+    target.add_argument('-auth', help='Show SIP authentications', dest='auth', action="count")
 
     rtp = parser_pcapdump.add_argument_group('RTP')
     rtp.add_argument('-r', '-rtp_extract', help='Extract RTP streams into WAV files', dest='rtp_extract', action="count")
@@ -1520,23 +1521,24 @@ Payloads
             print(BWHITE + COMMAND + ':' + WHITE + ' Mandatory params: ' + GREEN + '-f <FILE>' + WHITE)
             print(WHITE + 'Use ' + CYAN + 'sippts ' + COMMAND + ' -h/--help' + WHITE + ' for help')
             exit()
-        if not args.sip and not args.rtp and not args.rtp_extract:
+        if not args.sip and not args.rtp and not args.auth and not args.rtp_extract:
             parser_pcapdump.print_help()
             print(RED)
             print('Param error!')
-            print(BWHITE + COMMAND + ':' + WHITE + ' Mandatory params: ' + GREEN + '-sip' + WHITE + ' or ' + GREEN + '-rtp' + WHITE + ' or ' + GREEN + '-r' + WHITE)
+            print(BWHITE + COMMAND + ':' + WHITE + ' Mandatory params: ' + GREEN + '-sip' + WHITE + ' or ' + GREEN + '-rtp' + WHITE + ' or ' + GREEN + '-auth' + WHITE + ' or ' + GREEN + '-r' + WHITE)
             print(WHITE + 'Use ' + CYAN + 'sippts ' + COMMAND + ' -h/--help' + WHITE + ' for help')
             exit()
 
         FILE = args.file
         SIP = args.sip
+        AUTH = args.auth
         RTP = args.rtp
         VERBOSE = args.verbose
         FOLDER = args.folder
         RTPEXTRACT = args.rtp_extract
         NOCOLOR = args.nocolor
 
-        return COMMAND, FILE, FOLDER, VERBOSE, RTPEXTRACT, NOCOLOR, SIP, RTP
+        return COMMAND, FILE, FOLDER, VERBOSE, RTPEXTRACT, NOCOLOR, SIP, RTP, AUTH
     elif COMMAND == 'rtpbleed':
         if args.help == 1:
             parser_rtpbleed.print_help()

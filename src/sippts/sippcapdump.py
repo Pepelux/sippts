@@ -22,6 +22,7 @@ class SipPcapDump:
         self.rtp_extract = 0
         self.sip = 0
         self.rtp = 0
+        self.auth = 0
 
         self.nocolor = ''
         self.c = Color()
@@ -50,6 +51,9 @@ class SipPcapDump:
         if self.rtp:
             self.rtp_frames()
        
+        if self.auth == 1 and self.sip != 1:
+            self.sip_auth()
+
     
     def sip_frames(self):
         capture = pyshark.FileCapture(self.file, display_filter='sip')
