@@ -36,6 +36,7 @@ class SipDigestCrack:
         self.suffix = ''
         self.verbose = '0'
 
+        self.pwdvalue = ''
         self.run = True
 
         self.totaltime = 0
@@ -162,6 +163,11 @@ class SipDigestCrack:
                                             b64pwd = base64.b64decode(
                                                 values[5]).decode()
                                             word_start = b64pwd
+                                            
+                                            l = len(self.prefix)
+                                            word_start = word_start[l:]
+                                            l = len(self.suffix)
+                                            word_start = word_start[0:len(word_start)-l]
                                     except:
                                         fd.close()
                                         return ''
@@ -169,7 +175,7 @@ class SipDigestCrack:
                             fd.close()
                         except:
                             pass
-
+                        
                         pwd = self.crack(response, username, realm, method,
                                          uri, nonce, algorithm, cnonce, nc, qop, word_start)
 
@@ -179,6 +185,8 @@ class SipDigestCrack:
                             self.found.append('%s###%s###%s###%s' % (
                                 ipsrc, ipdst, username, pwd))
                         else:
+                            if self.run == False:
+                                self.save_file(self.wordlist, username, self.pwdvalue)
                             print(
                                 self.c.RED+'[-] Password not found. Try with another wordlist')
 
@@ -278,6 +286,8 @@ class SipDigestCrack:
 
                         print(self.c.BWHITE + '   [-] Trying pass ' +
                               self.c.YELLOW + '%s' % pwd + self.c.WHITE, end="\r")
+                        
+                        self.pwdvalue = pwd
 
                         if word_start == '' or word_start == pwd:
                             word_start = ''
@@ -339,7 +349,6 @@ class SipDigestCrack:
             fd.close()
             return ''
 
-        self.save_file(self.wordlist, username, pwd)
         return ''
 
     def print(self):
