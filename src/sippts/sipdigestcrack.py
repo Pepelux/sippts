@@ -176,17 +176,22 @@ class SipDigestCrack:
 
                                                 print(self.c.GREEN+'[-] Cleartext password for user %s is %s' %
                                                     (username, word_start))
+                                                self.found.append('%s###%s###%s###%s' % (
+                                                    ipsrc, ipdst, username, word_start))
                                             else:
-                                                if ((self.bruteforce != 'True' and values[0] == 'wl' and values[1] == self.wordlist and self.prefix == values[2] and self.suffix == values[3]) or
-                                                        (self.bruteforce == 'True' and values[0] == 'bf' and values[1] == self.chars and self.prefix == values[2] and self.suffix == values[3])) and values[4] == username:
-                                                    b64pwd = base64.b64decode(
-                                                        values[5]).decode()
-                                                    word_start = b64pwd
-                                                    
-                                                    l = len(self.prefix)
-                                                    word_start = word_start[l:]
-                                                    l = len(self.suffix)
-                                                    word_start = word_start[0:len(word_start)-l]
+                                                if found == 'ignore':
+                                                    print(self.c.MAGENTA+'[-] Ignoring user %s' % username)
+                                                else:
+                                                    if ((self.bruteforce != 'True' and values[0] == 'wl' and values[1] == self.wordlist and self.prefix == values[2] and self.suffix == values[3]) or
+                                                            (self.bruteforce == 'True' and values[0] == 'bf' and values[1] == self.chars and self.prefix == values[2] and self.suffix == values[3])) and values[4] == username:
+                                                        b64pwd = base64.b64decode(
+                                                            values[5]).decode()
+                                                        word_start = b64pwd
+                                                        
+                                                        l = len(self.prefix)
+                                                        word_start = word_start[l:]
+                                                        l = len(self.suffix)
+                                                        word_start = word_start[0:len(word_start)-l]
                                     except:
                                         fd.close()
                                         return ''
