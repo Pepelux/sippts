@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__author__ = 'Jose Luis Verdeguer'
-__version__ = '4.0'
+__author__ = "Jose Luis Verdeguer"
+__version__ = "4.0"
 __license__ = "GPL"
-__copyright__ = "Copyright (C) 2015-2022, SIPPTS"
+__copyright__ = "Copyright (C) 2015-2024, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
 
 import socket
@@ -12,7 +12,13 @@ import sys
 import ssl
 import time
 import signal
-from .lib.functions import create_message, get_free_port, parse_message, generate_random_string, get_machine_default_ip
+from .lib.functions import (
+    create_message,
+    get_free_port,
+    parse_message,
+    generate_random_string,
+    get_machine_default_ip,
+)
 from .lib.color import Color
 from .lib.logos import Logo
 from datetime import datetime
@@ -20,35 +26,35 @@ from datetime import datetime
 
 class SipPing:
     def __init__(self):
-        self.ip = ''
-        self.host = ''
-        self.proxy = ''
-        self.route = ''
-        self.rport = '5060'
-        self.proto = 'UDP'
-        self.method = ''
-        self.domain = ''
-        self.contact_domain = ''
-        self.from_user = '100'
-        self.from_name = ''
-        self.from_domain = ''
-        self.from_tag = ''
-        self.to_user = '100'
-        self.to_name = ''
-        self.to_domain = ''
-        self.to_tag = ''
-        self.user = ''
-        self.pwd = ''
-        self.user_agent = 'pplsip'
-        self.digest = ''
-        self.branch = ''
-        self.callid = ''
-        self.cseq = '1'
-        self.localip = ''
+        self.ip = ""
+        self.host = ""
+        self.proxy = ""
+        self.route = ""
+        self.rport = "5060"
+        self.proto = "UDP"
+        self.method = ""
+        self.domain = ""
+        self.contact_domain = ""
+        self.from_user = "100"
+        self.from_name = ""
+        self.from_domain = ""
+        self.from_tag = ""
+        self.to_user = "100"
+        self.to_name = ""
+        self.to_domain = ""
+        self.to_tag = ""
+        self.user = ""
+        self.pwd = ""
+        self.user_agent = "pplsip"
+        self.digest = ""
+        self.branch = ""
+        self.callid = ""
+        self.cseq = "1"
+        self.localip = ""
         self.number = 0
         self.interval = 1
-        self.ppi = ''
-        self.pai = ''
+        self.ppi = ""
+        self.pai = ""
         self.timeout = 5
 
         self.run = True
@@ -58,9 +64,23 @@ class SipPing:
         self.c = Color()
 
     def start(self):
-        supported_protos = ['UDP', 'TCP', 'TLS']
-        supported_methods = ['REGISTER', 'SUBSCRIBE', 'NOTIFY', 'PUBLISH', 'MESSAGE', 'INVITE',
-                             'OPTIONS', 'ACK', 'CANCEL', 'BYE', 'PRACK', 'INFO', 'REFER', 'UPDATE']
+        supported_protos = ["UDP", "TCP", "TLS"]
+        supported_methods = [
+            "REGISTER",
+            "SUBSCRIBE",
+            "NOTIFY",
+            "PUBLISH",
+            "MESSAGE",
+            "INVITE",
+            "OPTIONS",
+            "ACK",
+            "CANCEL",
+            "BYE",
+            "PRACK",
+            "INFO",
+            "REFER",
+            "UPDATE",
+        ]
 
         if self.number == 0:
             self.number = 99999
@@ -70,100 +90,115 @@ class SipPing:
 
         # my IP address
         local_ip = self.localip
-        if self.localip == '':
+        if self.localip == "":
             try:
                 local_ip = get_machine_default_ip()
             except:
-                print(self.c.BRED + 'Error getting local IP')
-                print(self.c.BWHITE + 'Try with ' + self.c.BYELLOW + '-local-ip' + self.cBWHITE + ' param')
+                print(f"{self.c.BRED}Error getting local IP")
+                print(
+                    f"{self.c.BWHITE}Try with {self.c.BYELLOW}-local-ip{self.cBWHITE} param"
+                )
                 print(self.c.WHITE)
                 exit()
 
         # if rport is by default but we want to scan TLS protocol, use port 5061
-        if self.rport == 5060 and self.proto == 'TLS':
+        if self.rport == 5060 and self.proto == "TLS":
             self.rport = 5061
 
         # check method
         if self.method not in supported_methods:
-            print(self.c.BRED + 'Method %s is not supported' % self.method)
+            print(f"{self.c.BRED}Method {self.method} is not supported")
+            print(self.c.WHITE)
             sys.exit()
 
         # check protocol
         if self.proto not in supported_protos:
-            print(self.c.BRED + 'Protocol %s is not supported' % self.proto)
+            print(f"{self.c.BRED}Protocol {self.proto} is not supported")
+            print(self.c.WHITE)
             sys.exit()
 
-        logo = Logo('sipping')
+        logo = Logo("sipping")
         logo.print()
 
-        print(self.c.BWHITE + '[✓] Target: ' + self.c.YELLOW + '%s' % self.ip + self.c.WHITE + ':' +
-              self.c.YELLOW + '%s' % self.rport + self.c.WHITE + '/' + self.c.YELLOW + '%s' % self.proto)
-        if self.proxy != '':
-            print(self.c.BWHITE + '[✓] Outbound Proxy: ' + self.c.GREEN + '%s' %
-                  self.proxy)
-        if self.domain != '' and self.domain != str(self.ip) and self.domain != self.host:
-            print(self.c.BWHITE + '[✓] Customized Domain: ' +
-                  self.c.GREEN + '%s' % self.domain)
-        if self.contact_domain != '':
-            print(self.c.BWHITE + '[✓] Customized Contact Domain: ' + self.c.GREEN + '%s' %
-                  self.contact_domain)
-        if self.from_name != '':
-            print(self.c.BWHITE + '[✓] Customized From Name: ' +
-                  self.c.GREEN + '%s' % self.from_name)
-        if self.from_user != '100':
-            print(self.c.BWHITE + '[✓] Customized From User: ' +
-                  self.c.GREEN + '%s' % self.from_user)
-        if self.from_domain != '':
-            print(self.c.BWHITE + '[✓] Customized From Domain: ' +
-                  self.c.GREEN + '%s' % self.from_domain)
-        if self.from_tag != '':
-            print(self.c.BWHITE + '[✓] Customized From Tag: ' +
-                  self.c.GREEN + '%s' % self.from_tag)
-        if self.to_name != '':
-            print(self.c.BWHITE + '[✓] Customized To Name: ' +
-                  self.c.GREEN + '%s' % self.to_name)
-        if self.to_user != '100':
-            print(self.c.BWHITE + '[✓] Customized To User: ' +
-                  self.c.GREEN + '%s' % self.to_user)
-        if self.to_domain != '':
-            print(self.c.BWHITE + '[✓] Customized To Domain: ' +
-                  self.c.GREEN + '%s' % self.to_domain)
-        if self.to_tag != '':
-            print(self.c.BWHITE + '[✓] Customized To Tag: ' +
-                  self.c.GREEN + '%s' % self.to_tag)
-        if self.user_agent != 'pplsip':
-            print(self.c.BWHITE + '[✓] Customized User-Agent: ' +
-                  self.c.GREEN + '%s' % self.user_agent)
+        print(
+            f"{self.c.BWHITE}[✓] Target: {self.c.GREEN}{self.ip}{self.c.WHITE}:{self.c.GREEN}{self.rport}{self.c.WHITE}/{self.c.GREEN}{self.proto}"
+        )
+        if self.proxy != "":
+            print(f"{self.c.BWHITE}[✓] Outbound Proxy: {self.c.GREEN}{self.proxy}")
+        if (
+            self.domain != ""
+            and self.domain != str(self.ip)
+            and self.domain != self.host
+        ):
+            print(f"{self.c.BWHITE}[✓] Customized Domain: {self.c.GREEN}{self.domain}")
+        if self.contact_domain != "":
+            print(
+                f"{self.c.BWHITE}[✓] Customized Contact Domain: {self.c.GREEN}{self.contact_domain}"
+            )
+        if self.from_name != "":
+            print(
+                f"{self.c.BWHITE}[✓] Customized From Name: {self.c.GREEN}{self.from_name}"
+            )
+        if self.from_user != "100":
+            print(
+                f"{self.c.BWHITE}[✓] Customized From User: {self.c.GREEN}{self.from_user}"
+            )
+        if self.from_domain != "":
+            print(
+                f"{self.c.BWHITE}[✓] Customized From Domain: {self.c.GREEN}{self.from_domain}"
+            )
+        if self.from_tag != "":
+            print(
+                f"{self.c.BWHITE}[✓] Customized From Tag: {self.c.GREEN}{self.from_tag}"
+            )
+        if self.to_name != "":
+            print(
+                f"{self.c.BWHITE}[✓] Customized To Name: {self.c.GREEN}{self.to_name}"
+            )
+        if self.to_user != "100":
+            print(
+                f"{self.c.BWHITE}[✓] Customized To User: {self.c.GREEN}{self.to_user}"
+            )
+        if self.to_domain != "":
+            print(
+                f"{self.c.BWHITE}[✓] Customized To Domain: {self.c.GREEN}{self.to_domain}"
+            )
+        if self.to_tag != "":
+            print(f"{self.c.BWHITE}[✓] Customized To Tag: {self.c.GREEN}{self.to_tag}")
+        if self.user_agent != "pplsip":
+            print(
+                f"{self.c.BWHITE}[✓] Customized User-Agent: {self.c.GREEN}{self.user_agent}"
+            )
         print(self.c.WHITE)
 
         signal.signal(signal.SIGINT, self.signal_handler)
-        print(self.c.BYELLOW + 'Press Ctrl+C to stop')
+        print(f"{self.c.BYELLOW}Press Ctrl+C to stop")
         print(self.c.WHITE)
 
-        if self.branch == '':
-            self.branch = generate_random_string(71, 71, 'ascii')
-        if self.callid == '':
-            self.callid = generate_random_string(32, 32, 'hex')
-        if self.from_tag == '':
-            self.from_tag = generate_random_string(8, 8, 'hex')
+        if self.branch == "":
+            self.branch = generate_random_string(71, 71, "ascii")
+        if self.callid == "":
+            self.callid = generate_random_string(32, 32, "hex")
+        if self.from_tag == "":
+            self.from_tag = generate_random_string(8, 8, "hex")
 
-        if self.cseq == None or self.cseq == '':
-            self.cseq = '1'
+        if self.cseq == None or self.cseq == "":
+            self.cseq = "1"
 
-        if self.host != '' and self.domain == '':
+        if self.host != "" and self.domain == "":
             self.domain = self.host
-        if self.domain == '':
+        if self.domain == "":
             self.domain = self.ip
-        if not self.from_domain or self.from_domain == '':
+        if not self.from_domain or self.from_domain == "":
             self.from_domain = self.domain
-        if not self.to_domain or self.to_domain == '':
+        if not self.to_domain or self.to_domain == "":
             self.to_domain = self.domain
 
-        if self.contact_domain == '':
+        if self.contact_domain == "":
             self.contact_domain = local_ip
 
-        if self.proxy != '':
-            self.route = '<sip:%s;lr>' % self.proxy
+        if self.proxy != "":
+            self.route = "<sip:%s;lr>" % self.proxy
 
         ip = self.ip
         try:
@@ -172,27 +207,58 @@ class SipPing:
             pass
 
         if ip != self.ip:
-            print(self.c.YELLOW + 'PING ' + self.c.BGREEN + '%s (%s)' %
-                  (self.ip, ip) + self.c.YELLOW + ' using method %s' % self.method)
+            print(
+                f"{self.c.YELLOW}PINGING {self.c.BGREEN}{self.ip} ({ip}){self.c.YELLOW} using method {self.method}"
+            )
         else:
-            print(self.c.YELLOW + 'PING ' + self.c.BGREEN + '%s' %
-                  self.ip + self.c.YELLOW + ' using method %s' % self.method)
+            print(
+                f"{self.c.YELLOW}PINGING {self.c.BGREEN}{self.ip}{self.c.YELLOW} using method {self.method}"
+            )
 
         while self.run == True and self.pingcount < self.number:
             try:
-                if self.proto == 'UDP':
+                if self.proto == "UDP":
                     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                 else:
                     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             except socket.error:
-                print(self.c.RED + 'Failed to create socket')
+                print(f"{self.c.RED}Failed to create socket")
+                print(self.c.WHITE)
                 sys.exit(1)
 
-            bind = '0.0.0.0'
+            bind = "0.0.0.0"
             lport = get_free_port()
 
-            msg = create_message(self.method, '', self.contact_domain, self.from_user, self.from_name, self.from_domain, self.to_user, self.to_name, self.to_domain, self.proto,
-                                 self.domain, self.user_agent, lport, self.branch, self.callid, self.from_tag, self.cseq, self.to_tag, self.digest, 1, '', 0, '', self.route, self.ppi, self.pai, '', 1)
+            msg = create_message(
+                self.method,
+                "",
+                self.contact_domain,
+                self.from_user,
+                self.from_name,
+                self.from_domain,
+                self.to_user,
+                self.to_name,
+                self.to_domain,
+                self.proto,
+                self.domain,
+                self.user_agent,
+                lport,
+                self.branch,
+                self.callid,
+                self.from_tag,
+                self.cseq,
+                self.to_tag,
+                self.digest,
+                1,
+                "",
+                0,
+                "",
+                self.route,
+                self.ppi,
+                self.pai,
+                "",
+                1,
+            )
 
             try:
                 sock.bind((bind, lport))
@@ -200,24 +266,24 @@ class SipPing:
                 lport = get_free_port()
                 sock.bind((bind, lport))
 
-            if self.proxy == '':
+            if self.proxy == "":
                 host = (str(self.ip), int(self.rport))
             else:
-                if self.proxy.find(':') > 0:
-                    (proxy_ip, proxy_port) = self.proxy.split(':')
+                if self.proxy.find(":") > 0:
+                    (proxy_ip, proxy_port) = self.proxy.split(":")
                 else:
                     proxy_ip = self.proxy
-                    proxy_port = '5060'
+                    proxy_port = "5060"
 
                 host = (str(proxy_ip), int(proxy_port))
 
             try:
                 sock.settimeout(self.timeout)
 
-                if self.proto == 'TCP':
+                if self.proto == "TCP":
                     sock.connect(host)
 
-                if self.proto == 'TLS':
+                if self.proto == "TLS":
                     context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
                     context.check_hostname = False
                     context.verify_mode = ssl.CERT_NONE
@@ -226,23 +292,21 @@ class SipPing:
                     sock_ssl = context.wrap_socket(sock, server_hostname=str(host[0]))
                     sock_ssl.connect(host)
             except socket.timeout:
-                print(self.c.RED +
-                      '[!] Socket connection timeout' + self.c.WHITE)
+                print(f"{self.c.RED}[!] Socket connection timeout{self.c.WHITE}")
                 # sys.exit()
             except:
-                print(self.c.RED +
-                      '[!] Socket connection error' + self.c.WHITE)
+                print(f"{self.c.RED}[!] Socket connection error{self.c.WHITE}")
                 # sys.exit()
 
             try:
                 start = time.time()
 
-                if self.proto == 'TLS':
-                    sock_ssl.sendall(bytes(msg[:8192], 'utf-8'))
+                if self.proto == "TLS":
+                    sock_ssl.sendall(bytes(msg[:8192], "utf-8"))
                 else:
-                    sock.sendto(bytes(msg[:8192], 'utf-8'), host)
+                    sock.sendto(bytes(msg[:8192], "utf-8"), host)
 
-                if self.proto == 'TLS':
+                if self.proto == "TLS":
                     resp = sock_ssl.recv(4096)
                 else:
                     resp = sock.recv(4096)
@@ -250,27 +314,41 @@ class SipPing:
                 headers = parse_message(resp.decode())
 
                 if headers:
-                    response = '%s %s' % (
-                        headers['response_code'], headers['response_text'])
+                    response = "%s %s" % (
+                        headers["response_code"],
+                        headers["response_text"],
+                    )
 
                 end = time.time()
                 totaltime = end - start
 
                 self.pingcount += 1
-                print(self.c.CYAN + '[%s UTC] ' % datetime.now().strftime("%Y-%m-%d %H:%M:%S") + self.c.GREEN + '%s ' % response + self.c.WHITE + 'from ' + self.c.YELLOW + '%s' % ip + self.c.WHITE + ' cseq=' +
-                      self.c.YELLOW + '%d' % self.pingcount + self.c.WHITE + ' time=' + self.c.YELLOW + '%fms' % totaltime + self.c.WHITE)
+                
+                ccolor = self.c.BRED
+                if response[0:1] == "1":
+                    ccolor = self.c.BBLUE
+                if response[0:1] == "2":
+                    ccolor = self.c.BGREEN
+                if response[0:1] == "3":
+                    ccolor = self.c.BMAGENTA
+                print(
+                    f"{self.c.CYAN}[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} UTC] {ccolor}{response}{self.c.WHITE} from {self.c.BYELLOW}{ip}{self.c.WHITE} cseq={self.c.BYELLOW}{str(self.pingcount)}{self.c.WHITE} time={self.c.BYELLOW}{str(round(totaltime,3))} ms{self.c.WHITE}"
+                )
             except socket.timeout:
                 self.pingcount += 1
-                print(self.c.CYAN + '[%s UTC] ' % datetime.now().strftime("%Y-%m-%d %H:%M:%S") + self.c.WHITE + 'From ' + self.c.YELLOW + '%s' % ip + self.c.WHITE + ' cseq=' + self.c.YELLOW +
-                      '%d' % self.pingcount + self.c.WHITE + ' Destination Host Unreachable' + self.c.WHITE)
+                print(
+                    f"{self.c.CYAN}[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} UTC] {self.c.GREEN}{ccolor}{self.c.WHITE} from {self.c.BYELLOW}{ip}{self.c.WHITE} cseq={self.c.BYELLOW}{str(self.pingcount)}{self.c.WHITE} Destination Host Unreachable{self.c.WHITE}"
+                )
                 pass
             except KeyboardInterrupt:
-                print(self.c.RED + '\nYou pressed Ctrl+C!' + self.c.WHITE)
+                print(f"{self.c.RED}\nYou pressed Ctrl+C!")
+                print(self.c.WHITE)
                 sys.exit()
             except:
                 self.pingcount += 1
-                print(self.c.CYAN + '[%s UTC] ' % datetime.now().strftime("%Y-%m-%d %H:%M:%S") + self.c.WHITE + 'From ' + self.c.YELLOW + '%s' % ip + self.c.WHITE + ' cseq=' + self.c.YELLOW +
-                      '%d' % self.pingcount + self.c.WHITE + ' Destination Host Unreachable' + self.c.WHITE)
+                print(
+                    f"{self.c.CYAN}[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} UTC] {self.c.GREEN}{ccolor}{self.c.WHITE} from {self.c.BYELLOW}{ip}{self.c.WHITE} cseq={self.c.BYELLOW}{str(self.pingcount)}{self.c.WHITE} Destination Host Unreachable{self.c.WHITE}"
+                )
                 pass
 
             time.sleep(self.interval)

@@ -15,7 +15,7 @@ class Logo:
         self.c = Color()
         
     def print(self):
-        print('\n' + self.c.RED + u'''☎️  SIPPTS''' + self.c.WHITE +
+        print(f'\n' + self.c.RED + u'''☎️  SIPPTS''' + self.c.WHITE +
               ''' BY ''' + self.c.GREEN + '''🅿 🅴 🅿 🅴 🅻 🆄 🆇''' + self.c.YELLOW)
 
         print(self.get_logo() + self.c.WHITE)

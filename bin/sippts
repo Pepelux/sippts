@@ -1,8 +1,8 @@
 #!/opt/homebrew/opt/python@3.12/bin/python3.12
 # -*- coding: utf-8 -*-
 
-__author__ = 'Jose Luis Verdeguer'
-__version__ = '4.0'
+__author__ = "Jose Luis Verdeguer"
+__version__ = "4.0"
 __license__ = "GPL"
 __copyright__ = "Copyright (C) 2015-2024, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
@@ -10,31 +10,63 @@ __email__ = "pepeluxx@gmail.com"
 from sippts.lib.params import get_sippts_args
 from sippts.lib.videos import Video
 
+
 def main():
     params = get_sippts_args()
-    
-    if params[0] == 'video':
+
+    if params[0] == "video":
         (cmd, basic, digest, leak, spoof) = params
-        
+
         s = Video()
-        
+
         if basic == 1:
             s.basic()
-        
+
         if digest == 1:
             s.digest()
-        
+
         if leak == 1:
             s.leak()
-        
+
         if spoof == 1:
             s.spoof()
-        
+
         exit()
-    
-    if params[0] == 'scan':
-        (cmd, ip, host, proxy, rport, proto, method, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, user_agent, nthreads, timeout, verbose, ping, file, nocolor, ofile, oifile, fp, random, ppi, pai, local_ip, cve) = params
-        
+
+    if params[0] == "scan":
+        (
+            cmd,
+            ip,
+            host,
+            proxy,
+            rport,
+            proto,
+            method,
+            domain,
+            contact_domain,
+            from_name,
+            from_user,
+            from_domain,
+            to_name,
+            to_user,
+            to_domain,
+            user_agent,
+            nthreads,
+            timeout,
+            verbose,
+            ping,
+            file,
+            nocolor,
+            ofile,
+            oifile,
+            fp,
+            random,
+            ppi,
+            pai,
+            local_ip,
+            cve,
+        ) = params
+
         from sippts.sipscan import SipScan
 
         s = SipScan()
@@ -67,8 +99,28 @@ def main():
         s.pai = pai
         s.localip = local_ip
         s.getcve = cve
-    elif params[0] == 'exten':
-        (cmd, ip, host, proxy, rport, rexten, prefix, proto, method, domain, contact_domain, from_user, user_agent, nthreads, verbose, nocolor, ofile, filter, timeout) = params
+    elif params[0] == "exten":
+        (
+            cmd,
+            ip,
+            host,
+            proxy,
+            rport,
+            rexten,
+            prefix,
+            proto,
+            method,
+            domain,
+            contact_domain,
+            from_user,
+            user_agent,
+            nthreads,
+            verbose,
+            nocolor,
+            ofile,
+            filter,
+            timeout,
+        ) = params
 
         from sippts.sipexten import SipExten
 
@@ -91,8 +143,27 @@ def main():
         s.ofile = ofile
         s.filter = filter
         s.timeout = timeout
-    elif params[0] == 'rcrack':
-        (cmd, ip, host, proxy, rport, rexten, prefix, authuser, ext_len, proto, domain, contact_domain, user_agent, wordlist, nthreads, verbose, nocolor, timeout) = params
+    elif params[0] == "rcrack":
+        (
+            cmd,
+            ip,
+            host,
+            proxy,
+            rport,
+            rexten,
+            prefix,
+            authuser,
+            ext_len,
+            proto,
+            domain,
+            contact_domain,
+            user_agent,
+            wordlist,
+            nthreads,
+            verbose,
+            nocolor,
+            timeout,
+        ) = params
 
         from sippts.siprcrack import SipRemoteCrack
 
@@ -114,8 +185,46 @@ def main():
         s.verbose = verbose
         s.nocolor = nocolor
         s.timeout = timeout
-    elif params[0] == 'send':
-        (cmd, ip, host, template, proxy, rport, lport, proto, method, domain, contact_domain, from_name, from_user, from_domain, from_tag, to_name, to_user, to_domain, to_tag, user, pwd, digest, branch, callid, cseq, sdp, sdes, user_agent, localip, nocolor, ofile, ppi, pai, header, nocontact, timeout, verbose) = params
+    elif params[0] == "send":
+        (
+            cmd,
+            ip,
+            host,
+            template,
+            proxy,
+            rport,
+            lport,
+            proto,
+            method,
+            domain,
+            contact_domain,
+            from_name,
+            from_user,
+            from_domain,
+            from_tag,
+            to_name,
+            to_user,
+            to_domain,
+            to_tag,
+            user,
+            pwd,
+            digest,
+            branch,
+            callid,
+            cseq,
+            sdp,
+            sdes,
+            user_agent,
+            localip,
+            nocolor,
+            ofile,
+            ppi,
+            pai,
+            header,
+            nocontact,
+            timeout,
+            verbose,
+        ) = params
 
         from sippts.sipsend import SipSend
 
@@ -156,8 +265,26 @@ def main():
         s.nocontact = nocontact
         s.timeout = timeout
         s.verbose = verbose
-    elif params[0] == 'enumerate':
-        (cmd, ip, host, proxy, rport, proto, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, user_agent, verbose, timeout) = params
+    elif params[0] == "enumerate":
+        (
+            cmd,
+            ip,
+            host,
+            proxy,
+            rport,
+            proto,
+            domain,
+            contact_domain,
+            from_name,
+            from_user,
+            from_domain,
+            to_name,
+            to_user,
+            to_domain,
+            user_agent,
+            verbose,
+            timeout,
+        ) = params
 
         from sippts.sipenumerate import SipEnumerate
 
@@ -178,8 +305,37 @@ def main():
         s.user_agent = user_agent
         s.verbose = verbose
         s.timeout = timeout
-    elif params[0] == 'leak':
-        (cmd, ip, host, proxy, rport, proto, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, user_agent, localip, ofile, lfile, user, pwd, auth, verbose, sdp, sdes, file, ping, ppi, pai) = params
+    elif params[0] == "leak":
+        (
+            cmd,
+            ip,
+            host,
+            proxy,
+            rport,
+            proto,
+            domain,
+            contact_domain,
+            from_name,
+            from_user,
+            from_domain,
+            to_name,
+            to_user,
+            to_domain,
+            user_agent,
+            localip,
+            ofile,
+            lfile,
+            user,
+            pwd,
+            auth,
+            verbose,
+            sdp,
+            sdes,
+            file,
+            ping,
+            ppi,
+            pai,
+        ) = params
 
         from sippts.sipdigestleak import SipDigestLeak
 
@@ -211,8 +367,39 @@ def main():
         s.ping = ping
         s.ppi = ppi
         s.pai = pai
-    elif params[0] == 'ping':
-        (cmd, ip, host, proxy, rport, proto, method, domain, contact_domain, from_name, from_user, from_domain, from_tag, to_name, to_user, to_domain, to_tag, user, pwd, digest, branch, callid, cseq, user_agent, localip, number, interval, ppi, pai, timeout) = params
+    elif params[0] == "ping":
+        (
+            cmd,
+            ip,
+            host,
+            proxy,
+            rport,
+            proto,
+            method,
+            domain,
+            contact_domain,
+            from_name,
+            from_user,
+            from_domain,
+            from_tag,
+            to_name,
+            to_user,
+            to_domain,
+            to_tag,
+            user,
+            pwd,
+            digest,
+            branch,
+            callid,
+            cseq,
+            user_agent,
+            localip,
+            number,
+            interval,
+            ppi,
+            pai,
+            timeout,
+        ) = params
 
         from sippts.sipping import SipPing
 
@@ -246,8 +433,37 @@ def main():
         s.ppi = ppi
         s.pai = pai
         s.timeout = timeout
-    elif params[0] == 'invite':
-        (cmd, ip, host, proxy, rport, lport, proto, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, transfer, auth_user, auth_pwd, user_agent, localip, threads, nosdp, verbose, sdes, nocolor, ofile, ppi, pai) = params
+    elif params[0] == "invite":
+        (
+            cmd,
+            ip,
+            host,
+            proxy,
+            rport,
+            lport,
+            proto,
+            domain,
+            contact_domain,
+            from_name,
+            from_user,
+            from_domain,
+            to_name,
+            to_user,
+            to_domain,
+            transfer,
+            auth_user,
+            auth_pwd,
+            user_agent,
+            localip,
+            threads,
+            nosdp,
+            verbose,
+            sdes,
+            nocolor,
+            ofile,
+            ppi,
+            pai,
+        ) = params
 
         from sippts.sipinvite import SipInvite
 
@@ -279,7 +495,7 @@ def main():
         s.ofile = ofile
         s.ppi = ppi
         s.pai = pai
-    elif params[0] == 'dump':
+    elif params[0] == "dump":
         (cmd, file, ofile) = params
 
         from sippts.sipdump import SipDump
@@ -287,8 +503,19 @@ def main():
         s = SipDump()
         s.file = file
         s.ofile = ofile
-    elif params[0] == 'dcrack':
-        (cmd, file, verbose, wordlist, bruteforce, charset, max, min, prefix, suffix) = params
+    elif params[0] == "dcrack":
+        (
+            cmd,
+            file,
+            verbose,
+            wordlist,
+            bruteforce,
+            charset,
+            max,
+            min,
+            prefix,
+            suffix,
+        ) = params
 
         from sippts.sipdigestcrack import SipDigestCrack
 
@@ -301,9 +528,33 @@ def main():
         s.max = max
         s.min = min
         s.prefix = prefix
-        s.suffix = suffix    
-    elif params[0] == 'flood':
-        (cmd, ip, host, rport, proto, method, domain, contact_domain, from_name, from_user, from_domain, to_name, to_user, to_domain, digest, user_agent, nthreads, verbose, number, bad, alphabet, max, min) = params
+        s.suffix = suffix
+    elif params[0] == "flood":
+        (
+            cmd,
+            ip,
+            host,
+            rport,
+            proto,
+            method,
+            domain,
+            contact_domain,
+            from_name,
+            from_user,
+            from_domain,
+            to_name,
+            to_user,
+            to_domain,
+            digest,
+            user_agent,
+            nthreads,
+            verbose,
+            number,
+            bad,
+            alphabet,
+            max,
+            min,
+        ) = params
 
         from sippts.sipflood import SipFlood
 
@@ -330,8 +581,30 @@ def main():
         s.alphabet = alphabet
         s.max = max
         s.min = min
-    elif params[0] == 'wssend':
-        (cmd, ip, rport, path, verbose, proto, method, domain, contact_domain, from_name, from_user, from_domain, from_tag, to_name, to_user, to_tag, to_domain, user_agent, localip, ppi, pai) = params
+    elif params[0] == "wssend":
+        (
+            cmd,
+            ip,
+            rport,
+            path,
+            verbose,
+            proto,
+            method,
+            domain,
+            contact_domain,
+            from_name,
+            from_user,
+            from_domain,
+            from_tag,
+            to_name,
+            to_user,
+            to_tag,
+            to_domain,
+            user_agent,
+            localip,
+            ppi,
+            pai,
+        ) = params
 
         from sippts.wssend import WsSend
 
@@ -356,7 +629,7 @@ def main():
         s.verbose = verbose
         s.ppi = ppi
         s.pai = pai
-    elif params[0] == 'sniff':
+    elif params[0] == "sniff":
         (cmd, dev, ofile, auth, verbose, proto) = params
 
         from sippts.sipsniff import SipSniff
@@ -367,7 +640,7 @@ def main():
         s.auth = auth
         s.verbose = verbose
         s.proto = proto
-    elif params[0] == 'spoof':
+    elif params[0] == "spoof":
         (cmd, ip, verbose, gw, file) = params
 
         from sippts.arpspoof import ArpSpoof
@@ -377,7 +650,7 @@ def main():
         s.verbose = verbose
         s.gw = gw
         s.file = file
-    elif params[0] == 'pcapdump':
+    elif params[0] == "pcapdump":
         (cmd, file, folder, verbose, rtpextract, nocolor, sip, rtp, auth) = params
 
         from sippts.sippcapdump import SipPcapDump
@@ -391,7 +664,7 @@ def main():
         s.sip = sip
         s.rtp = rtp
         s.auth = auth
-    elif params[0] == 'rtpbleed':
+    elif params[0] == "rtpbleed":
         (cmd, ip, start_port, end_port, loops, payload, delay) = params
 
         from sippts.rtpbleed import RTPBleed
@@ -403,7 +676,7 @@ def main():
         s.loops = loops
         s.payload = payload
         s.delay = delay
-    elif params[0] == 'rtcpbleed':
+    elif params[0] == "rtcpbleed":
         (cmd, ip, start_port, end_port, delay) = params
 
         from sippts.rtcpbleed import RTCPBleed
@@ -413,7 +686,7 @@ def main():
         s.start_port = start_port
         s.end_port = end_port
         s.delay = delay
-    elif params[0] == 'rtpbleedflood':
+    elif params[0] == "rtpbleedflood":
         (cmd, ip, port, payload, verbose) = params
 
         from sippts.rtpbleedflood import RTPBleedFlood
@@ -423,7 +696,7 @@ def main():
         s.port = port
         s.payload = payload
         s.verbose = verbose
-    elif params[0] == 'rtpbleedinject':
+    elif params[0] == "rtpbleedinject":
         (cmd, ip, port, payload, file) = params
 
         from sippts.rtpbleedinject import RTPBleedInject
@@ -434,10 +707,11 @@ def main():
         s.payload = payload
         s.file = file
     else:
-        print('Error loading module ' + params[0])
+        print(f"Error loading module {params[0]}")
         exit()
-        
+
     s.start()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

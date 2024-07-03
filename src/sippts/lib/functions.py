@@ -10,29 +10,29 @@ import hashlib
 import platform
 
 
-BRED = '\033[1;31;20m'
-RED = '\033[0;31;20m'
-BRED_BLACK = '\033[1;30;41m'
-RED_BLACK = '\033[0;30;41m'
-BGREEN = '\033[1;32;20m'
-GREEN = '\033[0;32;20m'
-BGREEN_BLACK = '\033[1;30;42m'
-GREEN_BLACK = '\033[0;30;42m'
-BYELLOW = '\033[1;33;20m'
-YELLOW = '\033[0;33;20m'
-BBLUE = '\033[1;34;20m'
-BLUE = '\033[0;34;20m'
-BMAGENTA = '\033[1;35;20m'
-MAGENTA = '\033[0;35;20m'
-BCYAN = '\033[1;36;20m'
-CYAN = '\033[0;36;20m'
-BWHITE = '\033[1;37;20m'
-WHITE = '\033[0;37;20m'
+BRED = "\033[1;31;20m"
+RED = "\033[0;31;20m"
+BRED_BLACK = "\033[1;30;41m"
+RED_BLACK = "\033[0;30;41m"
+BGREEN = "\033[1;32;20m"
+GREEN = "\033[0;32;20m"
+BGREEN_BLACK = "\033[1;30;42m"
+GREEN_BLACK = "\033[0;30;42m"
+BYELLOW = "\033[1;33;20m"
+YELLOW = "\033[0;33;20m"
+BBLUE = "\033[1;34;20m"
+BLUE = "\033[0;34;20m"
+BMAGENTA = "\033[1;35;20m"
+MAGENTA = "\033[0;35;20m"
+BCYAN = "\033[1;36;20m"
+CYAN = "\033[0;36;20m"
+BWHITE = "\033[1;37;20m"
+WHITE = "\033[0;37;20m"
 
 
 def get_free_port():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.bind(('', 0))
+    sock.bind(("", 0))
     _, port = sock.getsockname()
     sock.close()
 
@@ -47,7 +47,7 @@ def system_call(command):
 def searchInterface():
     ifaces = netifaces.interfaces()
     local_ip = get_machine_default_ip()
-    networkInterface = ''
+    networkInterface = ""
 
     for iface in ifaces:
         data = netifaces.ifaddresses(iface)
@@ -57,9 +57,9 @@ def searchInterface():
     return networkInterface
 
 
-def ping(host, time='1'):
+def ping(host, time="1"):
     # parameter = '-n' if platform.system().lower() == 'windows' else '-c'
-    ping = 'ping -t 1 -c 1 -W %s %s >/dev/null' % (time, host)
+    ping = "ping -t 1 -c 1 -W %s %s >/dev/null" % (time, host)
     response = os.system(ping)
 
     if response == 0:
@@ -69,7 +69,9 @@ def ping(host, time='1'):
 
 
 def get_default_gateway_mac():
-    return system_call("route -n get default | grep 'gateway' | awk '{print $2}'").decode()
+    return system_call(
+        "route -n get default | grep 'gateway' | awk '{print $2}'"
+    ).decode()
 
 
 def get_default_gateway_linux():
@@ -77,14 +79,14 @@ def get_default_gateway_linux():
     with open("/proc/net/route") as fh:
         for line in fh:
             fields = line.strip().split()
-            if fields[1] != '00000000' or not int(fields[3], 16) & 2:
+            if fields[1] != "00000000" or not int(fields[3], 16) & 2:
                 # If not default route or not RTF_GATEWAY, skip it
                 continue
 
             return socket.inet_ntoa(struct.pack("<L", int(fields[2], 16)))
 
 
-def get_machine_default_ip(type='ip'):
+def get_machine_default_ip(type="ip"):
     """Return the default gateway IP for the machine."""
     gateways = netifaces.gateways()
     defaults = gateways.get("default")
@@ -97,7 +99,7 @@ def get_machine_default_ip(type='ip'):
             return
         addresses = netifaces.ifaddresses(gw_info[1]).get(family)
         if addresses:
-            if type == 'mask':
+            if type == "mask":
                 return addresses[0]["netmask"]
             else:
                 return addresses[0]["addr"]
@@ -106,21 +108,19 @@ def get_machine_default_ip(type='ip'):
 
 
 def _enable_mac_iproute():
-    cmd = 'sudo sysctl -w net.inet.ip.forwarding=1'
+    cmd = "sudo sysctl -w net.inet.ip.forwarding=1"
     try:
         exec(cmd)
     except:
-        print(RED + '\nError executing %s. Please execute it manually' %
-              cmd + WHITE)
+        print(f'{RED}\nError executing {cmd}. Please execute it manually{WHITE}')
 
 
 def _disable_mac_iproute():
-    cmd = 'sudo sysctl -w net.inet.ip.forwarding=0'
+    cmd = "sudo sysctl -w net.inet.ip.forwarding=0"
     try:
         exec(cmd)
     except:
-        print(RED + '\nError executing %s. Please execute it manually' %
-              cmd + WHITE)
+        print(f'{RED}\nError executing {cmd}. Please execute it manually{WHITE}')
 
 
 def _enable_linux_iproute():
@@ -149,6 +149,7 @@ def _disable_linux_iproute():
     with open(file_path, "w") as f:
         print(0, file=f)
 
+
 # def _enable_windows_iproute():
 #     """
 #     Enables IP route (IP Forwarding) in Windows
@@ -164,15 +165,15 @@ def disable_ip_route(verbose=1):
     Disables IP forwarding
     """
     if verbose > 0:
-        print(YELLOW + "[!] Disabling IP Routing..." + WHITE)
-    # _enable_windows_iproute() if "nt" in os.name else _disable_linux_iproute()
+        print(f"{YELLOW}[!] Disabling IP Routing...{WHITE}")
+        # _enable_windows_iproute() if "nt" in os.name else _disable_linux_iproute()
         ops = platform.system()
-        if ops == 'Darwin':
+        if ops == "Darwin":
             _disable_mac_iproute()
-        if ops == 'Linux':
+        if ops == "Linux":
             _disable_linux_iproute()
     if verbose > 0:
-        print(YELLOW + "[!] IP Routing disabled.\n" + WHITE)
+        print(f"{YELLOW}[!] IP Routing disabled.\n{WHITE}")
 
 
 def enable_ip_route(verbose=1):
@@ -180,15 +181,15 @@ def enable_ip_route(verbose=1):
     Enables IP forwarding
     """
     if verbose > 0:
-        print(BWHITE + "[!] Enabling IP Routing..." + WHITE)
-    # _enable_windows_iproute() if "nt" in os.name else _enable_linux_iproute()
+        print(f"{BWHITE}[!] Enabling IP Routing...{WHITE}")
+        # _enable_windows_iproute() if "nt" in os.name else _enable_linux_iproute()
         ops = platform.system()
-        if ops == 'Darwin':
+        if ops == "Darwin":
             _enable_mac_iproute()
-        if ops == 'Linux':
+        if ops == "Linux":
             _enable_linux_iproute()
     if verbose > 0:
-        print(BWHITE + "[!] IP Routing enabled\n" + WHITE)
+        print(f"{BWHITE}[!] IP Routing enabled\n{WHITE}")
 
 
 def ip2long(ip):
@@ -200,28 +201,36 @@ def ip2long(ip):
 
 
 def long2ip(ip):
-    return str(socket.inet_ntoa(struct.pack('!L', ip)))
+    return str(socket.inet_ntoa(struct.pack("!L", ip)))
 
 
 def generate_random_string(len_ini, len_end, type):
     len = generate_random_integer(len_ini, len_end)
 
-    if type == 'all':
-        str = ''.join(chr(i) for i in range(128))
-        result_str = ''.join(random.choice(str) for i in range(len))
-    elif type == 'printable_nl':
-        result_str = ''.join(random.choice(
-            r'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\s\t\n\r\x0b\x0c') for i in range(len))
-    elif type == 'printable':
-        result_str = ''.join(random.choice(
-            r'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\s') for i in range(len))
-    elif type == 'ascii':
-        result_str = ''.join(random.choice(
-            r'0123456789abcdefghijklmnopqqrstuvwxyz') for i in range(len))
+    if type == "all":
+        str = "".join(chr(i) for i in range(128))
+        result_str = "".join(random.choice(str) for i in range(len))
+    elif type == "printable_nl":
+        result_str = "".join(
+            random.choice(
+                r'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\s\t\n\r\x0b\x0c'
+            )
+            for i in range(len)
+        )
+    elif type == "printable":
+        result_str = "".join(
+            random.choice(
+                r'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\s'
+            )
+            for i in range(len)
+        )
+    elif type == "ascii":
+        result_str = "".join(
+            random.choice(r"0123456789abcdefghijklmnopqqrstuvwxyz") for i in range(len)
+        )
     else:
         # By default use 'hex'
-        result_str = ''.join(random.choice('0123456789abcdef')
-                             for i in range(len))
+        result_str = "".join(random.choice("0123456789abcdef") for i in range(len))
 
     return result_str
 
@@ -230,473 +239,559 @@ def generate_random_integer(len_ini, len_end):
     return randint(len_ini, len_end)
 
 
-def create_message(method, ip_sdp, contactdomain, fromuser, fromname, fromdomain, touser, toname, todomain, proto, domain, useragent, fromport, branch, callid, tag, cseq, totag, digest, auth_type, referto, withsdp, via, rr, ppi, pai, header, withcontact):
-    expires = '120'
+def create_message(
+    method,
+    ip_sdp,
+    contactdomain,
+    fromuser,
+    fromname,
+    fromdomain,
+    touser,
+    toname,
+    todomain,
+    proto,
+    domain,
+    useragent,
+    fromport,
+    branch,
+    callid,
+    tag,
+    cseq,
+    totag,
+    digest,
+    auth_type,
+    referto,
+    withsdp,
+    via,
+    rr,
+    ppi,
+    pai,
+    header,
+    withcontact,
+):
+    expires = "120"
 
-    if method == 'REGISTER' or method == 'NOTIFY' or method == 'ACK':
-        starting_line = '%s sip:%s SIP/2.0' % (method, domain)
+    if method == "REGISTER" or method == "NOTIFY" or method == "ACK":
+        starting_line = "%s sip:%s SIP/2.0" % (method, domain)
     else:
-        starting_line = '%s sip:%s@%s SIP/2.0' % (method, touser, domain)
+        starting_line = "%s sip:%s@%s SIP/2.0" % (method, touser, domain)
 
-    if branch == '':
-        branch = generate_random_string(71, 71, 'ascii')
-    if callid == '':
-        callid = generate_random_string(32, 32, 'hex')
-    if tag == '':
-        tag = generate_random_string(8, 8, 'hex')
+    if branch == "":
+        branch = generate_random_string(71, 71, "ascii")
+    if callid == "":
+        callid = generate_random_string(32, 32, "hex")
+    if tag == "":
+        tag = generate_random_string(8, 8, "hex")
 
-    if method == 'REFER' and referto == '':
-        referto = '999'
+    if method == "REFER" and referto == "":
+        referto = "999"
 
     headers = dict()
-    if via == '':
-        headers['Via'] = 'SIP/2.0/%s %s:%s;branch=%s;rport' % (
-            proto.upper(), contactdomain, fromport, branch)
+    if via == "":
+        headers["Via"] = "SIP/2.0/%s %s:%s;branch=%s;rport" % (
+            proto.upper(),
+            contactdomain,
+            fromport,
+            branch,
+        )
     else:
-        headers['Via'] = via
+        headers["Via"] = via
 
-    if rr != '':
+    if rr != "":
         rrs = rr.split("#")
         count = 0
 
         # for rr in rrs:
         for rr in rrs[::-1]:
             count += 1
-            headers['Route %s' % str(count)] = rr
+            headers["Route %s" % str(count)] = rr
 
-    m = re.search(r'^from:\s*(.+)', header.lower())
+    m = re.search(r"^from:\s*(.+)", header.lower())
     if not m:
-        headers['From'] = '%s <sip:%s@%s>;tag=%s' % (
-            fromname, fromuser, fromdomain, tag)
+        headers["From"] = "%s <sip:%s@%s>;tag=%s" % (
+            fromname,
+            fromuser,
+            fromdomain,
+            tag,
+        )
 
-    m = re.search(r'^to:\s*(.+)', header.lower())
+    m = re.search(r"^to:\s*(.+)", header.lower())
     if not m:
-        if method == 'NOTIFY':
-            if totag == '':
-                headers['To'] = '<sip:%s>' % todomain
+        if method == "NOTIFY":
+            if totag == "":
+                headers["To"] = "<sip:%s>" % todomain
             else:
-                headers['To'] = '<sip:%s>;tag=%s' % (todomain, totag)
+                headers["To"] = "<sip:%s>;tag=%s" % (todomain, totag)
         else:
-            if totag == '':
-                headers['To'] = '%s <sip:%s@%s>' % (toname, touser, todomain)
+            if totag == "":
+                headers["To"] = "%s <sip:%s@%s>" % (toname, touser, todomain)
             else:
-                headers['To'] = '%s <sip:%s@%s>;tag=%s' % (
-                    toname, touser, todomain, totag)
+                headers["To"] = "%s <sip:%s@%s>;tag=%s" % (
+                    toname,
+                    touser,
+                    todomain,
+                    totag,
+                )
 
     if withcontact == 1:
-        m = re.search(r'^contact:\s*(.+)', header.lower())
+        m = re.search(r"^contact:\s*(.+)", header.lower())
         if not m:
-            if method != 'CANCEL' and method != 'ACK':
-                headers['Contact'] = '<sip:%s@%s:%d;transport=%s>;expires=%s' % (
-                    fromuser, contactdomain, fromport, proto, expires)
+            if method != "CANCEL" and method != "ACK":
+                headers["Contact"] = "<sip:%s@%s:%d;transport=%s>;expires=%s" % (
+                    fromuser,
+                    contactdomain,
+                    fromport,
+                    proto,
+                    expires,
+                )
 
-    headers['Call-ID'] = '%s' % callid
+    headers["Call-ID"] = "%s" % callid
 
-    if digest != '':
+    if digest != "":
         if auth_type == 2:
-            headers['Proxy-Authorization'] = '%s' % digest
+            headers["Proxy-Authorization"] = "%s" % digest
         else:
-            headers['Authorization'] = '%s' % digest
+            headers["Authorization"] = "%s" % digest
 
-    headers['CSeq'] = '%s %s' % (cseq, method)
-    headers['Max-Forwards'] = '70'
+    headers["CSeq"] = "%s %s" % (cseq, method)
+    headers["Max-Forwards"] = "70"
 
-    if method == 'REFER':
-        headers['Refer-To'] = '<sip:%s@%s>' % (referto, domain)
-        headers['Referred-By'] = '<sip:%s@%s:%s>' % (
-            fromuser, domain, fromport)
+    if method == "REFER":
+        headers["Refer-To"] = "<sip:%s@%s>" % (referto, domain)
+        headers["Referred-By"] = "<sip:%s@%s:%s>" % (fromuser, domain, fromport)
 
-    if method == 'SUBSCRIBE':
-        headers['Accept'] = 'application/x-as-feature-event+xml'
-        headers['Event'] = 'as-feature-event'
+    if method == "SUBSCRIBE":
+        headers["Accept"] = "application/x-as-feature-event+xml"
+        headers["Event"] = "as-feature-event"
 
-    if method == 'NOTIFY':
-        headers['Event'] = 'keep-alive'
+    if method == "NOTIFY":
+        headers["Event"] = "keep-alive"
 
-    if method != 'ACK':
-        headers['User-Agent'] = '%s' % useragent
-        if method != 'CANCEL':
-            headers['Allow'] = 'INVITE, REGISTER, ACK, CANCEL, BYE, NOTIFY, REFER, OPTIONS, INFO, SUBSCRIBE, UPDATE, PRACK, MESSAGE'
+    if method != "ACK":
+        headers["User-Agent"] = "%s" % useragent
+        if method != "CANCEL":
+            headers["Allow"] = (
+                "INVITE, REGISTER, ACK, CANCEL, BYE, NOTIFY, REFER, OPTIONS, INFO, SUBSCRIBE, UPDATE, PRACK, MESSAGE"
+            )
 
-    if method == 'REGISTER':
-        headers['Expires'] = '%s' % expires
+    if method == "REGISTER":
+        headers["Expires"] = "%s" % expires
 
     if withsdp == 1:
-        headers['Content-Type'] = 'application/sdp'
-        headers['Accept'] = 'application/sdp, application/dtmf-relay'
+        headers["Content-Type"] = "application/sdp"
+        headers["Accept"] = "application/sdp, application/dtmf-relay"
 
-    if method == 'INVITE':
-        if ppi != '':
-            headers['P-Preferred-Identity'] = '<sip:%s@telefonica.net>' % ppi
+    if method == "INVITE":
+        if ppi != "":
+            headers["P-Preferred-Identity"] = "<sip:%s@telefonica.net>" % ppi
 
-        if pai != '':
-            headers['P-Asserted-Identity'] = '<sip:%s@telefonica.net>' % pai
+        if pai != "":
+            headers["P-Asserted-Identity"] = "<sip:%s@telefonica.net>" % pai
 
-    msg = starting_line+'\r\n'
+    msg = starting_line + "\r\n"
     for h in headers.items():
         # msg += '%s: %s\r\n' % h
         name = h[0]
         value = h[1]
 
-        m = re.search(r'^Route', name)
+        m = re.search(r"^Route", name)
         if m:
-            name = 'Route'
-        msg += '%s: %s\r\n' % (name, value)
+            name = "Route"
+        msg += "%s: %s\r\n" % (name, value)
 
-    if header != '':
-        h = header.split('&')
+    if header != "":
+        h = header.split("&")
 
         for hdr in h:
-            msg += '%s\r\n' % hdr
+            msg += "%s\r\n" % hdr
 
-    sdp = ''
+    sdp = ""
     if withsdp == 1:
         # Use RTP
-        sdp = '\r\n'
-        sdp += 'v=0\r\n'
-        sdp += 'o=%s 8000 8000 IN IP4 %s\r\n' % (fromuser, ip_sdp)
-        sdp += 's=SIPPTS\r\n'
-        sdp += 'c=IN IP4 %s\r\n' % ip_sdp
-        sdp += 't=0 0\r\n'
-        sdp += 'm=audio 12194 RTP/AVP 0 9 8 18 3 110 101\r\n'
-        sdp += 'a=rtpmap:0 PCMU/8000\r\n'
-        sdp += 'a=rtpmap:9 G722/8000\r\n'
-        sdp += 'a=rtpmap:8 PCMA/8000\r\n'
-        sdp += 'a=rtpmap:18 G729/8000\r\n'
-        sdp += 'a=fmtp:18 annexb=no\r\n'
-        sdp += 'a=rtpmap:3 GSM/8000\r\n'
-        sdp += 'a=rtpmap:110 speex/8000\r\n'
-        sdp += 'a=rtpmap:101 telephone-event/8000\r\n'
-        sdp += 'a=fmtp:101 0-16\r\n'
-        sdp += 'a=ptime:20\r\n'
-        sdp += 'a=maxptime:60\r\n'
-        sdp += 'a=sendrecv\r\n'
+        sdp = "\r\n"
+        sdp += "v=0\r\n"
+        sdp += "o=%s 8000 8000 IN IP4 %s\r\n" % (fromuser, ip_sdp)
+        sdp += "s=SIPPTS\r\n"
+        sdp += "c=IN IP4 %s\r\n" % ip_sdp
+        sdp += "t=0 0\r\n"
+        sdp += "m=audio 12194 RTP/AVP 0 9 8 18 3 110 101\r\n"
+        sdp += "a=rtpmap:0 PCMU/8000\r\n"
+        sdp += "a=rtpmap:9 G722/8000\r\n"
+        sdp += "a=rtpmap:8 PCMA/8000\r\n"
+        sdp += "a=rtpmap:18 G729/8000\r\n"
+        sdp += "a=fmtp:18 annexb=no\r\n"
+        sdp += "a=rtpmap:3 GSM/8000\r\n"
+        sdp += "a=rtpmap:110 speex/8000\r\n"
+        sdp += "a=rtpmap:101 telephone-event/8000\r\n"
+        sdp += "a=fmtp:101 0-16\r\n"
+        sdp += "a=ptime:20\r\n"
+        sdp += "a=maxptime:60\r\n"
+        sdp += "a=sendrecv\r\n"
 
     if withsdp == 2:
         # Use SRTP
-        sdp = '\r\n'
-        sdp += 'v=0\r\n'
-        sdp += 'o=anonymous 1312841870 1312841870 IN IP4 %s\r\n' % ip_sdp
-        sdp += 's=SIPPTS\r\n'
-        sdp += 'c=IN IP4 %s\r\n' % ip_sdp
-        sdp += 't=0 0\r\n'
-        sdp += 'm=audio 12194 RTP/AVP 0 9 8 18 3 110 101\r\n'
-        sdp += 'a=rtpmap:0 PCMU/8000\r\n'
-        sdp += 'a=rtpmap:9 G722/8000\r\n'
-        sdp += 'a=rtpmap:8 PCMA/8000\r\n'
-        sdp += 'a=rtpmap:18 G729/8000\r\n'
-        sdp += 'a=fmtp:18 annexb=no\r\n'
-        sdp += 'a=rtpmap:3 GSM/8000\r\n'
-        sdp += 'a=rtpmap:110 speex/8000\r\n'
-        sdp += 'a=rtpmap:101 telephone-event/8000\r\n'
-        sdp += 'a=fmtp:101 0-16\r\n'
-        sdp += 'a=ptime:20\r\n'
-        sdp += 'a=maxptime:60\r\n'
-        sdp += 'a=sendrecv\r\n'
-        sdp += 'a=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:4EvYRd22P8n36wRrlWCMZIWegovyv7iWm464D4Pt\r\n'
-        sdp += 'a=crypto:2 AES_CM_128_HMAC_SHA1_32 inline:mWQ4cakWKOnfH9Tji2pEF87JtVFUqBAMPqub9roe\r\n'
+        sdp = "\r\n"
+        sdp += "v=0\r\n"
+        sdp += "o=anonymous 1312841870 1312841870 IN IP4 %s\r\n" % ip_sdp
+        sdp += "s=SIPPTS\r\n"
+        sdp += "c=IN IP4 %s\r\n" % ip_sdp
+        sdp += "t=0 0\r\n"
+        sdp += "m=audio 12194 RTP/AVP 0 9 8 18 3 110 101\r\n"
+        sdp += "a=rtpmap:0 PCMU/8000\r\n"
+        sdp += "a=rtpmap:9 G722/8000\r\n"
+        sdp += "a=rtpmap:8 PCMA/8000\r\n"
+        sdp += "a=rtpmap:18 G729/8000\r\n"
+        sdp += "a=fmtp:18 annexb=no\r\n"
+        sdp += "a=rtpmap:3 GSM/8000\r\n"
+        sdp += "a=rtpmap:110 speex/8000\r\n"
+        sdp += "a=rtpmap:101 telephone-event/8000\r\n"
+        sdp += "a=fmtp:101 0-16\r\n"
+        sdp += "a=ptime:20\r\n"
+        sdp += "a=maxptime:60\r\n"
+        sdp += "a=sendrecv\r\n"
+        sdp += "a=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:4EvYRd22P8n36wRrlWCMZIWegovyv7iWm464D4Pt\r\n"
+        sdp += "a=crypto:2 AES_CM_128_HMAC_SHA1_32 inline:mWQ4cakWKOnfH9Tji2pEF87JtVFUqBAMPqub9roe\r\n"
 
-    msg += 'Content-Length: ' + str(len(sdp)) + '\r\n'
+    msg += "Content-Length: " + str(len(sdp)) + "\r\n"
     msg += sdp
 
-    msg += '\r\n'
+    msg += "\r\n"
 
-    return (msg)
+    return msg
 
 
-def create_response_error(message, fromuser, touser, proto, domain, fromport, cseq, method, branch, callid, tag, totag, iplocal, via, auth_code):
-    realm = 'asterisk'
-    nonce = generate_random_string(8, 8, 'ascii')
-    digest = 'Digest algorithm=MD5, realm="%s", nonce="%s\"' % (realm, nonce)
+def create_response_error(
+    message,
+    fromuser,
+    touser,
+    proto,
+    domain,
+    fromport,
+    cseq,
+    method,
+    branch,
+    callid,
+    tag,
+    totag,
+    iplocal,
+    via,
+    auth_code,
+):
+    realm = "asterisk"
+    nonce = generate_random_string(8, 8, "ascii")
+    digest = 'Digest algorithm=MD5, realm="%s", nonce="%s"' % (realm, nonce)
 
-    starting_line = 'SIP/2.0 %s' % message
+    starting_line = "SIP/2.0 %s" % message
 
     headers = dict()
-    if via == '':
-        headers['Via'] = 'SIP/2.0/%s %s:%s;branch=%s;rport' % (
-            proto.upper(), domain, fromport, branch)
+    if via == "":
+        headers["Via"] = "SIP/2.0/%s %s:%s;branch=%s;rport" % (
+            proto.upper(),
+            domain,
+            fromport,
+            branch,
+        )
     else:
         vias = via.split("#")
         count = 0
 
         for via in vias[::-1]:
             count += 1
-            headers['Via %s' % str(count)] = via
+            headers["Via %s" % str(count)] = via
 
-    headers['From'] = '<sip:%s@%s>;tag=%s' % (fromuser, domain, totag)
-    headers['To'] = '<sip:%s@%s>;tag=%s' % (touser, iplocal, tag)
-    headers['Call-ID'] = '%s' % callid
-    headers['CSeq'] = '%d %s' % (cseq, method)
-    if method == 'BYE':
-        headers[auth_code] = '%s' % digest
+    headers["From"] = "<sip:%s@%s>;tag=%s" % (fromuser, domain, totag)
+    headers["To"] = "<sip:%s@%s>;tag=%s" % (touser, iplocal, tag)
+    headers["Call-ID"] = "%s" % callid
+    headers["CSeq"] = "%d %s" % (cseq, method)
+    if method == "BYE":
+        headers[auth_code] = "%s" % digest
         # headers['WWW-Authenticate'] = '%s' % digest
         # headers['Proxy-Authenticate'] = '%s' % digest
-    headers['Content-Length'] = '0'
+    headers["Content-Length"] = "0"
 
-    msg = starting_line+'\r\n'
+    msg = starting_line + "\r\n"
     for h in headers.items():
         #     msg += '%s: %s\r\n' % h
         name = h[0]
         value = h[1]
 
-        m = re.search(r'^Via', name)
+        m = re.search(r"^Via", name)
         if m:
-            name = 'Via'
-        msg += '%s: %s\r\n' % (name, value)
+            name = "Via"
+        msg += "%s: %s\r\n" % (name, value)
 
-    msg += '\r\n'
+    msg += "\r\n"
 
-    return (msg)
+    return msg
 
 
-def create_response_ok(fromuser, touser, proto, domain, fromport, cseq, branch, callid, tag, totag):
-    starting_line = 'SIP/2.0 200 Ok'
+def create_response_ok(
+    fromuser, touser, proto, domain, fromport, cseq, branch, callid, tag, totag
+):
+    starting_line = "SIP/2.0 200 Ok"
 
     headers = dict()
-    headers['Via'] = 'SIP/2.0/%s %s:%s;branch=%s' % (
-        proto.upper(), domain, fromport, branch)
-    headers['From'] = '<sip:%s@%s>;tag=%s' % (fromuser, domain, totag)
-    headers['To'] = '<sip:%s@%s>;tag=%s' % (touser, domain, tag)
-    headers['Call-ID'] = '%s' % callid
-    headers['CSeq'] = '%d BYE' % cseq
-    headers['Content-Length'] = '0'
+    headers["Via"] = "SIP/2.0/%s %s:%s;branch=%s" % (
+        proto.upper(),
+        domain,
+        fromport,
+        branch,
+    )
+    headers["From"] = "<sip:%s@%s>;tag=%s" % (fromuser, domain, totag)
+    headers["To"] = "<sip:%s@%s>;tag=%s" % (touser, domain, tag)
+    headers["Call-ID"] = "%s" % callid
+    headers["CSeq"] = "%d BYE" % cseq
+    headers["Content-Length"] = "0"
 
-    msg = starting_line+'\r\n'
+    msg = starting_line + "\r\n"
     for h in headers.items():
-        msg += '%s: %s\r\n' % h
+        msg += "%s: %s\r\n" % h
 
-    msg += '\r\n'
+    msg += "\r\n"
 
-    return (msg)
+    return msg
 
 
 def parse_message(buffer):
-    headers = buffer.split('\r\n')
+    headers = buffer.split("\r\n")
 
     data = dict()
-    data['response_text'] = ''
-    data['response_code'] = ''
-    data['sipuser'] = ''
-    data['sipdomain'] = ''
-    data['ua'] = ''
-    data['via'] = ''
-    data['via2'] = ''
-    data['rr'] = ''
-    data['route'] = ''
-    data['auth-type'] = 1
-    data['type'] = 'Unknown'
+    data["response_text"] = ""
+    data["response_code"] = ""
+    data["sipuser"] = ""
+    data["sipdomain"] = ""
+    data["ua"] = ""
+    data["via"] = ""
+    data["via2"] = ""
+    data["rr"] = ""
+    data["route"] = ""
+    data["auth-type"] = 1
+    data["type"] = "Unknown"
 
     for header in headers:
-        m = re.search(r'^SIP\/[0-9|\.]+\s([0-9]+)\s(.+)', header)
+        m = re.search(r"^SIP\/[0-9|\.]+\s([0-9]+)\s(.+)", header)
         if m:
-            data['response_code'] = '%s' % (m.group(1))
-            data['response_text'] = '%s' % (m.group(2))
+            data["response_code"] = "%s" % (m.group(1))
+            data["response_text"] = "%s" % (m.group(2))
 
-        m = re.search(r'([a-z|A-Z]+)\ssip\:(.*)\sSIP\/[0-9|\.]*', header)
+        m = re.search(r"([a-z|A-Z]+)\ssip\:(.*)\sSIP\/[0-9|\.]*", header)
         if m:
-            data['method'] = '%s' % (m.group(1))
-            uri = '%s' % (m.group(2))
-            if uri.find('@') > 0:
-                n = re.search(r'(.*)@(.*)', uri)
-                data['sipuser'] = '%s' % (n.group(1))
-                data['sipdomain'] = '%s' % (n.group(2))
+            data["method"] = "%s" % (m.group(1))
+            uri = "%s" % (m.group(2))
+            if uri.find("@") > 0:
+                n = re.search(r"(.*)@(.*)", uri)
+                data["sipuser"] = "%s" % (n.group(1))
+                data["sipdomain"] = "%s" % (n.group(2))
             else:
-                data['sipdomain'] = uri
-            if data['sipdomain'].find(':') > 0:
-                n = re.search(r'(.*):(.*)', uri)
-                data['sipdomain'] = '%s' % (n.group(1))
-                data['sipport'] = '%s' % (n.group(2))
+                data["sipdomain"] = uri
+            if data["sipdomain"].find(":") > 0:
+                n = re.search(r"(.*):(.*)", uri)
+                data["sipdomain"] = "%s" % (n.group(1))
+                data["sipport"] = "%s" % (n.group(2))
             else:
-                data['sipport'] = '5060'
+                data["sipport"] = "5060"
 
-        m = re.search(r'^From:\s*.*\<sip:([a-z|A-z|0-9|_]*)\@.*', header)
+        m = re.search(r"^From:\s*.*\<sip:([a-z|A-z|0-9|_]*)\@.*", header)
         if m:
-            data['fromuser'] = '%s' % (m.group(1))
+            data["fromuser"] = "%s" % (m.group(1))
 
-        m = re.search(r'^From:\s*(.+)', header)
+        m = re.search(r"^From:\s*(.+)", header)
         if m:
-            hfrom = '%s' % (m.group(1))
+            hfrom = "%s" % (m.group(1))
 
             try:
-                n = re.search(r'.*;tag=(.+)', hfrom)
+                n = re.search(r".*;tag=(.+)", hfrom)
                 if n:
-                    data['fromtag'] = '%s' % (n.group(1))
+                    data["fromtag"] = "%s" % (n.group(1))
                 else:
-                    data['fromtag'] = ''
+                    data["fromtag"] = ""
             except:
-                data['fromtag'] = ''
+                data["fromtag"] = ""
 
-        m = re.search(r'^Record-Route:\s*(.*)', header)
+        m = re.search(r"^Record-Route:\s*(.*)", header)
         if m:
-            if data['rr'] == '':
-                data['rr'] = '%s' % (m.group(1))
+            if data["rr"] == "":
+                data["rr"] = "%s" % (m.group(1))
             else:
-                data['rr'] = data['rr'] + '#' + '%s' % (m.group(1))
+                data["rr"] = data["rr"] + "#" + "%s" % (m.group(1))
 
-        m = re.search(r'^Via:\s*(.*)', header)
+        m = re.search(r"^Via:\s*(.*)", header)
         if m:
-            data['via'] = '%s' % (m.group(1))
+            data["via"] = "%s" % (m.group(1))
 
-            if data['via2'] == '':
-                data['via2'] = '%s' % (m.group(1))
+            if data["via2"] == "":
+                data["via2"] = "%s" % (m.group(1))
             else:
-                data['via2'] = '%s' % (m.group(1)) + '#' + data['via2']
+                data["via2"] = "%s" % (m.group(1)) + "#" + data["via2"]
 
-            n = re.search(r'.+;branch=(.+);*.*', data['via'])
+            n = re.search(r".+;branch=(.+);*.*", data["via"])
             if n:
-                data['branch'] = '%s' % (n.group(1))
+                data["branch"] = "%s" % (n.group(1))
             else:
-                data['branch'] = ''
+                data["branch"] = ""
 
-        m = re.search(r'^Call-ID:\s*(.*)', header)
+        m = re.search(r"^Call-ID:\s*(.*)", header)
         if m:
-            data['callid'] = '%s' % (m.group(1))
+            data["callid"] = "%s" % (m.group(1))
 
-        m = re.search(r'^Server:\s*(.+)', header)
+        m = re.search(r"^Server:\s*(.+)", header)
         if m:
-            data['ua'] = '%s' % (m.group(1))
-            data['type'] = 'Server'
+            data["ua"] = "%s" % (m.group(1))
+            data["type"] = "Server"
         else:
-            m = re.search(r'^User-Agent:\s*(.+)', header)
+            m = re.search(r"^User-Agent:\s*(.+)", header)
             if m:
-                data['ua'] = '%s' % (m.group(1))
-                data['type'] = 'Device'
+                data["ua"] = "%s" % (m.group(1))
+                data["type"] = "Device"
 
-        m = re.search(r'^To:\s*(.+)', header)
+        m = re.search(r"^To:\s*(.+)", header)
         if m:
-            to = '%s' % (m.group(1))
-            data['to'] = to
+            to = "%s" % (m.group(1))
+            data["to"] = to
 
             try:
-                n = re.search(r'.*;tag=(.+)', to)
+                n = re.search(r".*;tag=(.+)", to)
                 if n:
-                    data['totag'] = '%s' % (n.group(1))
+                    data["totag"] = "%s" % (n.group(1))
                 else:
-                    data['totag'] = ''
+                    data["totag"] = ""
             except:
-                data['totag'] = ''
+                data["totag"] = ""
 
-        m = re.search(r'^Contact:\s*(.+)', header)
+        m = re.search(r"^Contact:\s*(.+)", header)
         if m:
-            m = re.search(r'\@', header)
+            m = re.search(r"\@", header)
             if m:
                 m = re.search(
-                    r'^Contact:\s*.*\<sip:([a-z|A-z|0-9|_]*)\@(.*)\>.*', header)
+                    r"^Contact:\s*.*\<sip:([a-z|A-z|0-9|_]*)\@(.*)\>.*", header
+                )
                 # r'^Contact:\s*.*\<sip:([a-z|A-z|0-9|_]*)\@([0-9|\.]*):*.*\>.*', header)
                 if m:
-                    data['contactuser'] = '%s' % (m.group(1))
-                    data['contactdomain'] = '%s' % (m.group(2))
+                    data["contactuser"] = "%s" % (m.group(1))
+                    data["contactdomain"] = "%s" % (m.group(2))
             else:
-                m = re.search(
-                    r'^Contact:\s*.*\<sip:(.*)\>.*', header)
+                m = re.search(r"^Contact:\s*.*\<sip:(.*)\>.*", header)
                 if m:
-                    data['contactuser'] = ''
-                    data['contactdomain'] = '%s' % (m.group(1))
+                    data["contactuser"] = ""
+                    data["contactdomain"] = "%s" % (m.group(1))
 
-        m = re.search(r'^CSeq:\s*([0-9]+)\s.*', header)
+        m = re.search(r"^CSeq:\s*([0-9]+)\s.*", header)
         if m:
-            data['cseq'] = '%s' % (m.group(1))
+            data["cseq"] = "%s" % (m.group(1))
 
-        m = re.search(r'^Authorization:\s*(.+)', header)
+        m = re.search(r"^Authorization:\s*(.+)", header)
         if m:
-            data['auth'] = '%s' % (m.group(1))
+            data["auth"] = "%s" % (m.group(1))
         else:
-            m = re.search(r'^WWW-Authenticate:\s*(.+)', header)
+            m = re.search(r"^WWW-Authenticate:\s*(.+)", header)
             if m:
-                data['auth'] = '%s' % (m.group(1))
-                data['auth-type'] = 1
+                data["auth"] = "%s" % (m.group(1))
+                data["auth-type"] = 1
             else:
-                m = re.search(r'^Proxy-Authenticate:\s*(.+)', header)
+                m = re.search(r"^Proxy-Authenticate:\s*(.+)", header)
                 if m:
-                    data['auth'] = '%s' % (m.group(1))
-                    data['auth-type'] = 2
+                    data["auth"] = "%s" % (m.group(1))
+                    data["auth-type"] = 2
 
-        m = re.search(r'^CSeq:\s*([0-9]+)\s.*', header)
+        m = re.search(r"^CSeq:\s*([0-9]+)\s.*", header)
         if m:
-            data['cseq'] = '%s' % (m.group(1))
+            data["cseq"] = "%s" % (m.group(1))
 
     return data
 
 
 def parse_digest(buffer):
-    headers = buffer.split('\r\n')
+    headers = buffer.split("\r\n")
 
     data = dict()
 
-    data['algorithm'] = 'MD5'
+    data["algorithm"] = "MD5"
 
     for header in headers:
-        m = re.search(r'username=\"([a-z|A-Z|0-9|-|_|\.|:]+)\"', header)
+        m = re.search(r"username=\"([a-z|A-Z|0-9|-|_|\.|:]+)\"", header)
         if m:
-            data['username'] = '%s' % (m.group(1))
+            data["username"] = "%s" % (m.group(1))
         else:
-            data['username'] = ''
+            data["username"] = ""
 
-        m = re.search(r'realm=\"([a-z|A-Z|0-9|-|_|\.]+)\"', header)
+        m = re.search(r"realm=\"([a-z|A-Z|0-9|-|_|\.]+)\"", header)
         if m:
-            data['realm'] = '%s' % (m.group(1))
+            data["realm"] = "%s" % (m.group(1))
         else:
-            data['realm'] = ''
+            data["realm"] = ""
 
-        m = re.search(r'nonce=\"([a-z|A-Z|0-9|\/|\+|\=|:|\|_|-|\.]+)\"', header)
+        m = re.search(r"nonce=\"([a-z|A-Z|0-9|\/|\+|\=|:|\|_|-|\.]+)\"", header)
         if m:
-            data['nonce'] = '%s' % (m.group(1))
+            data["nonce"] = "%s" % (m.group(1))
         else:
-            data['nonce'] = ''
+            data["nonce"] = ""
 
-        m = re.search(r'uri=\"([a-z|A-Z|0-9|-|_|\.|\:|\;|\=|\@|\#]+)\"', header)
+        m = re.search(r"uri=\"([a-z|A-Z|0-9|-|_|\.|\:|\;|\=|\@|\#]+)\"", header)
         if m:
-            data['uri'] = '%s' % (m.group(1))
+            data["uri"] = "%s" % (m.group(1))
         else:
-            data['uri'] = ''
+            data["uri"] = ""
 
-        m = re.search(r'response=\"([a-z|0-9]+)\"', header)
+        m = re.search(r"response=\"([a-z|0-9]+)\"", header)
         if m:
-            data['response'] = '%s' % (m.group(1))
+            data["response"] = "%s" % (m.group(1))
         else:
-            data['response'] = ''
+            data["response"] = ""
 
-        m = re.search(r'algorithm=([a-z|A-Z|0-9|-|_]+)', header)
+        m = re.search(r"algorithm=([a-z|A-Z|0-9|-|_]+)", header)
         if m:
-            data['algorithm'] = '%s' % (m.group(1))
+            data["algorithm"] = "%s" % (m.group(1))
         else:
-            data['algorithm'] = 'MD5'
+            data["algorithm"] = "MD5"
 
-        m = re.search(r'cnonce=\"([\w\+\/]+)\"', header)
+        m = re.search(r"cnonce=\"([\w\+\/]+)\"", header)
         if m:
-            data['cnonce'] = '%s' % (m.group(1))
+            data["cnonce"] = "%s" % (m.group(1))
         else:
-            data['cnonce'] = ''
+            data["cnonce"] = ""
 
-        m = re.search(r'nc=\"*([\w\+]+)\"*', header)
+        m = re.search(r"nc=\"*([\w\+]+)\"*", header)
         if m:
-            data['nc'] = '%s' % (m.group(1))
+            data["nc"] = "%s" % (m.group(1))
         else:
-            data['nc'] = ''
+            data["nc"] = ""
 
-        m = re.search(r'qop=\"*([\w\+]+)\"*', header)
+        m = re.search(r"qop=\"*([\w\+]+)\"*", header)
         if m:
-            data['qop'] = '%s' % (m.group(1))
+            data["qop"] = "%s" % (m.group(1))
         else:
-            data['qop'] = ''
+            data["qop"] = ""
 
     return data
 
 
 def getHash(algorithm, string):
-    if algorithm == 'MD5':
+    if algorithm == "MD5":
         hashfunc = hashlib.md5
-    elif algorithm == 'SHA':
+    elif algorithm == "SHA":
         hashfunc = hashlib.sha1
-    elif algorithm == 'SHA-256':
+    elif algorithm == "SHA-256":
         hashfunc = hashlib.sha256
-    elif algorithm == 'SHA-512':
+    elif algorithm == "SHA-512":
         hashfunc = hashlib.sha512
 
     return hashfunc(string.encode()).hexdigest()
 
 
-def calculateHash(username, realm, pwd, method, uri, nonce, algorithm, cnonce, nc, qop, verbose, entitybody):
+def calculateHash(
+    username,
+    realm,
+    pwd,
+    method,
+    uri,
+    nonce,
+    algorithm,
+    cnonce,
+    nc,
+    qop,
+    verbose,
+    entitybody,
+):
     # HA1 = MD5(username:realm:password)
     # HA2 = MD5(method:digestURI)
     # response = MD5(HA1:nonce:HA2)
@@ -708,410 +803,440 @@ def calculateHash(username, realm, pwd, method, uri, nonce, algorithm, cnonce, n
     # If the qop directive's value is "auth" or "auth-int":
     #   response = MD5(HA1:nonce:nonceCount:cnonce:qop:HA2)
 
-    a1 = '%s:%s:%s' % (username, realm, pwd)
-    a2 = '%s:%s' % (method, uri)
+    a1 = "%s:%s:%s" % (username, realm, pwd)
+    a2 = "%s:%s" % (method, uri)
 
     ha1 = getHash(algorithm, a1)
-    if algorithm == 'MD5-sess':
-        a1 = '%s:%s:%s' % (ha1, nonce, cnonce)
+    if algorithm == "MD5-sess":
+        a1 = "%s:%s:%s" % (ha1, nonce, cnonce)
         ha1 = getHash(algorithm, a1)
     ha2 = getHash(algorithm, a2)
-    if (qop == 'auth' or qop == 'auth-int') and cnonce != '':
-        if entitybody != '':
-            a2 = '%s:%s:%s' % (method, uri, getHash(algorithm, entitybody))
+    if (qop == "auth" or qop == "auth-int") and cnonce != "":
+        if entitybody != "":
+            a2 = "%s:%s:%s" % (method, uri, getHash(algorithm, entitybody))
             ha2 = getHash(algorithm, a2)
-        b = '%s:%s:%s:%s:%s:%s' % (ha1, nonce, nc, cnonce, qop, ha2)
+        b = "%s:%s:%s:%s:%s:%s" % (ha1, nonce, nc, cnonce, qop, ha2)
     else:
-        b = '%s:%s:%s' % (ha1, nonce, ha2)
+        b = "%s:%s:%s" % (ha1, nonce, ha2)
     ret = getHash(algorithm, b)
 
     if verbose == 1:
-        print(WHITE+'Calculating %s hash:' % (algorithm))
-        print(WHITE+'A1 hash %s(%s): %s' % (algorithm, a1, ha1))
-        print(WHITE+'A2 hash %s(%s): %s' % (algorithm, a2, ha2))
-        print(WHITE+'B  hash %s(%s): %s' % (algorithm, b, ret))
+        print(f"{WHITE}Calculating {algorithm} hash:")
+        print(f"{WHITE}A1 hash {algorithm}({a1}): {ha1}")
+        print(f"{WHITE}A2 hash {algorithm}({a2}): {ha2}")
+        print(f"{WHITE}B  hash {algorithm}({b}): {ret}")
         print(WHITE)
     return ret
 
 
 def format_time(value):
     if value < 60:
-        return str(value) + ' sec(s)'
+        return str(value) + " sec(s)"
 
-    m = int(value/60)
+    m = int(value / 60)
     s = value % 60
 
     if m < 60:
-        return str(m) + ' min(s) ' + str(s) + ' sec(s)'
+        return str(m) + " min(s) " + str(s) + " sec(s)"
 
-    h = int(m/60)
+    h = int(m / 60)
     m = m % 60
 
-    return str(h) + ' hour(s) ' + str(m) + ' min(s) ' + str(s) + ' sec(s)'
+    return str(h) + " hour(s) " + str(m) + " min(s) " + str(s) + " sec(s)"
 
 
 def fingerprinting(method, msg, headers, verbose):
     fp = []
 
-    tag = headers['totag']
-    ua = headers['ua']
-    type = headers['type']
-    code = headers['response_code']
+    tag = headers["totag"]
+    ua = headers["ua"]
+    type = headers["type"]
+    code = headers["response_code"]
 
-    if method == 'REGISTER':
-        if code == '405':
-            type = 'Device'
-        if code == '401':
-            type = 'Server'
+    if method == "REGISTER":
+        if code == "405":
+            type = "Device"
+        if code == "401":
+            type = "Server"
 
     # Device or Unknown
-    if type != 'Server':
-        m = re.search(r'^[a-fA-F0-9]{6,8}-[a-fA-F0-9]{2,4}$', tag)
+    if type != "Server":
+        m = re.search(r"^[a-fA-F0-9]{6,8}-[a-fA-F0-9]{2,4}$", tag)
         if m:
-            fp.append('Cisco VoIP Gateway')
-        m = re.search(r'^[a-fA-F0-9]{16}i0$', tag)
+            fp.append("Cisco VoIP Gateway")
+        m = re.search(r"^[a-fA-F0-9]{16}i0$", tag)
         if m:
-            fp.append('Sipura/Linksys SPA')
-        m = re.search(r'^[0-9]{5,10}$', tag)
+            fp.append("Sipura/Linksys SPA")
+        m = re.search(r"^[0-9]{5,10}$", tag)
         if m:
-            fp.append('Grandstream')
-            fp.append('Aastra')
-            fp.append('Dahua')
-        m = re.search(r'^[0-9]{8,10}$', tag)
+            fp.append("Grandstream")
+            fp.append("Aastra")
+            fp.append("Dahua")
+        m = re.search(r"^[0-9]{8,10}$", tag)
         if m:
-            fp.append('Fanvil')
-            fp.append('eXosip')
-            fp.append('Linphone')
-            fp.append('Kedacom')
-        m = re.search(r'^[a-f0-9]{8}$', tag)
+            fp.append("Fanvil")
+            fp.append("eXosip")
+            fp.append("Linphone")
+            fp.append("Kedacom")
+        m = re.search(r"^[a-f0-9]{8}$", tag)
         if m:
-            if ua[0:2] == 'Z ':
+            if ua[0:2] == "Z ":
                 fp.clear()
-                fp.append('Zoiper')
+                fp.append("Zoiper")
             else:
-                fp.append('Cisco IP Phone')
-                fp.append('3CX Phone')
-                fp.append('Mitel Border GW')
-                fp.append('Abto SIP SDK')
-                fp.append('ReadyNet')
-                fp.append('Tesira')
-        m = re.search(r'^[a-z0-9]{10}$', tag)
+                fp.append("Cisco IP Phone")
+                fp.append("3CX Phone")
+                fp.append("Mitel Border GW")
+                fp.append("Abto SIP SDK")
+                fp.append("ReadyNet")
+                fp.append("Tesira")
+        m = re.search(r"^[a-z0-9]{10}$", tag)
         if m:
-            fp.append('Panasonic')
-        if m and tag[0:2] != 'as':
-            fp.append('Panasonic')
-            fp.append('RM')
-            fp.append('Grandstream')
-            fp.append('IceWarp')
-        m = re.search(r'^[a-z]{8}$', tag)
+            fp.append("Panasonic")
+        if m and tag[0:2] != "as":
+            fp.append("Panasonic")
+            fp.append("RM")
+            fp.append("Grandstream")
+            fp.append("IceWarp")
+        m = re.search(r"^[a-z]{8}$", tag)
         if m:
-            fp.append('Ozeki VoIP SIP SDK')
-        m = re.search(r'^[0-9]{8,10}$', tag)
+            fp.append("Ozeki VoIP SIP SDK")
+        m = re.search(r"^[0-9]{8,10}$", tag)
         if m:
-            if ua[0:6] == 'Estech':
+            if ua[0:6] == "Estech":
                 fp.clear()
-                fp.append('ESI')
+                fp.append("ESI")
             else:
-                fp.append('Draytek')
-                fp.append('Yealink')
-                fp.append('Cellgate')
-                fp.append('Akuvox')
-        m = re.search(r'^[a-f0-9]{16}$', tag)
+                fp.append("Draytek")
+                fp.append("Yealink")
+                fp.append("Cellgate")
+                fp.append("Akuvox")
+        m = re.search(r"^[a-f0-9]{16}$", tag)
         if m:
-            fp.append('Grandstream')
-        m = re.search(r'^plcm_', tag)
+            fp.append("Grandstream")
+        m = re.search(r"^plcm_", tag)
         if m:
-            fp.append('Polycom')
-        m = re.search(r'^[a-f0-9]{15}$', tag)
+            fp.append("Polycom")
+        m = re.search(r"^[a-f0-9]{15}$", tag)
         if m:
-            fp.append('Sangoma')
-            fp.append('Tandberg')
-        m = re.search(r'^[a-f0-9]{32}$', tag)
+            fp.append("Sangoma")
+            fp.append("Tandberg")
+        m = re.search(r"^[a-f0-9]{32}$", tag)
         if m:
-            fp.append('Comrex')
-            fp.append('OXO')
-            fp.append('InterVideo')
-            fp.append('Dahua')
-        m = re.search(r'^[0-9a-f]{2}-[0-9]{8,10}$', tag)
+            fp.append("Comrex")
+            fp.append("OXO")
+            fp.append("InterVideo")
+            fp.append("Dahua")
+        m = re.search(r"^[0-9a-f]{2}-[0-9]{8,10}$", tag)
         if m:
-            fp.append('Sercomm Router')
+            fp.append("Sercomm Router")
         m = re.search(
-            '^[0-9a-f]{6,8}-[0-9a-f]{6,8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{1}-[0-9a-f]{5,8}-[0-9a-f]{6,8}-[0-9a-f]{5,8}$', tag)
+            "^[0-9a-f]{6,8}-[0-9a-f]{6,8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{1}-[0-9a-f]{5,8}-[0-9a-f]{6,8}-[0-9a-f]{5,8}$",
+            tag,
+        )
         if m:
-            fp.append('Matrix')
+            fp.append("Matrix")
         m = re.search(
-            '^[0-9a-f]{7,8}-[0-9a-f]{7,8}-[0-9a-f]{5,6}-[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}$', tag)
+            "^[0-9a-f]{7,8}-[0-9a-f]{7,8}-[0-9a-f]{5,6}-[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}$",
+            tag,
+        )
         if m:
-            fp.append('Matrix')
+            fp.append("Matrix")
         m = re.search(
-            '^[0-9a-f]{6,8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{8}-[0-9a-f]{7,8}-[0-9a-f]{8}$', tag)
+            "^[0-9a-f]{6,8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{8}-[0-9a-f]{7,8}-[0-9a-f]{8}$",
+            tag,
+        )
         if m:
-            if ua[0:8] == 'Inventel':
-                fp.append('Livebox')
+            if ua[0:8] == "Inventel":
+                fp.append("Livebox")
             else:
-                fp.append('Matrix')
-                fp.append('Livebox')
+                fp.append("Matrix")
+                fp.append("Livebox")
         m = re.search(
-            '^[0-9a-f]{6,8}-[0-9a-f]{10,15}-[0-9a-f]{7,8}-[0-9a-f]{7,8}-[0-9a-f]{7}$', tag)
+            "^[0-9a-f]{6,8}-[0-9a-f]{10,15}-[0-9a-f]{7,8}-[0-9a-f]{7,8}-[0-9a-f]{7}$",
+            tag,
+        )
         if m:
-            fp.append('Matrix')
+            fp.append("Matrix")
         m = re.search(
-            '^[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{5}-[0-9a-f]{8}-[0-9a-f]{5}$', tag)
+            "^[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{5}-[0-9a-f]{8}-[0-9a-f]{5}$",
+            tag,
+        )
         if m:
-            fp.append('Sagem')
+            fp.append("Sagem")
         m = re.search(
-            '^[0-9a-f]{6,7}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{5,6}-[0-9a-f]{7,8}-[0-9a-f]{5,6}$', tag)
+            "^[0-9a-f]{6,7}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{5}-[0-9a-f]{5,6}-[0-9a-f]{7,8}-[0-9a-f]{5,6}$",
+            tag,
+        )
         if m:
-            if ua[0:11] == 'MediaAccess':
-                fp.append('Technicolor')
+            if ua[0:11] == "MediaAccess":
+                fp.append("Technicolor")
             else:
-                fp.append('Thomson')
-                fp.append('Technicolor')
-        m = re.search(r'^[0-9A-F]{16}$', tag)
+                fp.append("Thomson")
+                fp.append("Technicolor")
+        m = re.search(r"^[0-9A-F]{16}$", tag)
         if m:
-            fp.append('Fritz')
-        m = re.search(r'^ZyXELUA_[0-9]{10}-[0-9]{4}$', tag)
+            fp.append("Fritz")
+        m = re.search(r"^ZyXELUA_[0-9]{10}-[0-9]{4}$", tag)
         if m:
-            fp.append('ZyXEL')
-        m = re.search(r'^[0-9a-z]{71}$', tag)
+            fp.append("ZyXEL")
+        m = re.search(r"^[0-9a-z]{71}$", tag)
         if m:
-            if ua[0:7] == 'Maxwell':
-                fp.append('Gigaset')
-            elif ua[0:4] == 'TSW-':
-                fp.append('Creston')
+            if ua[0:7] == "Maxwell":
+                fp.append("Gigaset")
+            elif ua[0:4] == "TSW-":
+                fp.append("Creston")
             else:
-                fp.append('Yealink')
-                fp.append('TP-Link')
-                fp.append('Gigaset')
-                fp.append('DoorBird')
-                fp.append('Axis')
-                fp.append('Digium')
-        m = re.search(r'^as[0-9a-f]{8}$', tag)
+                fp.append("Yealink")
+                fp.append("TP-Link")
+                fp.append("Gigaset")
+                fp.append("DoorBird")
+                fp.append("Axis")
+                fp.append("Digium")
+        m = re.search(r"^as[0-9a-f]{8}$", tag)
         if m:
-            if ua[0:4] == 'FPBX' or ua[0:4] == 'IPBX':
-                fp.append('Asterisk PBX')
+            if ua[0:4] == "FPBX" or ua[0:4] == "IPBX":
+                fp.append("Asterisk PBX")
             else:
-                fp.append('Asterisk PBX')
-                fp.append('Huawei')
-                fp.append('BeWAN')
-                fp.append('XiVO')
+                fp.append("Asterisk PBX")
+                fp.append("Huawei")
+                fp.append("BeWAN")
+                fp.append("XiVO")
         m = re.search(
-            '^[a-f0-9]{6}-[a-f0-9]{7,8}-[a-f0-9]{4}-[a-f0-9]{5}-[a-f0-9]{7,8}-[a-f0-9]{7,8}-[a-f0-9]{7,8}$', tag)
+            "^[a-f0-9]{6}-[a-f0-9]{7,8}-[a-f0-9]{4}-[a-f0-9]{5}-[a-f0-9]{7,8}-[a-f0-9]{7,8}-[a-f0-9]{7,8}$",
+            tag,
+        )
         if m:
-            fp.append('Skype for Business')
-        m = re.search(r'^ZyXELUA_', tag)
+            fp.append("Skype for Business")
+        m = re.search(r"^ZyXELUA_", tag)
         if m:
-            fp.append('ZyXEL')
-        m = re.search(r'^[0-9]{8,10}$', tag)
+            fp.append("ZyXEL")
+        m = re.search(r"^[0-9]{8,10}$", tag)
         if m:
-            if ua[0:4] == 'ININ':
+            if ua[0:4] == "ININ":
                 fp.clear()
-                fp.append('Interactive Intelligence EDGE')
-        m = re.search(r'^0\.0\.0\.0\+1\+[0-9a-z]{7,8}\+[0-9a-z]{7,8}$', tag)
+                fp.append("Interactive Intelligence EDGE")
+        m = re.search(r"^0\.0\.0\.0\+1\+[0-9a-z]{7,8}\+[0-9a-z]{7,8}$", tag)
         if m:
-            fp.append('Calix')
+            fp.append("Calix")
         m = re.search(
-            '^[0-9a-f]{7}-[0-9]{1}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{6}$', tag)
+            "^[0-9a-f]{7}-[0-9]{1}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{6}-[0-9a-f]{8}-[0-9a-f]{6}$",
+            tag,
+        )
         if m:
-            fp.append('ShoreGear')
+            fp.append("ShoreGear")
 
-        if tag == '123456':
-            fp.append('Alcatel')
+        if tag == "123456":
+            fp.append("Alcatel")
 
-        if tag == '':
-            m = re.search(r'^[A-Z]{1,2}[0-9]{2,3}\sIP', ua)
+        if tag == "":
+            m = re.search(r"^[A-Z]{1,2}[0-9]{2,3}\sIP", ua)
             if m:
-                fp.append('Gigaset')
-            elif headers['to'][0:1] != '<':
-                fp.append('Intelbras')
+                fp.append("Gigaset")
+            elif headers["to"][0:1] != "<":
+                fp.append("Intelbras")
             else:
-                fp.append('SNOM')
-                fp.append('FortiVoice')
-                fp.append('AddPac')
-                fp.append('Gigaset')
-                fp.append('VTechET')
-                fp.append('STL-IP')
-                fp.append('Laia')
-                fp.append('REDCOM')
+                fp.append("SNOM")
+                fp.append("FortiVoice")
+                fp.append("AddPac")
+                fp.append("Gigaset")
+                fp.append("VTechET")
+                fp.append("STL-IP")
+                fp.append("Laia")
+                fp.append("REDCOM")
 
-        hdr = msg.split('\r\n')
+        hdr = msg.split("\r\n")
         for h in hdr:
             if h.lower().find('realm="3cxphonesystem"') > 0:
                 fp.clear()
-                fp.append('3CX Phone System')
-            if h.lower().find('x-grandstream-pbx:') == 0:
-                fp.append('Grandstream ')
+                fp.append("3CX Phone System")
+            if h.lower().find("x-grandstream-pbx:") == 0:
+                fp.append("Grandstream ")
 
     # Server or Unknown or not found in Device
-    if type != 'Device' or fp == []:
-        m = re.search(r'^as[0-9a-f]{8}$', tag)
+    if type != "Device" or fp == []:
+        m = re.search(r"^as[0-9a-f]{8}$", tag)
         if m:
-            if ua[0:2] == 'TE':
-                fp.append('Yeastar')
-            elif ua[0:4] == 'FPBX' or ua[0:4] == 'IPBX' or ua[0:3] == 'MOR' or ua[0:8] == 'Asterisk':
-                fp.append('Asterisk PBX')
-            elif ua[0:2] == 'UC':
-                fp.append('Openvox')
-            elif ua[0:5] == 'Aline':
-                fp.append('Aline')
-            elif ua[0:5] == 'Cisco':
-                fp.append('Cisco/SPA')
-            elif ua[0:10] == 'FortiVoice':
-                fp.append('FortiVoice')
-            elif ua[0:8] == 'VoxStack':
-                fp.append('VoxStack')
-            elif ua[0:3] == 'BEC':
-                fp.append('BEC')
+            if ua[0:2] == "TE":
+                fp.append("Yeastar")
+            elif (
+                ua[0:4] == "FPBX"
+                or ua[0:4] == "IPBX"
+                or ua[0:3] == "MOR"
+                or ua[0:8] == "Asterisk"
+            ):
+                fp.append("Asterisk PBX")
+            elif ua[0:2] == "UC":
+                fp.append("Openvox")
+            elif ua[0:5] == "Aline":
+                fp.append("Aline")
+            elif ua[0:5] == "Cisco":
+                fp.append("Cisco/SPA")
+            elif ua[0:10] == "FortiVoice":
+                fp.append("FortiVoice")
+            elif ua[0:8] == "VoxStack":
+                fp.append("VoxStack")
+            elif ua[0:3] == "BEC":
+                fp.append("BEC")
             else:
-                fp.append('Asterisk PBX')
-        m = re.search(r'^[0-9a-z]{71}$', tag)
+                fp.append("Asterisk PBX")
+        m = re.search(r"^[0-9a-z]{71}$", tag)
         if m:
-            if ua[0:4] == 'FPBX' or ua[0:4] == 'IPBX':
-                fp.append('Asterisk PBX')
-            elif ua[0:10] == 'FortiVoice':
-                fp.append('FortiVoice')
+            if ua[0:4] == "FPBX" or ua[0:4] == "IPBX":
+                fp.append("Asterisk PBX")
+            elif ua[0:10] == "FortiVoice":
+                fp.append("FortiVoice")
             else:
-                fp.append('Asterisk PBX')
-                fp.append('Yeastar')
-                fp.append('Grandstream')
-                fp.append('TP-Link')
-                fp.append('SylkServer')
-                fp.append('ESI')
-                fp.append('ClearlyIP')
-        m = re.search(r'^[a-z0-9A-Z]{11}.[a-z0-9A-Z]{32}.[0-9]{1}$', tag)
+                fp.append("Asterisk PBX")
+                fp.append("Yeastar")
+                fp.append("Grandstream")
+                fp.append("TP-Link")
+                fp.append("SylkServer")
+                fp.append("ESI")
+                fp.append("ClearlyIP")
+        m = re.search(r"^[a-z0-9A-Z]{11}.[a-z0-9A-Z]{32}.[0-9]{1}$", tag)
         if m:
-            fp.append('Asterisk PBX')
-        m = re.search(r'^[a-f0-9]{32}.[a-f0-9]{2,8}$', tag)
+            fp.append("Asterisk PBX")
+        m = re.search(r"^[a-f0-9]{32}.[a-f0-9]{2,8}$", tag)
         if m:
-            if ua[0:8] == 'OpenSIPS':
-                fp.append('OpenSIPS SIP Proxy')
-            elif ua[0:6] == 'Siedle':
-                fp.append('Siedle')
+            if ua[0:8] == "OpenSIPS":
+                fp.append("OpenSIPS SIP Proxy")
+            elif ua[0:6] == "Siedle":
+                fp.append("Siedle")
             else:
-                fp.append('Kamailio SIP Proxy')
-        m = re.search(r'^DL[a-f0-9]{10}$', tag)
+                fp.append("Kamailio SIP Proxy")
+        m = re.search(r"^DL[a-f0-9]{10}$", tag)
         if m:
-            fp.append('LifeSize Media Server')
-        m = re.search(r'^[a-zA-Z0-9]{13}$', tag)
+            fp.append("LifeSize Media Server")
+        m = re.search(r"^[a-zA-Z0-9]{13}$", tag)
         if m:
-            fp.append('FreeSWITCH')
-        m = re.search(r'^[0-9a-z]{4}[\.-][0-9a-z]{32}$', tag)
+            fp.append("FreeSWITCH")
+        m = re.search(r"^[0-9a-z]{4}[\.-][0-9a-z]{32}$", tag)
         if m:
-            fp.append('OpenSIPS SIP Proxy')
-        m = re.search(r'^[0-9A-F]{8}-[0-9A-F]{16}-[0-9A-F]{8}$', tag)
+            fp.append("OpenSIPS SIP Proxy")
+        m = re.search(r"^[0-9A-F]{8}-[0-9A-F]{16}-[0-9A-F]{8}$", tag)
         if m:
-            fp.append('SEMS')
-        m = re.search(r'^[0-9]{10}$', tag)
-        if m and ua[0:4] == 'Desk' and ua[5:10] == 'Phone':
+            fp.append("SEMS")
+        m = re.search(r"^[0-9]{10}$", tag)
+        if m and ua[0:4] == "Desk" and ua[5:10] == "Phone":
             fp.clear()
-            fp.append('OpenScape')
-        m = re.search(r'^[0-9A-F]{3,4}$', tag)
+            fp.append("OpenScape")
+        m = re.search(r"^[0-9A-F]{3,4}$", tag)
         if m:
-            fp.append('OneAccess')
-        m = re.search(
-            '^[0-9A-F]{1}-[0-9A-F]{8}-[0-9A-F]{16}-[0-9A-F]{8}$', tag)
+            fp.append("OneAccess")
+        m = re.search(r"^[0-9A-F]{1}-[0-9A-F]{8}-[0-9A-F]{16}-[0-9A-F]{8}$", tag)
         if m:
-            fp.append('Yeti')
-        m = re.search(r'^[0-9a-z]{10}$', tag)
+            fp.append("Yeti")
+        m = re.search(r"^[0-9a-z]{10}$", tag)
         if m:
-            fp.append('Brekeke')
-            fp.append('MediaCore')
-            fp.append('XiVO')
+            fp.append("Brekeke")
+            fp.append("MediaCore")
+            fp.append("XiVO")
 
         if fp == []:
-            m = re.search(r'^[a-fA-F0-9]{6,8}-[a-fA-F0-9]{1,4}$', tag)
+            m = re.search(r"^[a-fA-F0-9]{6,8}-[a-fA-F0-9]{1,4}$", tag)
             if m:
-                fp.append('Cisco SIP Gateway')
+                fp.append("Cisco SIP Gateway")
             m = re.search(
-                '^[a-f0-9]{18}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$', tag)
+                "^[a-f0-9]{18}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$", tag
+            )
             if m:
-                fp.append('Epygi Quadro')
-            m = re.search(r'^[a-f0-9]{16}$', tag)
+                fp.append("Epygi Quadro")
+            m = re.search(r"^[a-f0-9]{16}$", tag)
             if m:
-                fp.append('Tandberg')
-                fp.append('Algo')
-            m = re.search(r'^[0-9a-f]{19,20}$', tag)
+                fp.append("Tandberg")
+                fp.append("Algo")
+            m = re.search(r"^[0-9a-f]{19,20}$", tag)
             if m:
-                fp.append('Ingate')
-                fp.append('SIParator')
-                fp.append('StarkPBX')
-            m = re.search(r'^[0-9]{5,10}$', tag)
+                fp.append("Ingate")
+                fp.append("SIParator")
+                fp.append("StarkPBX")
+            m = re.search(r"^[0-9]{5,10}$", tag)
             if m:
-                fp.append('Panasonic')
-            m = re.search(r'^[0-9]{8,10}$', tag)
+                fp.append("Panasonic")
+            m = re.search(r"^[0-9]{8,10}$", tag)
             if m:
-                fp.append('Yate')
-                fp.append('Mediatrix')
-                fp.append('MediaCore')
-            m = re.search(r'^[0-9]{10}$', tag)
+                fp.append("Yate")
+                fp.append("Mediatrix")
+                fp.append("MediaCore")
+            m = re.search(r"^[0-9]{10}$", tag)
             if m:
-                fp.append('M5T')
-            m = re.search(r'^[0-9a-f]{16}-[0-9a-f]{8}$', tag)
+                fp.append("M5T")
+            m = re.search(r"^[0-9a-f]{16}-[0-9a-f]{8}$", tag)
             if m:
-                fp.append('ZTE')
-            m = re.search(r'^[0-9A-Z]{32}$', tag)
+                fp.append("ZTE")
+            m = re.search(r"^[0-9A-Z]{32}$", tag)
             if m:
-                fp.append('RTC')
-            m = re.search(r'^[0-9a-f]{32}$', tag)
+                fp.append("RTC")
+            m = re.search(r"^[0-9a-f]{32}$", tag)
             if m:
-                fp.append('PhonerLite')
-            m = re.search(r'^[0-9a-z]{16}$', tag)
+                fp.append("PhonerLite")
+            m = re.search(r"^[0-9a-z]{16}$", tag)
             if m:
-                fp.append('Cisco')
-            m = re.search(r'^[0-9a-z]{17,18}$', tag)
+                fp.append("Cisco")
+            m = re.search(r"^[0-9a-z]{17,18}$", tag)
             if m:
-                fp.append('Cisco/SPA')
-            m = re.search(r'^1c[0-9]{9,10}$', tag)
+                fp.append("Cisco/SPA")
+            m = re.search(r"^1c[0-9]{9,10}$", tag)
             if m:
-                fp.append('Mediant SBC')
-            m = re.search(r'^[0-9]{5,10}$', tag)
+                fp.append("Mediant SBC")
+            m = re.search(r"^[0-9]{5,10}$", tag)
             if m:
-                fp.append('OpenScape')
-                fp.append('Aastra')
-                fp.append('SNOM')
-            m = re.search(r'^[0-9A-F]{8}$', tag)
+                fp.append("OpenScape")
+                fp.append("Aastra")
+                fp.append("SNOM")
+            m = re.search(r"^[0-9A-F]{8}$", tag)
             if m:
-                fp.append('CommuniGate')
-            m = re.search(r'^[0-9A-F]{24}$', tag)
+                fp.append("CommuniGate")
+            m = re.search(r"^[0-9A-F]{24}$", tag)
             if m:
-                fp.append('NEC')
-            m = re.search(r'^[0-9A-Z]{18}$', tag)
+                fp.append("NEC")
+            m = re.search(r"^[0-9A-Z]{18}$", tag)
             if m:
-                fp.append('Aastra')
-            m = re.search(r'^[a-f0-9]{7}-[a-f0-9]{6}$', tag)
-            if m and ua[0:5] == 'SONUS':
+                fp.append("Aastra")
+            m = re.search(r"^[a-f0-9]{7}-[a-f0-9]{6}$", tag)
+            if m and ua[0:5] == "SONUS":
                 print(ua[0:5])
-                fp.append('Skype for Business')
+                fp.append("Skype for Business")
 
-        if tag == '12345678':
-            fp.append('Alcatel')
-        if tag == '':
-            if ua[0:5] == 'Acano':
-                fp.append('Cisco Meeting Server')
+        if tag == "12345678":
+            fp.append("Alcatel")
+        if tag == "":
+            if ua[0:5] == "Acano":
+                fp.append("Cisco Meeting Server")
             else:
-                fp.append('Aastra SIP Server')
-                fp.append('Yate SIP Server')
-                fp.append('Epygi Quadro')
+                fp.append("Aastra SIP Server")
+                fp.append("Yate SIP Server")
+                fp.append("Epygi Quadro")
 
-        hdr = msg.split('\r\n')
+        hdr = msg.split("\r\n")
         for h in hdr:
-            if h.lower().find('av-global-session-id:') == 0:
-                fp.append('Avaya Session Manager')
-            if h.lower().find('www-authenticate:') == 0 and h.lower().find('realm="asterisk"') > 0:
+            if h.lower().find("av-global-session-id:") == 0:
+                fp.append("Avaya Session Manager")
+            if (
+                h.lower().find("www-authenticate:") == 0
+                and h.lower().find('realm="asterisk"') > 0
+            ):
                 fp.clear()
-                fp.append('Asterisk PBX')
-            if h.lower().find('o=ciscosystemssip-gw-useragent') == 0:
-                fp.append('Cisco SIP Gateway')
-    if ua != '':
+                fp.append("Asterisk PBX")
+            if h.lower().find("o=ciscosystemssip-gw-useragent") == 0:
+                fp.append("Cisco SIP Gateway")
+    if ua != "":
         for f in fp:
-            if ua.lower().replace(' ', '').replace('-', '').find(f.lower().replace(' ', '').replace('-', '')) == 0:
+            if (
+                ua.lower()
+                .replace(" ", "")
+                .replace("-", "")
+                .find(f.lower().replace(" ", "").replace("-", ""))
+                == 0
+            ):
                 return [f]
 
     if fp == []:
-        return (['Unknown'])
+        return ["Unknown"]
 
     if len(fp) > 3 and verbose != 2:
-        return ['Too many matches']
+        return ["Too many matches"]
 
     clearfp = []
 
@@ -1121,64 +1246,72 @@ def fingerprinting(method, msg, headers, verbose):
 
     return clearfp
 
+
 def load_cve_version():
     import sysconfig
-    path = sysconfig.get_paths()["purelib"] + '/sippts/data/cve.csv'
-    
-    if not os.path.isfile(path):
-        path = path.replace('/usr/', '/usr/local/').replace('site-packages', 'dist-packages')
+
+    path = sysconfig.get_paths()["purelib"] + "/sippts/data/cve.csv"
 
     if not os.path.isfile(path):
-        return 'Unknown'
-    
+        path = path.replace("/usr/", "/usr/local/").replace(
+            "site-packages", "dist-packages"
+        )
+
+    if not os.path.isfile(path):
+        return "Unknown"
+
     with open(path) as f:
-        line = f.readline().strip('\n')    
-   
+        line = f.readline().strip("\n")
+
     f.close()
-    
-    aux = line.split(';')
-    
+
+    aux = line.split(";")
+
     return aux[1]
-    
+
 
 def load_cve():
     import sysconfig
-    path = sysconfig.get_paths()["purelib"] + '/sippts/data/cve.csv'
-    
+
+    path = sysconfig.get_paths()["purelib"] + "/sippts/data/cve.csv"
+
     if not os.path.isfile(path):
-        path = path.replace('/usr/', '/usr/local/').replace('site-packages', 'dist-packages')
+        path = path.replace("/usr/", "/usr/local/").replace(
+            "site-packages", "dist-packages"
+        )
 
     if not os.path.isfile(path):
         return []
-    
+
     cve = []
-    
-    f = open(path, 'r')
+
+    f = open(path, "r")
     c = 0
-    
+
     for line in f:
         if c > 0:
-            line = line.replace('\n', '')
-            line = line.replace(';', '###')
+            line = line.replace("\n", "")
+            line = line.replace(";", "###")
             if len(line) > 0:
                 cve.append(line)
         c += 1
-    
+
     f.close()
-    
+
     return cve
+
 
 def check_model(ua, fp, type, cvelist):
     found = []
-    model = '$$$'
-    version = '$$$'
-    firmware = '$$$'
+    model = "$$$"
+    version = "$$$"
+    firmware = "$$$"
 
-    aux = ua.lower().split(' ')
+    aux = ua.lower().split(" ")
     l = len(aux)
 
     model = aux[0]
-    
+
     # if model == 'grandstream':
     if l > 1:
         version = aux[1]
@@ -1189,18 +1322,27 @@ def check_model(ua, fp, type, cvelist):
         cve = cve.lower()
         if cve.find(model) > -1 and cve.find(version) > -1 and cve.find(firmware) > -1:
             found.append(cve)
-    
+
     if len(found) == 0:
         for cve in cvelist:
             cve = cve.lower()
             if cve.find(model) > -1:
-                if cve.find(version) > -1 or cve.replace(' ', '').find(version) > -1 or cve.find(version.replace(' ', '')) > -1 or cve.replace(' ', '').find(version.replace(' ', '')) > -1:
+                if (
+                    cve.find(version) > -1
+                    or cve.replace(" ", "").find(version) > -1
+                    or cve.find(version.replace(" ", "")) > -1
+                    or cve.replace(" ", "").find(version.replace(" ", "")) > -1
+                ):
                     found.append(cve)
-                elif cve.replace('-', '').find(version) > -1 or cve.find(version.replace('-', '')) > -1 or cve.replace('-', '').find(version.replace('-', '')) > -1:
+                elif (
+                    cve.replace("-", "").find(version) > -1
+                    or cve.find(version.replace("-", "")) > -1
+                    or cve.replace("-", "").find(version.replace("-", "")) > -1
+                ):
                     found.append(cve)
 
-    if len(found) == 0 and type == 'Server':
-        aux = fp.lower().split(' ')
+    if len(found) == 0 and type == "Server":
+        aux = fp.lower().split(" ")
         model = aux[0]
 
         for cve in cvelist:
