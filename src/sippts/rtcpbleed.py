@@ -37,10 +37,10 @@ class RTCPBleed:
 
         print(f"{self.c.BWHITE}[✓] Target IP: {self.c.YELLOW}{self.ip}")
         print(
-            f"{self.c.BWHITE}[✓] Port range: {self.c.YELLOW}{str(self.start_port)}{self.c.WHITE}-{self.c.YELLOW}{str(self.end_port)}"
+            f"{self.c.BWHITE}[✓] Port range: {self.c.YELLOW}{self.start_port}{self.c.WHITE}-{self.c.YELLOW}{self.end_port}"
         )
         print(
-            f"{self.c.BWHITE}[✓] Delay between tries: {self.c.YELLOW}{str(self.delay)} microseconds"
+            f"{self.c.BWHITE}[✓] Delay between tries: {self.c.YELLOW}{self.delay} microseconds"
         )
         print(self.c.WHITE)
 

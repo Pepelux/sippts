@@ -35,13 +35,13 @@ class RTPBleedFlood:
 
         print(f"{self.c.BWHITE}[✓] Target IP: {self.c.YELLOW}{self.ip}")
         print(
-            f"{self.c.BWHITE}[✓] Port range: {self.c.YELLOW}{str(self.start_port)}{self.c.WHITE}-{self.c.YELLOW}{str(self.end_port)}"
+            f"{self.c.BWHITE}[✓] Remote port: {self.c.YELLOW}{str(self.port)}"
         )
-        print(f"{self.c.BWHITE}[✓] Payload type: {self.c.YELLOW}{str(self.payload)}")
+        print(f"{self.c.BWHITE}[✓] Payload type: {self.c.YELLOW}{self.payload}")
         print(self.c.WHITE)
 
         print(
-            f"{self.c.YELLOW}[+] Sending RTP packets to {self.ip}:{str(self.port)}{self.c.WHITE}"
+            f"{self.c.YELLOW}[+] Sending RTP packets to {self.ip}:{self.port}{self.c.WHITE}"
         )
 
         # Create a UDP socket

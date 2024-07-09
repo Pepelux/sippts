@@ -33,7 +33,7 @@ class RTPBleedInject:
 
         print(f"{self.c.BWHITE}[✓] Target IP: {self.c.YELLOW}{self.ip}")
         print(
-            f"{self.c.BWHITE}[✓] Port range: {self.c.YELLOW}{str(self.start_port)}{self.c.WHITE}-{self.c.YELLOW}{str(self.end_port)}"
+            f"{self.c.BWHITE}[✓] Remote port: {self.c.YELLOW}{self.c.YELLOW}{str(self.port)}"
         )
         print(f"{self.c.BWHITE}[✓] Payload type: {self.c.YELLOW}{str(self.payload)}")
         print(f"{self.c.BWHITE}[✓] WAV file {self.c.YELLOW}{self.file}")
@@ -41,12 +41,17 @@ class RTPBleedInject:
 
         print(f"{self.c.YELLOW}[+] Reading WAV file ...{self.c.WHITE}")
 
-        file = open(self.file, "rb")
-        data = file.read()
-        file.close()
-        print(
-            f"{self.c.YELLOW}[+] Sending RTP packets to {self.c.CYAN}{self.ip}{self.c.WHITE}:{self.c.CYAN}{str(self.port)}{self.c.WHITE} to obtain info about the streams{self.c.WHITE}"
-        )
+        try:
+            file = open(self.file, "rb")
+            data = file.read()
+            file.close()
+            print(
+                f"{self.c.YELLOW}[+] Sending RTP packets to {self.c.CYAN}{self.ip}{self.c.WHITE}:{self.c.CYAN}{str(self.port)}{self.c.WHITE} to obtain info about the streams{self.c.WHITE}"
+            )
+        except:
+            print(f"{self.c.RED}Error opening file {self.file}")
+            print(self.c.WHITE)
+            exit()
 
         # Create a UDP socket
         try:

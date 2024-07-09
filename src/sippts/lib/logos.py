@@ -38,7 +38,7 @@ class Logo:
     | .-----.   .--.  |
     | |     |  /    \\ |
     | '-----'  \\    / |
-    |           |  |  |                                    {self.c.BYELLOW}SIPPTS version {local_version}{local_version_status}{color}
+    |           |  |  |                                   {self.c.BYELLOW}SIPPTS version {local_version}{local_version_status}{color}
     | LI LI LI  |  |  |                                         {self.c.BCYAN}CVE version {local_cve_version}{local_cve_version_status}{color}
     | LI LI LI  |  |  |Oo                     {self.c.BGREEN}https://github.com/Pepelux/sippts{color}
     | LI LI LI  |  |  |`Oo            {self.c.BBLUE}by {self.c.BRED}Pepelux{self.c.BBLUE} - https://twitter.com/pepeluxx{color}
