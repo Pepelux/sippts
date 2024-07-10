@@ -172,7 +172,7 @@ class SipDigestCrack:
                 )
             else:
                 print(
-                    f"{self.c.BYELLOW}[+] Trying to crack hash {response} of the user {username} ...{self.c.WHITE}"
+                    f"{self.c.BYELLOW}[+] Trying to crack hash {response} of the user {username} ...{self.c.WHITE}".ljust(100)
                 )
 
                 try:
@@ -446,7 +446,7 @@ class SipDigestCrack:
                         pwd = pwd.replace("\n", "")
 
                         print(
-                            f"{self.c.BWHITE}   [-] Trying pass {self.c.YELLOW}{pwd}{self.c.WHITE} for user {self.c.GREEN}{username}{self.c.WHITE}",
+                            f"{self.c.BWHITE}   [-] Trying pass {self.c.YELLOW}{pwd}{self.c.WHITE} for user {self.c.GREEN}{username}{self.c.WHITE}".ljust(100),
                             end="\r",
                         )
 
@@ -494,7 +494,7 @@ class SipDigestCrack:
                         pwd = pwd[0:50]
 
                         print(
-                            f"{self.c.BWHITE}   [-] Trying pass {self.c.YELLOW}{pwd.ljust(50)}{self.c.WHITE}",
+                            f"{self.c.BWHITE}   [-] Trying pass {self.c.YELLOW}{pwd.ljust(50)}{self.c.WHITE}".ljust(100),
                             end="\r",
                         )
 
