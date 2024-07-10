@@ -41,6 +41,7 @@ class SipDigestCrack:
 
         self.totaltime = 0
         self.found = []
+        self.saved = False
 
         self.c = Color()
 
@@ -306,6 +307,10 @@ class SipDigestCrack:
         return value
 
     def save_file(self, wl, usr, pwd, status):
+        if self.saved == True:
+            return
+        
+        self.saved = True
         lines = []
         found = 0
 
@@ -480,8 +485,11 @@ class SipDigestCrack:
         else:
             with open(self.wordlist, "rb") as fd:
                 for pwd in fd:
-                    if not self.run_event.is_set():
-                        break
+                    # if not self.run_event.is_set():
+                    #     # fd.close()
+                    #     self.save_file(self.wordlist, username, pwd, "false")
+                    #     self.stop()
+                    #     break
 
                     try:
                         pwd = pwd.decode("ascii")
@@ -497,6 +505,12 @@ class SipDigestCrack:
                             f"{self.c.BWHITE}   [-] Trying pass {self.c.YELLOW}{pwd}{self.c.WHITE} for user {self.c.GREEN}{username}{self.c.WHITE}".ljust(250),
                             end="\r",
                         )
+
+                        if not self.run_event.is_set():
+                            fd.close()
+                            self.save_file(self.wordlist, username, pwd, "false")
+                            self.stop()
+                            break
 
                         if self.verbose == 1:
                             print(f"{self.c.WHITE}Password: {pwd.ljust(50)}")
