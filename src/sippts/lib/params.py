@@ -1916,7 +1916,7 @@ Usage examples:
     parser_invite = subparsers.add_parser(
         "invite",
         formatter_class=argparse.RawTextHelpFormatter,
-        help="SIP INVITE attack",
+        help="Try to make calls through a PBX",
         add_help=False,
         description=RED
         + Logo("sipinvite").get_logo()
