@@ -26,7 +26,7 @@ CYAN = "\033[0;36;20m"
 BWHITE = "\033[1;37;20m"
 WHITE = "\033[0;37;20m"
 
-local_version = "4.0.11"
+local_version = "4.0.12"
 
 
 def get_sippts_args():
@@ -2296,11 +2296,19 @@ Usage examples:
         dest="max",
         default=8,
     )
-
+    
     log = parser_dcrack.add_argument_group("Log")
     log.add_argument("-v", help="Increase verbosity", dest="verbose", action="count")
 
     options = parser_dcrack.add_argument_group("Other options")
+    options.add_argument(
+        "-th",
+        metavar="THREADS",
+        type=int,
+        help="Number of threads (default: 10)",
+        dest="threads",
+        default=10,
+    )
     options.add_argument(
         "-p",
         metavar="PREFIX",
@@ -3808,6 +3816,7 @@ Payloads
         PREFIX = args.prefix
         SUFFIX = args.suffix
         VERBOSE = args.verbose
+        THREADS = args.threads
 
         return (
             COMMAND,
@@ -3820,6 +3829,7 @@ Payloads
             MIN,
             PREFIX,
             SUFFIX,
+            THREADS
         )
     elif COMMAND == "flood":
         if args.help == 1:

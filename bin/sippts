@@ -515,6 +515,7 @@ def main():
             min,
             prefix,
             suffix,
+            threads
         ) = params
 
         from sippts.sipdigestcrack import SipDigestCrack
@@ -529,6 +530,7 @@ def main():
         s.min = min
         s.prefix = prefix
         s.suffix = suffix
+        s.threads = threads
     elif params[0] == "flood":
         (
             cmd,

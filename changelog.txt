@@ -21,7 +21,8 @@ devel:
   - added param -v for verbose mode
   - added param -template to load SIP messages
 - dcrack:
-  - Use pyshark library instead tshark application
+  - use pyshark library instead tshark application
+  - added param -th to use threads
 - global:
   - bug fixes
 

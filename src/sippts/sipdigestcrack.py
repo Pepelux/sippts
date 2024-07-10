@@ -7,20 +7,17 @@ __license__ = "GPL"
 __copyright__ = "Copyright (C) 2015-2024, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
 
-from curses.ascii import isascii
+import signal
+from concurrent.futures import ThreadPoolExecutor
+import threading
 import io
 import base64
-from nis import cat
 import os
-import re
 import time
-
 import cursor
 from .lib.functions import calculateHash, format_time
 import itertools
 import string
-import threading
-import signal
 from .lib.color import Color
 from .lib.logos import Logo
 
@@ -37,6 +34,7 @@ class SipDigestCrack:
         self.prefix = ""
         self.suffix = ""
         self.verbose = "0"
+        self.threads = 10
 
         self.pwdvalue = ""
         self.run = True
@@ -45,6 +43,10 @@ class SipDigestCrack:
         self.found = []
 
         self.c = Color()
+
+        self.run_event = threading.Event()
+        self.run_event.set()
+        signal.signal(signal.SIGINT, self.signal_handler)
 
     def start(self):
         if not os.path.isfile(self.file):
@@ -81,206 +83,220 @@ class SipDigestCrack:
 
         print(f"{self.c.BWHITE}[✓] Input file: {self.c.GREEN}{self.file}")
         print(f"{self.c.BWHITE}[✓] Wordlist: {self.c.GREEN}{self.wordlist}")
+        print(f"{self.c.BWHITE}[✓] Used threads: {self.c.GREEN}{str(self.threads)}")
         print(self.c.WHITE)
 
-        signal.signal(signal.SIGINT, self.signal_handler)
         print(f"{self.c.BYELLOW}\nPress Ctrl+C to stop")
         print(self.c.WHITE)
 
-        threads = list()
-        t = threading.Thread(target=self.read_data, daemon=True)
-        threads.append(t)
-        t.start()
-        t.join()
+        # File format:
+        # ipsrc"ipdst"username"realm"method"uri"nonce"cnonce"nc"qop"auth"response
+        try:
+            with open(self.file, "r") as f:
+                with ThreadPoolExecutor(max_workers=self.threads) as executor:
+                    for line in f:
+                        if not self.run_event.is_set():
+                            break
+                        line = line.strip()
+                        values = line.split('"')
+                        ipsrc = values[0]
+                        ipdst = values[1]
+                        username = values[2]
+                        realm = values[3]
+                        method = values[4]
+                        uri = values[5]
+                        nonce = values[6]
+                        cnonce = values[7]
+                        nc = values[8]
+                        qop = values[9]
+                        algorithm = values[10]
+                        response = values[11]
+
+                        executor.submit(
+                            self.read_data,
+                            ipsrc,
+                            ipdst,
+                            username,
+                            realm,
+                            method,
+                            uri,
+                            nonce,
+                            cnonce,
+                            nc,
+                            qop,
+                            algorithm,
+                            response,
+                        )
+                    executor.shutdown(wait=True)
+
+            f.close()
+        except Exception as e:
+            print(f"Exception: {e}")
 
         self.found.sort()
         self.print()
 
     def signal_handler(self, sig, frame):
-        print(f"{self.c.BYELLOW}You pressed Ctrl+C!")
-        print(f"{self.c.BWHITE}\nStopping sipcrack ...")
-        print(self.c.WHITE)
-
         self.stop()
 
     def stop(self):
+        print(f"{self.c.BYELLOW}You pressed Ctrl+C!{self.c.WHITE}")
+        print(f"{self.c.BWHITE}\nStopping sipcrack ...\n{self.c.WHITE}")
+        self.run_event.clear()
         self.run = False
 
-    def read_data(self):
-        # File format:
-        # ipsrc"ipdst"username"realm"method"uri"nonce"cnonce"nc"qop"auth"response
+    def read_data(
+        self,
+        ipsrc,
+        ipdst,
+        username,
+        realm,
+        method,
+        uri,
+        nonce,
+        cnonce,
+        nc,
+        qop,
+        algorithm,
+        response,
+    ):
+        try:
+            rows = []
+            start = time.time()
 
-        with open(self.file) as f:
-            if self.run == True:
-                line = f.readline()
+            row = "%s#%s#%s#%s" % (ipsrc, ipdst, username, realm)
 
+            if row in rows:
                 print(
-                    f"{self.c.BWHITE}[✓]{self.c.WHITE} Using wordlist: {self.c.GREEN}{self.wordlist}{self.c.WHITE}"
+                    f"{self.c.YELLOW}username {username}@{ipdst} already checked{self.c.WHITE}"
                 )
+            else:
                 print(
-                    f"{self.c.BWHITE}[✓]{self.c.WHITE} Hashes file: {self.c.GREEN}{self.file}{self.c.WHITE}"
+                    f"{self.c.BYELLOW}[+] Trying to crack hash {response} of the user {username} ...{self.c.WHITE}"
                 )
 
-                rows = []
+                try:
+                    with io.open(
+                        "sipdigestcrack.res",
+                        "r",
+                        newline=None,
+                        encoding="latin-1",
+                    ) as fd:
+                        word_start = ""
+                        found = "false"
 
-                start = time.time()
+                        for pline in fd:
+                            try:
+                                pl = pline.replace("\n", "")
+                                # type (bf|wl) - chars - prefix - suffix - username - b64(starting_password) - found
+                                values = pl.split(":")
 
-                while line:
-                    if self.run == False:
-                        f.close()
-                        return
-                    line = line.replace("\n", "")
-                    values = line.split('"')
-
-                    ipsrc = values[0]
-                    ipdst = values[1]
-                    username = values[2]
-                    realm = values[3]
-                    method = values[4]
-                    uri = values[5]
-                    nonce = values[6]
-                    cnonce = values[7]
-                    nc = values[8]
-                    qop = values[9]
-                    algorithm = values[10]
-                    response = values[11]
-
-                    row = "%s#%s#%s#%s" % (ipsrc, ipdst, username, realm)
-
-                    if row in rows:
-                        print(
-                            f"{self.c.YELLOW}username {username}@{ipdst} already checked{self.c.WHITE}"
-                        )
-                    else:
-                        print(
-                            f"{self.c.BYELLOW}[+] Trying to crack hash {response} of the user {username} ...{self.c.WHITE}"
-                        )
-
-                        try:
-                            with io.open(
-                                "sipdigestcrack.res",
-                                "r",
-                                newline=None,
-                                encoding="latin-1",
-                            ) as fd:
-                                word_start = ""
-                                found = "false"
-
-                                for pline in fd:
+                                if values[4] == username:
                                     try:
-                                        pl = pline.replace("\n", "")
-                                        # type (bf|wl) - chars - prefix - suffix - username - b64(starting_password) - found
-                                        values = pl.split(":")
+                                        found = values[6]
+                                    except:
+                                        found = "false"
 
-                                        if values[4] == username:
-                                            try:
-                                                found = values[6]
-                                            except:
-                                                found = "false"
+                                    if found == "true":
+                                        b64pwd = base64.b64decode(values[5]).decode()
+                                        word_start = b64pwd
 
-                                            if found == "true":
+                                        print(
+                                            f"{self.c.GREEN}[-] Cleartext password for user {username} is {word_start}{self.c.WHITE}"
+                                        )
+                                        self.found.append(
+                                            "%s###%s###%s###%s"
+                                            % (
+                                                ipsrc,
+                                                ipdst,
+                                                username,
+                                                word_start,
+                                            )
+                                        )
+                                    else:
+                                        if found == "ignore":
+                                            print(
+                                                f"{self.c.MAGENTA}[-] Ignoring user {username}{self.c.WHITE}"
+                                            )
+                                        else:
+                                            if (
+                                                (
+                                                    self.bruteforce != "True"
+                                                    and values[0] == "wl"
+                                                    and values[1] == self.wordlist
+                                                    and self.prefix == values[2]
+                                                    and self.suffix == values[3]
+                                                )
+                                                or (
+                                                    self.bruteforce == "True"
+                                                    and values[0] == "bf"
+                                                    and values[1] == self.chars
+                                                    and self.prefix == values[2]
+                                                    and self.suffix == values[3]
+                                                )
+                                            ) and values[4] == username:
                                                 b64pwd = base64.b64decode(
                                                     values[5]
                                                 ).decode()
                                                 word_start = b64pwd
 
-                                                print(
-                                                    f"{self.c.GREEN}[-] Cleartext password for user {username} is {word_start}{self.c.WHITE}"
-                                                )
-                                                self.found.append(
-                                                    "%s###%s###%s###%s"
-                                                    % (
-                                                        ipsrc,
-                                                        ipdst,
-                                                        username,
-                                                        word_start,
-                                                    )
-                                                )
-                                            else:
-                                                if found == "ignore":
-                                                    print(
-                                                        f"{self.c.MAGENTA}[-] Ignoring user {username}{self.c.WHITE}"
-                                                    )
-                                                else:
-                                                    if (
-                                                        (
-                                                            self.bruteforce != "True"
-                                                            and values[0] == "wl"
-                                                            and values[1]
-                                                            == self.wordlist
-                                                            and self.prefix == values[2]
-                                                            and self.suffix == values[3]
-                                                        )
-                                                        or (
-                                                            self.bruteforce == "True"
-                                                            and values[0] == "bf"
-                                                            and values[1] == self.chars
-                                                            and self.prefix == values[2]
-                                                            and self.suffix == values[3]
-                                                        )
-                                                    ) and values[4] == username:
-                                                        b64pwd = base64.b64decode(
-                                                            values[5]
-                                                        ).decode()
-                                                        word_start = b64pwd
+                                                l = len(self.prefix)
+                                                word_start = word_start[l:]
+                                                l = len(self.suffix)
+                                                word_start = word_start[
+                                                    0 : len(word_start) - l
+                                                ]
+                            except:
+                                pass
 
-                                                        l = len(self.prefix)
-                                                        word_start = word_start[l:]
-                                                        l = len(self.suffix)
-                                                        word_start = word_start[
-                                                            0 : len(word_start) - l
-                                                        ]
-                                    except:
-                                        fd.close()
-                                        return ""
+                    fd.close()
+                except:
+                    pass
 
-                            fd.close()
-                        except:
-                            pass
+                if found == "false":
+                    cursor.hide()
+                    pwd = self.crack(
+                        response,
+                        username,
+                        realm,
+                        method,
+                        uri,
+                        nonce,
+                        algorithm,
+                        cnonce,
+                        nc,
+                        qop,
+                        word_start,
+                    )
+                    cursor.show()
 
-                        if found == "false":
-                            cursor.hide()
-                            pwd = self.crack(
-                                response,
-                                username,
-                                realm,
-                                method,
-                                uri,
-                                nonce,
-                                algorithm,
-                                cnonce,
-                                nc,
-                                qop,
-                                word_start,
-                            )
-                            cursor.show()
-
-                            if pwd != "":
-                                print(
-                                    f"{self.c.GREEN}[-] Cleartext password for user {username} is {pwd}{self.c.WHITE}"
-                                )
-                                self.found.append(
-                                    "%s###%s###%s###%s" % (ipsrc, ipdst, username, pwd)
+                    if pwd != "":
+                        print(
+                            f"{self.c.GREEN}[-] Cleartext password for user {username} is {pwd}{self.c.WHITE}"
+                        )
+                        self.found.append(
+                            "%s###%s###%s###%s" % (ipsrc, ipdst, username, pwd)
+                        )
+                    else:
+                        if self.run == False:
+                            if self.bruteforce == "True":
+                                self.save_file(
+                                    self.charset, username, self.pwdvalue, "false"
                                 )
                             else:
-                                if self.run == False:
-                                    self.save_file(
-                                        self.wordlist, username, self.pwdvalue, "false"
-                                    )
-                                print(
-                                    f"{self.c.RED}[-] Password not found. Try with another wordlist{self.c.WHITE}"
+                                self.save_file(
+                                    self.wordlist, username, self.pwdvalue, "false"
                                 )
+                        print(
+                            f"{self.c.RED}[-] Password not found. Try with another wordlist{self.c.WHITE}"
+                        )
 
-                    rows.append(row)
-                    line = f.readline()
+                rows.append(row)
 
-                end = time.time()
-                self.totaltime = int(end - start)
-            else:
-                f.close()
-                return
-
-        f.close()
+            end = time.time()
+            self.totaltime = int(end - start)
+        except KeyboardInterrupt:
+            self.stop()
 
     def check_value(self, password, chars):
         pos = len(chars)
@@ -408,29 +424,29 @@ class SipDigestCrack:
         word_start,
     ):
         if self.bruteforce == "True":
-            if self.run == False:
+            if not self.run_event.is_set():
                 return ""
 
             try:
                 START_VALUE = self.check_value(word_start, self.chars)
 
                 for n in range(int(self.min), int(self.max) + 1):
-                    if self.run == False:
-                        return ""
+                    if not self.run_event.is_set():
+                        break
 
                     xs = itertools.product(self.chars, repeat=n)
                     combos = itertools.islice(xs, START_VALUE, None)
 
                     for i, pwd in enumerate(combos, start=START_VALUE):
-                        if self.run == False:
-                            return ""
+                        if not self.run_event.is_set():
+                            break
 
                         pwd = "".join(pwd)
                         pwd = "%s%s%s" % (self.prefix, pwd, self.suffix)
                         pwd = pwd.replace("\n", "")
 
                         print(
-                            f"{self.c.BWHITE}   [-] Trying pass {self.c.YELLOW}{pwd}{self.c.WHITE}",
+                            f"{self.c.BWHITE}   [-] Trying pass {self.c.YELLOW}{pwd}{self.c.WHITE} for user {self.c.GREEN}{username}{self.c.WHITE}",
                             end="\r",
                         )
 
@@ -453,11 +469,10 @@ class SipDigestCrack:
                             self.verbose,
                             "",
                         ):
-                            self.save_file(self.wordlist, username, pwd, "true")
+                            self.save_file(self.charset, username, pwd, "true")
                             return pwd
             except KeyboardInterrupt:
                 self.save_file(self.charset, username, pwd, "false")
-                self.run = False
                 self.stop()
                 return ""
             except:
@@ -465,8 +480,8 @@ class SipDigestCrack:
         else:
             with open(self.wordlist, "rb") as fd:
                 for pwd in fd:
-                    if self.run == False:
-                        return ""
+                    if not self.run_event.is_set():
+                        break
 
                     try:
                         pwd = pwd.decode("ascii")
@@ -506,7 +521,6 @@ class SipDigestCrack:
                     except KeyboardInterrupt:
                         fd.close()
                         self.save_file(self.wordlist, username, pwd, "false")
-                        self.run = False
                         self.stop()
                         return ""
                     except:
