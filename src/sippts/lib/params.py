@@ -3797,7 +3797,7 @@ Payloads
             print(f"{BWHITE}{COMMAND}:{WHITE} Mandatory params: {GREEN}-f <FILE>")
             print(f"{WHITE}Use {CYAN}sippts {COMMAND} -h/--help{WHITE} for help")
             exit()
-        if not args.bruteforce and not args.wordlist:
+        if (not args.bruteforce and not args.wordlist) or (args.bruteforce and args.wordlist):
             parser_dcrack.print_help()
             print(RED)
             print("Param error!")

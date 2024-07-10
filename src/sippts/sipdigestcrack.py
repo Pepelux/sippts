@@ -453,7 +453,7 @@ class SipDigestCrack:
                         self.pwdvalue = pwd
 
                         if self.verbose == 1:
-                            print(f"{self.c.WHITE}Password:{pwd}")
+                            print(f"{self.c.WHITE}\nPassword:{pwd}")
                             print(f"{self.c.WHITE}Expected hash: {response}")
                         if response == calculateHash(
                             username,
@@ -494,7 +494,7 @@ class SipDigestCrack:
                         pwd = pwd[0:50]
 
                         print(
-                            f"{self.c.BWHITE}   [-] Trying pass {self.c.YELLOW}{pwd.ljust(50)}{self.c.WHITE}".ljust(100),
+                            f"{self.c.BWHITE}   [-] Trying pass {self.c.YELLOW}{pwd}{self.c.WHITE} for user {self.c.GREEN}{username}{self.c.WHITE}".ljust(250),
                             end="\r",
                         )
 
