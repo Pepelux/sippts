@@ -1260,15 +1260,17 @@ def load_cve_version():
     if not os.path.isfile(path):
         return "Unknown"
 
-    with open(path) as f:
-        line = f.readline().strip("\n")
+    try:
+        with open(path) as f:
+            line = f.readline().strip("\n")
 
-    f.close()
+        f.close()
 
-    aux = line.split(";")
+        aux = line.split(";")
 
-    return aux[1]
-
+        return aux[1]
+    except:
+        return "Unknown"
 
 def load_cve():
     import sysconfig
