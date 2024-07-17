@@ -7,6 +7,7 @@ __license__ = "GPL"
 __copyright__ = "Copyright (C) 2015-2024, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
 
+from threading import Lock
 import signal
 from concurrent.futures import ThreadPoolExecutor
 import threading
@@ -41,7 +42,11 @@ class SipDigestCrack:
 
         self.totaltime = 0
         self.found = []
-        self.saved = False
+        self.saved = []
+        
+        self.lock = None
+
+        self.backupfile = "sipdigestcrack.res"
 
         self.c = Color()
 
@@ -50,6 +55,8 @@ class SipDigestCrack:
         signal.signal(signal.SIGINT, self.signal_handler)
 
     def start(self):
+        self.lock = Lock()
+        
         if not os.path.isfile(self.file):
             print(f"{self.c.RED}[-] File {self.file} not found")
             print(self.c.WHITE)
@@ -136,6 +143,8 @@ class SipDigestCrack:
 
         self.found.sort()
         self.print()
+        
+        self.save_file()
 
     def signal_handler(self, sig, frame):
         self.stop()
@@ -176,9 +185,11 @@ class SipDigestCrack:
                     f"{self.c.BYELLOW}[+] Trying to crack hash {response} of the user {username} ...{self.c.WHITE}".ljust(100)
                 )
 
+                found = "false"
+                word_start = ""
                 try:
                     with io.open(
-                        "sipdigestcrack.res",
+                        self.backupfile,
                         "r",
                         newline=None,
                         encoding="latin-1",
@@ -281,11 +292,11 @@ class SipDigestCrack:
                     else:
                         if self.run == False:
                             if self.bruteforce == "True":
-                                self.save_file(
+                                self.save_data(
                                     self.charset, username, self.pwdvalue, "false"
                                 )
                             else:
-                                self.save_file(
+                                self.save_data(
                                     self.wordlist, username, self.pwdvalue, "false"
                                 )
                         print(
@@ -306,21 +317,17 @@ class SipDigestCrack:
             value += (pos**i) * chars.index(c)
         return value
 
-    def save_file(self, wl, usr, pwd, status):
-        if self.saved == True:
-            return
-        
-        self.saved = True
-        lines = []
+    def save_data(self, wl, usr, pwd, status):
         found = 0
 
         b64pwd = base64.b64encode(bytes(pwd, "utf-8")).decode()
 
-        print(f"{self.c.WHITE}\nSaving restore data ...")
+        if pwd == '' or b64pwd == '':
+            return
 
         try:
             with io.open(
-                "sipdigestcrack.res", "r", newline=None, encoding="latin-1"
+                self.backupfile, "r", newline=None, encoding="latin-1"
             ) as fd:
                 for pline in fd:
                     try:
@@ -360,7 +367,8 @@ class SipDigestCrack:
                                 status,
                             )
                             found = 1
-                        lines.append(pl)
+                        if pl not in self.saved:
+                            self.saved.append(pl)
                     except:
                         fd.close()
                         return ""
@@ -374,6 +382,7 @@ class SipDigestCrack:
                     self.suffix,
                     usr,
                     b64pwd,
+                    status,
                 )
             else:
                 pl = "bf:%s:%s:%s:%s:%s" % (
@@ -385,7 +394,8 @@ class SipDigestCrack:
                     status,
                 )
             found = 1
-            lines.append(pl)
+            if pl not in self.saved:
+                self.saved.append(pl)
 
         if found == 0:
             if self.bruteforce != "True":
@@ -406,13 +416,31 @@ class SipDigestCrack:
                     b64pwd,
                     status,
                 )
-            lines.append(pl)
+            if pl not in self.saved:
+                self.saved.append(pl)
 
-        with open("sipdigestcrack.res", "w+") as f:
-            for l in lines:
-                f.write(l + "\n")
+    def save_file(self):
+        self.saved.sort()
+        aux = []
+        aux2 = []
+        
+        for line in reversed(self.saved):
+            values = line.split(":")
+            
+            tmp = f"{values[0]}:{values[1]}:{values[2]}:{values[3]}:{values[4]}:"            
+            if tmp not in aux:
+                aux2.append(line)
+                
+            aux.append(tmp)
 
-        f.close()
+        aux2.sort()
+
+        f = open(self.backupfile, 'w+')
+        
+        for line in aux2:
+            f.write(line + "\n")
+                
+        f.close()    
 
     def crack(
         self,
@@ -474,10 +502,10 @@ class SipDigestCrack:
                             self.verbose,
                             "",
                         ):
-                            self.save_file(self.charset, username, pwd, "true")
+                            self.save_data(self.charset, username, pwd, "true")
                             return pwd
             except KeyboardInterrupt:
-                self.save_file(self.charset, username, pwd, "false")
+                self.save_data(self.charset, username, pwd, "false")
                 self.stop()
                 return ""
             except:
@@ -487,7 +515,7 @@ class SipDigestCrack:
                 for pwd in fd:
                     # if not self.run_event.is_set():
                     #     # fd.close()
-                    #     self.save_file(self.wordlist, username, pwd, "false")
+                    #     self.save_data(self.wordlist, username, pwd, "false")
                     #     self.stop()
                     #     break
 
@@ -508,7 +536,7 @@ class SipDigestCrack:
 
                         if not self.run_event.is_set():
                             fd.close()
-                            self.save_file(self.wordlist, username, pwd, "false")
+                            self.save_data(self.wordlist, username, pwd, "false")
                             self.stop()
                             break
 
@@ -530,18 +558,18 @@ class SipDigestCrack:
                             "",
                         ):
                             fd.close()
-                            self.save_file(self.wordlist, username, pwd, "true")
+                            self.save_data(self.wordlist, username, pwd, "true")
                             return pwd
                     except KeyboardInterrupt:
                         fd.close()
-                        self.save_file(self.wordlist, username, pwd, "false")
+                        self.save_data(self.wordlist, username, pwd, "false")
                         self.stop()
                         return ""
                     except:
                         pwd = ""
                         pass
 
-            self.save_file(self.wordlist, username, pwd, "false")
+            self.save_data(self.wordlist, username, pwd, "false")
             fd.close()
             return ""
 
