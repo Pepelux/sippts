@@ -403,6 +403,7 @@ class SipExten:
                 pass
             finally:
                 sock.close()
+                cursor.show()
 
     def print(self):
         iplen = len("IP address")
