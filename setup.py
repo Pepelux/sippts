@@ -13,6 +13,7 @@ if __name__ == "__main__":
       version='4.0',
       install_requires=[     
         'netifaces',
+        'requests',
         'IPy',
         'scapy',
         'pyshark',
