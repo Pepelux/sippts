@@ -196,12 +196,24 @@ def ip2long(ip):
     """
     Convert an IP string to long
     """
-    packedIP = socket.inet_aton(ip)
-    return struct.unpack("!L", packedIP)[0]
+    try:
+        # First, try to handle IPv4 addresses
+        packedIP = socket.inet_aton(ip)
+        return int.from_bytes(packedIP, 'big')
+    except OSError:
+        # If it's not IPv4, assume it's IPv6 and try to handle that
+        packedIP = socket.inet_pton(socket.AF_INET6, ip)
+        return int.from_bytes(packedIP, 'big')
 
 
 def long2ip(ip):
-    return str(socket.inet_ntoa(struct.pack("!L", ip)))
+    try:
+        # Try to handle IPv4 addresses first
+        return str(socket.inet_ntoa(struct.pack("!L", ip)))
+    except struct.error:
+        # If the IP is too large for IPv4, assume it's IPv6
+        packed_ip = ip.to_bytes(16, byteorder='big')  # Assuming the `ip` is in integer form
+        return socket.inet_ntop(socket.AF_INET6, packed_ip)
 
 
 def generate_random_string(len_ini, len_end, type):
