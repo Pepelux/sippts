@@ -205,7 +205,13 @@ Sippts has been tested on:
   
 ## Instalation ##
   Installing via git:
-  * $ git clone https://github.com/Pepelux/sippts.git
-  * $ cd sippts
-  * $ pip3 install .
+  ```bash
+  git clone https://github.com/Pepelux/sippts.git
+```
+```bash
+cd sippts
+```
+```bash
+pip3 install .
+```
 
