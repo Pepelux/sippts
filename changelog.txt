@@ -1,4 +1,5 @@
 devel:
+- added IPv6 converstions
 - renamed module sippcapdump to sipdump
 - removed tshark module
 - added module pcapdump to dump data from a PCAP file (SIP, RTP and RTP-to-WAV)
