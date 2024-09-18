@@ -2345,7 +2345,7 @@ Usage examples:
         + BYELLOW
         + """flood"""
         + YELLOW
-        + """ flood a server sending messages with a selected method."""
+        + """ performs a flood of a server by sending messages with a selected method."""
         + WHITE,
     )
 
