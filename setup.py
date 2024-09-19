@@ -18,10 +18,10 @@ if __name__ == "__main__":
         'scapy',
         'pyshark',
         'websocket-client',
-        'rel',
-        'cursor'
+        'rel'
       ],
       extra_requires=[
+        'cursor',
         'ArpSpoof'
       ],
     include_package_data=True,

@@ -14,7 +14,11 @@ import ssl
 import re
 import time
 
-import cursor
+try:
+    import cursor
+except:
+    pass
+
 from .lib.functions import (
     create_message,
     parse_message,
@@ -205,7 +209,10 @@ class SipExten:
                     try:
                         with ThreadPoolExecutor(max_workers=nthreads) as executor:
                             if self.quit == False:
-                                cursor.show()
+                                try:
+                                    cursor.show()
+                                except: 
+                                    pass
                                 for i, val2 in enumerate(values2):
                                     val_ipaddr = val2[0]
 
@@ -226,7 +233,10 @@ class SipExten:
                     except KeyboardInterrupt:
                         print(f"{self.c.RED}\nYou pressed Ctrl+C!")
                         print(self.c.WHITE)
-                        cursor.show()
+                        try:
+                            cursor.show()
+                        except: 
+                            pass
                         self.quit = True
 
                     values2.clear()
@@ -240,7 +250,10 @@ class SipExten:
 
     def scan_host(self, ipaddr, to_user):
         if self.quit == False:
-            cursor.hide()
+            try:
+                cursor.hide()
+            except: 
+                pass
             print(
                 f"{self.c.BYELLOW}[{self.line[self.pos]}] Enumerating {ipaddr}:{self.rport}/{self.proto} => Exten {to_user.ljust(100)}",
                 end="\r",
@@ -403,7 +416,10 @@ class SipExten:
                 pass
             finally:
                 sock.close()
-                cursor.show()
+                try:
+                    cursor.show()
+                except: 
+                    pass
 
     def print(self):
         iplen = len("IP address")

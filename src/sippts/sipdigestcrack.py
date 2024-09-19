@@ -15,7 +15,12 @@ import io
 import base64
 import os
 import time
-import cursor
+
+try:
+    import cursor
+except:
+    pass
+
 from .lib.functions import calculateHash, format_time
 import itertools
 import string
@@ -266,7 +271,10 @@ class SipDigestCrack:
                     pass
 
                 if found == "false":
-                    cursor.hide()
+                    try:
+                        cursor.hide()
+                    except: 
+                        pass
                     pwd = self.crack(
                         response,
                         username,
@@ -280,7 +288,10 @@ class SipDigestCrack:
                         qop,
                         word_start,
                     )
-                    cursor.show()
+                    try:
+                        cursor.show()
+                    except: 
+                        pass
 
                     if pwd != "":
                         print(

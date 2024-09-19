@@ -15,7 +15,12 @@ import ssl
 import re
 import time
 from IPy import IP
-import cursor
+
+try:
+    import cursor
+except:
+    pass
+
 from .lib.functions import (
     create_message,
     parse_message,
@@ -418,10 +423,16 @@ class SipScan:
                                             val_port,
                                             val_proto,
                                         )
-                                cursor.show()
+                                try:
+                                    cursor.show()
+                                except: 
+                                    pass
                     except KeyboardInterrupt:
                         print(f"{self.c.RED}\nYou pressed Ctrl+C!")
-                        cursor.show()
+                        try:
+                            cursor.show()
+                        except:
+                            pass
                         print(self.c.WHITE)
                         self.quit = True
 
@@ -439,7 +450,10 @@ class SipScan:
 
     def scan_host(self, ipaddr, port, proto):
         if self.quit == False:
-            cursor.hide()
+            try:
+                cursor.hide()
+            except:
+                pass
             print(
                 f"{self.c.BYELLOW}[{self.line[self.pos]}] Scanning {ipaddr}:{str(port)}/{proto}{' '.ljust(100)}",
                 end="\r",

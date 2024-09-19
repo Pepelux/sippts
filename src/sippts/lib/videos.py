@@ -1,4 +1,8 @@
-import cursor
+try:
+    import cursor
+except:
+    pass
+
 import time
 from .color import Color
 from .logos import Logo
@@ -9,40 +13,64 @@ class Video:
         self.c = Color()
 
     def basic(self):
-        cursor.hide()
+        try:
+            cursor.hide()
+        except: 
+            pass
 
         self.scan(5060, 5061)
         self.exten(100, 999)
         self.rcrack()
 
-        cursor.show()
+        try:
+            cursor.show()
+        except: 
+            pass
         exit()
 
     def digest(self):
-        cursor.hide()
+        try:
+            cursor.hide()
+        except: 
+            pass
 
         self.dump()
         self.dcrack()
 
-        cursor.show()
+        try:
+            cursor.show()
+        except: 
+            pass
         exit()
 
     def leak(self):
-        cursor.hide()
+        try:
+            cursor.hide()
+        except: 
+            pass
 
         self.sdleak()
         self.dcrack(True)
 
-        cursor.show()
+        try:
+            cursor.show()
+        except: 
+            pass
         exit()
 
     def spoof(self):
-        cursor.hide()
+        try:
+            cursor.hide()
+        except: 
+            pass
 
         self.arps()
         self.sniff()
 
-        cursor.show()
+        try:
+            cursor.show()
+        except: 
+            pass
         exit()
 
     def scan(self, portstart, portend):
