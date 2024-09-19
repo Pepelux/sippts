@@ -160,7 +160,7 @@ sippts -up
 
 # Set of tools for penetration test over SIP protocol #
 
-You can get help on how to use this tool at https://sippts.seguridadvoip.com and also on the Gothub wiki pages:
+You can get help on how to use this tool at https://sippts.seguridadvoip.com and also on the Github wiki pages:
 
 Sippts is a set of tools for auditing VoIP servers and devices using the SIP protocol. Sippts is programmed in Python and consists of the following commands or modules:
   * _**scan**_ is a fast scanner for SIP services that uses multithread. Scan can check several IPs and port ranges and it can work over UDP or TCP. [Click here to read more about scan command](https://github.com/Pepelux/sippts/wiki/Command-scan)
