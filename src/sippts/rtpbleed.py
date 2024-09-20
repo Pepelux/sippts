@@ -26,6 +26,7 @@ class RTPBleed:
         self.loops = "4"
         self.payload = "0"
         self.delay = "50"
+        self.ofile = ""
 
         self.c = Color()
 
@@ -51,6 +52,10 @@ class RTPBleed:
             f"{self.c.BWHITE}[✓] Delay between tries: {self.c.YELLOW}{self.delay} microseconds"
         )
         print(self.c.WHITE)
+
+        if self.ofile != "":
+            f = open(self.ofile, "a+")
+            f.write(f"Target IP: {self.ip}\n")
 
         # Create a UDP socket
         try:
@@ -117,12 +122,17 @@ class RTPBleed:
                             print(
                                 f"{self.c.WHITE}    [-] SSRC: {ssrc} - Timestamp: {timestamp} - Seq number: {seq}"
                             )
+                            if self.ofile != "":
+                                f.write(f"received {str(size)} bytes from target port {str(rport)} - loop {str(loop)} - SSRC: {ssrc} - Timestamp: {timestamp} - Seq number: {seq}\n")
                     except:
                         # No data available
                         continue
             except KeyboardInterrupt:
                 print(f"{self.c.YELLOW}\nYou pressed Ctrl+C!")
                 print(self.c.WHITE)
+                if self.ofile != "":
+                    f.write("\n")
+                    f.close()
                 exit()
             except:
                 pass
@@ -130,3 +140,7 @@ class RTPBleed:
             port += 2
 
         print(self.c.WHITE)
+
+        if self.ofile != "":
+            f.write("\n")
+            f.close()

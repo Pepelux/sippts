@@ -24,6 +24,7 @@ class RTCPBleed:
         self.start_port = "10000"
         self.end_port = "20000"
         self.delay = "1"
+        self.ofile = ""
 
         self.c = Color()
 
@@ -44,6 +45,10 @@ class RTCPBleed:
         )
         print(self.c.WHITE)
 
+        if self.ofile != "":
+            f = open(self.ofile, "a+")
+            f.write(f"Target IP: {self.ip}\n")
+            
         # Create a UDP socket
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -57,7 +62,8 @@ class RTCPBleed:
         byte_array = bytearray.fromhex(message)
         port = self.start_port
 
-        while True:
+        # while True:
+        while port < self.end_port + 2:
             try:
                 host = (str(self.ip), port)
 
@@ -76,12 +82,18 @@ class RTCPBleed:
                         print(
                             f"{self.c.WHITE}received {str(size)} bytes from target port {str(rport)}"
                         )
+
+                        if self.ofile != "":
+                            f.write(f"received {str(size)} bytes from target port {str(rport)}\n")
                 except:
                     # No data available
                     pass
             except KeyboardInterrupt:
                 print(f"{self.c.YELLOW}\nYou pressed Ctrl+C!")
                 print(self.c.WHITE)
+                if self.ofile != "":
+                    f.write("\n")
+                    f.close()
                 exit()
             except:
                 pass
@@ -89,3 +101,9 @@ class RTCPBleed:
             port += 2
             if port > self.end_port:
                 port = self.start_port
+
+        print(self.c.WHITE)
+
+        if self.ofile != "":
+            f.write("\n")
+            f.close()

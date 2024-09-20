@@ -26,7 +26,7 @@ CYAN = "\033[0;36;20m"
 BWHITE = "\033[1;37;20m"
 WHITE = "\033[0;37;20m"
 
-local_version = "4.0.14"
+local_version = "4.0.15"
 
 
 def get_sippts_args():
@@ -2747,6 +2747,16 @@ Payloads
         "-i", metavar="IP", type=str, help="Target IP address", dest="ipaddr"
     )
 
+    log = parser_rtpbleed.add_argument_group("Log")
+    log.add_argument(
+        "-o",
+        metavar="FILE",
+        type=str,
+        help="Save data into a log file",
+        dest="ofile",
+        default="",
+    )
+
     other = parser_rtpbleed.add_argument_group("Other options")
     other.add_argument(
         "-s",
@@ -2815,6 +2825,16 @@ Payloads
     target = parser_rtcpbleed.add_argument_group("Target")
     target.add_argument(
         "-i", metavar="IP", type=str, help="Target IP address", dest="ipaddr"
+    )
+
+    log = parser_rtcpbleed.add_argument_group("Log")
+    log.add_argument(
+        "-o",
+        metavar="FILE",
+        type=str,
+        help="Save data into a log file",
+        dest="ofile",
+        default="",
     )
 
     other = parser_rtcpbleed.add_argument_group("Other options")
@@ -3989,10 +4009,11 @@ Payloads
             SP = SP + 1
         if EP % 2 != 0:
             EP = EP + 1
-        LOOPS = args.loops
+        LOOPS = args.loops        
         PAYLOAD = args.payload
         DELAY = args.delay
-        return COMMAND, IPADDR, SP, EP, LOOPS, PAYLOAD, DELAY
+        OFILE = args.ofile
+        return COMMAND, IPADDR, SP, EP, LOOPS, PAYLOAD, DELAY, OFILE
     elif COMMAND == "rtcpbleed":
         if args.help == 1:
             parser_rtcpbleed.print_help()
@@ -4014,7 +4035,8 @@ Payloads
         if EP % 2 == 0:
             EP = EP + 1
         DELAY = args.delay
-        return COMMAND, IPADDR, SP, EP, DELAY
+        OFILE = args.ofile
+        return COMMAND, IPADDR, SP, EP, DELAY, OFILE
     elif COMMAND == "rtpbleedflood":
         if args.help == 1:
             parser_rtpbleedflood.print_help()

@@ -667,7 +667,7 @@ def main():
         s.rtp = rtp
         s.auth = auth
     elif params[0] == "rtpbleed":
-        (cmd, ip, start_port, end_port, loops, payload, delay) = params
+        (cmd, ip, start_port, end_port, loops, payload, delay, ofile) = params
 
         from sippts.rtpbleed import RTPBleed
 
@@ -678,8 +678,9 @@ def main():
         s.loops = loops
         s.payload = payload
         s.delay = delay
+        s.ofile = ofile
     elif params[0] == "rtcpbleed":
-        (cmd, ip, start_port, end_port, delay) = params
+        (cmd, ip, start_port, end_port, delay, ofile) = params
 
         from sippts.rtcpbleed import RTCPBleed
 
@@ -688,6 +689,7 @@ def main():
         s.start_port = start_port
         s.end_port = end_port
         s.delay = delay
+        s.ofile = ofile
     elif params[0] == "rtpbleedflood":
         (cmd, ip, port, payload, verbose) = params
 
