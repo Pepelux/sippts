@@ -1,9 +1,10 @@
-devel:
+v4.1 (Sep/2024):
 - added IPv6 converstions
 - renamed module sippcapdump to sipdump
 - removed tshark module
 - added module pcapdump to dump data from a PCAP file (SIP, RTP and RTP-to-WAV)
 - added module video to show animated help
+- added module astami to connect to Asterisk AMI
 - scan:
   - added param -t to set sockets timeout
   - added param -oi to save found ips into a file
