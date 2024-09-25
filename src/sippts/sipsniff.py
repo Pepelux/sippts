@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 __author__ = "Jose Luis Verdeguer"
-__version__ = "4.0"
+__version__ = "4.1"
 __license__ = "GPL"
 __copyright__ = "Copyright (C) 2015-2024, SIPPTS"
 __email__ = "pepeluxx@gmail.com"

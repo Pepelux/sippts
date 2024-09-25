@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 __author__ = "Jose Luis Verdeguer"
-__version__ = "4.0"
+__version__ = "4.1"
 __license__ = "GPL"
 __copyright__ = "Copyright (C) 2015-2024, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
@@ -32,8 +32,45 @@ def main():
             s.spoof()
 
         exit()
+    elif params[0] == "astami":
+        (
+            cmd,
+            ip,
+            host,
+            rport,
+            proto,
+            threads,
+            timeout,
+            verbose,
+            file,
+            nocolor,
+            ofile,
+            random,
+            local_ip,
+            user,
+            pwd,
+            cmd
+        ) = params
 
-    if params[0] == "scan":
+        from sippts.astami import SipAstAMI
+
+        s = SipAstAMI()
+        s.ip = ip
+        s.host = host
+        s.rport = rport
+        s.proto = proto
+        s.threads = threads
+        s.timeout = timeout
+        s.verbose = verbose
+        s.file = file
+        s.nocolor = nocolor
+        s.ofile = ofile
+        s.random = random
+        s.localip = local_ip
+        s.user = user
+        s.pwd = pwd
+        s.cmd = cmd
+    elif params[0] == "scan":
         (
             cmd,
             ip,
