@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 __author__ = "Jose Luis Verdeguer"
-__version__ = "4.0"
+__version__ = "4.1"
 __license__ = "GPL"
 __copyright__ = "Copyright (C) 2015-2024, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
@@ -236,8 +236,9 @@ class SipScan:
                 print(self.c.WHITE)
                 exit()
         else:
+            ips = []
+            
             for i in self.ip.split(","):
-                ips = []
                 hosts = []
                 error = 0
 
@@ -291,13 +292,12 @@ class SipScan:
                                         f"{self.c.GREEN}\n   [-] ... Pong {str(long2ip(i))}{self.c.WHITE}"
                                     )
                                     ips.append(long2ip(i))
-
-                    self.prepare_scan(ips, ports, protos, iplist)
                 except:
                     if ips == []:
                         ips.append(self.ip)
                         iplist = self.ip
-                        self.prepare_scan(ips, ports, protos, iplist)
+
+            self.prepare_scan(ips, ports, protos, iplist)
 
     def prepare_scan(self, ips, ports, protos, iplist):
         max_values = 100000

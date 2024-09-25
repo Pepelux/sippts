@@ -9,8 +9,8 @@ scripts=[
 if __name__ == "__main__":
   setup(scripts=scripts,
     name='SIPPTS',
-      author='Jose Luis Verdeguer - Pepelux',
-      version='4.0',
+      author='Jose Luis Verdeguer aka Pepelux',
+      version='4.1',
       install_requires=[     
         'netifaces',
         'requests',
@@ -18,7 +18,8 @@ if __name__ == "__main__":
         'scapy',
         'pyshark',
         'websocket-client',
-        'rel'
+        'rel',
+        'asterisk-ami'
       ],
       extra_requires=[
         'cursor',
