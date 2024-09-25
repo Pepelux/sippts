@@ -1,5 +1,5 @@
 v4.1 (Sep/2024):
-- added IPv6 converstions
+- added IPv6 conversions
 - renamed module sippcapdump to sipdump
 - removed tshark module
 - added module pcapdump to dump data from a PCAP file (SIP, RTP and RTP-to-WAV)
