@@ -26,7 +26,7 @@ CYAN = "\033[0;36;20m"
 BWHITE = "\033[1;37;20m"
 WHITE = "\033[0;37;20m"
 
-local_version = "4.0.15"
+local_version = "4.1.0"
 
 
 def get_sippts_args():
@@ -159,6 +159,144 @@ def get_sippts_args():
     )
 
     other = parser_video.add_argument_group("Other options")
+    other.add_argument(
+        "-h", "--help", help="Show this help", dest="help", action="count"
+    )
+
+    ################
+    # Asterisk AMI #
+    ################
+    parser_astami = subparsers.add_parser(
+        "astami",
+        formatter_class=argparse.RawTextHelpFormatter,
+        help="Asterisk AMI pentest",
+        add_help=False,
+        description=RED
+        + Logo("astami").get_logo()
+        + YELLOW
+        + """
+  Module """
+        + BYELLOW
+        + """astami"""
+        + YELLOW
+        + """ is a module to scan and audit the Asterisk AMI service."""
+        + WHITE,
+        epilog="""
+Usage examples:
+"""
+        + YELLOW
+        + """  Searching for AMI services and devices with default ports (5038/tcp) on the local network
+"""
+        + WHITE
+        + """     sippts astami -i 192.168.0.0/24
+"""
+    )
+
+    target = parser_astami.add_argument_group("Target")
+    target.add_argument(
+        "-i",
+        metavar="IP|HOST",
+        type=str,
+        help="Host/IP address/network (ex: mysipserver.com | 192.168.0.10 | 192.168.0.0/24)",
+        dest="ipaddr",
+    )
+    target.add_argument(
+        "-f",
+        metavar="FILE",
+        type=str,
+        help="File with several IPs or network ranges",
+        dest="file",
+        default="",
+    )
+    target.add_argument(
+        "-r",
+        metavar="REMOTE_PORT",
+        type=str,
+        help="Ports to scan. Ex: 5038 | 5038,5039 | 5030-5060 | 5038,5039,5070-5080 (default: 5038)",
+        dest="rport",
+        default="5038",
+    )
+    target.add_argument(
+        "-p",
+        metavar="PROTOCOL",
+        type=str.upper,
+        help="Protocol: tcp|tls|all (default: tcp)",
+        dest="proto",
+        choices=["TCP", "TLS", "ALL"],
+        default="tcp",
+    )
+    target.add_argument(
+        "-c",
+        metavar="COMMAND",
+        type=str,
+        help="Send command to AMI",
+        dest="cmd",
+        default="",
+    )
+
+    auth = parser_astami.add_argument_group("Auth")
+    auth.add_argument(
+        "-user",
+        metavar="AUTH_USER",
+        type=str,
+        help="Authentication user (default: admin)",
+        dest="user",
+        default="admin",
+    )
+    auth.add_argument(
+        "-pass",
+        metavar="AUTH_PASS",
+        type=str,
+        help="Authentication password (default: amp111)",
+        dest="pwd",
+        default="amp111",
+    )
+
+    log = parser_astami.add_argument_group("Log")
+    log.add_argument("-v", help="Increase verbosity", dest="verbose", action="count")
+    log.add_argument(
+        "-vv", help="Increase more verbosity", dest="more_verbose", action="count"
+    )
+    log.add_argument(
+        "-nocolor", help="Show result without colors", dest="nocolor", action="count"
+    )
+    log.add_argument(
+        "-o",
+        metavar="FILE",
+        type=str,
+        help="Save data into a log file",
+        dest="ofile",
+        default="",
+    )
+
+    other = parser_astami.add_argument_group("Other options")
+    other.add_argument(
+        "-th",
+        metavar="THREADS",
+        type=int,
+        help="Number of threads (default: 200)",
+        dest="threads",
+        default=200,
+    )
+    other.add_argument(
+        "-t",
+        metavar="TIMEOUT",
+        type=int,
+        help="Sockets timeout (default: 5)",
+        dest="timeout",
+        default=5,
+    )
+    other.add_argument(
+        "-random", help="Randomize target hosts", dest="random", action="count"
+    )
+    other.add_argument(
+        "-local-ip",
+        metavar="IP",
+        type=str,
+        help="Set local IP address (by default try to get it)",
+        dest="localip",
+        default="",
+    )
     other.add_argument(
         "-h", "--help", help="Show this help", dest="help", action="count"
     )
@@ -3130,6 +3268,11 @@ Payloads
                 "sipsniff.py",
             )
             download_file(
+                giturl + "src/sippts/astami.py",
+                modulepath + "astami.py",
+                "astami.py",
+            )
+            download_file(
                 giturl + "src/sippts/wssend.py", modulepath + "wssend.py", "wssend.py"
             )
 
@@ -3194,6 +3337,57 @@ Payloads
         SPOOF = args.spoof
 
         return COMMAND, BASIC, DIGEST, LEAK, SPOOF
+    elif COMMAND == "astami":
+        if args.help == 1:
+            parser_astami.print_help()
+            exit()
+        if not args.ipaddr and not args.file:
+            parser_astami.print_help()
+            print(RED)
+            print("Param error!")
+            print(
+                f"{BWHITE}{COMMAND}:{WHITE} Mandatory params: {GREEN}-i <IP|HOST>{WHITE} or {GREEN}-f <FILE>"
+            )
+            print(f"{WHITE}Use {CYAN}sippts {COMMAND} -h/--help{WHITE} for help")
+            exit()
+
+        IPADDR = args.ipaddr
+        HOST = args.ipaddr
+        PORT = args.rport
+        PROTO = args.proto
+        THREADS = args.threads
+        TIMEOUT = args.timeout
+        VERBOSE = args.verbose
+        MORE_VERBOSE = args.more_verbose
+        if MORE_VERBOSE == 1:
+            VERBOSE = 2
+        FILE = args.file
+        NOCOLOR = args.nocolor
+        OFILE = args.ofile
+        RANDOM = args.random
+        LOCALIP = args.localip
+        USER = args.user
+        PWD = args.pwd
+        CMD = args.cmd
+
+        return (
+            COMMAND,
+            IPADDR,
+            HOST,
+            PORT,
+            PROTO,
+            THREADS,
+            TIMEOUT,
+            VERBOSE,
+            FILE,
+            NOCOLOR,
+            OFILE,
+            RANDOM,
+            LOCALIP,
+            USER,
+            PWD,
+            CMD
+        )
     elif COMMAND == "scan":
         if args.help == 1:
             parser_scan.print_help()
