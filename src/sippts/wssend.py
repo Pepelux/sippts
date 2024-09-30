@@ -40,6 +40,7 @@ class WsSend:
         self.ppi = ""
         self.pai = ""
         self.localip = ""
+        self.path = ""
 
         self.msg = ""
         self.c = Color()
@@ -62,6 +63,11 @@ class WsSend:
             "REFER",
             "UPDATE",
         ]
+
+        try:
+            self.verbose = int(self.verbose)
+        except:
+            self.verbose = 0
 
         self.method = self.method.upper()
         self.proto = self.proto.upper()
@@ -205,7 +211,7 @@ class WsSend:
         except:
             print(f"{self.c.RED}Socket error")
             print(self.c.WHITE)
-            exit()
+            return
 
         print(self.c.WHITE)
 

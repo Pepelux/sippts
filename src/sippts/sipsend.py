@@ -89,6 +89,11 @@ class SipSend:
         if self.nocontact == 1:
             self.withcontact = 0
 
+        try:
+            self.verbose = int(self.verbose)
+        except:
+            self.verbose = 0
+
         self.method = self.method.upper()
         self.proto = self.proto.upper()
 
