@@ -65,8 +65,8 @@ class SipScan:
         self.nocolor = ""
         self.ofile = ""
         self.oifile = ""
-        self.fp = "0"
-        self.random = 0
+        self.fp = "False"
+        self.random = "False"
         self.ppi = ""
         self.pai = ""
         self.localip = ""
@@ -448,6 +448,11 @@ class SipScan:
         if len(self.cve) > 0:
             self.print_cve()
 
+        try:
+            cursor.show()
+        except:
+            pass
+
     def scan_host(self, ipaddr, port, proto):
         if self.quit == False:
             try:
@@ -673,7 +678,9 @@ class SipScan:
                                     self.cve.append(v)
             except socket.timeout:
                 pass
-            except:
+            except Exception as error:
+                if self.verbose == 2:
+                    print(f"{self.c.RED}\n{error}{self.c.WHITE}")
                 pass
             finally:
                 sock.close()

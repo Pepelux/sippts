@@ -1,6 +1,6 @@
 [project]
 name = "sippts"
-version = "4.0.dev0"
+version = "4.1.dev0"
 description = "SIPPTS is a set of tools for auditing VoIP systems based on the SIP protocol"
 readme = "README.md"
 requires-python = ">=3.7"

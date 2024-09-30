@@ -18,12 +18,13 @@ if __name__ == "__main__":
         'scapy',
         'pyshark',
         'websocket-client',
-        'rel',
-        'asterisk-ami'
+        'rel'
       ],
       extra_requires=[
         'cursor',
-        'ArpSpoof'
+        'ArpSpoof',
+        'asterisk-ami',
+        'Cmd'
       ],
     include_package_data=True,
     package_data={'sippts': ['data/cve.csv']}
