@@ -35,7 +35,6 @@ class RTPBleed:
     def stop(self):
         print(self.c.WHITE)
         self.run = False
-        exit()
 
     def start(self):
         self.start_port = int(self.start_port)

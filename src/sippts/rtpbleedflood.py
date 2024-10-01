@@ -32,7 +32,6 @@ class RTPBleedFlood:
     def stop(self):
         print(self.c.WHITE)
         self.run = False
-        exit()
 
 
     def start(self):
