@@ -1,0 +1,3066 @@
+#!/opt/homebrew/opt/python@3.12/bin/python3.12
+# -*- coding: utf-8 -*-
+
+__author__ = "Jose Luis Verdeguer"
+__version__ = "4.1"
+__license__ = "GPL"
+__copyright__ = "Copyright (C) 2015-2024, SIPPTS"
+__email__ = "pepeluxx@gmail.com"
+
+import os
+import random
+import subprocess
+import signal
+import platform
+import netifaces
+from cmd import Cmd
+from sippts.lib.color import Color
+from sippts.lib.logos import Logo
+from sippts.lib.functions import (
+    get_machine_default_ip,
+    get_default_gateway_linux,
+    get_default_gateway_mac,
+    load_cve_version,
+)
+
+local_version = "4.1.1"
+local_version_status = ""
+local_cve_version = ""
+local_cve_version_status = ""
+
+
+modules = [
+    "scan",
+    "exten",
+    "rcrack",
+    "enumerate",
+    "send",
+    "wssend",
+    "invite",
+    "leak",
+    "dump",
+    "dcrack",
+    "pcapdump",
+    "ping",
+    "flood",
+    "rtpbleed",
+    "rtcpbleed",
+    "rtpbleedflood",
+    "rtpbleedinject",
+]
+
+parameters = []
+
+scan = (
+    (
+        "ip",
+        "Target Host/IP address/network (ex: mysipserver.com | 192.168.0.10 | 192.168.0.0/24, 192.168.1.10-192.168.1.20,10.0.0.0/24)",
+        True,
+    ),
+    ("file", "File with several IPs or network ranges", True),
+    (
+        "rport",
+        "Target port(s). Ex: 5060 | 5070,5080 | 5060-5080 | 5060,5062,5070-5080",
+        True,
+    ),
+    ("proto", "Protocol: udp|tcp|tls|all", True),
+    ("proxy", "Use an outbound proxy (Ex: 192.168.1.1 or 192.168.1.1:5070)", False),
+    ("method", "Method used to scan: options, invite, register", True),
+    (
+        "domain",
+        "SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)",
+        False,
+    ),
+    ("contact_domain", "Domain or IP address for Contact header. Ex: 10.0.1.2", False),
+    ("from_name", "From Name. Ex: Bob", False),
+    ("from_user", "From User", False),
+    ("from_domain", "From Domain", False),
+    ("to_name", "To Name. Ex: Alice", False),
+    ("to_user", "To User", False),
+    ("to_domain", "To Domain", False),
+    ("ua", "User-Agent header", False),
+    ("ppi", "P-Preferred-Identity header", False),
+    ("pai", "P-Asserted-Identity header", False),
+    ("verbose", "Verbosity level: 0|1|2", True),
+    ("output_file", "Save data into a log file", False),
+    ("output_ip_file", "Save IPs into a log file", False),
+    ("cve", "Show possible CVEs", False),
+    ("threads", "Number of threads", True),
+    ("timeout", "Sockets timeout", True),
+    ("ping", "Ping host before scan", True),
+    ("fp", "Try to fingerprinting", True),
+    ("random", "Randomize target hosts", True),
+    ("local_ip", "Set local IP address (by default try to get it)", False),
+)
+
+exten = (
+    ("ip", "Target Host/IP address", True),
+    ("rport", "Target port. Ex: 5060", True),
+    (
+        "exten",
+        "Extensions to scan. Ex: 100 | 100,102,105 | 100-200 | 100,102,200-300",
+        True,
+    ),
+    ("proto", "Protocol: udp|tcp|tls", True),
+    ("proxy", "Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)", False),
+    ("prefix", "Prefix for extensions, used for authentication", False),
+    ("method", "Method used to scan: options, invite, register", True),
+    (
+        "domain",
+        "SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)",
+        False,
+    ),
+    ("contact_domain", "Domain or IP address for Contact header. Ex: 10.0.1.2", False),
+    ("from_user", "From User", False),
+    ("ua", "User-Agent header", False),
+    ("verbose", "Verbosity level: 0|1|2", True),
+    ("output_file", "Save data into a log file", False),
+    ("filter", "Filter response code (ex: 200)", False),
+    ("threads", "Number of threads", True),
+    ("timeout", "Sockets timeout", True),
+)
+
+rcrack = (
+    ("ip", "Target Host/IP address", True),
+    ("rport", "Target port. Ex: 5060", True),
+    (
+        "exten",
+        "Extensions or users to attack. Ex: 100 | 100,102,105 | 100-200 | user100",
+        True,
+    ),
+    ("auth_user", "Use a custom SIP Auth User instead the extension", False),
+    ("proto", "Protocol: udp|tcp|tls", True),
+    ("proxy", "Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)", False),
+    ("prefix", "Prefix for extensions, used for authentication", False),
+    ("len", "Lenght of the extensions (if set, left padding with 0's)", False),
+    ("wordlist", "Wordlist for bruteforce", True),
+    (
+        "domain",
+        "SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)",
+        False,
+    ),
+    ("contact_domain", "Domain or IP address for Contact header. Ex: 10.0.1.2", False),
+    ("ua", "User-Agent header", False),
+    ("verbose", "Verbosity level: 0|1", True),
+    ("threads", "Number of threads", True),
+    ("timeout", "Sockets timeout", True),
+)
+
+enumerate = (
+    ("ip", "Target Host/IP address", True),
+    ("rport", "Target port. Ex: 5060", True),
+    ("proto", "Protocol: udp|tcp|tls", True),
+    ("proxy", "Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)", False),
+    (
+        "domain",
+        "SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)",
+        False,
+    ),
+    ("contact_domain", "Domain or IP address for Contact header. Ex: 10.0.1.2", False),
+    ("from_name", "From Name. Ex: Bob", False),
+    ("from_user", "From User", False),
+    ("from_domain", "From Domain", False),
+    ("to_name", "To Name. Ex: Alice", False),
+    ("to_user", "To User", False),
+    ("to_domain", "To Domain", False),
+    ("ua", "User-Agent header", False),
+    ("verbose", "Verbosity level: 0|1", True),
+    ("timeout", "Sockets timeout", True),
+)
+
+send = (
+    ("ip", "Target Host/IP address", True),
+    ("rport", "Target port. Ex: 5060", True),
+    ("lport", "Local port", False),
+    ("template", "File with a SIP message template", False),
+    ("proto", "Protocol: udp|tcp|tls", True),
+    ("proxy", "Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)", False),
+    ("method", "Method used to scan: options, invite, register", True),
+    (
+        "domain",
+        "SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)",
+        False,
+    ),
+    ("contact_domain", "Domain or IP address for Contact header. Ex: 10.0.1.2", False),
+    ("from_name", "From Name. Ex: Bob", False),
+    ("from_user", "From User", False),
+    ("from_domain", "From Domain", False),
+    ("from_tag", "From Tag", False),
+    ("to_name", "To Name. Ex: Alice", False),
+    ("to_user", "To User", False),
+    ("to_domain", "To Domain", False),
+    ("to_tag", "To Tag", False),
+    ("ua", "User-Agent header", False),
+    ("ppi", "P-Preferred-Identity header", False),
+    ("pai", "P-Asserted-Identity header", False),
+    (
+        "header",
+        'Add custom header (ex: "Allow-Events: presence"). Multiple headers: hdr1&hdr2',
+        False,
+    ),
+    ("branch", "Customize Branch header", False),
+    ("callid", "Customize CallID header", False),
+    ("cseq", "Customize Seq number", False),
+    ("digest", "Add a customized Digest header", False),
+    ("sdp", "Send SDP in INVITE messages", False),
+    ("sdes", "Send SDES in SDP", False),
+    ("user", "Authentication user", False),
+    ("pass", "Authentication password", False),
+    ("verbose", "Verbosity level: 0|1", True),
+    ("output_file", "Save data into a log file", False),
+    ("timeout", "Sockets timeout", True),
+    ("local_ip", "Set local IP address (by default try to get it)", False),
+)
+
+wssend = (
+    ("ip", "Target Host/IP address", True),
+    ("rport", "Target port. Ex: 5060", True),
+    ("proto", "Protocol: udp|tcp|tls", True),
+    ("path", "WS path. Ex: /ws", False),
+    ("method", "Method used to scan: options, invite, register", True),
+    (
+        "domain",
+        "SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)",
+        False,
+    ),
+    ("contact_domain", "Domain or IP address for Contact header. Ex: 10.0.1.2", False),
+    ("from_name", "From Name. Ex: Bob", False),
+    ("from_user", "From User", False),
+    ("from_domain", "From Domain", False),
+    ("from_tag", "From Tag", False),
+    ("to_name", "To Name. Ex: Alice", False),
+    ("to_user", "To User", False),
+    ("to_domain", "To Domain", False),
+    ("to_tag", "To Tag", False),
+    ("ua", "User-Agent header", False),
+    ("ppi", "P-Preferred-Identity header", False),
+    ("pai", "P-Asserted-Identity header", False),
+    ("verbose", "Verbosity level: 0|1", True),
+    ("local_ip", "Set local IP address (by default try to get it)", False),
+)
+
+invite = (
+    ("ip", "Target Host/IP address", True),
+    ("rport", "Target port. Ex: 5060", True),
+    ("lport", "Local port", False),
+    ("proto", "Protocol: udp|tcp|tls", True),
+    ("proxy", "Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)", False),
+    (
+        "domain",
+        "SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)",
+        False,
+    ),
+    ("contact_domain", "Domain or IP address for Contact header. Ex: 10.0.1.2", False),
+    ("from_name", "From Name. Ex: Bob", False),
+    ("from_user", "From User", False),
+    ("from_domain", "From Domain", False),
+    ("to_name", "To Name. Ex: Alice", False),
+    ("to_user", "To User", False),
+    ("to_domain", "To Domain", False),
+    ("ua", "User-Agent header", False),
+    ("ppi", "P-Preferred-Identity header", False),
+    ("pai", "P-Asserted-Identity header", False),
+    ("nosdp", "Do not send SDP", False),
+    ("sdes", "Send SDES in SDP", False),
+    ("user", "Authentication user", False),
+    ("pass", "Authentication password", False),
+    ("verbose", "Verbosity level: 0|1", True),
+    ("output_file", "Save data into a log file", False),
+    ("transfer", "Phone number to transfer the call", False),
+    ("local_ip", "Set local IP address (by default try to get it)", False),
+)
+
+leak = (
+    ("ip", "Target Host/IP address", True),
+    ("file", "File with several IPs or network ranges", True),
+    ("rport", "Target port. Ex: 5060", True),
+    ("proto", "Protocol: udp|tcp|tls", True),
+    ("proxy", "Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)", False),
+    (
+        "domain",
+        "SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)",
+        False,
+    ),
+    ("contact_domain", "Domain or IP address for Contact header. Ex: 10.0.1.2", False),
+    ("from_name", "From Name. Ex: Bob", False),
+    ("from_user", "From User", False),
+    ("from_domain", "From Domain", False),
+    ("to_name", "To Name. Ex: Alice", False),
+    ("to_user", "To User", False),
+    ("to_domain", "To Domain", False),
+    ("ua", "User-Agent header", False),
+    ("ppi", "P-Preferred-Identity header", False),
+    ("pai", "P-Asserted-Identity header", False),
+    ("sdp", "Send SDP", False),
+    ("sdes", "Send SDES in SDP", False),
+    ("auth", "Authentication mode [www|proxy]", False),
+    ("user", "Authentication user", False),
+    ("pass", "Authentication password", False),
+    ("verbose", "Verbosity level: 0|1", True),
+    ("output_file", "Save digest to file in SipCrack format", False),
+    ("log_file", "Save result into a log file", False),
+    ("ping", "Ping host before send attack", True),
+    ("local_ip", "Set local IP address (by default try to get it)", False),
+)
+
+dump = (
+    ("file", "PCAP file to analyze", True),
+    ("output_file", "Save digest to file in SipCrack format", True),
+)
+
+dcrack = (
+    ("file", "SipCrack format file with SIP Digest hashes", True),
+    ("wordlist", "Wordlist for bruteforce", True),
+    ("bruteforce", "Bruteforce password", True),
+    ("charset", "Charset for bruteforce", False),
+    ("min", "Min length for bruteforce", False),
+    ("max", "Max length for bruteforce", False),
+    ("verbose", "Verbosity level: 0|1", True),
+    ("threads", "Number of threads", True),
+    ("prefix", "Prefix for passwords", False),
+    ("suffix", "suffix for passwords", False),
+)
+
+pcapdump = (
+    ("file", "PCAP file to analyze", True),
+    ("sip", "Show SIP frames", False),
+    ("rtp", "Show RTP frames", False),
+    ("auth", "Show SIP authentications", False),
+    ("rtp_extract", "Extract RTP streams into WAV files", False),
+    ("verbose", "Verbosity level: 0|1", True),
+    ("output_folder", "Save data into a folder", False),
+)
+
+ping = (
+    ("ip", "Target Host/IP address", True),
+    ("rport", "Target port. Ex: 5060", True),
+    ("proto", "Protocol: udp|tcp|tls", True),
+    ("proxy", "Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)", False),
+    ("method", "Method used to scan: options, invite, register", True),
+    (
+        "domain",
+        "SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)",
+        False,
+    ),
+    ("contact_domain", "Domain or IP address for Contact header. Ex: 10.0.1.2", False),
+    ("from_name", "From Name. Ex: Bob", False),
+    ("from_user", "From User", False),
+    ("from_domain", "From Domain", False),
+    ("from_tag", "From Tag", False),
+    ("to_name", "To Name. Ex: Alice", False),
+    ("to_user", "To User", False),
+    ("to_domain", "To Domain", False),
+    ("to_tag", "To Tag", False),
+    ("ua", "User-Agent header", False),
+    ("ppi", "P-Preferred-Identity header", False),
+    ("pai", "P-Asserted-Identity header", False),
+    ("branch", "Customize Branch header", False),
+    ("callid", "Customize CallID header", False),
+    ("cseq", "Customize Seq number", False),
+    ("digest", "Add a customized Digest header", False),
+    ("user", "Authentication user", False),
+    ("pass", "Authentication password", False),
+    ("requests", "Number of requests", False),
+    ("interval", "Wait interval seconds between sending each packet", False),
+    ("timeout", "Sockets timeout", True),
+    ("local_ip", "Set local IP address (by default try to get it)", False),
+)
+
+flood = (
+    ("ip", "Target Host/IP address", True),
+    ("rport", "Target port. Ex: 5060", True),
+    ("proto", "Protocol: udp|tcp|tls", True),
+    ("method", "Method used to scan: options, invite, register", True),
+    ("domain", "SIP Domain or IP address. Ex: my.sipserver.com", False),
+    ("contact_domain", "Domain or IP address for Contact header. Ex: 10.0.1.2", False),
+    ("from_name", "From Name. Ex: Bob", False),
+    ("from_user", "From User", False),
+    ("from_domain", "From Domain", False),
+    ("to_name", "To Name. Ex: Alice", False),
+    ("to_user", "To User", False),
+    ("to_domain", "To Domain", False),
+    ("ua", "User-Agent header", False),
+    ("digest", "Add a customized Digest header", False),
+    ("bad", "Send malformed headers", False),
+    ("charset", "Alphabet [all|printable|ascii|hex]", False),
+    ("min", "Min length", False),
+    ("max", "Max length", False),
+    ("verbose", "Verbosity level: 0|1", True),
+    ("threads", "Number of threads", True),
+    ("requests", "Number of requests", False),
+)
+
+rtpbleed = (
+    ("ip", "Target Host/IP address", True),
+    ("output_file", "Save data into a log file", False),
+    ("start", "Start port of the host", True),
+    ("end", "End port of the host", True),
+    ("loops", "Number of times to probe the port ranges on the target(s)", True),
+    ("payload", "Codec payload", True),
+    ("delay", "Delay for timeout in microseconds", True),
+)
+
+rtcpbleed = (
+    ("ip", "Target Host/IP address", True),
+    ("output_file", "Save data into a log file", False),
+    ("start", "Start port of the host", True),
+    ("end", "End port of the host", True),
+    ("delay", "Delay for timeout in microseconds", True),
+)
+
+rtpbleedflood = (
+    ("ip", "Target Host/IP address", True),
+    ("port", "Port number to flood", True),
+    ("payload", "Codec payload", True),
+    ("verbose", "Verbosity level: 0|1", True),
+)
+
+rtpbleedinject = (
+    ("ip", "Target Host/IP address", True),
+    ("file", "Audio file (WAV) to inject", True),
+    ("port", "Port number to flood", True),
+    ("payload", "Codec payload", True),
+)
+
+
+modules_list = (
+    ("scan", "SIP network scanner"),
+    ("exten", "SIP PBX extensions enumerator"),
+    ("rcrack", "Remote PBX extensions cracker"),
+    ("enumerate", "To check the available methods of a SIP service/server"),
+    ("send", "Send a customized SIP message"),
+    ("wssend", "Send a customized SIP message over Web Sockets"),
+    ("invite", "SIP INVITE attack"),
+    ("leak", "Exploit the SIP Digest Leak vulnerability"),
+    ("dump", "Extracts SIP Digest authentications from a PCAP file"),
+    ("dcrack", "Bruteforce SIP digest authentications"),
+    ("pcapdump", "Extracts data from a PCAP file"),
+    ("ping", "Send a SIP Ping to test if the server/device is available"),
+    (
+        "flood",
+        "Performs a flood of a server by sending messages with a selected method",
+    ),
+    ("rtpbleed", "Detects the RTP Bleed vulnerability sending RTP streams"),
+    ("rtcpbleed", "Detects the RTP Bleed vulnerability sending RTCP streams"),
+    ("rtpbleedflood", "Exploit the RTP Bleed vulnerability flooding with RTP streams"),
+    (
+        "rtpbleedinject",
+        "Exploit the RTP Bleed vulnerability injecting RTP audio streams",
+    ),
+)
+
+help_list = (
+    ("network", "Show network information"),
+    ("modules", "Show available modules"),
+    ("setg <param> <value>", "Set global parameters to use with other modules"),
+    ("unsetg <param>", "Remove global parameter"),
+    ("global", "List global parameters"),
+    ("use <module>", "Use a module"),
+    ("back", "Back to the main menu"),
+    ("clear|Ctrl+L", "Clear screen"),
+    ("shell", "Execute a shell"),
+    ("quit|exit|q", "Exit the application"),
+)
+
+help_mod_list = (
+    ("show", "Show module options"),
+    (
+        "set <param> <value>",
+        "Set options and parameters for the current module you are working with",
+    ),
+    ("run", "Execute module"),
+)
+
+c = Color()
+
+
+def load_parameters(list):
+    for v1, v2, v3 in list:
+        if v1 not in parameters:
+            parameters.append(v1)
+
+
+def open_shell():
+    print(c.BWHITE + "Type exit to return to SIPPTS" + c.WHITE)
+    # for mac and linux(here, os.name is 'posix')
+    if os.name == "posix" or os.name == "Linux":
+        _ = os.system("/bin/bash")
+    else:
+        # for windows platfrom
+        _ = os.system("cmd")
+
+
+def screen_clear():
+    # for mac and linux(here, os.name is 'posix')
+    if os.name == "posix" or os.name == "Linux":
+        _ = os.system("clear")
+    else:
+        # for windows platfrom
+        _ = os.system("cls")
+
+
+def signal_handler(self, sig):
+    print(f"{c.BYELLOW}\n\nYou pressed Ctrl+C!\n")
+    print(c.WHITE)
+    print("Bye! See you soon\n")
+
+    exit(0)
+
+
+def network():
+    local_ip = get_machine_default_ip()
+    local_mask = get_machine_default_ip("mask")
+    ops = platform.system()
+
+    if ops == "Linux":
+        gw = get_default_gateway_linux()
+
+    if ops == "Darwin":
+        gw = get_default_gateway_mac().strip()
+
+    dev = ""
+
+    x = netifaces.interfaces()
+    for i in x:
+        try:
+            y = netifaces.ifaddresses(i)
+            address = y[2][0]["addr"]
+            if address == local_ip:
+                dev = i
+        except:
+            pass
+
+    print(f"{c.BWHITE}[!] Client interface: {c.BMAGENTA}{dev}")
+    print(f"{c.BWHITE}[!] Client IP address: {c.BGREEN}{local_ip}")
+    print(f"{c.BWHITE}[!] Network mask: {c.BGREEN}{local_mask}")
+    print(f"{c.BWHITE}[!] Gateway: {c.BGREEN}{gw}")
+    print(c.WHITE)
+
+
+def get_version():
+    global local_version
+    global local_version_status
+    global local_cve_version
+    global local_cve_version_status
+
+    try:
+        command = [
+            "curl",
+            "https://raw.githubusercontent.com/Pepelux/sippts/master/version",
+            "-H 'Cache-Control: no-cache, no-store'",
+        ]
+        result = subprocess.run(
+            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+        )
+
+        output = result.stdout
+        error = result.stderr
+
+        if result.returncode == 0:
+            current_version = output.replace("\n", "")
+        else:
+            current_version = local_version
+    except:
+        current_version = local_version
+
+    if local_version != current_version:
+        local_version_status = (
+            c.BRED + """ (last version """ + current_version + """)"""
+        )
+    else:
+        local_version_status = c.BWHITE + """ (updated)"""
+
+    local_cve_version = load_cve_version()
+
+    try:
+        command = [
+            "curl",
+            "https://raw.githubusercontent.com/Pepelux/sippts/master/cveversion",
+            "-H 'Cache-Control: no-cache, no-store'",
+        ]
+        result = subprocess.run(
+            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+        )
+
+        output = result.stdout
+        error = result.stderr
+
+        if result.returncode == 0 and output != "404: Not Found":
+            current_cve_version = output.replace("\n", "")
+        else:
+            current_cve_version = local_cve_version
+    except:
+        current_cve_version = local_cve_version
+
+    if local_cve_version != current_cve_version:
+        local_cve_version_status = (
+            c.BRED + """ (last version """ + current_cve_version + """)"""
+        )
+    else:
+        local_cve_version_status = c.BWHITE + """ (updated)"""
+
+
+class SIPPTS(Cmd):
+    prompt = f"{c.BGREEN}SIPPTS> {c.WHITE}"
+
+    active_mod = ""
+    mod = ""
+
+    globalop = []
+
+    print(c.WHITE)
+    screen_clear()
+
+    get_version()
+
+    load_parameters(scan)
+    load_parameters(exten)
+    load_parameters(rcrack)
+    load_parameters(enumerate)
+    load_parameters(send)
+    load_parameters(wssend)
+    load_parameters(invite)
+    load_parameters(leak)
+    load_parameters(dump)
+    load_parameters(dcrack)
+    load_parameters(pcapdump)
+    load_parameters(ping)
+    load_parameters(flood)
+    load_parameters(rtpbleed)
+    load_parameters(rtcpbleed)
+    load_parameters(rtpbleedflood)
+    load_parameters(rtpbleedinject)
+    parameters.sort()
+
+    rnd = random.randint(1, 4)
+    if rnd == 1:
+        color = c.RED
+    elif rnd == 2:
+        color = c.GREEN
+    elif rnd == 3:
+        color = c.CYAN
+    else:
+        color = c.YELLOW
+
+    print(color)
+    logo = Logo("sippts").get_logo(
+        color,
+        local_version,
+        local_version_status,
+        local_cve_version,
+        local_cve_version_status,
+    )
+    print(logo)
+
+    print(
+        f"{c.WHITE}Welcome to {c.BBLUE}SIPPTS{c.WHITE}! Type {c.BWHITE}? {c.WHITE}or {c.BWHITE}help {c.WHITE}to list commands\n"
+    )
+
+    signal.signal(signal.SIGINT, signal_handler)
+
+    network()
+
+    print(f"Type {c.BWHITE}? {c.WHITE}or {c.BWHITE}help {c.WHITE}to list commands\n")
+
+    singhandle = False
+
+    def signal_handler(self, sig, x):
+        print(c.BYELLOW + "\n\nYou pressed Ctrl+C!")
+        print(c.WHITE)
+
+        self.mod.stop()
+
+    def complete_use(self, text, line, start_index, end_index):
+        if text:
+            return [command for command in modules if command.startswith(text)]
+        else:
+            return modules
+
+    def complete_set(self, text, line, start_index, end_index):
+        if text:
+            return [param for param in parameters if param.startswith(text)]
+        else:
+            return modules
+
+    # show available commands
+    def available_commands(self, globalcmd):
+        plen = 25
+        dlen = 20
+
+        if globalcmd == True:
+            l = help_list
+        else:
+            l = help_mod_list
+
+        for x in l:
+            if len(x[1]) > dlen:
+                dlen = len(x[1])
+
+        tlen = plen + dlen + 4
+        print(c.WHITE)
+        print(" " + "-" * tlen)
+        if globalcmd == True:
+            print(
+                f"{c.WHITE}| {c.BWHITE}" + "Global commands".ljust(tlen) + f"{c.WHITE}|"
+            )
+        else:
+            print(
+                f"{c.WHITE}| {c.BWHITE}" + "Module commands".ljust(tlen) + f"{c.WHITE}|"
+            )
+        print(" " + "-" * tlen)
+
+        for x in l:
+            (hc, hd) = x
+            print(
+                c.WHITE
+                + "| "
+                + c.GREEN
+                + "%s" % hc.ljust(plen)
+                + c.WHITE
+                + "| "
+                + "%s" % hd.ljust(dlen)
+                + " |"
+            )
+
+        print(" " + "-" * tlen)
+
+        if globalcmd == True:
+            print(
+                f"{c.WHITE}\nType {c.BYELLOW}help <command>{c.WHITE} for command help"
+            )
+
+    # show available modules
+    def available_modules(self):
+        plen = 25
+        dlen = 20
+
+        for x in modules_list:
+            if len(x[1]) > dlen:
+                dlen = len(x[1])
+
+        tlen = plen + dlen + 4
+        print(c.WHITE)
+        print(" " + "-" * tlen)
+        print(
+            f"{c.WHITE}|{c.BWHITE} "
+            + "Available modules".ljust(tlen - 2)
+            + f"{c.WHITE} |"
+        )
+        print(" " + "-" * tlen)
+
+        for x in modules_list:
+            (hc, hd) = x
+            print(f"{c.WHITE}| {c.GREEN}{hc.ljust(plen)}{c.WHITE}| {hd.ljust(dlen)} |")
+
+        print(" " + "-" * tlen)
+
+        print(f"{c.WHITE}\nType {c.BYELLOW}use <module> {c.WHITE}to select a module\n")
+
+    # show available options
+    def available_options(self, module):
+        plen = 10
+        vlen = 10
+        dlen = 10
+
+        for x in module:
+            (param, detail, required) = x
+            value = self.set_option(self.active_mod, param, "", True, False)
+            if len(param) > plen:
+                plen = len(param)
+            if len(detail) > dlen:
+                dlen = len(detail)
+            if len(str(value)) > vlen:
+                vlen = len(str(value))
+
+        tlen = plen + vlen + dlen + 6
+        print(f"{c.BWHITE}Available options:\n")
+        print(" " + "-" * tlen)
+        print(
+            f"{c.WHITE}"
+            + f"| "
+            + "Param".ljust(plen)
+            + f"| "
+            + "Value".ljust(vlen)
+            + f"| "
+            + "Description".ljust(dlen)
+            + " |"
+        )
+        print(" " + "-" * tlen)
+
+        for x in module:
+            C = c.GREEN
+            (param, detail, required) = x
+            value = self.set_option(self.active_mod, param, "", True, True)
+
+            if required == True and value == "":
+                if (
+                    (self.active_mod == "scan" or self.active_mod == "leak")
+                    and (
+                        param == "ip"
+                        and self.set_option(self.active_mod, "file", "", True, False)
+                        != ""
+                    )
+                    or (
+                        param == "file"
+                        and self.set_option(self.active_mod, "ip", "", True, False)
+                        != ""
+                    )
+                ):
+                    C = c.GREEN
+                elif (
+                    self.active_mod == "dcrack"
+                    and param == "wordlist"
+                    and self.set_option(self.active_mod, "bruteforce", "", True, False)
+                    == "1"
+                ):
+                    C = c.GREEN
+                else:
+                    C = c.RED
+
+            print(
+                f"{c.WHITE}"
+                + f"| {C}{param.ljust(plen)}{c.WHITE}"
+                + f"| {c.YELLOW}{str(value).ljust(vlen)}{c.WHITE}"
+                + f"| {detail.ljust(dlen)} |"
+            )
+
+        print(" " + "-" * tlen)
+
+        print(f"{c.WHITE}\nType {c.BYELLOW}set <param> <value> {c.WHITE}to change\n")
+
+    def set_option_scan(self, param, value, run, log):
+        supported_protos = ["UDP", "TCP", "TLS"]
+        supported_methods = ["OPTIONS", "REGISTER", "INVITE"]
+
+        ok = True
+
+        if param == "ip":
+            if run == False:
+                self.mod.ip = value
+            else:
+                value = self.mod.ip
+        elif param == "file":
+            if run == False:
+                self.mod.file = value
+            else:
+                value = self.mod.file
+        elif param == "rport":
+            if run == False:
+                self.mod.rport = value
+            else:
+                value = self.mod.rport
+        elif param == "proto":
+            if run == False:
+                value = value.upper()
+                if value not in supported_protos:
+                    if value == "ALL":
+                        self.mod.proto = "UDP|TCP|TLS"
+                    else:
+                        if log == True:
+                            print(
+                                f"{c.WHITE}Protocol {c.BRED}{value} {c.WHITE}is not supported\n"
+                            )
+                        ok = False
+                else:
+                    self.mod.proto = value
+            else:
+                value = self.mod.proto
+        elif param == "proxy":
+            if run == False:
+                self.mod.proxy = value
+            else:
+                value = self.mod.proxy
+        elif param == "method":
+            if run == False:
+                value = value.upper()
+                if value not in supported_methods:
+                    if log == True:
+                        print(
+                            f"{c.WHITE}Method {c.BRED}{value} {c.WHITE}is not supported\n"
+                        )
+                    ok = False
+                else:
+                    self.mod.method = value
+            else:
+                value = self.mod.method
+        elif param == "domain":
+            if run == False:
+                self.mod.domain = value
+            else:
+                value = self.mod.domain
+        elif param == "contact_domain":
+            if run == False:
+                self.mod.contact_domain = value
+            else:
+                value = self.mod.contact_domain
+        elif param == "from_name":
+            if run == False:
+                self.mod.from_name = value
+            else:
+                value = self.mod.from_name
+        elif param == "from_user":
+            if run == False:
+                self.mod.from_user = value
+            else:
+                value = self.mod.from_user
+        elif param == "from_domain":
+            if run == False:
+                self.mod.from_domain = value
+            else:
+                value = self.mod.from_domain
+        elif param == "to_name":
+            if run == False:
+                self.mod.to_name = value
+            else:
+                value = self.mod.to_name
+        elif param == "to_user":
+            if run == False:
+                self.mod.to_user = value
+            else:
+                value = self.mod.to_user
+        elif param == "to_domain":
+            if run == False:
+                self.mod.to_domain = value
+            else:
+                value = self.mod.to_domain
+        elif param == "ua":
+            if run == False:
+                self.mod.user_agent = value
+            else:
+                value = self.mod.user_agent
+        elif param == "ppi":
+            if run == False:
+                self.mod.ppi = value
+            else:
+                value = self.mod.ppi
+        elif param == "pai":
+            if run == False:
+                self.mod.pai = value
+            else:
+                value = self.mod.pai
+        elif param == "verbose":
+            if run == False:
+                if value != "0" and value != "1" and value != "2":
+                    if log == True:
+                        print(f"{c.WHITE}Value {c.BRED}{value} {c.WHITE}is not valid\n")
+                    ok = False
+                else:
+                    self.mod.verbose = value
+            else:
+                value = self.mod.verbose
+        elif param == "output_file":
+            if run == False:
+                self.mod.ofile = value
+            else:
+                value = self.mod.ofile
+        elif param == "output_ip_file":
+            if run == False:
+                self.mod.oifile = value
+            else:
+                value = self.mod.oifile
+        elif param == "cve":
+            if run == False:
+                self.mod.cve = value
+            else:
+                value = self.mod.cve
+        elif param == "threads":
+            if run == False:
+                self.mod.threads = value
+            else:
+                value = self.mod.threads
+        elif param == "timeout":
+            if run == False:
+                self.mod.timeout = value
+            else:
+                value = self.mod.timeout
+        elif param == "ping":
+            if run == False:
+                if value.lower() != "true" and value.lower() != "false":
+                    if log == True:
+                        print(f"{c.WHITE}Value {c.BRED}{value} {c.WHITE}is not valid\n")
+                    ok = False
+                else:
+                    if value.lower() == "true":
+                        self.mod.ping = True
+                    else:
+                        self.mod.ping = False
+            else:
+                value = self.mod.ping
+        elif param == "fp":
+            if run == False:
+                if value.lower() != "true" and value.lower() != "false":
+                    if log == True:
+                        print(f"{c.WHITE}Value {c.BRED}{value} {c.WHITE}is not valid\n")
+                    ok = False
+                else:
+                    if value.lower() == "true":
+                        self.mod.fp = True
+                    else:
+                        self.mod.fp = False
+            else:
+                value = self.mod.fp
+        elif param == "random":
+            if run == False:
+                if value.lower() != "true" and value.lower() != "false":
+                    if log == True:
+                        print(f"{c.WHITE}Value {c.BRED}{value} {c.WHITE}is not valid\n")
+                    ok = False
+                else:
+                    if value.lower() == "true":
+                        self.mod.random = True
+                    else:
+                        self.mod.random = False
+            else:
+                value = self.mod.random
+        elif param == "local_ip":
+            if run == False:
+                self.mod.localip = value
+            else:
+                value = self.mod.localip
+        else:
+            if log == True:
+                print(f"{c.WHITE}Wrong option: {c.BRED}{param}{c.WHITE}")
+            ok = False
+
+        if run == False and ok == True:
+            if log == True:
+                print(f"{c.GREEN}\n{param}{c.WHITE} -> {c.YELLOW}{value}{c.WHITE}\n")
+
+        return value
+
+    def set_option_exten(self, param, value, run, log):
+        supported_protos = ["UDP", "TCP", "TLS"]
+        supported_methods = ["OPTIONS", "REGISTER", "INVITE"]
+
+        ok = True
+
+        if param == "ip":
+            if run == False:
+                self.mod.ip = value
+            else:
+                value = self.mod.ip
+        elif param == "rport":
+            if run == False:
+                self.mod.rport = value
+            else:
+                value = self.mod.rport
+        elif param == "exten":
+            if run == False:
+                self.mod.exten = value
+            else:
+                value = self.mod.exten
+        elif param == "prefix":
+            if run == False:
+                self.mod.prefix = value
+            else:
+                value = self.mod.prefix
+        elif param == "proto":
+            if run == False:
+                value = value.upper()
+                if value not in supported_protos:
+                    if value == "ALL":
+                        self.mod.proto = "UDP|TCP|TLS"
+                    else:
+                        if log == True:
+                            print(
+                                f"{c.WHITE}Protocol {c.BRED}{value} {c.WHITE}is not supported\n"
+                            )
+                        ok = False
+                else:
+                    self.mod.proto = value
+            else:
+                value = self.mod.proto
+        elif param == "proxy":
+            if run == False:
+                self.mod.proxy = value
+            else:
+                value = self.mod.proxy
+        elif param == "method":
+            if run == False:
+                value = value.upper()
+                if value not in supported_methods:
+                    if log == True:
+                        print(
+                            f"{c.WHITE}Method {c.BRED}{value} {c.WHITE}is not supported\n"
+                        )
+                    ok = False
+                else:
+                    self.mod.method = value
+            else:
+                value = self.mod.method
+        elif param == "domain":
+            if run == False:
+                self.mod.domain = value
+            else:
+                value = self.mod.domain
+        elif param == "contact_domain":
+            if run == False:
+                self.mod.contact_domain = value
+            else:
+                value = self.mod.contact_domain
+        elif param == "from_user":
+            if run == False:
+                self.mod.from_user = value
+            else:
+                value = self.mod.from_user
+        elif param == "ua":
+            if run == False:
+                self.mod.user_agent = value
+            else:
+                value = self.mod.user_agent
+        elif param == "verbose":
+            if run == False:
+                if value != "0" and value != "1" and value != "2":
+                    if log == True:
+                        print(f"{c.WHITE}Value {c.BRED}{value} {c.WHITE}is not valid\n")
+                    ok = False
+                else:
+                    self.mod.verbose = value
+            else:
+                value = self.mod.verbose
+        elif param == "output_file":
+            if run == False:
+                self.mod.ofile = value
+            else:
+                value = self.mod.ofile
+        elif param == "filter":
+            if run == False:
+                self.mod.filter = value
+            else:
+                value = self.mod.filter
+        elif param == "threads":
+            if run == False:
+                self.mod.threads = value
+            else:
+                value = self.mod.threads
+        elif param == "timeout":
+            if run == False:
+                self.mod.timeout = value
+            else:
+                value = self.mod.timeout
+        else:
+            if log == True:
+                print(f"{c.WHITE}Wrong option: {c.BRED}{param}{c.WHITE}")
+            ok = False
+
+        if run == False and ok == True:
+            if log == True:
+                print(f"{c.GREEN}\n{param}{c.WHITE} -> {c.YELLOW}{value}{c.WHITE}\n")
+
+        return value
+
+    def set_option_rcrack(self, param, value, run, log):
+        supported_protos = ["UDP", "TCP", "TLS"]
+
+        ok = True
+
+        if param == "ip":
+            if run == False:
+                self.mod.ip = value
+            else:
+                value = self.mod.ip
+        elif param == "rport":
+            if run == False:
+                self.mod.rport = value
+            else:
+                value = self.mod.rport
+        elif param == "exten":
+            if run == False:
+                self.mod.exten = value
+            else:
+                value = self.mod.exten
+        elif param == "auth_user":
+            if run == False:
+                self.mod.authuser = value
+            else:
+                value = self.mod.authuser
+        elif param == "prefix":
+            if run == False:
+                self.mod.prefix = value
+            else:
+                value = self.mod.prefix
+        elif param == "len":
+            if run == False:
+                self.mod.ext_len = value
+            else:
+                value = self.mod.ext_len
+        elif param == "wordlist":
+            if run == False:
+                self.mod.wordlist = value
+            else:
+                value = self.mod.wordlist
+        elif param == "proto":
+            if run == False:
+                value = value.upper()
+                if value not in supported_protos:
+                    if value == "ALL":
+                        self.mod.proto = "UDP|TCP|TLS"
+                    else:
+                        if log == True:
+                            print(
+                                f"{c.WHITE}Protocol {c.BRED}{value} {c.WHITE}is not supported\n"
+                            )
+                        ok = False
+                else:
+                    self.mod.proto = value
+            else:
+                value = self.mod.proto
+        elif param == "proxy":
+            if run == False:
+                self.mod.proxy = value
+            else:
+                value = self.mod.proxy
+        elif param == "domain":
+            if run == False:
+                self.mod.domain = value
+            else:
+                value = self.mod.domain
+        elif param == "contact_domain":
+            if run == False:
+                self.mod.contact_domain = value
+            else:
+                value = self.mod.contact_domain
+        elif param == "ua":
+            if run == False:
+                self.mod.user_agent = value
+            else:
+                value = self.mod.user_agent
+        elif param == "verbose":
+            if run == False:
+                if value != "0" and value != "1":
+                    if log == True:
+                        print(f"{c.WHITE}Value {c.BRED}{value} {c.WHITE}is not valid\n")
+                    ok = False
+                else:
+                    self.mod.verbose = value
+            else:
+                value = self.mod.verbose
+        elif param == "threads":
+            if run == False:
+                self.mod.threads = value
+            else:
+                value = self.mod.threads
+        elif param == "timeout":
+            if run == False:
+                self.mod.timeout = value
+            else:
+                value = self.mod.timeout
+        else:
+            if log == True:
+                print(f"{c.WHITE}Wrong option: {c.BRED}{param}{c.WHITE}")
+            ok = False
+
+        if run == False and ok == True:
+            if log == True:
+                print(f"{c.GREEN}\n{param}{c.WHITE} -> {c.YELLOW}{value}{c.WHITE}\n")
+
+        return value
+
+    def set_option_enumerate(self, param, value, run, log):
+        supported_protos = ["UDP", "TCP", "TLS"]
+
+        ok = True
+
+        if param == "ip":
+            if run == False:
+                self.mod.ip = value
+            else:
+                value = self.mod.ip
+        elif param == "rport":
+            if run == False:
+                self.mod.rport = value
+            else:
+                value = self.mod.rport
+        elif param == "proto":
+            if run == False:
+                value = value.upper()
+                if value not in supported_protos:
+                    if value == "ALL":
+                        self.mod.proto = "UDP|TCP|TLS"
+                    else:
+                        if log == True:
+                            print(
+                                f"{c.WHITE}Protocol {c.BRED}{value} {c.WHITE}is not supported\n"
+                            )
+                        ok = False
+                else:
+                    self.mod.proto = value
+            else:
+                value = self.mod.proto
+        elif param == "proxy":
+            if run == False:
+                self.mod.proxy = value
+            else:
+                value = self.mod.proxy
+        elif param == "domain":
+            if run == False:
+                self.mod.domain = value
+            else:
+                value = self.mod.domain
+        elif param == "contact_domain":
+            if run == False:
+                self.mod.contact_domain = value
+            else:
+                value = self.mod.contact_domain
+        elif param == "from_name":
+            if run == False:
+                self.mod.from_name = value
+            else:
+                value = self.mod.from_name
+        elif param == "from_user":
+            if run == False:
+                self.mod.from_user = value
+            else:
+                value = self.mod.from_user
+        elif param == "from_domain":
+            if run == False:
+                self.mod.from_domain = value
+            else:
+                value = self.mod.from_domain
+        elif param == "to_name":
+            if run == False:
+                self.mod.to_name = value
+            else:
+                value = self.mod.to_name
+        elif param == "to_user":
+            if run == False:
+                self.mod.to_user = value
+            else:
+                value = self.mod.to_user
+        elif param == "to_domain":
+            if run == False:
+                self.mod.to_domain = value
+            else:
+                value = self.mod.to_domain
+        elif param == "ua":
+            if run == False:
+                self.mod.user_agent = value
+            else:
+                value = self.mod.user_agent
+        elif param == "verbose":
+            if run == False:
+                if value != "0" and value != "1":
+                    if log == True:
+                        print(f"{c.WHITE}Value {c.BRED}{value} {c.WHITE}is not valid\n")
+                    ok = False
+                else:
+                    self.mod.verbose = value
+            else:
+                value = self.mod.verbose
+        elif param == "timeout":
+            if run == False:
+                self.mod.timeout = value
+            else:
+                value = self.mod.timeout
+        else:
+            if log == True:
+                print(f"{c.WHITE}Wrong option: {c.BRED}{param}{c.WHITE}")
+            ok = False
+
+        if run == False and ok == True:
+            if log == True:
+                print(f"{c.GREEN}\n{param}{c.WHITE} -> {c.YELLOW}{value}{c.WHITE}\n")
+
+        return value
+
+    def set_option_send(self, param, value, run, log):
+        supported_protos = ["UDP", "TCP", "TLS"]
+        supported_methods = ["OPTIONS", "REGISTER", "INVITE"]
+
+        ok = True
+
+        if param == "ip":
+            if run == False:
+                self.mod.ip = value
+            else:
+                value = self.mod.ip
+        elif param == "template":
+            if run == False:
+                self.mod.template = value
+            else:
+                value = self.mod.template
+        elif param == "rport":
+            if run == False:
+                self.mod.rport = value
+            else:
+                value = self.mod.rport
+        elif param == "lport":
+            if run == False:
+                self.mod.lport = value
+            else:
+                value = self.mod.lport
+        elif param == "proto":
+            if run == False:
+                value = value.upper()
+                if value not in supported_protos:
+                    if value == "ALL":
+                        self.mod.proto = "UDP|TCP|TLS"
+                    else:
+                        if log == True:
+                            print(
+                                f"{c.WHITE}Protocol {c.BRED}{value} {c.WHITE}is not supported\n"
+                            )
+                        ok = False
+                else:
+                    self.mod.proto = value
+            else:
+                value = self.mod.proto
+        elif param == "proxy":
+            if run == False:
+                self.mod.proxy = value
+            else:
+                value = self.mod.proxy
+        elif param == "method":
+            if run == False:
+                value = value.upper()
+                if value not in supported_methods:
+                    if log == True:
+                        print(
+                            f"{c.WHITE}Method {c.BRED}{value} {c.WHITE}is not supported\n"
+                        )
+                    ok = False
+                else:
+                    self.mod.method = value
+            else:
+                value = self.mod.method
+        elif param == "domain":
+            if run == False:
+                self.mod.domain = value
+            else:
+                value = self.mod.domain
+        elif param == "contact_domain":
+            if run == False:
+                self.mod.contact_domain = value
+            else:
+                value = self.mod.contact_domain
+        elif param == "from_name":
+            if run == False:
+                self.mod.from_name = value
+            else:
+                value = self.mod.from_name
+        elif param == "from_user":
+            if run == False:
+                self.mod.from_user = value
+            else:
+                value = self.mod.from_user
+        elif param == "from_domain":
+            if run == False:
+                self.mod.from_domain = value
+            else:
+                value = self.mod.from_domain
+        elif param == "from_tag":
+            if run == False:
+                self.mod.from_tag = value
+            else:
+                value = self.mod.from_tag
+        elif param == "to_name":
+            if run == False:
+                self.mod.to_name = value
+            else:
+                value = self.mod.to_name
+        elif param == "to_user":
+            if run == False:
+                self.mod.to_user = value
+            else:
+                value = self.mod.to_user
+        elif param == "to_domain":
+            if run == False:
+                self.mod.to_domain = value
+            else:
+                value = self.mod.to_domain
+        elif param == "to_tag":
+            if run == False:
+                self.mod.to_tag = value
+            else:
+                value = self.mod.to_tag
+        elif param == "ua":
+            if run == False:
+                self.mod.user_agent = value
+            else:
+                value = self.mod.user_agent
+        elif param == "ppi":
+            if run == False:
+                self.mod.ppi = value
+            else:
+                value = self.mod.ppi
+        elif param == "pai":
+            if run == False:
+                self.mod.pai = value
+            else:
+                value = self.mod.pai
+        elif param == "header":
+            if run == False:
+                self.mod.header = value
+            else:
+                value = self.mod.header
+        elif param == "branch":
+            if run == False:
+                self.mod.branch = value
+            else:
+                value = self.mod.branch
+        elif param == "callid":
+            if run == False:
+                self.mod.callid = value
+            else:
+                value = self.mod.callid
+        elif param == "cseq":
+            if run == False:
+                self.mod.cseq = value
+            else:
+                value = self.mod.cseq
+        elif param == "digest":
+            if run == False:
+                self.mod.digest = value
+            else:
+                value = self.mod.digest
+        elif param == "sdp":
+            if run == False:
+                self.mod.sdp = value
+            else:
+                value = self.mod.sdp
+        elif param == "sdes":
+            if run == False:
+                self.mod.sdes = value
+            else:
+                value = self.mod.sdes
+        elif param == "user":
+            if run == False:
+                self.mod.user = value
+            else:
+                value = self.mod.user
+        elif param == "pass":
+            if run == False:
+                self.mod.pwd = value
+            else:
+                value = self.mod.pwd
+        elif param == "verbose":
+            if run == False:
+                if value != "0" and value != "1":
+                    if log == True:
+                        print(f"{c.WHITE}Value {c.BRED}{value} {c.WHITE}is not valid\n")
+                    ok = False
+                else:
+                    self.mod.verbose = value
+            else:
+                value = self.mod.verbose
+        elif param == "output_file":
+            if run == False:
+                self.mod.ofile = value
+            else:
+                value = self.mod.ofile
+        elif param == "timeout":
+            if run == False:
+                self.mod.timeout = value
+            else:
+                value = self.mod.timeout
+        elif param == "local_ip":
+            if run == False:
+                self.mod.localip = value
+            else:
+                value = self.mod.localip
+        else:
+            if log == True:
+                print(f"{c.WHITE}Wrong option: {c.BRED}{param}{c.WHITE}")
+            ok = False
+
+        if run == False and ok == True:
+            if log == True:
+                print(f"{c.GREEN}\n{param}{c.WHITE} -> {c.YELLOW}{value}{c.WHITE}\n")
+
+        return value
+
+    def set_option_wssend(self, param, value, run, log):
+        supported_protos = ["UDP", "TCP", "TLS"]
+        supported_methods = ["OPTIONS", "REGISTER", "INVITE"]
+
+        ok = True
+
+        if param == "ip":
+            if run == False:
+                self.mod.ip = value
+            else:
+                value = self.mod.ip
+        elif param == "rport":
+            if run == False:
+                self.mod.rport = value
+            else:
+                value = self.mod.rport
+        elif param == "proto":
+            if run == False:
+                value = value.upper()
+                if value not in supported_protos:
+                    if value == "ALL":
+                        self.mod.proto = "UDP|TCP|TLS"
+                    else:
+                        if log == True:
+                            print(
+                                f"{c.WHITE}Protocol {c.BRED}{value} {c.WHITE}is not supported\n"
+                            )
+                        ok = False
+                else:
+                    self.mod.proto = value
+            else:
+                value = self.mod.proto
+        elif param == "path":
+            if run == False:
+                self.mod.path = value
+            else:
+                value = self.mod.path
+        elif param == "method":
+            if run == False:
+                value = value.upper()
+                if value not in supported_methods:
+                    if log == True:
+                        print(
+                            f"{c.WHITE}Method {c.BRED}{value} {c.WHITE}is not supported\n"
+                        )
+                    ok = False
+                else:
+                    self.mod.method = value
+            else:
+                value = self.mod.method
+        elif param == "domain":
+            if run == False:
+                self.mod.domain = value
+            else:
+                value = self.mod.domain
+        elif param == "contact_domain":
+            if run == False:
+                self.mod.contact_domain = value
+            else:
+                value = self.mod.contact_domain
+        elif param == "from_name":
+            if run == False:
+                self.mod.from_name = value
+            else:
+                value = self.mod.from_name
+        elif param == "from_user":
+            if run == False:
+                self.mod.from_user = value
+            else:
+                value = self.mod.from_user
+        elif param == "from_domain":
+            if run == False:
+                self.mod.from_domain = value
+            else:
+                value = self.mod.from_domain
+        elif param == "from_tag":
+            if run == False:
+                self.mod.from_tag = value
+            else:
+                value = self.mod.from_tag
+        elif param == "to_name":
+            if run == False:
+                self.mod.to_name = value
+            else:
+                value = self.mod.to_name
+        elif param == "to_user":
+            if run == False:
+                self.mod.to_user = value
+            else:
+                value = self.mod.to_user
+        elif param == "to_domain":
+            if run == False:
+                self.mod.to_domain = value
+            else:
+                value = self.mod.to_domain
+        elif param == "to_tag":
+            if run == False:
+                self.mod.to_tag = value
+            else:
+                value = self.mod.to_tag
+        elif param == "ua":
+            if run == False:
+                self.mod.user_agent = value
+            else:
+                value = self.mod.user_agent
+        elif param == "ppi":
+            if run == False:
+                self.mod.ppi = value
+            else:
+                value = self.mod.ppi
+        elif param == "pai":
+            if run == False:
+                self.mod.pai = value
+            else:
+                value = self.mod.pai
+        elif param == "verbose":
+            if run == False:
+                if value != "0" and value != "1":
+                    if log == True:
+                        print(f"{c.WHITE}Value {c.BRED}{value} {c.WHITE}is not valid\n")
+                    ok = False
+                else:
+                    self.mod.verbose = value
+            else:
+                value = self.mod.verbose
+        elif param == "local_ip":
+            if run == False:
+                self.mod.localip = value
+            else:
+                value = self.mod.localip
+        else:
+            if log == True:
+                print(f"{c.WHITE}Wrong option: {c.BRED}{param}{c.WHITE}")
+            ok = False
+
+        if run == False and ok == True:
+            if log == True:
+                print(f"{c.GREEN}\n{param}{c.WHITE} -> {c.YELLOW}{value}{c.WHITE}\n")
+
+        return value
+
+    def set_option_invite(self, param, value, run, log):
+        supported_protos = ["UDP", "TCP", "TLS"]
+
+        ok = True
+
+        if param == "ip":
+            if run == False:
+                self.mod.ip = value
+            else:
+                value = self.mod.ip
+        elif param == "rport":
+            if run == False:
+                self.mod.rport = value
+            else:
+                value = self.mod.rport
+        elif param == "lport":
+            if run == False:
+                self.mod.lport = value
+            else:
+                value = self.mod.lport
+        elif param == "proto":
+            if run == False:
+                value = value.upper()
+                if value not in supported_protos:
+                    if value == "ALL":
+                        self.mod.proto = "UDP|TCP|TLS"
+                    else:
+                        if log == True:
+                            print(
+                                f"{c.WHITE}Protocol {c.BRED}{value} {c.WHITE}is not supported\n"
+                            )
+                        ok = False
+                else:
+                    self.mod.proto = value
+            else:
+                value = self.mod.proto
+        elif param == "proxy":
+            if run == False:
+                self.mod.proxy = value
+            else:
+                value = self.mod.proxy
+        elif param == "domain":
+            if run == False:
+                self.mod.domain = value
+            else:
+                value = self.mod.domain
+        elif param == "contact_domain":
+            if run == False:
+                self.mod.contact_domain = value
+            else:
+                value = self.mod.contact_domain
+        elif param == "from_name":
+            if run == False:
+                self.mod.from_name = value
+            else:
+                value = self.mod.from_name
+        elif param == "from_user":
+            if run == False:
+                self.mod.from_user = value
+            else:
+                value = self.mod.from_user
+        elif param == "from_domain":
+            if run == False:
+                self.mod.from_domain = value
+            else:
+                value = self.mod.from_domain
+        elif param == "to_name":
+            if run == False:
+                self.mod.to_name = value
+            else:
+                value = self.mod.to_name
+        elif param == "to_user":
+            if run == False:
+                self.mod.to_user = value
+            else:
+                value = self.mod.to_user
+        elif param == "to_domain":
+            if run == False:
+                self.mod.to_domain = value
+            else:
+                value = self.mod.to_domain
+        elif param == "ua":
+            if run == False:
+                self.mod.user_agent = value
+            else:
+                value = self.mod.user_agent
+        elif param == "ppi":
+            if run == False:
+                self.mod.ppi = value
+            else:
+                value = self.mod.ppi
+        elif param == "pai":
+            if run == False:
+                self.mod.pai = value
+            else:
+                value = self.mod.pai
+        elif param == "nosdp":
+            if run == False:
+                self.mod.nosdp = value
+            else:
+                value = self.mod.nosdp
+        elif param == "sdes":
+            if run == False:
+                self.mod.sdes = value
+            else:
+                value = self.mod.sdes
+        elif param == "user":
+            if run == False:
+                self.mod.auth_user = value
+            else:
+                value = self.mod.auth_user
+        elif param == "pass":
+            if run == False:
+                self.mod.auth_pwd = value
+            else:
+                value = self.mod.auth_pwd
+        elif param == "verbose":
+            if run == False:
+                if value != "0" and value != "1":
+                    if log == True:
+                        print(f"{c.WHITE}Value {c.BRED}{value} {c.WHITE}is not valid\n")
+                    ok = False
+                else:
+                    self.mod.verbose = value
+            else:
+                value = self.mod.verbose
+        elif param == "output_file":
+            if run == False:
+                self.mod.ofile = value
+            else:
+                value = self.mod.ofile
+        elif param == "transfer":
+            if run == False:
+                self.mod.transfer = value
+            else:
+                value = self.mod.transfer
+        elif param == "local_ip":
+            if run == False:
+                self.mod.localip = value
+            else:
+                value = self.mod.localip
+        else:
+            if log == True:
+                print(f"{c.WHITE}Wrong option: {c.BRED}{param}{c.WHITE}")
+            ok = False
+
+        if run == False and ok == True:
+            if log == True:
+                print(f"{c.GREEN}\n{param}{c.WHITE} -> {c.YELLOW}{value}{c.WHITE}\n")
+
+        return value
+
+    def set_option_leak(self, param, value, run, log):
+        supported_protos = ["UDP", "TCP", "TLS"]
+
+        ok = True
+
+        if param == "ip":
+            if run == False:
+                self.mod.ip = value
+            else:
+                value = self.mod.ip
+        if param == "file":
+            if run == False:
+                self.mod.file = value
+            else:
+                value = self.mod.file
+        elif param == "rport":
+            if run == False:
+                self.mod.rport = value
+            else:
+                value = self.mod.rport
+        elif param == "proto":
+            if run == False:
+                value = value.upper()
+                if value not in supported_protos:
+                    if value == "ALL":
+                        self.mod.proto = "UDP|TCP|TLS"
+                    else:
+                        if log == True:
+                            print(
+                                f"{c.WHITE}Protocol {c.BRED}{value} {c.WHITE}is not supported\n"
+                            )
+                        ok = False
+                else:
+                    self.mod.proto = value
+            else:
+                value = self.mod.proto
+        elif param == "proxy":
+            if run == False:
+                self.mod.proxy = value
+            else:
+                value = self.mod.proxy
+        elif param == "domain":
+            if run == False:
+                self.mod.domain = value
+            else:
+                value = self.mod.domain
+        elif param == "contact_domain":
+            if run == False:
+                self.mod.contact_domain = value
+            else:
+                value = self.mod.contact_domain
+        elif param == "from_name":
+            if run == False:
+                self.mod.from_name = value
+            else:
+                value = self.mod.from_name
+        elif param == "from_user":
+            if run == False:
+                self.mod.from_user = value
+            else:
+                value = self.mod.from_user
+        elif param == "from_domain":
+            if run == False:
+                self.mod.from_domain = value
+            else:
+                value = self.mod.from_domain
+        elif param == "to_name":
+            if run == False:
+                self.mod.to_name = value
+            else:
+                value = self.mod.to_name
+        elif param == "to_user":
+            if run == False:
+                self.mod.to_user = value
+            else:
+                value = self.mod.to_user
+        elif param == "to_domain":
+            if run == False:
+                self.mod.to_domain = value
+            else:
+                value = self.mod.to_domain
+        elif param == "ua":
+            if run == False:
+                self.mod.user_agent = value
+            else:
+                value = self.mod.user_agent
+        elif param == "ppi":
+            if run == False:
+                self.mod.ppi = value
+            else:
+                value = self.mod.ppi
+        elif param == "pai":
+            if run == False:
+                self.mod.pai = value
+            else:
+                value = self.mod.pai
+        elif param == "sdp":
+            if run == False:
+                self.mod.sdp = value
+            else:
+                value = self.mod.sdp
+        elif param == "sdes":
+            if run == False:
+                self.mod.sdes = value
+            else:
+                value = self.mod.sdes
+        elif param == "user":
+            if run == False:
+                self.mod.user = value
+            else:
+                value = self.mod.user
+        elif param == "pass":
+            if run == False:
+                self.mod.pwd = value
+            else:
+                value = self.mod.pwd
+        elif param == "auth":
+            if run == False:
+                self.mod.auth_mode = value
+            else:
+                value = self.mod.auth_mode
+        elif param == "verbose":
+            if run == False:
+                if value != "0" and value != "1":
+                    if log == True:
+                        print(f"{c.WHITE}Value {c.BRED}{value} {c.WHITE}is not valid\n")
+                    ok = False
+                else:
+                    self.mod.verbose = value
+            else:
+                value = self.mod.verbose
+        elif param == "output_file":
+            if run == False:
+                self.mod.ofile = value
+            else:
+                value = self.mod.ofile
+        elif param == "log_file":
+            if run == False:
+                self.mod.lfile = value
+            else:
+                value = self.mod.lfile
+        elif param == "ping":
+            if run == False:
+                self.mod.ping = value
+            else:
+                value = self.mod.ping
+        elif param == "local_ip":
+            if run == False:
+                self.mod.localip = value
+            else:
+                value = self.mod.localip
+        else:
+            if log == True:
+                print(f"{c.WHITE}Wrong option: {c.BRED}{param}{c.WHITE}")
+            ok = False
+
+        if run == False and ok == True:
+            if log == True:
+                print(f"{c.GREEN}\n{param}{c.WHITE} -> {c.YELLOW}{value}{c.WHITE}\n")
+
+        return value
+
+    def set_option_dump(self, param, value, run, log):
+        ok = True
+
+        if param == "file":
+            if run == False:
+                self.mod.file = value
+            else:
+                value = self.mod.file
+        elif param == "output_file":
+            if run == False:
+                self.mod.ofile = value
+            else:
+                value = self.mod.ofile
+        else:
+            if log == True:
+                print(f"{c.WHITE}Wrong option: {c.BRED}{param}{c.WHITE}")
+            ok = False
+
+        if run == False and ok == True:
+            if log == True:
+                print(f"{c.GREEN}\n{param}{c.WHITE} -> {c.YELLOW}{value}{c.WHITE}\n")
+
+        return value
+
+    def set_option_dcrack(self, param, value, run, log):
+        ok = True
+
+        if param == "file":
+            if run == False:
+                self.mod.file = value
+            else:
+                value = self.mod.file
+        elif param == "wordlist":
+            if run == False:
+                self.mod.wordlist = value
+                if self.mod.wordlist != "":
+                    self.mod.bruteforce = 0
+            else:
+                value = self.mod.wordlist
+        elif param == "bruteforce":
+            if run == False:
+                self.mod.bruteforce = value
+            else:
+                value = self.mod.bruteforce
+        elif param == "charset":
+            if run == False:
+                self.mod.charset = value
+            else:
+                value = self.mod.charset
+        elif param == "min":
+            if run == False:
+                self.mod.min = value
+            else:
+                value = self.mod.min
+        elif param == "max":
+            if run == False:
+                self.mod.max = value
+            else:
+                value = self.mod.max
+        elif param == "verbose":
+            if run == False:
+                if value != "0" and value != "1":
+                    if log == True:
+                        print(f"{c.WHITE}Value {c.BRED}{value} {c.WHITE}is not valid\n")
+                    ok = False
+                else:
+                    self.mod.verbose = value
+            else:
+                value = self.mod.verbose
+        elif param == "threads":
+            if run == False:
+                self.mod.threads = value
+            else:
+                value = self.mod.threads
+        elif param == "prefix":
+            if run == False:
+                self.mod.prefix = value
+            else:
+                value = self.mod.prefix
+        elif param == "suffix":
+            if run == False:
+                self.mod.suffix = value
+            else:
+                value = self.mod.suffix
+        else:
+            if log == True:
+                print(f"{c.WHITE}Wrong option: {c.BRED}{param}{c.WHITE}")
+            ok = False
+
+        if run == False and ok == True:
+            if log == True:
+                print(f"{c.GREEN}\n{param}{c.WHITE} -> {c.YELLOW}{value}{c.WHITE}\n")
+
+        return value
+
+    def set_option_pcapdump(self, param, value, run, log):
+        ok = True
+
+        if param == "file":
+            if run == False:
+                self.mod.file = value
+            else:
+                value = self.mod.file
+        elif param == "sip":
+            if run == False:
+                self.mod.sip = value
+            else:
+                value = self.mod.sip
+        elif param == "rtp":
+            if run == False:
+                self.mod.rtp = value
+            else:
+                value = self.mod.rtp
+        elif param == "auth":
+            if run == False:
+                self.mod.auth = value
+            else:
+                value = self.mod.auth
+        elif param == "rtp_extract":
+            if run == False:
+                self.mod.rtp_extract = value
+            else:
+                value = self.mod.rtp_extract
+        elif param == "verbose":
+            if run == False:
+                if value != "0" and value != "1":
+                    if log == True:
+                        print(f"{c.WHITE}Value {c.BRED}{value} {c.WHITE}is not valid\n")
+                    ok = False
+                else:
+                    self.mod.verbose = value
+            else:
+                value = self.mod.verbose
+        elif param == "output_folder":
+            if run == False:
+                self.mod.folder = value
+            else:
+                value = self.mod.folder
+        else:
+            if log == True:
+                print(f"{c.WHITE}Wrong option: {c.BRED}{param}{c.WHITE}")
+            ok = False
+
+        if run == False and ok == True:
+            if log == True:
+                print(f"{c.GREEN}\n{param}{c.WHITE} -> {c.YELLOW}{value}{c.WHITE}\n")
+
+        return value
+
+    def set_option_ping(self, param, value, run, log):
+        supported_protos = ["UDP", "TCP", "TLS"]
+        supported_methods = ["OPTIONS", "REGISTER", "INVITE"]
+
+        ok = True
+
+        if param == "ip":
+            if run == False:
+                self.mod.ip = value
+            else:
+                value = self.mod.ip
+        elif param == "rport":
+            if run == False:
+                self.mod.rport = value
+            else:
+                value = self.mod.rport
+        elif param == "proto":
+            if run == False:
+                value = value.upper()
+                if value not in supported_protos:
+                    if value == "ALL":
+                        self.mod.proto = "UDP|TCP|TLS"
+                    else:
+                        if log == True:
+                            print(
+                                f"{c.WHITE}Protocol {c.BRED}{value} {c.WHITE}is not supported\n"
+                            )
+                        ok = False
+                else:
+                    self.mod.proto = value
+            else:
+                value = self.mod.proto
+        elif param == "proxy":
+            if run == False:
+                self.mod.proxy = value
+            else:
+                value = self.mod.proxy
+        elif param == "method":
+            if run == False:
+                value = value.upper()
+                if value not in supported_methods:
+                    if log == True:
+                        print(
+                            f"{c.WHITE}Method {c.BRED}{value} {c.WHITE}is not supported\n"
+                        )
+                    ok = False
+                else:
+                    self.mod.method = value
+            else:
+                value = self.mod.method
+        elif param == "domain":
+            if run == False:
+                self.mod.domain = value
+            else:
+                value = self.mod.domain
+        elif param == "contact_domain":
+            if run == False:
+                self.mod.contact_domain = value
+            else:
+                value = self.mod.contact_domain
+        elif param == "from_name":
+            if run == False:
+                self.mod.from_name = value
+            else:
+                value = self.mod.from_name
+        elif param == "from_user":
+            if run == False:
+                self.mod.from_user = value
+            else:
+                value = self.mod.from_user
+        elif param == "from_domain":
+            if run == False:
+                self.mod.from_domain = value
+            else:
+                value = self.mod.from_domain
+        elif param == "from_tag":
+            if run == False:
+                self.mod.from_tag = value
+            else:
+                value = self.mod.from_tag
+        elif param == "to_name":
+            if run == False:
+                self.mod.to_name = value
+            else:
+                value = self.mod.to_name
+        elif param == "to_user":
+            if run == False:
+                self.mod.to_user = value
+            else:
+                value = self.mod.to_user
+        elif param == "to_domain":
+            if run == False:
+                self.mod.to_domain = value
+            else:
+                value = self.mod.to_domain
+        elif param == "to_tag":
+            if run == False:
+                self.mod.to_tag = value
+            else:
+                value = self.mod.to_tag
+        elif param == "ua":
+            if run == False:
+                self.mod.user_agent = value
+            else:
+                value = self.mod.user_agent
+        elif param == "ppi":
+            if run == False:
+                self.mod.ppi = value
+            else:
+                value = self.mod.ppi
+        elif param == "pai":
+            if run == False:
+                self.mod.pai = value
+            else:
+                value = self.mod.pai
+        elif param == "branch":
+            if run == False:
+                self.mod.branch = value
+            else:
+                value = self.mod.branch
+        elif param == "callid":
+            if run == False:
+                self.mod.callid = value
+            else:
+                value = self.mod.callid
+        elif param == "cseq":
+            if run == False:
+                self.mod.cseq = value
+            else:
+                value = self.mod.cseq
+        elif param == "digest":
+            if run == False:
+                self.mod.digest = value
+            else:
+                value = self.mod.digest
+        elif param == "user":
+            if run == False:
+                self.mod.user = value
+            else:
+                value = self.mod.user
+        elif param == "pass":
+            if run == False:
+                self.mod.pwd = value
+            else:
+                value = self.mod.pwd
+        elif param == "requests":
+            if run == False:
+                self.mod.number = value
+            else:
+                value = self.mod.number
+        elif param == "interval":
+            if run == False:
+                self.mod.interval = value
+            else:
+                value = self.mod.interval
+        elif param == "timeout":
+            if run == False:
+                self.mod.timeout = value
+            else:
+                value = self.mod.timeout
+        elif param == "local_ip":
+            if run == False:
+                self.mod.localip = value
+            else:
+                value = self.mod.localip
+        else:
+            if log == True:
+                print(f"{c.WHITE}Wrong option: {c.BRED}{param}{c.WHITE}")
+            ok = False
+
+        if run == False and ok == True:
+            if log == True:
+                print(f"{c.GREEN}\n{param}{c.WHITE} -> {c.YELLOW}{value}{c.WHITE}\n")
+
+        return value
+
+    def set_option_flood(self, param, value, run, log):
+        supported_protos = ["UDP", "TCP", "TLS"]
+        supported_methods = ["OPTIONS", "REGISTER", "INVITE"]
+
+        ok = True
+
+        if param == "ip":
+            if run == False:
+                self.mod.ip = value
+            else:
+                value = self.mod.ip
+        elif param == "rport":
+            if run == False:
+                self.mod.rport = value
+            else:
+                value = self.mod.rport
+        elif param == "proto":
+            if run == False:
+                value = value.upper()
+                if value not in supported_protos:
+                    if value == "ALL":
+                        self.mod.proto = "UDP|TCP|TLS"
+                    else:
+                        if log == True:
+                            print(
+                                f"{c.WHITE}Protocol {c.BRED}{value} {c.WHITE}is not supported\n"
+                            )
+                        ok = False
+                else:
+                    self.mod.proto = value
+            else:
+                value = self.mod.proto
+        elif param == "method":
+            if run == False:
+                value = value.upper()
+                if value not in supported_methods:
+                    if log == True:
+                        print(
+                            f"{c.WHITE}Method {c.BRED}{value} {c.WHITE}is not supported\n"
+                        )
+                    ok = False
+                else:
+                    self.mod.method = value
+            else:
+                value = self.mod.method
+        elif param == "domain":
+            if run == False:
+                self.mod.domain = value
+            else:
+                value = self.mod.domain
+        elif param == "contact_domain":
+            if run == False:
+                self.mod.contact_domain = value
+            else:
+                value = self.mod.contact_domain
+        elif param == "from_name":
+            if run == False:
+                self.mod.from_name = value
+            else:
+                value = self.mod.from_name
+        elif param == "from_user":
+            if run == False:
+                self.mod.from_user = value
+            else:
+                value = self.mod.from_user
+        elif param == "from_domain":
+            if run == False:
+                self.mod.from_domain = value
+            else:
+                value = self.mod.from_domain
+        elif param == "to_name":
+            if run == False:
+                self.mod.to_name = value
+            else:
+                value = self.mod.to_name
+        elif param == "to_user":
+            if run == False:
+                self.mod.to_user = value
+            else:
+                value = self.mod.to_user
+        elif param == "to_domain":
+            if run == False:
+                self.mod.to_domain = value
+            else:
+                value = self.mod.to_domain
+        elif param == "ua":
+            if run == False:
+                self.mod.user_agent = value
+            else:
+                value = self.mod.user_agent
+        elif param == "digest":
+            if run == False:
+                self.mod.digest = value
+            else:
+                value = self.mod.digest
+        elif param == "bad":
+            if run == False:
+                self.mod.bad = value
+            else:
+                value = self.mod.bad
+        elif param == "charset":
+            if run == False:
+                self.mod.alphabet = value
+            else:
+                value = self.mod.alphabet
+        elif param == "max":
+            if run == False:
+                self.mod.max = value
+            else:
+                value = self.mod.max
+        elif param == "min":
+            if run == False:
+                self.mod.min = value
+            else:
+                value = self.mod.min
+        elif param == "requests":
+            if run == False:
+                self.mod.number = value
+            else:
+                value = self.mod.number
+        elif param == "threads":
+            if run == False:
+                self.mod.nthreads = value
+            else:
+                value = self.mod.nthreads
+        elif param == "verbose":
+            if run == False:
+                if value != "0" and value != "1":
+                    if log == True:
+                        print(f"{c.WHITE}Value {c.BRED}{value} {c.WHITE}is not valid\n")
+                    ok = False
+                else:
+                    self.mod.verbose = value
+            else:
+                value = self.mod.verbose
+        else:
+            if log == True:
+                print(f"{c.WHITE}Wrong option: {c.BRED}{param}{c.WHITE}")
+            ok = False
+
+        if run == False and ok == True:
+            if log == True:
+                print(f"{c.GREEN}\n{param}{c.WHITE} -> {c.YELLOW}{value}{c.WHITE}\n")
+
+        return value
+
+    def set_option_rtpbleed(self, param, value, run, log):
+        ok = True
+
+        if param == "ip":
+            if run == False:
+                self.mod.ip = value
+            else:
+                value = self.mod.ip
+        elif param == "output_file":
+            if run == False:
+                self.mod.ofile = value
+            else:
+                value = self.mod.ofile
+        elif param == "start":
+            if run == False:
+                self.mod.start_port = value
+            else:
+                value = self.mod.start_port
+        elif param == "end":
+            if run == False:
+                self.mod.end_port = value
+            else:
+                value = self.mod.end_port
+        elif param == "loops":
+            if run == False:
+                self.mod.loops = value
+            else:
+                value = self.mod.loops
+        elif param == "payload":
+            if run == False:
+                self.mod.payload = value
+            else:
+                value = self.mod.payload
+        elif param == "delay":
+            if run == False:
+                self.mod.delay = value
+            else:
+                value = self.mod.delay
+        else:
+            if log == True:
+                print(f"{c.WHITE}Wrong option: {c.BRED}{param}{c.WHITE}")
+            ok = False
+
+        if run == False and ok == True:
+            if log == True:
+                print(f"{c.GREEN}\n{param}{c.WHITE} -> {c.YELLOW}{value}{c.WHITE}\n")
+
+        return value
+
+    def set_option_rtcpbleed(self, param, value, run, log):
+        ok = True
+
+        if param == "ip":
+            if run == False:
+                self.mod.ip = value
+            else:
+                value = self.mod.ip
+        elif param == "output_file":
+            if run == False:
+                self.mod.ofile = value
+            else:
+                value = self.mod.ofile
+        elif param == "start":
+            if run == False:
+                self.mod.start_port = value
+            else:
+                value = self.mod.start_port
+        elif param == "end":
+            if run == False:
+                self.mod.end_port = value
+            else:
+                value = self.mod.end_port
+        elif param == "delay":
+            if run == False:
+                self.mod.delay = value
+            else:
+                value = self.mod.delay
+        else:
+            if log == True:
+                print(f"{c.WHITE}Wrong option: {c.BRED}{param}{c.WHITE}")
+            ok = False
+
+        if run == False and ok == True:
+            if log == True:
+                print(f"{c.GREEN}\n{param}{c.WHITE} -> {c.YELLOW}{value}{c.WHITE}\n")
+
+        return value
+
+    def set_option_rtpbleedflood(self, param, value, run, log):
+        ok = True
+
+        if param == "ip":
+            if run == False:
+                self.mod.ip = value
+            else:
+                value = self.mod.ip
+        elif param == "port":
+            if run == False:
+                self.mod.port = value
+            else:
+                value = self.mod.port
+        elif param == "payload":
+            if run == False:
+                self.mod.payload = value
+            else:
+                value = self.mod.payload
+        elif param == "verbose":
+            if run == False:
+                if value != "0" and value != "1":
+                    if log == True:
+                        print(f"{c.WHITE}Value {c.BRED}{value} {c.WHITE}is not valid\n")
+                    ok = False
+                else:
+                    self.mod.verbose = value
+            else:
+                value = self.mod.verbose
+        else:
+            if log == True:
+                print(f"{c.WHITE}Wrong option: {c.BRED}{param}{c.WHITE}")
+            ok = False
+
+        if run == False and ok == True:
+            if log == True:
+                print(f"{c.GREEN}\n{param}{c.WHITE} -> {c.YELLOW}{value}{c.WHITE}\n")
+
+        return value
+
+    def set_option_rtpbleedinject(self, param, value, run, log):
+        ok = True
+
+        if param == "ip":
+            if run == False:
+                self.mod.ip = value
+            else:
+                value = self.mod.ip
+        elif param == "file":
+            if run == False:
+                self.mod.file = value
+            else:
+                value = self.mod.file
+        elif param == "port":
+            if run == False:
+                self.mod.port = value
+            else:
+                value = self.mod.port
+        elif param == "payload":
+            if run == False:
+                self.mod.payload = value
+            else:
+                value = self.mod.payload
+        else:
+            if log == True:
+                print(f"{c.WHITE}Wrong option: {c.BRED}{param}{c.WHITE}")
+            ok = False
+
+        if run == False and ok == True:
+            if log == True:
+                print(f"{c.GREEN}\n{param}{c.WHITE} -> {c.YELLOW}{value}{c.WHITE}\n")
+
+        return value
+
+    # set global value for a param
+    def set_global_option(self, param, value):
+        if {param, value} in self.globalop:
+            print(
+                f"{c.BYELLOW}{param} {c.WHITE}=> {c.GREEN}{value} {c.WHITE}is already in global params"
+            )
+            return
+
+        updated = False
+
+        for p, v in self.globalop:
+            if p == param:
+                self.globalop.remove([p, v])
+                updated = True
+
+        self.globalop.append([param, value])
+
+        if updated == False:
+            print(
+                f"{c.BYELLOW}{param} {c.WHITE}=> {c.GREEN}{value} {c.WHITE}added to global params"
+            )
+        else:
+            print(f"{c.BYELLOW}{param} {c.WHITE}=> {c.GREEN}{value} {c.WHITE}updated")
+
+    # unset global value
+    def unset_global_option(self, param):
+        for p, v in self.globalop:
+            if p == param:
+                self.globalop.remove([p, v])
+                print(f"{c.BYELLOW}{param} {c.WHITE}removed from global params")
+                return
+
+        print(f"{c.BRED}{param} {c.WHITE}not found in global params")
+
+    # set value for a param
+    def set_option(self, module, param, value, run, log):
+        if module == "scan":
+            return self.set_option_scan(param, value, run, log)
+        if module == "exten":
+            return self.set_option_exten(param, value, run, log)
+        if module == "rcrack":
+            return self.set_option_rcrack(param, value, run, log)
+        if module == "enumerate":
+            return self.set_option_enumerate(param, value, run, log)
+        if module == "send":
+            return self.set_option_send(param, value, run, log)
+        if module == "wssend":
+            return self.set_option_wssend(param, value, run, log)
+        if module == "invite":
+            return self.set_option_invite(param, value, run, log)
+        if module == "leak":
+            return self.set_option_leak(param, value, run, log)
+        if module == "dump":
+            return self.set_option_dump(param, value, run, log)
+        if module == "dcrack":
+            return self.set_option_dcrack(param, value, run, log)
+        if module == "pcapdump":
+            return self.set_option_pcapdump(param, value, run, log)
+        if module == "ping":
+            return self.set_option_ping(param, value, run, log)
+        if module == "flood":
+            return self.set_option_flood(param, value, run, log)
+        if module == "rtpbleed":
+            return self.set_option_rtpbleed(param, value, run, log)
+        if module == "rtcpbleed":
+            return self.set_option_rtcpbleed(param, value, run, log)
+        if module == "rtpbleedflood":
+            return self.set_option_rtpbleedflood(param, value, run, log)
+        if module == "rtpbleedinject":
+            return self.set_option_rtpbleedinject(param, value, run, log)
+
+        return None
+
+    # network
+    def do_network(self, inp):
+        network()
+
+    # help
+    def do_help(self, inp):
+        param = format(inp)
+
+        if param == "modules":
+            print(f"{c.WHITE}Show available modules\n")
+        elif param == "use":
+            print(f"{c.WHITE}Use a specific module\n")
+        elif param == "back":
+            print(f"{c.WHITE}Back to the main menu\n")
+        elif param == "show":
+            print(f"{c.WHITE}Show parameters for the loaded module\n")
+        elif param == "exit" or param == "quit":
+            print(f"{c.WHITE}Exit the application\n")
+        else:
+            self.available_commands(True)
+
+        if self.active_mod != "":
+            self.available_commands(False)
+
+    # modules
+    def do_modules(self, inp):
+        self.available_modules()
+
+    # command use
+    def do_use(self, inp):
+        module = format(inp)
+
+        if not module or module == "":
+            print(f"{c.WHITE}Usage: {c.BYELLOW}use <module>{c.WHITE}")
+            print(f"{c.WHITE}Type {c.BYELLOW}help use {c.WHITE}for help")
+        elif module not in modules:
+            print(f"{c.WHITE}Module {c.BRED}{module} {c.WHITE}not found")
+            print(f"{c.WHITE}Type {c.BYELLOW}help use {c.WHITE}for help")
+        else:
+            self.prompt = f"{c.WHITE}SIPPTS/{c.BGREEN}{module}> {c.WHITE}"
+            self.active_mod = module
+
+            try:
+                if module == "scan":
+                    from sippts.sipscan import SipScan
+
+                    self.mod = SipScan()
+                elif module == "exten":
+                    from sippts.sipexten import SipExten
+
+                    self.mod = SipExten()
+                elif module == "rcrack":
+                    from sippts.siprcrack import SipRemoteCrack
+
+                    self.mod = SipRemoteCrack()
+                elif module == "enumerate":
+                    from sippts.sipenumerate import SipEnumerate
+
+                    self.mod = SipEnumerate()
+                elif module == "send":
+                    from sippts.sipsend import SipSend
+
+                    self.mod = SipSend()
+                elif module == "wssend":
+                    from sippts.wssend import WsSend
+
+                    self.mod = WsSend()
+                elif module == "invite":
+                    from sippts.sipinvite import SipInvite
+
+                    self.mod = SipInvite()
+                elif module == "leak":
+                    from sippts.sipdigestleak import SipDigestLeak
+
+                    self.mod = SipDigestLeak()
+                elif module == "dump":
+                    from sippts.sipdump import SipDump
+
+                    self.mod = SipDump()
+                elif module == "dcrack":
+                    from sippts.sipdigestcrack import SipDigestCrack
+
+                    self.mod = SipDigestCrack()
+                elif module == "pcapdump":
+                    from sippts.sippcapdump import SipPcapDump
+
+                    self.mod = SipPcapDump()
+                elif module == "ping":
+                    from sippts.sipping import SipPing
+
+                    self.mod = SipPing()
+                elif module == "flood":
+                    from sippts.sipflood import SipFlood
+
+                    self.mod = SipFlood()
+                elif module == "rtpbleed":
+                    from sippts.rtpbleed import RTPBleed
+
+                    self.mod = RTPBleed()
+                elif module == "rtcpbleed":
+                    from sippts.rtcpbleed import RTCPBleed
+
+                    self.mod = RTCPBleed()
+                elif module == "rtpbleedflood":
+                    from sippts.rtpbleedflood import RTPBleedFlood
+
+                    self.mod = RTPBleedFlood()
+                elif module == "rtpbleedinject":
+                    from sippts.rtpbleedinject import RTPBleedInject
+
+                    self.mod = RTPBleedInject()
+            except:
+                print(f"{c.RED}Error loading module {module}{c.WHITE}\n")
+                exit()
+
+            for p, v in self.globalop:
+                self.set_option(self.active_mod, p, v, False, False)
+
+            print(f"{c.WHITE}\nType {c.BYELLOW}show {c.WHITE}to print options\n")
+
+    # command back
+    def do_back(self, inp):
+        self.prompt = f"{c.BGREEN}SIPPTS> {c.WHITE}"
+        self.active_mod = ""
+
+    # command show
+    def do_show(self, inp):
+        if self.active_mod == "":
+            print(f"{c.RED}No module selected{c.WHITE}")
+            print(
+                f"{c.WHITE}\nType {c.BYELLOW}use <module> {c.WHITE}to load a module\n"
+            )
+            print(
+                f"Type {c.BWHITE}? {c.WHITE}or {c.BWHITE}help {c.WHITE}to list commands\n"
+            )
+        else:
+            module = []
+
+            if self.active_mod == "scan":
+                module = scan
+            elif self.active_mod == "exten":
+                module = exten
+            elif self.active_mod == "rcrack":
+                module = rcrack
+            elif self.active_mod == "enumerate":
+                module = enumerate
+            elif self.active_mod == "send":
+                module = send
+            elif self.active_mod == "wssend":
+                module = wssend
+            elif self.active_mod == "invite":
+                module = invite
+            elif self.active_mod == "leak":
+                module = leak
+            elif self.active_mod == "dump":
+                module = dump
+            elif self.active_mod == "dcrack":
+                module = dcrack
+            elif self.active_mod == "pcapdump":
+                module = pcapdump
+            elif self.active_mod == "ping":
+                module = ping
+            elif self.active_mod == "flood":
+                module = flood
+            elif self.active_mod == "rtpbleed":
+                module = rtpbleed
+            elif self.active_mod == "rtcpbleed":
+                module = rtcpbleed
+            elif self.active_mod == "rtpbleedflood":
+                module = rtpbleedflood
+            elif self.active_mod == "rtpbleedinject":
+                module = rtpbleedinject
+
+            self.available_options(module)
+
+    # command set
+    def do_set(self, inp):
+        if self.active_mod == "":
+            print(f"{c.RED}No module selected{c.WHITE}")
+            print(
+                f"{c.WHITE}\nType {c.BYELLOW}use <module> {c.WHITE}to load a module\n"
+            )
+            print(
+                f"Type {c.BWHITE}? {c.WHITE}or {c.BWHITE}help {c.WHITE}to list commands\n"
+            )
+        else:
+            pos = inp.find(" ")
+
+            if pos > 0:
+                param = inp[0:pos].strip()
+                value = inp[pos + 1 :].strip()
+            else:
+                param = inp
+                value = ""
+
+            self.set_option(self.active_mod, param, value, False, True)
+
+    # command setg
+    def do_setg(self, inp):
+        pos = inp.find(" ")
+
+        if pos > 0:
+            param = inp[0:pos].strip()
+            value = inp[pos + 1 :].strip()
+        else:
+            param = inp
+            value = ""
+
+        self.set_global_option(param, value)
+
+        if self.active_mod != "":
+            self.set_option(self.active_mod, param, value, False, True)
+
+    # command unsetg
+    def do_unsetg(self, inp):
+        self.unset_global_option(inp)
+
+    def do_global(self, inp):
+        for p, v in self.globalop:
+            print(f"{c.YELLOW}{p}{c.WHITE} => {c.GREEN}{v}{c.WHITE}")
+
+    # command run
+    def do_run(self, inp):
+        if self.singhandle == False:
+            signal.signal(signal.SIGINT, self.signal_handler)
+            self.singhandle = True
+
+        if self.active_mod == "":
+            print(f"{c.RED}No module selected{c.WHITE}")
+            print(
+                f"{c.WHITE}'\nType {c.BYELLOW}use <module> {c.WHITE}to load a module\n"
+            )
+        else:
+            ok = True
+            module = []
+
+            if self.active_mod == "scan":
+                module = scan
+            elif self.active_mod == "exten":
+                module = exten
+            elif self.active_mod == "rcrack":
+                module = rcrack
+            elif self.active_mod == "enumerate":
+                module = enumerate
+            elif self.active_mod == "send":
+                module = send
+            elif self.active_mod == "wssend":
+                module = wssend
+            elif self.active_mod == "invite":
+                module = invite
+            elif self.active_mod == "leak":
+                module = leak
+            elif self.active_mod == "dump":
+                module = dump
+            elif self.active_mod == "dcrack":
+                module = dcrack
+            elif self.active_mod == "pcapdump":
+                module = pcapdump
+            elif self.active_mod == "ping":
+                module = ping
+            elif self.active_mod == "flood":
+                module = flood
+            elif self.active_mod == "rtpbleed":
+                module = rtpbleed
+            elif self.active_mod == "rtcpbleed":
+                module = rtcpbleed
+            elif self.active_mod == "rtpbleedflood":
+                module = rtpbleedflood
+            elif self.active_mod == "rtpbleedinject":
+                module = rtpbleedinject
+
+            # check mandatory params
+            for x in module:
+                (param, detail, required) = x
+                value = self.set_option(self.active_mod, param, "", True, False)
+
+                if required == True and value == "":
+                    if (
+                        (self.active_mod == "scan" or self.active_mod == "leak")
+                        and (
+                            param == "ip"
+                            and self.set_option(
+                                self.active_mod, "file", "", True, False
+                            )
+                            != ""
+                        )
+                        or (
+                            param == "file"
+                            and self.set_option(self.active_mod, "ip", "", True, False)
+                            != ""
+                        )
+                    ):
+                        ok = True
+                    elif (
+                        self.active_mod == "dcrack"
+                        and param == "wordlist"
+                        and self.set_option(
+                            self.active_mod, "bruteforce", "", True, False
+                        )
+                        == "1"
+                    ):
+                        ok = True
+                    else:
+                        ok = False
+                        print(f"{c.WHITE}Param {c.BRED}{param} {c.WHITE}is mandatory\n")
+
+            if ok == True:
+                self.mod.start()
+
+    # command clear
+    def do_clear(self, inp):
+        screen_clear()
+
+    # command shell
+    def do_shell(self, inp):
+        open_shell()
+
+    # command exit
+    def do_exit(self, inp):
+        print(f"{c.WHITE}\n-= All the fish is sold =-\n")
+        return True
+
+    def default(self, inp):
+        if inp == "q" or inp == "quit":
+            return self.do_exit(inp)
+
+        print(
+            f"{c.WHITE}Command {c.BRED}{format(inp)} {c.WHITE}not found. Type {c.BWHITE}? {c.WHITE}or {c.BWHITE}help {c.WHITE}to list commands\n"
+        )
+
+    do_EOF = do_exit
+
+
+if __name__ == "__main__":
+    SIPPTS().cmdloop()

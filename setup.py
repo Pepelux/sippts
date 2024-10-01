@@ -3,7 +3,8 @@
 from setuptools import setup
 
 scripts=[
-  "bin/sippts"
+  "bin/sippts",
+  "bin/sippts-gui"
 ]
 
 if __name__ == "__main__":

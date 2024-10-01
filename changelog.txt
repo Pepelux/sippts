@@ -1,3 +1,10 @@
+v4.1.1 (Oct/2024):
+- added new binary: sippts-gui
+- global:
+  - clean unused params
+  - added stop functions in some modules
+  - bug fixes
+
 v4.1 (Sep/2024):
 - added IPv6 conversions
 - renamed module sippcapdump to sipdump
