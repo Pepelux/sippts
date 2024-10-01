@@ -192,7 +192,7 @@ class SipDigestLeak:
 
                         if ping(long2ip(i), "0.1") == True:
                             print(
-                                f"{self.c.GREEN}\n   [-] ... Pong str(long2ip(i)){self.c.WHITE}"
+                                f"{self.c.GREEN}\n   [-] ... Pong {str(long2ip(i))}{self.c.WHITE}"
                             )
                             ips.append(long2ip(i))
 
