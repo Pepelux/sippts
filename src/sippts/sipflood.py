@@ -88,7 +88,7 @@ class SipFlood:
         except:
             self.bad = 0
 
-        if self.bad == 1:
+        if self.bad:
             self.supported_methods.append("FUZZ")
 
         self.method = self.method.upper()
@@ -99,11 +99,11 @@ class SipFlood:
             self.rport = 5061
 
         # check method
-        if self.bad == None and self.method == "":
+        if not self.bad and self.method == "":
             print(f"{self.c.BRED}Method is mandatory")
             print(self.c.WHITE)
             sys.exit()
-        if self.bad == None and self.method not in self.supported_methods:
+        if not self.bad and self.method not in self.supported_methods:
             print(f"{self.c.BRED}Method {self.method} is not supported")
             print(self.c.WHITE)
             sys.exit()
@@ -134,7 +134,7 @@ class SipFlood:
         else:
             print(f"{self.c.BWHITE}[✓] Number of requests: {self.c.GREEN}{self.number}")
 
-        if self.bad == 1:
+        if self.bad:
             print(f"{self.c.BWHITE}[✓] Alphabet: {self.c.GREEN}{self.alphabet}")
             print(f"{self.c.BWHITE}[✓] Min length: {self.c.GREEN}{str(self.min)}")
             print(f"{self.c.BWHITE}[✓] Max length: {self.c.GREEN}{str(self.max)}")
@@ -142,7 +142,7 @@ class SipFlood:
 
         threads = list()
 
-        for i in range(self.nthreads):
+        for i in range(int(self.nthreads)):
             if self.run == True:
                 t = threading.Thread(target=self.flood, daemon=True)
                 threads.append(t)
@@ -201,7 +201,7 @@ class SipFlood:
                 lport = get_free_port()
                 sock.bind((bind, lport))
 
-                if self.bad == None:
+                if not self.bad:
                     if self.host != "" and self.domain == "":
                         self.domain = self.host
                     if self.domain == "":
@@ -271,7 +271,7 @@ class SipFlood:
                     pass
 
                 try:
-                    if self.bad == 1:
+                    if self.bad:
                         if not self.method or self.method == "":
                             method = self.supported_methods[
                                 generate_random_integer(0, 13)
