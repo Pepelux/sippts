@@ -25,10 +25,15 @@ class SipPcapDump:
         self.rtp = 0
         self.auth = 0
 
-        self.nocolor = ""
+        self.nocolor = 0
         self.c = Color()
 
     def start(self):
+        try:
+            self.nocolor == int(self.nocolor)
+        except:
+            self.nocolor = 0
+
         if self.nocolor == 1:
             self.c.ansy()
 
@@ -70,14 +75,14 @@ class SipPcapDump:
         if self.rtp_extract == 1:
             self.extract_rtp()
 
-        if self.sip == 1:
+        if self.sip:
             self.sip_frames()
             self.sip_auth()
 
         if self.rtp:
             self.rtp_frames()
 
-        if self.auth == 1 and self.sip != 1:
+        if self.auth and not self.sip:
             self.sip_auth()
 
     def sip_frames(self):

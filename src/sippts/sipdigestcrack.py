@@ -30,7 +30,7 @@ from .lib.logos import Logo
 
 class SipDigestCrack:
     def __init__(self):
-        self.file = "-"
+        self.file = ""
         self.wordlist = ""
         self.username = ""
         self.bruteforce = 0
