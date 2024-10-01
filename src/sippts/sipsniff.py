@@ -26,8 +26,8 @@ class SipSniff:
         self.dev = ""
         self.ofile = ""
         self.proto = "ALL"
-        self.verbose = "0"
-        self.auth = "False"
+        self.verbose = 0
+        self.auth = 0
 
         self.run = True
 
@@ -50,8 +50,16 @@ class SipSniff:
         exit()
 
     def start(self):
-        if not self.verbose:
-            self.verbose = "0"
+        try:
+            self.verbose == int(self.verbose)
+        except:
+            self.verbose = 0
+
+        try:
+            self.auth == int(self.auth)
+        except:
+            self.auth = 0
+
         if self.ofile and self.ofile != "":
             if not re.search(r".pcap$", self.ofile):
                 self.ofile += ".pcap"
@@ -65,8 +73,6 @@ class SipSniff:
                 f"{self.c.WHITE}You must be {self.c.RED}root{self.c.WHITE} to use this module"
             )
             return
-
-        self.verbose = int(self.verbose)
 
         logo = Logo("sipsniff")
         logo.print()
@@ -94,7 +100,7 @@ class SipSniff:
             print(
                 f"{self.c.BWHITE}[✓] Save captured data in the file: {self.c.GREEN}{self.ofile}"
             )
-        if self.auth == "True":
+        if self.auth == 1:
             print(
                 f"{self.c.BWHITE}[✓] {self.c.GREEN}Capture only authentication digest"
             )
@@ -178,7 +184,7 @@ class SipSniff:
                         # TLS connection
                         if self.proto == "TLS" or self.proto == "ALL":
                             if src_port == "5061" or dst_port == "5061":
-                                if self.auth != "True":
+                                if self.auth == 0:
                                     print(
                                         f"{self.c.YELLOW}Found TLS connection {src_addr}:{src_port} => {dst_addr}:{dst_port}"
                                     )
@@ -199,7 +205,7 @@ class SipSniff:
 
                                 # Is a SIP message?
                                 if method != "":
-                                    if self.auth != "True":
+                                    if self.auth == 0:
                                         print(
                                             f"{self.c.WHITE}[{method}] {src_addr}:{src_port} => {dst_addr}:{dst_port} - {ua}"
                                         )

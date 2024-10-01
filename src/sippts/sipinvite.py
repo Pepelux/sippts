@@ -64,7 +64,7 @@ class SipInvite:
         self.user_agent = "pplsip"
         self.localip = ""
         self.transfer = ""
-        self.verbose = "0"
+        self.verbose = 0
         self.auth_user = ""
         self.auth_pwd = ""
         self.nosdp = 0
@@ -587,6 +587,21 @@ class SipInvite:
         supported_protos = ["UDP", "TCP", "TLS"]
 
         self.proto = self.proto.upper()
+
+        try:
+            self.verbose = int(self.verbose)
+        except:
+            self.verbose = 0
+
+        try:
+            self.nosdp == int(self.nosdp)
+        except:
+            self.nosdp = 0
+
+        try:
+            self.sdes == int(self.sdes)
+        except:
+            self.sdes = 0
 
         if self.sdes == 1:
             self.sdp = 2

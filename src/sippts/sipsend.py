@@ -86,6 +86,11 @@ class SipSend:
             "UPDATE",
         ]
 
+        try:
+            self.nocontact == int(self.nocontact)
+        except:
+            self.nocontact = 0
+
         if self.nocontact == 1:
             self.withcontact = 0
 

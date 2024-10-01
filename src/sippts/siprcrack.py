@@ -55,7 +55,7 @@ class SipRemoteCrack:
         self.wordlist = ""
         self.user_agent = "pplsip"
         self.threads = "100"
-        self.verbose = "0"
+        self.verbose = 0
         self.nocolor = ""
         self.timeout = 5
 
@@ -356,6 +356,11 @@ class SipRemoteCrack:
         supported_protos = ["UDP", "TCP", "TLS"]
 
         self.proto = self.proto.upper()
+
+        try:
+            self.verbose == int(self.verbose)
+        except:
+            self.verbose = 0
 
         if self.nocolor == 1:
             self.c.ansy()

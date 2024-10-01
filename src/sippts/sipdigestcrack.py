@@ -33,13 +33,13 @@ class SipDigestCrack:
         self.file = "-"
         self.wordlist = ""
         self.username = ""
-        self.bruteforce = "False"
+        self.bruteforce = 0
         self.charset = "printable"
         self.min = "1"
         self.max = "8"
         self.prefix = ""
         self.suffix = ""
-        self.verbose = "0"
+        self.verbose = 0
         self.threads = 10
 
         self.pwdvalue = ""
@@ -62,6 +62,11 @@ class SipDigestCrack:
     def start(self):
         self.lock = Lock()
         
+        try:
+            self.verbose == int(self.verbose)
+        except:
+            self.verbose = 0
+
         if not os.path.isfile(self.file):
             print(f"{self.c.RED}[-] File {self.file} not found")
             print(self.c.WHITE)
@@ -88,8 +93,10 @@ class SipDigestCrack:
         else:
             self.chars = self.charset
 
-        if self.bruteforce == 1:
-            self.bruteforce = "True"
+        try:
+            self.bruteforce == int(self.bruteforce)
+        except:
+            self.bruteforce = 0
 
         logo = Logo("sipdigestcrack")
         logo.print()
@@ -238,14 +245,14 @@ class SipDigestCrack:
                                         else:
                                             if (
                                                 (
-                                                    self.bruteforce != "True"
+                                                    self.bruteforce == 0
                                                     and values[0] == "wl"
                                                     and values[1] == self.wordlist
                                                     and self.prefix == values[2]
                                                     and self.suffix == values[3]
                                                 )
                                                 or (
-                                                    self.bruteforce == "True"
+                                                    self.bruteforce == 1
                                                     and values[0] == "bf"
                                                     and values[1] == self.chars
                                                     and self.prefix == values[2]
@@ -302,7 +309,7 @@ class SipDigestCrack:
                         )
                     else:
                         if self.run == False:
-                            if self.bruteforce == "True":
+                            if self.bruteforce == 1:
                                 self.save_data(
                                     self.charset, username, self.pwdvalue, "false"
                                 )
@@ -345,7 +352,7 @@ class SipDigestCrack:
                         pl = pline.replace("\n", "")
                         values = pl.split(":")
                         if (
-                            self.bruteforce != "True"
+                            self.bruteforce == 0
                             and values[0] == "wl"
                             and values[1] == wl
                             and values[2] == self.prefix
@@ -362,7 +369,7 @@ class SipDigestCrack:
                             )
                             found = 1
                         if (
-                            self.bruteforce == "True"
+                            self.bruteforce == 1
                             and values[0] == "bf"
                             and values[1] == self.charset
                             and values[2] == self.prefix
@@ -386,7 +393,7 @@ class SipDigestCrack:
 
             fd.close()
         except:
-            if self.bruteforce != "True":
+            if self.bruteforce == 0:
                 pl = "wl:%s:%s:%s:%s:%s:%s" % (
                     wl,
                     self.prefix,
@@ -409,7 +416,7 @@ class SipDigestCrack:
                 self.saved.append(pl)
 
         if found == 0:
-            if self.bruteforce != "True":
+            if self.bruteforce == 0:
                 pl = "wl:%s:%s:%s:%s:%s:%s" % (
                     wl,
                     self.prefix,
@@ -467,7 +474,7 @@ class SipDigestCrack:
         qop,
         word_start,
     ):
-        if self.bruteforce == "True":
+        if self.bruteforce == 1:
             if not self.run_event.is_set():
                 return ""
 

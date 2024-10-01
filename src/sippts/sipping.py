@@ -82,6 +82,11 @@ class SipPing:
             "UPDATE",
         ]
 
+        try:
+            self.number == int(self.number)
+        except:
+            self.number = 0
+
         if self.number == 0:
             self.number = 99999
 

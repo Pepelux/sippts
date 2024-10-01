@@ -40,7 +40,7 @@ class SipAstAMI:
         self.route = ""
         self.rport = "5038"
         self.proto = "TCP"
-        self.verbose = "0"
+        self.verbose = 0
         self.file = ""
         self.nocolor = ""
         self.ofile = ""
@@ -65,7 +65,9 @@ class SipAstAMI:
         self.c = Color()
 
     def start(self):
-        if self.verbose == None:
+        try:
+            self.verbose == int(self.verbose)
+        except:
             self.verbose = 0
 
         supported_protos = ["TCP", "TLS"]

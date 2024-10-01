@@ -44,11 +44,11 @@ class SipFlood:
         self.to_domain = ""
         self.user_agent = "pplsip"
         self.digest = ""
-        self.verbose = "0"
+        self.verbose = 0
         self.nthreads = "300"
         self.count = 0
         self.number = 0
-        self.bad = "0"
+        self.bad = 0
         self.supported_methods = []
 
         self.alphabet = "printable"
@@ -78,6 +78,16 @@ class SipFlood:
             "UPDATE",
         ]
 
+        try:
+            self.verbose == int(self.verbose)
+        except:
+            self.verbose = 0
+
+        try:
+            self.bad == int(self.bad)
+        except:
+            self.bad = 0
+
         if self.bad == 1:
             self.supported_methods.append("FUZZ")
 
@@ -87,9 +97,6 @@ class SipFlood:
         # if rport is by default but we want to scan TLS protocol, use port 5061
         if self.rport == 5060 and self.proto == "TLS":
             self.rport = 5061
-
-        if not self.verbose:
-            self.verbose = "0"
 
         # check method
         if self.bad == None and self.method == "":
@@ -106,8 +113,6 @@ class SipFlood:
             print(f"{self.c.BRED}Protocol {self.proto} is not supported")
             print(self.c.WHITE)
             sys.exit()
-
-        self.verbose = int(self.verbose)
 
         logo = Logo("sipflood")
         logo.print()

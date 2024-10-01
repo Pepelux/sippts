@@ -59,18 +59,18 @@ class SipScan:
         self.to_domain = ""
         self.user_agent = "pplsip"
         self.threads = 200
-        self.verbose = "0"
-        self.ping = "False"
+        self.verbose = 0
+        self.ping = 0
         self.file = ""
         self.nocolor = ""
         self.ofile = ""
         self.oifile = ""
-        self.fp = "False"
-        self.random = "False"
+        self.fp = 0
+        self.random = 0
         self.ppi = ""
         self.pai = ""
         self.localip = ""
-        self.getcve = "False"
+        self.getcve = 0
         self.timeout = 5
 
         self.found = []
@@ -96,14 +96,31 @@ class SipScan:
         self.proto = self.proto.upper()
         if self.proto == "UDP|TCP|TLS":
             self.proto = "ALL"
-        if self.ping == 1:
-            self.ping = "True"
-        else:
-            self.ping = "False"
-        if self.getcve == 1:
-            self.getcve = "True"
-        else:
-            self.getcve = "False"
+
+        try:
+            self.verbose == int(self.verbose)
+        except:
+            self.verbose = 0
+
+        try:
+            self.ping == int(self.ping)
+        except:
+            self.ping = 0
+
+        try:
+            self.fp == int(self.fp)
+        except:
+            self.fp = 0
+
+        try:
+            self.random == int(self.random)
+        except:
+            self.random = 0
+
+        try:
+            self.getcve == int(self.getcve)
+        except:
+            self.getcve = 0
 
         # check method
         if self.method not in supported_methods:
@@ -210,7 +227,7 @@ class SipScan:
                                         and long2ip(i)[-2:] != ".0"
                                         and long2ip(i)[-4:] != ".255"
                                     ):
-                                        if self.ping == "False":
+                                        if self.ping == 0:
                                             ips.append(long2ip(i))
                                         else:
                                             print(
@@ -279,7 +296,7 @@ class SipScan:
                             and long2ip(i)[-2:] != ".0"
                             and long2ip(i)[-4:] != ".255"
                         ):
-                            if self.ping == "False":
+                            if self.ping == 0:
                                 ips.append(long2ip(i))
                             else:
                                 print(
@@ -670,7 +687,7 @@ class SipScan:
                                 f"{self.c.WHITE}Response <{headers['response_code']} {headers['response_text']}> from {ip}:{str(rport)}/{proto} without User-Agent"
                             )
 
-                    if headers["ua"] != "" and self.getcve == "True":
+                    if headers["ua"] != "" and self.getcve == 1:
                         val = check_model(headers["ua"], fp, sip_type, self.cvelist)
                         if val != "":
                             for v in val:

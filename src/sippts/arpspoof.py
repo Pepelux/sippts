@@ -35,7 +35,7 @@ class ArpSpoof:
     def __init__(self):
         self.ip = "-"
         self.gw = ""
-        self.verbose = "0"
+        self.verbose = 0
         self.file = ""
         self.ips = []
         self.dropped_ips = []
@@ -57,7 +57,9 @@ class ArpSpoof:
         current_user = current_user.strip()
         ops = platform.system()
 
-        if self.verbose == None:
+        try:
+            self.verbose == int(self.verbose)
+        except:
             self.verbose = 0
 
         if ops == "Linux" and current_user != "root":
@@ -223,7 +225,7 @@ class ArpSpoof:
 
             t = threading.Thread(
                 target=self.start_spoof,
-                args=(str(ip), self.gw, mac, int(self.verbose)),
+                args=(str(ip), self.gw, mac, self.verbose),
                 daemon=True,
             )
 
@@ -248,9 +250,9 @@ class ArpSpoof:
             ip = self.ips[x]
             if ip not in self.dropped_ips:
                 if ip != local_ip and ip != self.gw:
-                    self.restore(str(ip), self.gw, int(self.verbose))
+                    self.restore(str(ip), self.gw, self.verbose)
 
-        self.restore(self.gw, str(ip), int(self.verbose))
+        self.restore(self.gw, str(ip), self.verbose)
 
         # disable ip forwarding
         disable_ip_route()

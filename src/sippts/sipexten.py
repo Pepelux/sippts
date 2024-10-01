@@ -49,7 +49,7 @@ class SipExten:
         self.from_user = "100"
         self.user_agent = "pplsip"
         self.threads = "500"
-        self.verbose = "0"
+        self.verbose = 0
         self.nocolor = ""
         self.ofile = ""
         self.filter = ""
@@ -68,6 +68,11 @@ class SipExten:
 
         supported_protos = ["UDP", "TCP", "TLS"]
         supported_methods = ["OPTIONS", "REGISTER", "INVITE"]
+
+        try:
+            self.verbose == int(self.verbose)
+        except:
+            self.verbose = 0
 
         if self.nocolor == 1:
             self.c.ansy()

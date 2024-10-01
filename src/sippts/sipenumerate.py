@@ -41,7 +41,7 @@ class SipEnumerate:
         self.to_domain = ""
         self.user_agent = "pplsip"
         self.digest = ""
-        self.verbose = "0"
+        self.verbose = 0
         self.timeout = 5
 
         self.totaltime = 0
@@ -69,6 +69,11 @@ class SipEnumerate:
             "REFER",
             "UPDATE",
         ]
+
+        try:
+            self.verbose == int(self.verbose)
+        except:
+            self.verbose = 0
 
         self.proto = self.proto.upper()
 

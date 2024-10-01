@@ -42,6 +42,31 @@ class SipPcapDump:
                 print(f"Error making folder {self.folder}")
                 exit()
 
+        try:
+            self.verbose == int(self.verbose)
+        except:
+            self.verbose = 0
+
+        try:
+            self.rtp_extract == int(self.rtp_extract)
+        except:
+            self.rtp_extract = 0
+
+        try:
+            self.sip == int(self.sip)
+        except:
+            self.sip = 0
+
+        try:
+            self.rtp == int(self.rtp)
+        except:
+            self.rtp = 0
+
+        try:
+            self.auth == int(self.auth)
+        except:
+            self.auth = 0
+
         if self.rtp_extract == 1:
             self.extract_rtp()
 

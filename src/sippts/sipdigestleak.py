@@ -54,7 +54,7 @@ class SipDigestLeak:
         self.lfile = ""
         self.user = ""
         self.pwd = ""
-        self.auth_code = "www"
+        self.auth_mode = "www"
         self.sdp = 0
         self.sdes = 0
         self.verbose = 0
@@ -73,16 +73,28 @@ class SipDigestLeak:
 
         self.proto = self.proto.upper()
 
+        try:
+            self.verbose == int(self.verbose)
+        except:
+            self.verbose = 0
+
+        try:
+            self.sdp == int(self.sdp)
+        except:
+            self.sdp = 0
+
+        try:
+            self.sdes == int(self.sdes)
+        except:
+            self.sdes = 0
+
         if self.sdes == 1:
             self.sdp = 2
 
-        if self.sdp == None:
-            self.sdp = 0
-
-        if self.auth_code == "proxy":
-            self.auth_code = "Proxy-Authenticate"
+        if self.auth_mode == "proxy":
+            self.auth_mode = "Proxy-Authenticate"
         else:
-            self.auth_code = "WWW-Authenticate"
+            self.auth_mode = "WWW-Authenticate"
 
         if self.ping == 1:
             self.ping = "True"
@@ -226,7 +238,9 @@ class SipDigestLeak:
         print(
             f"{self.c.BWHITE}[✓] Target: {self.c.GREEN}{ip}{self.c.WHITE}:{self.c.GREEN}{port}{self.c.WHITE}/{self.c.GREEN}{proto}"
         )
-        print(f"{self.c.BWHITE}[✓] Output file: {self.c.GREEN}{self.ofile}")
+        print(f"{self.c.BWHITE}[✓] Auth mode: {self.c.GREEN}{self.auth_mode}")
+        if self.ofile != "":
+            print(f"{self.c.BWHITE}[✓] Output file: {self.c.GREEN}{self.ofile}")
         if self.proxy != "":
             print(f"{self.c.BWHITE}[✓] Outbound Proxy: {self.c.GREEN}{self.proxy}")
         print(self.c.WHITE)
@@ -723,7 +737,7 @@ class SipDigestLeak:
                     totag,
                     local_ip,
                     via,
-                    self.auth_code,
+                    self.auth_mode,
                 )
 
                 print(f"{self.c.YELLOW}[=>] Request 407 Proxy Authentication Required")

@@ -36,7 +36,7 @@ class WsSend:
         self.to_domain = ""
         self.to_tag = ""
         self.user_agent = "pplsip"
-        self.verbose = "0"
+        self.verbose = 0
         self.ppi = ""
         self.pai = ""
         self.localip = ""

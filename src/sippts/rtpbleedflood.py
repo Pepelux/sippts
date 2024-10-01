@@ -30,6 +30,11 @@ class RTPBleedFlood:
         self.port = int(self.port)
         self.payload = int(self.payload)
 
+        try:
+            self.verbose == int(self.verbose)
+        except:
+            self.verbose = 0
+
         logo = Logo("rtpbleedflood")
         logo.print()
 
