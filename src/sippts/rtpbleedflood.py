@@ -26,6 +26,12 @@ class RTPBleedFlood:
 
         self.c = Color()
 
+
+    def stop(self):
+        print(self.c.WHITE)
+        exit()
+
+
     def start(self):
         self.port = int(self.port)
         self.payload = int(self.payload)

@@ -85,6 +85,16 @@ class SipScan:
 
         self.c = Color()
 
+
+    def stop(self):
+        try:
+            cursor.show()
+        except:
+            pass
+        print(self.c.WHITE)
+        self.quit = True
+
+
     def start(self):
         supported_protos = ["UDP", "TCP", "TLS"]
         supported_methods = ["OPTIONS", "REGISTER", "INVITE"]

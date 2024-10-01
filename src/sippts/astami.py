@@ -64,6 +64,12 @@ class SipAstAMI:
 
         self.c = Color()
 
+
+    def stop(self):
+        print(self.c.WHITE)
+        self.quit = True
+
+
     def start(self):
         try:
             self.verbose == int(self.verbose)

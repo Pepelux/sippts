@@ -28,6 +28,11 @@ class RTCPBleed:
 
         self.c = Color()
 
+    def stop(self):
+        print(self.c.WHITE)
+        exit()
+
+
     def start(self):
         self.start_port = int(self.start_port)
         self.end_port = int(self.end_port)
