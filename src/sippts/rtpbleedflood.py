@@ -23,12 +23,15 @@ class RTPBleedFlood:
         self.port = ""
         self.payload = "0"
         self.verbose = 0
+        
+        self.run = True
 
         self.c = Color()
 
 
     def stop(self):
         print(self.c.WHITE)
+        self.run = False
         exit()
 
 
@@ -68,7 +71,7 @@ class RTPBleedFlood:
         nloop = 0
         count = 1
 
-        while True:
+        while True and self.run == True:
             try:
                 nloop += 1
                 cloop = hex(nloop)[2:]
@@ -124,6 +127,6 @@ class RTPBleedFlood:
             except KeyboardInterrupt:
                 print(f"{self.c.YELLOW}\nYou pressed Ctrl+C!")
                 print(self.c.WHITE)
-                exit()
+                self.run = False
             except:
                 pass

@@ -27,8 +27,15 @@ class RTPBleed:
         self.payload = "0"
         self.delay = "50"
         self.ofile = ""
+        
+        self.run = True
 
         self.c = Color()
+
+    def stop(self):
+        print(self.c.WHITE)
+        self.run = False
+        exit()
 
     def start(self):
         self.start_port = int(self.start_port)
@@ -69,75 +76,75 @@ class RTPBleed:
         port = self.start_port
 
         while port < self.end_port + 2:
-            try:
-                host = (str(self.ip), port)
+            if self.run == True:
+                try:
+                    host = (str(self.ip), port)
 
-                loop = 0
+                    loop = 0
+                    
+                    while loop < self.loops:
+                        cloop = str(loop).zfill(4)
+                        cpayload = "%s" % hex(0x80 | self.payload & 0x7F)[2:]
+                        # byte[0] = 0x80 => RTP version 2
+                        # byte[1] = 0x80+payload => Codec version (https://en.wikipedia.org/wiki/RTP_payload_formats)
+                        # byte[2-3] = Sequence number
+                        message = "80" + cpayload + cloop + "0000000000000000"
+                        byte_array = bytearray.fromhex(message)
 
-                while loop < self.loops:
-                    cloop = str(loop).zfill(4)
-                    cpayload = "%s" % hex(0x80 | self.payload & 0x7F)[2:]
-                    # byte[0] = 0x80 => RTP version 2
-                    # byte[1] = 0x80+payload => Codec version (https://en.wikipedia.org/wiki/RTP_payload_formats)
-                    # byte[2-3] = Sequence number
-                    message = "80" + cpayload + cloop + "0000000000000000"
-                    byte_array = bytearray.fromhex(message)
+                        print(
+                            f"{self.c.YELLOW}[+] Checking port: {str(port)} with payload type {str(self.payload)} (Seq number: {str(loop+1)})  ",
+                            end="\r",
+                        )
 
-                    print(
-                        f"{self.c.YELLOW}[+] Checking port: {str(port)} with payload type {str(self.payload)} (Seq number: {str(loop+1)})  ",
-                        end="\r",
-                    )
+                        # Send data
+                        sock.sendto(byte_array, host)
+                        time.sleep((self.delay + loop) / 1000.0)
 
-                    # Send data
-                    sock.sendto(byte_array, host)
-                    time.sleep((self.delay + loop) / 1000.0)
+                        loop += 1
 
-                    loop += 1
+                        try:
+                            (msg, addr) = sock.recvfrom(4096)
+                            (ipaddr, rport) = host
+                            size = len(msg)
 
-                    try:
-                        (msg, addr) = sock.recvfrom(4096)
-                        (ipaddr, rport) = host
-                        size = len(msg)
+                            if size >= 12:
+                                x = "%s%s" % (hex(msg[2])[2:], hex(msg[3])[2:])
+                                seq = int("0x%s" % x, base=16)
+                                x = "%s%s%s%s" % (
+                                    hex(msg[4])[2:],
+                                    hex(msg[5])[2:],
+                                    hex(msg[6])[2:],
+                                    hex(msg[7])[2:],
+                                )
+                                timestamp = int("0x%s" % x, base=16)
+                                ssrc = "%s%s%s%s" % (
+                                    hex(msg[8])[2:],
+                                    hex(msg[9])[2:],
+                                    hex(msg[10])[2:],
+                                    hex(msg[11])[2:],
+                                )
 
-                        if size >= 12:
-                            x = "%s%s" % (hex(msg[2])[2:], hex(msg[3])[2:])
-                            seq = int("0x%s" % x, base=16)
-                            x = "%s%s%s%s" % (
-                                hex(msg[4])[2:],
-                                hex(msg[5])[2:],
-                                hex(msg[6])[2:],
-                                hex(msg[7])[2:],
-                            )
-                            timestamp = int("0x%s" % x, base=16)
-                            ssrc = "%s%s%s%s" % (
-                                hex(msg[8])[2:],
-                                hex(msg[9])[2:],
-                                hex(msg[10])[2:],
-                                hex(msg[11])[2:],
-                            )
+                                print(
+                                    f"{self.c.WHITE}received {str(size)} bytes from target port {str(rport)} - loop {str(loop)}"
+                                )
+                                print(
+                                    f"{self.c.WHITE}    [-] SSRC: {ssrc} - Timestamp: {timestamp} - Seq number: {seq}"
+                                )
+                                if self.ofile != "":
+                                    f.write(f"received {str(size)} bytes from target port {str(rport)} - loop {str(loop)} - SSRC: {ssrc} - Timestamp: {timestamp} - Seq number: {seq}\n")
+                        except:
+                            # No data available
+                            continue
+                except KeyboardInterrupt:
+                    print(f"{self.c.YELLOW}\nYou pressed Ctrl+C!")
+                    print(self.c.WHITE)
+                    self.run = False
+                except:
+                    pass
 
-                            print(
-                                f"{self.c.WHITE}received {str(size)} bytes from target port {str(rport)} - loop {str(loop)}"
-                            )
-                            print(
-                                f"{self.c.WHITE}    [-] SSRC: {ssrc} - Timestamp: {timestamp} - Seq number: {seq}"
-                            )
-                            if self.ofile != "":
-                                f.write(f"received {str(size)} bytes from target port {str(rport)} - loop {str(loop)} - SSRC: {ssrc} - Timestamp: {timestamp} - Seq number: {seq}\n")
-                    except:
-                        # No data available
-                        continue
-            except KeyboardInterrupt:
-                print(f"{self.c.YELLOW}\nYou pressed Ctrl+C!")
-                print(self.c.WHITE)
-                if self.ofile != "":
-                    f.write("\n")
-                    f.close()
-                exit()
-            except:
-                pass
-
-            port += 2
+                port += 2
+            else:
+                port = self.end_port + 2
 
         print(self.c.WHITE)
 

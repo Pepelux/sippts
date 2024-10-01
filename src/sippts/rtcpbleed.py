@@ -26,10 +26,13 @@ class RTCPBleed:
         self.delay = "1"
         self.ofile = ""
 
+        self.run = True
+
         self.c = Color()
 
     def stop(self):
         print(self.c.WHITE)
+        self.run = False
         exit()
 
 
@@ -69,43 +72,43 @@ class RTCPBleed:
 
         # while True:
         while port < self.end_port + 2:
-            try:
-                host = (str(self.ip), port)
-
-                print(f"{self.c.YELLOW}[+] Checking port: {str(port)}", end="\r")
-
-                # Send data
-                sock.sendto(byte_array, host)
-                time.sleep(self.delay / 1000.0)
-
+            if self.run == True:
                 try:
-                    (msg, addr) = sock.recvfrom(4096)
-                    (ipaddr, rport) = host
-                    size = len(msg)
+                    host = (str(self.ip), port)
 
-                    if size >= 0:
-                        print(
-                            f"{self.c.WHITE}received {str(size)} bytes from target port {str(rport)}"
-                        )
+                    print(f"{self.c.YELLOW}[+] Checking port: {str(port)}", end="\r")
 
-                        if self.ofile != "":
-                            f.write(f"received {str(size)} bytes from target port {str(rport)}\n")
+                    # Send data
+                    sock.sendto(byte_array, host)
+                    time.sleep(self.delay / 1000.0)
+
+                    try:
+                        (msg, addr) = sock.recvfrom(4096)
+                        (ipaddr, rport) = host
+                        size = len(msg)
+
+                        if size >= 0:
+                            print(
+                                f"{self.c.WHITE}received {str(size)} bytes from target port {str(rport)}"
+                            )
+
+                            if self.ofile != "":
+                                f.write(f"received {str(size)} bytes from target port {str(rport)}\n")
+                    except:
+                        # No data available
+                        pass
+                except KeyboardInterrupt:
+                    print(f"{self.c.YELLOW}\nYou pressed Ctrl+C!")
+                    print(self.c.WHITE)
+                    self.run = False
                 except:
-                    # No data available
                     pass
-            except KeyboardInterrupt:
-                print(f"{self.c.YELLOW}\nYou pressed Ctrl+C!")
-                print(self.c.WHITE)
-                if self.ofile != "":
-                    f.write("\n")
-                    f.close()
-                exit()
-            except:
-                pass
 
-            port += 2
-            if port > self.end_port:
-                port = self.start_port
+                port += 2
+                if port > self.end_port:
+                    port = self.start_port
+            else:
+                port = self.end_port + 2
 
         print(self.c.WHITE)
 
