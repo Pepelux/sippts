@@ -2375,7 +2375,7 @@ Usage examples:
     )
 
     options = parser_dcrack.add_argument_group("Options")
-    wlist.add_argument(
+    options.add_argument(
         "-f",
         metavar="FILE",
         type=str,
