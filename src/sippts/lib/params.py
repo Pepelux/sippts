@@ -26,7 +26,7 @@ CYAN = "\033[0;36;20m"
 BWHITE = "\033[1;37;20m"
 WHITE = "\033[0;37;20m"
 
-local_version = "4.1.0"
+local_version = "4.1.1"
 
 
 def get_sippts_args():
@@ -2162,14 +2162,6 @@ Usage examples:
         default="",
     )
     headers.add_argument(
-        "-ft",
-        metavar="FROM_TAG",
-        type=str,
-        help="From Tag",
-        dest="from_tag",
-        default="",
-    )
-    headers.add_argument(
         "-tn",
         metavar="TO_NAME",
         type=str,
@@ -2265,14 +2257,6 @@ Usage examples:
         help="Phone number to transfer the call",
         dest="transfer_number",
         default="",
-    )
-    other.add_argument(
-        "-th",
-        metavar="THREADS",
-        type=int,
-        help="Number of threads (default: 200)",
-        dest="threads",
-        default=200,
     )
     other.add_argument(
         "-local-ip",
@@ -2390,7 +2374,7 @@ Usage examples:
 """,
     )
 
-    wlist = parser_dcrack.add_argument_group("Wordlist")
+    options = parser_dcrack.add_argument_group("Options")
     wlist.add_argument(
         "-f",
         metavar="FILE",
@@ -2399,6 +2383,8 @@ Usage examples:
         dest="file",
         default="",
     )
+
+    wlist = parser_dcrack.add_argument_group("Wordlist")
     wlist.add_argument(
         "-w",
         metavar="FILE",
