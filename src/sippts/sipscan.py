@@ -101,8 +101,7 @@ class SipScan:
         hard = ohard
         
         # If ulimit < threads, set new value
-        if soft < threads:
-            # soft = threads * 2
+        if soft < int(threads):
             soft = threads + 100
 
         if hard < soft:
@@ -124,6 +123,7 @@ class SipScan:
 
 
     def start(self):
+        self.threads = int(self.threads)
         self.set_ulimit(self.threads)
     
         supported_protos = ["UDP", "TCP", "TLS"]
@@ -360,6 +360,7 @@ class SipScan:
         max_values = 100000
 
         # threads to use
+        self.threads = int(self.threads)
         nthreads = self.threads
         total = len(list(product(ips, ports, protos)))
         if nthreads > total:
