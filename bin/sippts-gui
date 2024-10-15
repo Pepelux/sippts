@@ -23,7 +23,7 @@ from sippts.lib.functions import (
     load_cve_version,
 )
 
-local_version = "4.1.1"
+local_version = "4.1.2"
 local_version_status = ""
 local_cve_version = ""
 local_cve_version_status = ""

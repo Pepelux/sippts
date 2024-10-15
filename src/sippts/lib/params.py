@@ -26,7 +26,7 @@ CYAN = "\033[0;36;20m"
 BWHITE = "\033[1;37;20m"
 WHITE = "\033[0;37;20m"
 
-local_version = "4.1.1"
+local_version = "4.1.2"
 
 
 def get_sippts_args():

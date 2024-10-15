@@ -19,7 +19,8 @@ if __name__ == "__main__":
         'scapy',
         'pyshark',
         'websocket-client',
-        'rel'
+        'rel',
+        'resource'
       ],
       extra_requires=[
         'cursor',
