@@ -38,7 +38,7 @@ from .lib.color import Color
 from .lib.logos import Logo
 from itertools import product
 from concurrent.futures import ThreadPoolExecutor
-
+import resource as res
 
 class SipScan:
     def __init__(self):
@@ -84,7 +84,7 @@ class SipScan:
         self.cve = []
 
         self.c = Color()
-
+        
 
     def stop(self):
         try:
@@ -95,7 +95,37 @@ class SipScan:
         self.quit = True
 
 
+    def set_ulimit(self, threads):
+        # Get current 'ulimit -n' value
+        soft,ohard = res.getrlimit(res.RLIMIT_NOFILE)
+        hard = ohard
+        
+        # If ulimit < threads, set new value
+        if soft < threads:
+            # soft = threads * 2
+            soft = threads + 100
+
+        if hard < soft:
+            hard = soft
+
+        try:
+            res.setrlimit(res.RLIMIT_NOFILE,(soft,hard))
+        except (ValueError,res.error):
+            try:
+                hard = soft
+                # Trouble with max limit, retrying with soft,hard
+                res.setrlimit(res.RLIMIT_NOFILE,(soft,hard))
+            except Exception:
+                # Failed to set ulimit, setting new threads value
+                soft,hard = res.getrlimit(res.RLIMIT_NOFILE)
+                self.threads = soft
+
+        soft,hard = res.getrlimit(res.RLIMIT_NOFILE)
+
+
     def start(self):
+        self.set_ulimit(self.threads)
+    
         supported_protos = ["UDP", "TCP", "TLS"]
         supported_methods = ["OPTIONS", "REGISTER", "INVITE"]
 
@@ -504,7 +534,7 @@ class SipScan:
 
                 if self.fail > 50:
                     print(
-                        f"{self.c.RED}Too many socket connection errors. Consider reducing the number of threads or increasing the number of connections using ulimit"
+                        f"{self.c.RED}Too many socket connection errors. Consider reducing the number of threads"
                     )
                     self.quit = True
                     return
@@ -603,7 +633,7 @@ class SipScan:
                     sock_ssl.connect(host)
                     sock_ssl.sendall(bytes(msg[:8192], "utf-8"))
                 else:
-                    sock.sendto(bytes(msg[:8192], "utf-8"), host)
+                    sock.sendto(bytes(msg[:8192], "utf-8"), (host))
 
                 if self.verbose == 2:
                     print(

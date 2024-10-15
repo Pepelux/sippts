@@ -1,3 +1,7 @@
+devel:
+- scan:
+  - control ulimit handler and adjust according to threads
+
 v4.1.1 (Oct/2024):
 - added new binary: sippts-gui
 - global:
