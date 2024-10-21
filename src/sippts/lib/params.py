@@ -2259,6 +2259,14 @@ Usage examples:
         default="",
     )
     other.add_argument(
+        "-th",
+        metavar="THREADS",
+        type=int,
+        help="Number of threads (default: 200)",
+        dest="threads",
+        default=200,
+    )
+    other.add_argument(
         "-local-ip",
         metavar="IP",
         type=str,
