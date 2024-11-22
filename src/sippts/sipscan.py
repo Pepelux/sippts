@@ -470,8 +470,6 @@ class SipScan:
                                         ):
                                             val_port = 5061
 
-                                        if self.host != "" and self.domain == "":
-                                            self.domain = self.host
                                         if self.domain == "":
                                             self.domain = val_ipaddr
 
