@@ -83,16 +83,18 @@ class RTCPBleed:
 
                     try:
                         (msg, addr) = sock.recvfrom(4096)
-                        (ipaddr, rport) = host
-                        size = len(msg)
 
-                        if size >= 0:
-                            print(
-                                f"{self.c.WHITE}received {str(size)} bytes from target port {str(rport)}"
-                            )
+                        if addr[1] == port:
+                            (ipaddr, rport) = host
+                            size = len(msg)
 
-                            if self.ofile != "":
-                                f.write(f"received {str(size)} bytes from target port {str(rport)}\n")
+                            if size >= 0:
+                                print(
+                                    f"\n{self.c.WHITE}received {str(size)} bytes from target port {str(rport)}"
+                                )
+
+                                if self.ofile != "":
+                                    f.write(f"received {str(size)} bytes from target port {str(rport)}\n")
                     except:
                         # No data available
                         pass
