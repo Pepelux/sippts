@@ -3,6 +3,8 @@ devel:
   - bug fixes
 - rtcpbleed: 
   - bug fixes
+- sipscan
+  - force domain name when target server is a domain
 
 v4.1.2 (Nov/2024):
 - scan:

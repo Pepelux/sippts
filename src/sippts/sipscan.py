@@ -73,6 +73,8 @@ class SipScan:
         self.getcve = 0
         self.timeout = 5
 
+        self.forcedomain = False
+
         self.found = []
         self.ipsfound = []
         self.line = ["-", "\\", "|", "/"]
@@ -303,6 +305,10 @@ class SipScan:
                     if i.find("/") < 1:
                         i = socket.gethostbyname(i)
                         i = IP(i, make_net=True)
+
+                        if self.ip != i and self.ip.find(",") < 1:
+                            self.domain = self.ip
+                            self.forcedomain = True
                     else:
                         i = IP(i, make_net=True)
                 except:
@@ -380,9 +386,9 @@ class SipScan:
         print(f"{self.c.BWHITE}[✓] Method to scan: {self.c.GREEN}{self.method}")
 
         if (
-            self.domain != ""
+            (self.domain != ""
             and self.domain != str(self.ip)
-            and self.domain != self.host
+            and self.domain != self.host) or self.forcedomain
         ):
             print(f"{self.c.BWHITE}[✓] Customized Domain: {self.c.GREEN}{self.domain}")
         if self.contact_domain != "":
