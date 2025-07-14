@@ -306,7 +306,7 @@ class SipScan:
                         i = socket.gethostbyname(i)
                         i = IP(i, make_net=True)
 
-                        if self.ip != i and self.ip.find(",") < 1:
+                        if str(self.ip) != str(i) and self.ip.find(",") < 1:
                             self.domain = self.ip
                             self.forcedomain = True
                     else:
