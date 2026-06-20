@@ -59,10 +59,13 @@ def searchInterface():
 
 def ping(host, time="1"):
     # parameter = '-n' if platform.system().lower() == 'windows' else '-c'
-    ping = "ping -t 1 -c 1 -W %s %s >/dev/null" % (time, host)
-    response = os.system(ping)
+    response = subprocess.run(
+        ["ping", "-t", "1", "-c", "1", "-W", str(time), str(host)],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
 
-    if response == 0:
+    if response.returncode == 0:
         return True
     else:
         return False

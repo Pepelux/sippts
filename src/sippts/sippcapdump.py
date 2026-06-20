@@ -9,6 +9,7 @@ __email__ = "pepeluxx@gmail.com"
 
 import os
 import re
+import subprocess
 import pyshark
 from .lib.functions import parse_digest
 from .lib.color import Color
@@ -458,7 +459,13 @@ class SipPcapDump:
                 print(self.c.WHITE)
                 exit()
 
-        os.system(f"tshark -i - < {self.file} > sippts_dump.txt 2>/dev/null")
+        with open("sippts_dump.txt", "w") as out, open(self.file, "rb") as inp:
+            subprocess.run(
+                ["tshark", "-i", "-"],
+                stdin=inp,
+                stdout=out,
+                stderr=subprocess.DEVNULL,
+            )
 
         f = open("sippts_dump.txt", "r")
         for line in f:
@@ -476,14 +483,35 @@ class SipPcapDump:
         for s in ssrc:
             cont = cont + 1
             name = s[2:]
-            os.system(
-                f"tshark -n -r {self.file} -2 -R rtp -R 'rtp.ssrc == {s}' -T fields -e rtp.payload | tr -d '\n',':' | xxd -r -ps >{self.folder}/{name}.rtp"
+
+            tshark = subprocess.run(
+                [
+                    "tshark", "-n", "-r", self.file, "-2",
+                    "-R", "rtp", "-R", f"rtp.ssrc == {s}",
+                    "-T", "fields", "-e", "rtp.payload",
+                ],
+                stdout=subprocess.PIPE,
             )
-            os.system(
-                f"sox -t ul -r 8000 -c 1 {self.folder}/{name}.rtp {self.folder}/{name}_sox.wav"
+            # equivalent to: tr -d '\n,:'
+            payload = (
+                tshark.stdout.replace(b"\n", b"").replace(b",", b"").replace(b":", b"")
             )
-            os.system(
-                f"ffmpeg -f g722 -i {self.folder}/{name}.rtp -acodec pcm_s16le -ar 16000 -ac 1 {self.folder}/{name}_ffmpeg.wav"
+            with open(f"{self.folder}/{name}.rtp", "wb") as out:
+                subprocess.run(["xxd", "-r", "-ps"], input=payload, stdout=out)
+
+            subprocess.run(
+                [
+                    "sox", "-t", "ul", "-r", "8000", "-c", "1",
+                    f"{self.folder}/{name}.rtp",
+                    f"{self.folder}/{name}_sox.wav",
+                ]
+            )
+            subprocess.run(
+                [
+                    "ffmpeg", "-f", "g722", "-i", f"{self.folder}/{name}.rtp",
+                    "-acodec", "pcm_s16le", "-ar", "16000", "-ac", "1",
+                    f"{self.folder}/{name}_ffmpeg.wav",
+                ]
             )
 
             os.remove(f"{self.folder}/{name}.rtp")
