@@ -217,15 +217,6 @@ Usage examples:
         default="5038",
     )
     target.add_argument(
-        "-p",
-        metavar="PROTOCOL",
-        type=str.upper,
-        help="Protocol: tcp|tls|all (default: tcp)",
-        dest="proto",
-        choices=["TCP", "TLS", "ALL"],
-        default="tcp",
-    )
-    target.add_argument(
         "-c",
         metavar="COMMAND",
         type=str,
@@ -3348,7 +3339,6 @@ Payloads
         IPADDR = args.ipaddr
         HOST = args.ipaddr
         PORT = args.rport
-        PROTO = args.proto
         THREADS = args.threads
         TIMEOUT = args.timeout
         VERBOSE = args.verbose
@@ -3369,7 +3359,6 @@ Payloads
             IPADDR,
             HOST,
             PORT,
-            PROTO,
             THREADS,
             TIMEOUT,
             VERBOSE,

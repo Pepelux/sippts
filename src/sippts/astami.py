@@ -11,7 +11,6 @@ import random
 import re
 import socket
 import ipaddress
-import sys
 import time
 from IPy import IP
 from asterisk.ami import AMIClient, SimpleAction
@@ -76,20 +75,11 @@ class SipAstAMI:
         except:
             self.verbose = 0
 
-        supported_protos = ["TCP", "TLS"]
-
         if self.nocolor == 1:
             self.c.ansy()
 
-        self.proto = self.proto.upper()
-        if self.proto == "TCP|TLS":
-            self.proto = "ALL"
-
-        # check protocol
-        if self.proto != "ALL" and self.proto not in supported_protos:
-            print(f"{self.c.BRED}Protocol {self.proto} is not supported")
-            print(self.c.WHITE)
-            sys.exit()
+        # AMI connections are always TCP
+        self.proto = "TCP"
 
         # my IP address
         local_ip = self.localip
@@ -108,12 +98,8 @@ class SipAstAMI:
         logo = Logo("astami")
         logo.print()
 
-        # create a list of protocols
-        protos = []
-        if self.proto == "TCP" or self.proto == "ALL":
-            protos.append("TCP")
-        if self.proto == "TLS" or self.proto == "ALL":
-            protos.append("TLS")
+        # AMI connections are always TCP
+        protos = ["TCP"]
 
         # create a list of ports
         ports = []
@@ -256,10 +242,7 @@ class SipAstAMI:
 
         print(f"{self.c.BWHITE}[✓] IP/Network: {self.c.GREEN}{str(iplist)}")
         print(f"{self.c.BWHITE}[✓] Remote port: {self.c.GREEN}{self.rport}")
-        if self.proto == "ALL":
-            print(f"{self.c.BWHITE}[✓] Protocols: {self.c.GREEN}TCP, TLS")
-        else:
-            print(f"{self.c.BWHITE}[✓] Protocol: {self.c.GREEN}{self.proto.upper()}")
+        print(f"{self.c.BWHITE}[✓] Protocol: {self.c.GREEN}TCP")
         if self.ofile != "":
             print(
                 f"{self.c.BWHITE}[✓] Saving logs info file: {self.c.CYAN}{self.ofile}"
@@ -300,13 +283,6 @@ class SipAstAMI:
                                         val_ipaddr = val2[0]
                                         val_port = int(val2[1])
                                         val_proto = val2[2]
-
-                                        if (
-                                            self.proto == "ALL"
-                                            and self.rport == "5060"
-                                            and val_proto == "TLS"
-                                        ):
-                                            val_port = 5061
 
                                         executor.submit(
                                             self.scan_host,

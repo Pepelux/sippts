@@ -38,7 +38,6 @@ def main():
             ip,
             host,
             rport,
-            proto,
             threads,
             timeout,
             verbose,
@@ -58,7 +57,6 @@ def main():
         s.ip = ip
         s.host = host
         s.rport = rport
-        s.proto = proto
         s.threads = threads
         s.timeout = timeout
         s.verbose = verbose
