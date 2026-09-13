@@ -34,6 +34,16 @@ New in this version:
 - send: new params -ppid and -paid for the domain of P-Preferred-Identity and
   P-Asserted-Identity, which was hardcoded to telefonica.net (still the
   default). A value that already carries a @ is used as it is
+- data/cve.csv: rebuilt from the NVD of NIST, the official CVE database. It
+  went from 113 CVEs of 10 vendors to 1094 of 34, and it now covers the ones
+  fingerprinting() recognizes and the list did not have at all: Yealink,
+  Polycom, Snom, Fanvil, Akuvox, AudioCodes, Avaya, Mitel, 3CX, PJSIP and the
+  rest. The version ranges come from the CPEs of the NVD instead of being
+  written by hand, and the rows the NVD does not cover are kept
+- scan: the version is looked for anywhere in the User-Agent and not only as
+  a whole word, because a kamailio announces itself as
+  "kamailio (5.5.0 (x86_64/linux))" and a Cisco as "Cisco/SPA8000-6.1.11", and
+  splitting by spaces found no version in either of them
 - data/cve.csv: the row of CVE-2013-2686 said '>=11.0.0 and >= 11.2.1', two
   lower bounds, so it matched every Asterisk from 11 upwards. Checked against
   the NVD, the 11.x branch ends at 11.2.1, so the second one is a <=. With it

@@ -2385,7 +2385,10 @@ def check_model(ua, fp, type, cvelist):
     # the version is not always the second word: "Asterisk PBX 1.4.9" splits
     # into asterisk / pbx / 1.4.9. Any token that looks like a version is
     # tried, and one match is enough
-    candidatas = [x for x in ua.lower().split(" ") if re.match(r"^\d[\d.\-_]*$", x)]
+    # version numbers wherever they are in the string, not only as a whole
+    # word: a kamailio says "kamailio (5.5.0 (x86_64/linux))" and a Cisco
+    # "Cisco/SPA8000-6.1.11", and splitting by spaces found nothing in either
+    candidatas = re.findall(r"\d+(?:\.\d+)+", ua)
     ua_plano = _solo_alnum(ua)
 
     for cve in cvelist:
