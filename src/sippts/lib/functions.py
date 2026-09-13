@@ -1918,7 +1918,7 @@ def fingerprinting(method, msg, headers, verbose):
             if ua[0:7] == "Maxwell":
                 fp.append("Gigaset")
             elif ua[0:4] == "TSW-":
-                fp.append("Creston")
+                fp.append("Crestron")
             else:
                 fp.append("Yealink")
                 fp.append("TP-Link")
@@ -2275,8 +2275,10 @@ def _producto_en_ua(producto, ua_plano):
 
 
 _VERSION_SPEC = re.compile(
-    r"^\s*(?:(<=|>=|<|>|=)\s*)?([0-9][0-9A-Za-z.\-_]*)"
-    r"\s*(?:and\s+(?:(<=|>=|<|>|=)\s*)?([0-9][0-9A-Za-z.\-_]*)\s*)?$",
+    # versions out of the CPE bring punctuation of their own: 210/091.001 of
+    # an Alcatel and 10.5(2.10000.5) of a Cisco CUCM
+    r"^\s*(?:(<=|>=|<|>|=)\s*)?([0-9][0-9A-Za-z./()\-_]*)"
+    r"\s*(?:and\s+(?:(<=|>=|<|>|=)\s*)?([0-9][0-9A-Za-z./()\-_]*)\s*)?$",
     re.I,
 )
 

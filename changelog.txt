@@ -35,11 +35,19 @@ New in this version:
   P-Asserted-Identity, which was hardcoded to telefonica.net (still the
   default). A value that already carries a @ is used as it is
 - data/cve.csv: rebuilt from the NVD of NIST, the official CVE database. It
-  went from 113 CVEs of 10 vendors to 1094 of 34, and it now covers the ones
+  went from 113 CVEs of 10 vendors to 1361 of 54, and it now covers the ones
   fingerprinting() recognizes and the list did not have at all: Yealink,
-  Polycom, Snom, Fanvil, Akuvox, AudioCodes, Avaya, Mitel, 3CX, PJSIP and the
-  rest. The version ranges come from the CPEs of the NVD instead of being
-  written by hand, and the rows the NVD does not cover are kept
+  Polycom, Snom, Fanvil, Akuvox, AudioCodes, Avaya, Mitel, 3CX, PJSIP, IceWarp,
+  Crestron, Yeastar, Zoiper and the rest. The version ranges come from the CPEs
+  of the NVD instead of being written by hand, and the rows the NVD does not
+  cover are kept
+- fingerprinting(): a device of the TSW- series was reported as 'Creston'. The
+  vendor is Crestron, so whoever looked the name up found nothing
+- scan: the version ranges of the CVE list can carry the punctuation the CPEs
+  use, 210/091.001 of an Alcatel and 10.5(2.10000.5) of a Cisco CUCM. Without
+  it 19% of the rows could not be compared by version and only matched as
+  text; it is 4% now, and what is left are alphabetic versions (the A, B and C
+  of Asterisk Business Edition) that no numeric comparison can order
 - scan: the version is looked for anywhere in the User-Agent and not only as
   a whole word, because a kamailio announces itself as
   "kamailio (5.5.0 (x86_64/linux))" and a Cisco as "Cisco/SPA8000-6.1.11", and
