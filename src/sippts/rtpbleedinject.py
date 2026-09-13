@@ -18,6 +18,7 @@ from .lib.logos import Logo
 
 class RTPBleedInject:
     def __init__(self):
+        self.nocolor = ""
         self.ip = ""
         self.port = ""
         self.payload = "0"
@@ -34,9 +35,19 @@ class RTPBleedInject:
 
 
     def start(self):
+        # -nocolor has to be applied before anything is printed, the logo
+        # included, or those lines keep their escape codes
+        try:
+            self.nocolor = int(self.nocolor)
+        except (TypeError, ValueError):
+            self.nocolor = 0
+
+        if self.nocolor == 1:
+            self.c.ansy()
+
         self.port = int(self.port)
 
-        logo = Logo("rtpbleedinject")
+        logo = Logo("rtpbleedinject", self.nocolor)
         logo.print()
 
         print(f"{self.c.BWHITE}[✓] Target IP: {self.c.YELLOW}{self.ip}")

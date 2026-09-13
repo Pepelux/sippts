@@ -299,7 +299,7 @@ Usage examples:
         default=200,
     )
     other.add_argument(
-        "-t",
+        "-t", "--timeout",
         metavar="TIMEOUT",
         type=int,
         help="Sockets timeout (default: 5)",
@@ -367,10 +367,10 @@ Usage examples:
         + """     sippts scan -f targets.txt -random
 """
         + YELLOW
-        + """  Establishing an unidentified user agent as an attack tool
+        + """  Disguise the tool behind another User-Agent
 """
         + WHITE
-        + """     sippts scan -ua Grandstream
+        + """     sippts scan -i 192.168.0.0/24 -ua Grandstream
 """
         + YELLOW
         + """  Scan all ports and protocols of an address range using 500 threads (slow)
@@ -383,6 +383,20 @@ Usage examples:
 """
         + WHITE
         + """     sippts scan -f targets.txt -r 5060-5080 -p all -th 500 -ua Grandstream -v -fp -o output.txt
+"""
+        + YELLOW
+        + """  Save the hosts found as ip:port/proto, to chain with exten, rcrack or leak
+"""
+        + WHITE
+        + """     sippts scan -i 192.168.0.0/24 -r 5060-5080 -p all -ot targets.txt
+     sippts exten -f targets.txt -e 100-200 -oe extens.txt
+     sippts rcrack -f targets.txt -ef extens.txt -w wordlist.txt
+"""
+        + YELLOW
+        + """  Save the results as JSON or CSV, to process them with another tool
+"""
+        + WHITE
+        + """     sippts scan -i 192.168.0.0/24 -oj result.json -ocsv result.csv
 """,
     )
 
@@ -411,7 +425,7 @@ Usage examples:
         default="5060",
     )
     target.add_argument(
-        "-p",
+        "-p", "--protocol",
         metavar="PROTOCOL",
         type=str.upper,
         help="Protocol: udp|tcp|tls|all (default: udp)",
@@ -439,7 +453,7 @@ Usage examples:
         default="options",
     )
     headers.add_argument(
-        "-d",
+        "-d", "--domain",
         metavar="DOMAIN",
         type=str,
         help="SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)",
@@ -587,7 +601,7 @@ Usage examples:
         default=200,
     )
     other.add_argument(
-        "-t",
+        "-t", "--timeout",
         metavar="TIMEOUT",
         type=int,
         help="Sockets timeout (default: 5)",
@@ -683,7 +697,7 @@ Usage examples:
         default="",
     )
     target.add_argument(
-        "-p",
+        "-p", "--protocol",
         metavar="PROTOCOL",
         type=str.upper,
         help="Protocol: udp|tcp|tls (default: udp)",
@@ -719,7 +733,7 @@ Usage examples:
         default="register",
     )
     headers.add_argument(
-        "-d",
+        "-d", "--domain",
         metavar="DOMAIN",
         type=str,
         help="SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)",
@@ -809,7 +823,7 @@ Usage examples:
         default=200,
     )
     other.add_argument(
-        "-t",
+        "-t", "--timeout",
         metavar="TIMEOUT",
         type=int,
         help="Sockets timeout (default: 5)",
@@ -883,7 +897,7 @@ Usage examples:
         default="",
     )
     target.add_argument(
-        "-p",
+        "-p", "--protocol",
         metavar="PROTOCOL",
         type=str.upper,
         help="Protocol: udp|tcp|tls (default: udp)",
@@ -943,7 +957,7 @@ Usage examples:
 
     headers = parser_rcrack.add_argument_group("Headers")
     headers.add_argument(
-        "-d",
+        "-d", "--domain",
         metavar="DOMAIN",
         type=str,
         help="SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)",
@@ -1007,7 +1021,7 @@ Usage examples:
         default=200,
     )
     other.add_argument(
-        "-t",
+        "-t", "--timeout",
         metavar="TIMEOUT",
         type=int,
         help="Sockets timeout (default: 5)",
@@ -1074,7 +1088,7 @@ Usage examples:
         default=5060,
     )
     target.add_argument(
-        "-p",
+        "-p", "--protocol",
         metavar="PROTOCOL",
         type=str.upper,
         help="Protocol: udp|tcp|tls (default: udp)",
@@ -1108,7 +1122,7 @@ Usage examples:
         default="options",
     )
     headers.add_argument(
-        "-d",
+        "-d", "--domain",
         metavar="DOMAIN",
         type=str,
         help="SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)",
@@ -1323,7 +1337,7 @@ Usage examples:
 
     other = parser_send.add_argument_group("Other options")
     other.add_argument(
-        "-t",
+        "-t", "--timeout",
         metavar="TIMEOUT",
         type=int,
         help="Sockets timeout (default: 5)",
@@ -1390,7 +1404,7 @@ Usage examples:
         default=5060,
     )
     target.add_argument(
-        "-p",
+        "-p", "--protocol",
         metavar="PROTOCOL",
         type=str.upper,
         help="Protocol: ws|wss (default: wss)",
@@ -1418,7 +1432,7 @@ Usage examples:
         default="options",
     )
     headers.add_argument(
-        "-d",
+        "-d", "--domain",
         metavar="DOMAIN",
         type=str,
         help="SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)",
@@ -1519,10 +1533,13 @@ Usage examples:
 
     log = parser_wssend.add_argument_group("Log")
     log.add_argument("-v", help="Increase verbosity", dest="verbose", action="count")
+    log.add_argument(
+        "-nocolor", help="Show result without colors", dest="nocolor", action="count"
+    )
 
     other = parser_wssend.add_argument_group("Other options")
     other.add_argument(
-        "-t",
+        "-t", "--timeout",
         metavar="TIMEOUT",
         type=int,
         help="Time to wait for an answer (default: 5)",
@@ -1589,7 +1606,7 @@ Usage examples:
         default=5060,
     )
     target.add_argument(
-        "-p",
+        "-p", "--protocol",
         metavar="PROTOCOL",
         type=str.upper,
         help="Protocol: udp|tcp|tls (default: udp)",
@@ -1608,7 +1625,7 @@ Usage examples:
 
     headers = parser_enumerate.add_argument_group("Headers")
     headers.add_argument(
-        "-d",
+        "-d", "--domain",
         metavar="DOMAIN",
         type=str,
         help="SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)",
@@ -1706,10 +1723,13 @@ Usage examples:
         dest="ocsv",
         default="",
     )
+    log.add_argument(
+        "-nocolor", help="Show result without colors", dest="nocolor", action="count"
+    )
 
     other = parser_enumerate.add_argument_group("Other options")
     other.add_argument(
-        "-t",
+        "-t", "--timeout",
         metavar="TIMEOUT",
         type=int,
         help="Sockets timeout (default: 5)",
@@ -1799,7 +1819,7 @@ Usage examples:
         default=5060,
     )
     target.add_argument(
-        "-p",
+        "-p", "--protocol",
         metavar="PROTOCOL",
         type=str.upper,
         help="Protocol: udp|tcp (default: udp)",
@@ -1818,7 +1838,7 @@ Usage examples:
 
     headers = parser_leak.add_argument_group("Headers")
     headers.add_argument(
-        "-d",
+        "-d", "--domain",
         metavar="DOMAIN",
         type=str,
         help="SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)",
@@ -1994,6 +2014,9 @@ Usage examples:
         dest="ocsv",
         default="",
     )
+    log.add_argument(
+        "-nocolor", help="Show result without colors", dest="nocolor", action="count"
+    )
 
     other = parser_leak.add_argument_group("Other options")
     other.add_argument(
@@ -2059,7 +2082,7 @@ Usage examples:
         default=5060,
     )
     target.add_argument(
-        "-p",
+        "-p", "--protocol",
         metavar="PROTOCOL",
         type=str.upper,
         help="Protocol: udp|tcp|tls (default: udp)",
@@ -2087,7 +2110,7 @@ Usage examples:
         default="options",
     )
     headers.add_argument(
-        "-d",
+        "-d", "--domain",
         metavar="DOMAIN",
         type=str,
         help="SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)",
@@ -2233,7 +2256,7 @@ Usage examples:
 
     other = parser_ping.add_argument_group("Other options")
     other.add_argument(
-        "-t",
+        "-t", "--timeout",
         metavar="TIMEOUT",
         type=int,
         help="Sockets timeout (default: 5)",
@@ -2266,6 +2289,9 @@ Usage examples:
     )
     other.add_argument(
         "-h", "--help", help="Show this help", dest="help", action="count"
+    )
+    other.add_argument(
+        "-nocolor", help="Show result without colors", dest="nocolor", action="count"
     )
 
     ##################
@@ -2316,7 +2342,7 @@ Usage examples:
         default=5060,
     )
     target.add_argument(
-        "-p",
+        "-p", "--protocol",
         metavar="PROTOCOL",
         type=str.upper,
         help="Protocol: udp|tcp|tls (default: udp)",
@@ -2342,7 +2368,7 @@ Usage examples:
 
     headers = parser_invite.add_argument_group("Headers")
     headers.add_argument(
-        "-d",
+        "-d", "--domain",
         metavar="DOMAIN",
         type=str,
         help="SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)",
@@ -2547,6 +2573,9 @@ Usage examples:
     options.add_argument(
         "-h", "--help", help="Show this help", dest="help", action="count"
     )
+    options.add_argument(
+        "-nocolor", help="Show result without colors", dest="nocolor", action="count"
+    )
 
     ##################
     # dcrack command #
@@ -2675,6 +2704,9 @@ Usage examples:
         dest="ocsv",
         default="",
     )
+    log.add_argument(
+        "-nocolor", help="Show result without colors", dest="nocolor", action="count"
+    )
 
     options = parser_dcrack.add_argument_group("Other options")
     options.add_argument(
@@ -2738,7 +2770,7 @@ Usage examples:
         default=5060,
     )
     target.add_argument(
-        "-p",
+        "-p", "--protocol",
         metavar="PROTOCOL",
         type=str.upper,
         help="Protocol: udp|tcp|tls (default: udp)",
@@ -2762,7 +2794,7 @@ Usage examples:
         default="",
     )
     headers.add_argument(
-        "-d",
+        "-d", "--domain",
         metavar="DOMAIN",
         type=str,
         help="SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)",
@@ -2852,6 +2884,9 @@ Usage examples:
         dest="ofile",
         default="",
     )
+    log.add_argument(
+        "-nocolor", help="Show result without colors", dest="nocolor", action="count"
+    )
 
     fuzz = parser_flood.add_argument_group("Fuzzing")
     fuzz.add_argument("-b", help="Send malformed headers", dest="bad", action="count")
@@ -2937,7 +2972,7 @@ Usage examples:
         default=0,
     )
     options.add_argument(
-        "-p",
+        "-p", "--protocol",
         metavar="PROTOCOL",
         help="Protocol to sniff: udp|tcp|tls|all",
         dest="proto",
@@ -2953,6 +2988,9 @@ Usage examples:
         help="Save data into a log file",
         dest="ofile",
         default="",
+    )
+    log.add_argument(
+        "-nocolor", help="Show result without colors", dest="nocolor", action="count"
     )
 
     other = parser_sniff.add_argument_group("Other options")
@@ -3011,6 +3049,9 @@ Usage examples:
     log.add_argument("-v", help="Increase verbosity", dest="verbose", action="count")
     log.add_argument(
         "-vv", help="Increase more verbosity", dest="more_verbose", action="count"
+    )
+    log.add_argument(
+        "-nocolor", help="Show result without colors", dest="nocolor", action="count"
     )
 
     other = parser_spoof.add_argument_group("Other options")
@@ -3144,6 +3185,9 @@ Payloads
         dest="ofile",
         default="",
     )
+    log.add_argument(
+        "-nocolor", help="Show result without colors", dest="nocolor", action="count"
+    )
 
     other = parser_rtpbleed.add_argument_group("Other options")
     other.add_argument(
@@ -3224,6 +3268,9 @@ Payloads
         dest="ofile",
         default="",
     )
+    log.add_argument(
+        "-nocolor", help="Show result without colors", dest="nocolor", action="count"
+    )
 
     other = parser_rtcpbleed.add_argument_group("Other options")
     other.add_argument(
@@ -3281,6 +3328,9 @@ Payloads
 
     log = parser_rtpbleedflood.add_argument_group("Log")
     log.add_argument("-v", help="Increase verbosity", dest="verbose", action="count")
+    log.add_argument(
+        "-nocolor", help="Show result without colors", dest="nocolor", action="count"
+    )
 
     other = parser_rtpbleedflood.add_argument_group("Other options")
     other.add_argument(
@@ -3345,6 +3395,9 @@ Payloads
     )
     other.add_argument(
         "-h", "--help", help="Show this help", dest="help", action="count"
+    )
+    other.add_argument(
+        "-nocolor", help="Show result without colors", dest="nocolor", action="count"
     )
 
     ################
@@ -4000,6 +4053,7 @@ Payloads
         PAI = args.pai
         LOCALIP = args.localip
         TIMEOUT = args.timeout
+        NOCOLOR = args.nocolor
 
         return (
             COMMAND,
@@ -4024,6 +4078,7 @@ Payloads
             PPI,
             PAI,
             TIMEOUT,
+            NOCOLOR,
         )
     elif COMMAND == "enumerate":
         if args.help == 1:
@@ -4056,6 +4111,7 @@ Payloads
         TIMEOUT = args.timeout
         OJSON = args.ojson
         OCSV = args.ocsv
+        NOCOLOR = args.nocolor
 
         return (
             COMMAND,
@@ -4078,6 +4134,7 @@ Payloads
             TIMEOUT,
             OJSON,
             OCSV,
+            NOCOLOR,
         )
     elif COMMAND == "leak":
         if args.help == 1:
@@ -4125,6 +4182,7 @@ Payloads
         NONCE = args.nonce
         OJSON = args.ojson
         OCSV = args.ocsv
+        NOCOLOR = args.nocolor
 
         return (
             COMMAND,
@@ -4160,6 +4218,7 @@ Payloads
             REALM,
             AUTHALG,
             NONCE,
+            NOCOLOR,
         )
     elif COMMAND == "ping":
         if args.help == 1:
@@ -4202,6 +4261,7 @@ Payloads
         PPI = args.ppi
         PAI = args.pai
         TIMEOUT = args.timeout
+        NOCOLOR = args.nocolor
 
         return (
             COMMAND,
@@ -4234,6 +4294,7 @@ Payloads
             PPI,
             PAI,
             TIMEOUT,
+            NOCOLOR,
         )
     elif COMMAND == "invite":
         if args.help == 1:
@@ -4321,8 +4382,9 @@ Payloads
 
         FILE = args.file
         OFILE = args.ofile
+        NOCOLOR = args.nocolor
 
-        return COMMAND, FILE, OFILE
+        return COMMAND, FILE, OFILE, NOCOLOR
     elif COMMAND == "dcrack":
         if args.help == 1:
             parser_dcrack.print_help()
@@ -4357,6 +4419,7 @@ Payloads
         OFILE = args.ofile
         OJSON = args.ojson
         OCSV = args.ocsv
+        NOCOLOR = args.nocolor
 
         return (
             COMMAND,
@@ -4373,6 +4436,7 @@ Payloads
             OFILE,
             OJSON,
             OCSV,
+            NOCOLOR,
         )
     elif COMMAND == "flood":
         if args.help == 1:
@@ -4418,6 +4482,7 @@ Payloads
         ALPHABET = args.alphabet
         MIN = args.min
         MAX = args.max
+        NOCOLOR = args.nocolor
 
         return (
             COMMAND,
@@ -4444,6 +4509,7 @@ Payloads
             ALPHABET,
             MAX,
             MIN,
+            NOCOLOR,
         )
     elif COMMAND == "sniff":
         if args.help == 1:
@@ -4456,8 +4522,9 @@ Payloads
         AUTH = args.auth
         VERBOSE = args.verbose
         RPORT = args.rport
+        NOCOLOR = args.nocolor
 
-        return COMMAND, DEV, OFILE, AUTH, VERBOSE, PROTO, RPORT
+        return COMMAND, DEV, OFILE, AUTH, VERBOSE, PROTO, RPORT, NOCOLOR
     elif COMMAND == "spoof":
         if args.help == 1:
             parser_spoof.print_help()
@@ -4478,10 +4545,11 @@ Payloads
         VERBOSE = args.verbose
 
         MORE_VERBOSE = args.more_verbose
+        NOCOLOR = args.nocolor
         if MORE_VERBOSE == 1:
             VERBOSE = 2
 
-        return COMMAND, IPADDR, VERBOSE, GW, FILE
+        return COMMAND, IPADDR, VERBOSE, GW, FILE, NOCOLOR
     elif COMMAND == "pcapdump":
         if args.help == 1:
             parser_pcapdump.print_help()
@@ -4539,7 +4607,8 @@ Payloads
         PAYLOAD = args.payload
         DELAY = args.delay
         OFILE = args.ofile
-        return COMMAND, IPADDR, SP, EP, LOOPS, PAYLOAD, DELAY, OFILE
+        NOCOLOR = args.nocolor
+        return COMMAND, IPADDR, SP, EP, LOOPS, PAYLOAD, DELAY, OFILE, NOCOLOR
     elif COMMAND == "rtcpbleed":
         if args.help == 1:
             parser_rtcpbleed.print_help()
@@ -4562,7 +4631,8 @@ Payloads
             EP = EP + 1
         DELAY = args.delay
         OFILE = args.ofile
-        return COMMAND, IPADDR, SP, EP, DELAY, OFILE
+        NOCOLOR = args.nocolor
+        return COMMAND, IPADDR, SP, EP, DELAY, OFILE, NOCOLOR
     elif COMMAND == "rtpbleedflood":
         if args.help == 1:
             parser_rtpbleedflood.print_help()
@@ -4581,8 +4651,9 @@ Payloads
         P = args.rport
         PAYLOAD = args.payload
         VERBOSE = args.verbose
+        NOCOLOR = args.nocolor
 
-        return COMMAND, IPADDR, P, PAYLOAD, VERBOSE
+        return COMMAND, IPADDR, P, PAYLOAD, VERBOSE, NOCOLOR
     elif COMMAND == "rtpbleedinject":
         if args.help == 1:
             parser_rtpbleedinject.print_help()
@@ -4601,8 +4672,9 @@ Payloads
         P = args.rport
         PAYLOAD = args.payload
         FILE = args.file
+        NOCOLOR = args.nocolor
 
-        return COMMAND, IPADDR, P, PAYLOAD, FILE
+        return COMMAND, IPADDR, P, PAYLOAD, FILE, NOCOLOR
     else:
         parser.print_help()
         exit()

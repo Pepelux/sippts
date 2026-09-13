@@ -28,6 +28,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 class SipEnumerate:
     def __init__(self):
+        self.nocolor = ""
         self.ojson = ""
         self.ocsv = ""
         self.ip = ""
@@ -58,6 +59,16 @@ class SipEnumerate:
         self.c = Color()
 
     def start(self):
+        # -nocolor has to be applied before anything is printed, the logo
+        # included, or those lines keep their escape codes
+        try:
+            self.nocolor = int(self.nocolor)
+        except (TypeError, ValueError):
+            self.nocolor = 0
+
+        if self.nocolor == 1:
+            self.c.ansy()
+
         # from sippts-gui it arrives as text and the comparison against 5060
         # below never matched, so -p TLS did not switch to the default 5061
         try:
@@ -113,7 +124,7 @@ class SipEnumerate:
             print(self.c.WHITE)
             sys.exit()
 
-        logo = Logo("sipenumerate")
+        logo = Logo("sipenumerate", self.nocolor)
         logo.print()
 
         print(

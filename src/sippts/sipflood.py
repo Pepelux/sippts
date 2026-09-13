@@ -29,6 +29,7 @@ from .lib.logos import Logo
 
 class SipFlood:
     def __init__(self):
+        self.nocolor = ""
         self.ip = ""
         self.host = ""
         self.proxy = ""
@@ -65,6 +66,16 @@ class SipFlood:
         self.run = True
 
     def start(self):
+        # -nocolor has to be applied before anything is printed, the logo
+        # included, or those lines keep their escape codes
+        try:
+            self.nocolor = int(self.nocolor)
+        except (TypeError, ValueError):
+            self.nocolor = 0
+
+        if self.nocolor == 1:
+            self.c.ansy()
+
         # from sippts-gui it arrives as text and the comparison against 5060
         # below never matched, so -p TLS did not switch to the default 5061
         try:
@@ -146,7 +157,7 @@ class SipFlood:
             print(self.c.WHITE)
             sys.exit()
 
-        logo = Logo("sipflood")
+        logo = Logo("sipflood", self.nocolor)
         logo.print()
 
         signal.signal(signal.SIGINT, self.signal_handler)

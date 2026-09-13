@@ -29,6 +29,7 @@ from .lib.logos import Logo
 
 class ArpSpoof:
     def __init__(self):
+        self.nocolor = ""
         self.ip = "-"
         self.gw = ""
         self.verbose = 0
@@ -48,6 +49,16 @@ class ArpSpoof:
         self.stop()
 
     def start(self):
+        # -nocolor has to be applied before anything is printed, the logo
+        # included, or those lines keep their escape codes
+        try:
+            self.nocolor = int(self.nocolor)
+        except (TypeError, ValueError):
+            self.nocolor = 0
+
+        if self.nocolor == 1:
+            self.c.ansy()
+
         # current_user = os.getlogin()
         current_user = os.popen("whoami").read()
         current_user = current_user.strip()
@@ -64,7 +75,7 @@ class ArpSpoof:
             )
             return
 
-        logo = Logo("arpspoof")
+        logo = Logo("arpspoof", self.nocolor)
         logo.print()
 
         signal.signal(signal.SIGINT, self.signal_handler)

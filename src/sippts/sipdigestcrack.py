@@ -31,6 +31,7 @@ from .lib.logos import Logo
 
 class SipDigestCrack:
     def __init__(self):
+        self.nocolor = ""
         self.ojson = ""
         self.ocsv = ""
         self.file = ""
@@ -65,6 +66,16 @@ class SipDigestCrack:
         signal.signal(signal.SIGINT, self.signal_handler)
 
     def start(self):
+        # -nocolor has to be applied before anything is printed, the logo
+        # included, or those lines keep their escape codes
+        try:
+            self.nocolor = int(self.nocolor)
+        except (TypeError, ValueError):
+            self.nocolor = 0
+
+        if self.nocolor == 1:
+            self.c.ansy()
+
         # reset the stop flag: after a Ctrl+C the object kept it set, so from
         # sippts-gui (where the module instance is reused) every later run
         # did nothing at all
@@ -109,7 +120,7 @@ class SipDigestCrack:
         except:
             self.bruteforce = 0
 
-        logo = Logo("sipdigestcrack")
+        logo = Logo("sipdigestcrack", self.nocolor)
         logo.print()
 
         print(f"{self.c.BWHITE}[✓] Input file: {self.c.GREEN}{self.file}")

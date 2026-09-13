@@ -360,6 +360,7 @@ def main():
             timeout,
             ojson,
             ocsv,
+            nocolor,
         ) = params
 
         from sippts.sipenumerate import SipEnumerate
@@ -384,6 +385,7 @@ def main():
         s.timeout = timeout
         s.ojson = ojson
         s.ocsv = ocsv
+        s.nocolor = nocolor
     elif params[0] == "leak":
         (
             cmd,
@@ -419,6 +421,7 @@ def main():
             realm,
             auth_alg,
             nonce,
+            nocolor,
         ) = params
 
         from sippts.sipdigestleak import SipDigestLeak
@@ -456,6 +459,7 @@ def main():
         s.realm = realm
         s.auth_alg = auth_alg
         s.nonce = nonce
+        s.nocolor = nocolor
     elif params[0] == "ping":
         (
             cmd,
@@ -488,6 +492,7 @@ def main():
             ppi,
             pai,
             timeout,
+            nocolor,
         ) = params
 
         from sippts.sipping import SipPing
@@ -522,6 +527,7 @@ def main():
         s.ppi = ppi
         s.pai = pai
         s.timeout = timeout
+        s.nocolor = nocolor
     elif params[0] == "invite":
         (
             cmd,
@@ -585,13 +591,14 @@ def main():
         s.ppi = ppi
         s.pai = pai
     elif params[0] == "dump":
-        (cmd, file, ofile) = params
+        (cmd, file, ofile, nocolor) = params
 
         from sippts.sipdump import SipDump
 
         s = SipDump()
         s.file = file
         s.ofile = ofile
+        s.nocolor = nocolor
     elif params[0] == "dcrack":
         (
             cmd,
@@ -608,6 +615,7 @@ def main():
             ofile,
             ojson,
             ocsv,
+            nocolor,
         ) = params
 
         from sippts.sipdigestcrack import SipDigestCrack
@@ -626,6 +634,7 @@ def main():
         s.ofile = ofile
         s.ojson = ojson
         s.ocsv = ocsv
+        s.nocolor = nocolor
     elif params[0] == "flood":
         (
             cmd,
@@ -652,6 +661,7 @@ def main():
             alphabet,
             max,
             min,
+            nocolor,
         ) = params
 
         from sippts.sipflood import SipFlood
@@ -680,6 +690,7 @@ def main():
         s.alphabet = alphabet
         s.max = max
         s.min = min
+        s.nocolor = nocolor
     elif params[0] == "wssend":
         (
             cmd,
@@ -704,6 +715,7 @@ def main():
             ppi,
             pai,
             timeout,
+            nocolor,
         ) = params
 
         from sippts.wssend import WsSend
@@ -730,8 +742,9 @@ def main():
         s.ppi = ppi
         s.pai = pai
         s.timeout = timeout
+        s.nocolor = nocolor
     elif params[0] == "sniff":
-        (cmd, dev, ofile, auth, verbose, proto, rport) = params
+        (cmd, dev, ofile, auth, verbose, proto, rport, nocolor) = params
 
         from sippts.sipsniff import SipSniff
 
@@ -742,8 +755,9 @@ def main():
         s.verbose = verbose
         s.proto = proto
         s.rport = rport
+        s.nocolor = nocolor
     elif params[0] == "spoof":
-        (cmd, ip, verbose, gw, file) = params
+        (cmd, ip, verbose, gw, file, nocolor) = params
 
         from sippts.arpspoof import ArpSpoof
 
@@ -752,6 +766,7 @@ def main():
         s.verbose = verbose
         s.gw = gw
         s.file = file
+        s.nocolor = nocolor
     elif params[0] == "pcapdump":
         (cmd, file, folder, verbose, rtpextract, nocolor, sip, rtp, auth) = params
 
@@ -767,7 +782,7 @@ def main():
         s.rtp = rtp
         s.auth = auth
     elif params[0] == "rtpbleed":
-        (cmd, ip, start_port, end_port, loops, payload, delay, ofile) = params
+        (cmd, ip, start_port, end_port, loops, payload, delay, ofile, nocolor) = params
 
         from sippts.rtpbleed import RTPBleed
 
@@ -779,8 +794,9 @@ def main():
         s.payload = payload
         s.delay = delay
         s.ofile = ofile
+        s.nocolor = nocolor
     elif params[0] == "rtcpbleed":
-        (cmd, ip, start_port, end_port, delay, ofile) = params
+        (cmd, ip, start_port, end_port, delay, ofile, nocolor) = params
 
         from sippts.rtcpbleed import RTCPBleed
 
@@ -790,8 +806,9 @@ def main():
         s.end_port = end_port
         s.delay = delay
         s.ofile = ofile
+        s.nocolor = nocolor
     elif params[0] == "rtpbleedflood":
-        (cmd, ip, port, payload, verbose) = params
+        (cmd, ip, port, payload, verbose, nocolor) = params
 
         from sippts.rtpbleedflood import RTPBleedFlood
 
@@ -800,8 +817,9 @@ def main():
         s.port = port
         s.payload = payload
         s.verbose = verbose
+        s.nocolor = nocolor
     elif params[0] == "rtpbleedinject":
-        (cmd, ip, port, payload, file) = params
+        (cmd, ip, port, payload, file, nocolor) = params
 
         from sippts.rtpbleedinject import RTPBleedInject
 
@@ -810,6 +828,7 @@ def main():
         s.port = port
         s.payload = payload
         s.file = file
+        s.nocolor = nocolor
     else:
         print(f"Error loading module {params[0]}")
         exit()

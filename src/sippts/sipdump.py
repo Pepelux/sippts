@@ -15,15 +15,26 @@ from .lib.logos import Logo
 
 class SipDump:
     def __init__(self):
+        self.nocolor = ""
         self.file = ""
         self.ofile = ""
 
         self.c = Color()
 
     def start(self):
+        # -nocolor has to be applied before anything is printed, the logo
+        # included, or those lines keep their escape codes
+        try:
+            self.nocolor = int(self.nocolor)
+        except (TypeError, ValueError):
+            self.nocolor = 0
+
+        if self.nocolor == 1:
+            self.c.ansy()
+
         pyshark_compat()
 
-        logo = Logo("sipdump")
+        logo = Logo("sipdump", self.nocolor)
         logo.print()
 
         print(f"{self.c.BWHITE}[✓] Input file: {self.c.GREEN}{self.file}")

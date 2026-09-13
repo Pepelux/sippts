@@ -21,6 +21,7 @@ from .lib.logos import Logo
 
 class WsSend:
     def __init__(self):
+        self.nocolor = ""
         self.ip = ""
         self.host = ""
         self.rport = "5061"
@@ -50,6 +51,16 @@ class WsSend:
         self.c = Color()
 
     def start(self):
+        # -nocolor has to be applied before anything is printed, the logo
+        # included, or those lines keep their escape codes
+        try:
+            self.nocolor = int(self.nocolor)
+        except (TypeError, ValueError):
+            self.nocolor = 0
+
+        if self.nocolor == 1:
+            self.c.ansy()
+
         supported_protos = ["WS", "WSS"]
         supported_methods = [
             "REGISTER",
@@ -106,7 +117,7 @@ class WsSend:
             print(self.c.WHITE)
             sys.exit()
 
-        logo = Logo("wssend")
+        logo = Logo("wssend", self.nocolor)
         logo.print()
 
         print(

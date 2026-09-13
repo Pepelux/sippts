@@ -37,6 +37,7 @@ from .lib.logos import Logo
 
 class SipDigestLeak:
     def __init__(self):
+        self.nocolor = ""
         self.realm = "asterisk"
         self.auth_alg = "MD5"
         self.nonce = ""
@@ -77,6 +78,16 @@ class SipDigestLeak:
         self.c = Color()
 
     def start(self):
+        # -nocolor has to be applied before anything is printed, the logo
+        # included, or those lines keep their escape codes
+        try:
+            self.nocolor = int(self.nocolor)
+        except (TypeError, ValueError):
+            self.nocolor = 0
+
+        if self.nocolor == 1:
+            self.c.ansy()
+
         # from sippts-gui it arrives as text and the comparison against 5060
         # below never matched, so -p TLS did not switch to the default 5061
         try:
@@ -137,7 +148,7 @@ class SipDigestLeak:
         if self.rport == 5060 and self.proto == "TLS":
             self.rport = 5061
 
-        logo = Logo("sipdigestleak")
+        logo = Logo("sipdigestleak", self.nocolor)
         logo.print()
 
         signal.signal(signal.SIGINT, self.signal_handler)

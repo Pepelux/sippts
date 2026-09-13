@@ -25,6 +25,7 @@ from .lib.logos import Logo
 
 class SipSniff:
     def __init__(self):
+        self.nocolor = ""
         self.dev = ""
         self.ofile = ""
         self.rport = 0
@@ -72,6 +73,16 @@ class SipSniff:
         sys.exit()
 
     def start(self):
+        # -nocolor has to be applied before anything is printed, the logo
+        # included, or those lines keep their escape codes
+        try:
+            self.nocolor = int(self.nocolor)
+        except (TypeError, ValueError):
+            self.nocolor = 0
+
+        if self.nocolor == 1:
+            self.c.ansy()
+
         pyshark_compat()
 
         try:
@@ -98,7 +109,7 @@ class SipSniff:
             )
             return
 
-        logo = Logo("sipsniff")
+        logo = Logo("sipsniff", self.nocolor)
         logo.print()
 
         self.proto = self.proto.upper()

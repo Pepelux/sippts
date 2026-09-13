@@ -52,6 +52,25 @@ New in this version:
   'leak -o' -> 'dcrack -f' does not change. The JSON carries the same envelope
   for every tool (tool, version, timestamp, target, count and a flat results
   array), so a single consumer works with all of them
+- global: -nocolor in every module. It was only in 7 of the 20, so the other
+  13 printed escape codes even when the output went to a file or to a pipe. It
+  is applied at the start of start(), before the banner, because sipsend was
+  applying it after and those lines kept their colour
+- global: long aliases --timeout, --protocol and --domain for the short flags,
+  which mean different things depending on the command: -t is the transfer
+  number in invite, -p is the payload type in the rtp tools and the prefix in
+  dcrack, and -d is the device in sniff and the delay in rtpbleed. The short
+  ones do not change; the alias is only added where they really mean that
+- leak: new param -t TIMEOUT. It had 30 seconds hardcoded and waits that long
+  per host, which against a whole network is forever
+- wssend, enumerate, ping, rtpbleedflood, rtpbleedinject: new param -o FILE
+- README: it documented a tshark module that no longer exists (removed in
+  v4.0), did not mention astami, sniff, spoof, pcapdump or video, claimed that
+  exten and rcrack accept port ranges (their -r is a single port) and that scan
+  only works over UDP and TCP. The pasted help of scan was outdated to the
+  point of not even showing -oi. Plus the usual crop of typos: Instalation,
+  "Can be use sippts", a wiki link with three m's and an example of scan with
+  no target, which fails as written
 - global: the version number is read from the 'version' file, the same one
   github serves for the -up check. It used to be written by hand in four
   places (that file, params.py, sippts-gui and setup.py) and two of them had

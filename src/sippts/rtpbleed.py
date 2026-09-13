@@ -21,6 +21,7 @@ from .lib.logos import Logo
 
 class RTPBleed:
     def __init__(self):
+        self.nocolor = ""
         self.ip = ""
         self.start_port = "10000"
         self.end_port = "20000"
@@ -38,13 +39,23 @@ class RTPBleed:
         self.run = False
 
     def start(self):
+        # -nocolor has to be applied before anything is printed, the logo
+        # included, or those lines keep their escape codes
+        try:
+            self.nocolor = int(self.nocolor)
+        except (TypeError, ValueError):
+            self.nocolor = 0
+
+        if self.nocolor == 1:
+            self.c.ansy()
+
         self.start_port = int(self.start_port)
         self.end_port = int(self.end_port)
         self.loops = int(self.loops)
         self.payload = int(self.payload)
         self.delay = int(self.delay)
 
-        logo = Logo("rtpbleed")
+        logo = Logo("rtpbleed", self.nocolor)
         logo.print()
 
         print(f"{self.c.BWHITE}[✓] Target IP: {self.c.YELLOW}{self.ip}")
