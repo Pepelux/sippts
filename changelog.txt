@@ -9,6 +9,16 @@ New in this version:
   losing the port and the protocol, and its format cannot change without
   breaking whoever already uses it: now 'scan -ot t.txt && leak -f t.txt'
   needs no editing in between
+- exten, rcrack: new param -f FILE, a file of targets one per line, in the same
+  ip:port/proto that 'scan -ot' writes and 'leak -f' already read (networks and
+  ranges are accepted too). Both walk the file one pass per (port, protocol):
+  their workers read the port and the protocol many times, so reassigning them
+  with threads alive would have been an intermittent and silent race condition
+- exten: new param -oe FILE, saves the extensions found one per line
+- rcrack: new param -ef FILE, reads that list and adds it to whatever -e
+  brought, respecting -el and -pr. -e is no longer mandatory when -ef is given.
+  With this, 'scan -ot' -> 'exten -f -oe' -> 'rcrack -f -ef' runs end to end
+  with nothing typed in between
 - rcrack, dcrack: new param -o FILE. They were the only two modules with no
   output file at all, so the result of a crack that can take hours only
   existed in the terminal scrollback

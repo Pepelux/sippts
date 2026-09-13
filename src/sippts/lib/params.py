@@ -699,6 +699,14 @@ Usage examples:
         dest="proxy",
         default="",
     )
+    target.add_argument(
+        "-f",
+        metavar="FILE",
+        type=str,
+        help="File with targets, one per line (ip, network, range or ip:port/proto)",
+        dest="file",
+        default="",
+    )
 
     headers = parser_exten.add_argument_group("Headers")
     headers.add_argument(
@@ -780,6 +788,14 @@ Usage examples:
         type=str,
         help="Save results into a CSV file",
         dest="ocsv",
+        default="",
+    )
+    log.add_argument(
+        "-oe",
+        metavar="FILE",
+        type=str,
+        help="Save the extensions found, one per line, ready for -ef of rcrack",
+        dest="oefile",
         default="",
     )
 
@@ -881,6 +897,22 @@ Usage examples:
         type=str,
         help="Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)",
         dest="proxy",
+        default="",
+    )
+    target.add_argument(
+        "-f",
+        metavar="FILE",
+        type=str,
+        help="File with targets, one per line (ip, network, range or ip:port/proto)",
+        dest="file",
+        default="",
+    )
+    target.add_argument(
+        "-ef",
+        metavar="FILE",
+        type=str,
+        help="File with extensions, one per line (what exten -oe writes)",
+        dest="effile",
         default="",
     )
 
@@ -3652,7 +3684,7 @@ Payloads
         if args.help == 1:
             parser_exten.print_help()
             exit()
-        if not args.ipaddr:
+        if not args.ipaddr and not args.file:
             parser_exten.print_help()
             print(RED)
             print("Param error!")
@@ -3661,6 +3693,8 @@ Payloads
             exit()
 
         IPADDR = args.ipaddr
+        FILE = args.file
+        OEFILE = args.oefile
         HOST = args.ipaddr
         PROXY = args.proxy
         RPORT = args.rport
@@ -3706,12 +3740,14 @@ Payloads
             TIMEOUT,
             OJSON,
             OCSV,
+            FILE,
+            OEFILE,
         )
     elif COMMAND == "rcrack":
         if args.help == 1:
             parser_rcrack.print_help()
             exit()
-        if not args.ipaddr or not args.exten or not args.wordlist:
+        if (not args.ipaddr and not args.file) or (not args.exten and not args.effile) or not args.wordlist:
             parser_rcrack.print_help()
             print(RED)
             print("Param error!")
@@ -3722,6 +3758,8 @@ Payloads
             exit()
 
         IPADDR = args.ipaddr
+        FILE = args.file
+        EFFILE = args.effile
         HOST = args.ipaddr
         PROXY = args.proxy
         RPORT = args.rport
@@ -3764,6 +3802,8 @@ Payloads
             OFILE,
             OJSON,
             OCSV,
+            FILE,
+            EFFILE,
         )
     elif COMMAND == "send":
         if args.help == 1:

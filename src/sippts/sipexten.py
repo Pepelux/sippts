@@ -29,6 +29,7 @@ from .lib.functions import (
     format_time,
     write_results,
     RESULT_FIELDS,
+    read_targets_file,
 )
 from .lib.color import Color
 from .lib.logos import Logo
@@ -41,6 +42,8 @@ class SipExten:
         self.ojson = ""
         self.ocsv = ""
         self.ip = ""
+        self.file = ""
+        self.oefile = ""
         self.host = ""
         self.proxy = ""
         self.route = ""
@@ -109,17 +112,37 @@ class SipExten:
             sys.exit()
 
         # create a list of IP addresses
-        try:
-            (ips, names) = expand_targets(self.ip)
-        except ValueError as error:
-            print(f"{self.c.BRED}{error}")
-            print(self.c.WHITE)
-            sys.exit()
+        names = []
 
-        if ips == []:
-            print(f"{self.c.BRED}No target to scan in {self.ip}")
-            print(self.c.WHITE)
-            sys.exit()
+        if self.file != "":
+            # targets from a file, in the ip:port/proto that 'scan -ot' writes
+            # and 'leak -f' already read. Networks and ranges are accepted too
+            (targets, errors) = read_targets_file(self.file, self.rport, self.proto)
+
+            for error in errors:
+                print(f"{self.c.BRED}{error}")
+                print(self.c.WHITE)
+
+            if targets == []:
+                print(f"{self.c.BRED}No target to scan in {self.file}")
+                print(self.c.WHITE)
+                sys.exit()
+
+            ips = [t[0] for t in targets]
+        else:
+            try:
+                (ips, names) = expand_targets(self.ip)
+            except ValueError as error:
+                print(f"{self.c.BRED}{error}")
+                print(self.c.WHITE)
+                sys.exit()
+
+            if ips == []:
+                print(f"{self.c.BRED}No target to scan in {self.ip}")
+                print(self.c.WHITE)
+                sys.exit()
+
+            targets = [(ip, self.rport, self.proto) for ip in ips]
 
         # when the target is a single host name, keep the name as SIP domain
         # (for a network or a range each host uses its own address, see scan_host)
@@ -148,7 +171,10 @@ class SipExten:
         logo = Logo("sipexten", self.nocolor)
         logo.print()
 
-        print(f"{self.c.BWHITE}[✓] IP/Network: {self.c.GREEN}{self.ip}")
+        if self.file != "":
+            print(f"{self.c.BWHITE}[✓] Targets file: {self.c.GREEN}{self.file}")
+        else:
+            print(f"{self.c.BWHITE}[✓] IP/Network: {self.c.GREEN}{self.ip}")
         if self.proxy != "":
             print(f"{self.c.BWHITE}[✓] Outbound Proxy: {self.c.GREEN}{self.proxy}")
         print(f"{self.c.BWHITE}[✓] Port: {self.c.GREEN}{self.rport}")
@@ -188,11 +214,39 @@ class SipExten:
             )
         print(self.c.WHITE)
 
+        start = time.time()
+
+        # one pass per (port, proto): the workers read self.rport and
+        # self.proto many times, so they are only reassigned between passes,
+        # with no threads alive
+        grupos = dict()
+
+        for (ip, port, proto) in targets:
+            grupos.setdefault((port, proto), [])
+
+            if ip not in grupos[(port, proto)]:
+                grupos[(port, proto)].append(ip)
+
+        for (port, proto), lista in grupos.items():
+            if self.quit == True:
+                break
+
+            self.rport = port
+            self.proto = proto
+
+            self.run_pass(lista, extens, nthreads, max_values)
+
+        end = time.time()
+        self.totaltime = int(end - start)
+
+        self.found.sort(key=host_sort_key)
+        self.print()
+
+    def run_pass(self, ips, extens, nthreads, max_values):
+        total = len(ips) * len(extens)
         values = product(ips, extens)
         values2 = []
         count = 0
-
-        start = time.time()
 
         for i, val in enumerate(values):
             if self.quit == False:
@@ -236,12 +290,6 @@ class SipExten:
 
                     values2.clear()
                     count = 0
-
-        end = time.time()
-        self.totaltime = int(end - start)
-
-        self.found.sort(key=host_sort_key)
-        self.print()
 
     def scan_host(self, ipaddr, to_user):
         if self.quit == False:
@@ -506,6 +554,26 @@ class SipExten:
             )
             print(self.c.WHITE)
             self.errors = 0
+        # extensions found, one per line, to feed 'rcrack -ef'
+        if self.oefile != "" and len(self.found) > 0:
+            extensiones = []
+
+            for x in self.found:
+                valores = x.split("###")
+
+                if len(valores) > 3 and valores[3] not in extensiones:
+                    extensiones.append(valores[3])
+
+            extensiones.sort()
+
+            try:
+                with open(self.oefile, "w") as fe:
+                    for e in extensiones:
+                        fe.write(e + "\n")
+            except OSError as error:
+                print(f"{self.c.RED}Error writing {self.oefile} ({error})")
+                print(self.c.WHITE)
+
         write_results(
             self.found,
             RESULT_FIELDS["exten"],

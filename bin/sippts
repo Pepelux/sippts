@@ -167,6 +167,8 @@ def main():
             timeout,
             ojson,
             ocsv,
+            file,
+            oefile,
         ) = params
 
         from sippts.sipexten import SipExten
@@ -192,6 +194,8 @@ def main():
         s.timeout = timeout
         s.ojson = ojson
         s.ocsv = ocsv
+        s.file = file
+        s.oefile = oefile
     elif params[0] == "rcrack":
         (
             cmd,
@@ -215,6 +219,8 @@ def main():
             ofile,
             ojson,
             ocsv,
+            file,
+            effile,
         ) = params
 
         from sippts.siprcrack import SipRemoteCrack
@@ -240,6 +246,8 @@ def main():
         s.ofile = ofile
         s.ojson = ojson
         s.ocsv = ocsv
+        s.file = file
+        s.effile = effile
     elif params[0] == "send":
         (
             cmd,

@@ -34,6 +34,7 @@ from .lib.functions import (
     open_log,
     write_results,
     RESULT_FIELDS,
+    read_targets_file,
 )
 from .lib.color import Color
 from .lib.logos import Logo
@@ -59,6 +60,9 @@ class SipRemoteCrack:
         self.contact_domain = ""
         self.wordlist = ""
         self.ofile = ""
+        self.file = ""
+        self.effile = ""
+        self.targets = []
         self.user_agent = "pplsip"
         self.threads = "100"
         self.verbose = 0
@@ -418,17 +422,38 @@ class SipRemoteCrack:
             sys.exit()
 
         # create a list of IP addresses
-        try:
-            (self.ips, names) = expand_targets(self.ip)
-        except ValueError as error:
-            print(f"{self.c.BRED}{error}")
-            print(self.c.WHITE)
-            sys.exit()
+        names = []
 
-        if self.ips == []:
-            print(f"{self.c.BRED}No target to attack in {self.ip}")
-            print(self.c.WHITE)
-            sys.exit()
+        if self.file != "":
+            # targets from a file, in the ip:port/proto that 'scan -ot' writes
+            (self.targets, errors) = read_targets_file(
+                self.file, self.rport, self.proto
+            )
+
+            for error in errors:
+                print(f"{self.c.BRED}{error}")
+                print(self.c.WHITE)
+
+            if self.targets == []:
+                print(f"{self.c.BRED}No target to attack in {self.file}")
+                print(self.c.WHITE)
+                sys.exit()
+
+            self.ips = [t[0] for t in self.targets]
+        else:
+            try:
+                (self.ips, names) = expand_targets(self.ip)
+            except ValueError as error:
+                print(f"{self.c.BRED}{error}")
+                print(self.c.WHITE)
+                sys.exit()
+
+            if self.ips == []:
+                print(f"{self.c.BRED}No target to attack in {self.ip}")
+                print(self.c.WHITE)
+                sys.exit()
+
+            self.targets = [(ip, self.rport, self.proto) for ip in self.ips]
 
         # when the target is a single host name, keep the name as SIP domain
         # (for a network or a range each host uses its own address, see register)
@@ -440,7 +465,12 @@ class SipRemoteCrack:
 
         # create a list of extens
         self.extens = []
-        for p in self.exten.split(","):
+
+        # -e is optional now that -ef exists, so it can arrive empty
+        if self.exten == None:
+            self.exten = ""
+
+        for p in self.exten.split(",") if self.exten != "" else []:
             p = p.strip()
             m = re.fullmatch(r"([0-9]+)-([0-9]+)", p)
             if m:
@@ -454,6 +484,32 @@ class SipRemoteCrack:
                     self.extens.append(str(p).zfill(int(self.ext_len)))
                 else:
                     self.extens.append(p)
+
+        # extensions from a file, what 'exten -oe' writes: they are added to
+        # whatever -e brought, respecting -el and -pr
+        if self.effile != "":
+            try:
+                with open(self.effile) as fe:
+                    for linea in fe:
+                        linea = linea.strip()
+
+                        if linea == "" or linea.startswith("#"):
+                            continue
+
+                        if self.ext_len != "":
+                            linea = str(linea).zfill(int(self.ext_len))
+
+                        if linea not in self.extens:
+                            self.extens.append(linea)
+            except OSError as error:
+                print(f"{self.c.RED}Error reading {self.effile} ({error})")
+                print(self.c.WHITE)
+                sys.exit()
+
+        if self.extens == []:
+            print(f"{self.c.BRED}No extensions to attack")
+            print(self.c.WHITE)
+            sys.exit()
 
         signal.signal(signal.SIGINT, self.signal_handler)
         print(f"{self.c.BYELLOW}\nPress Ctrl+C to stop\n")
@@ -477,13 +533,19 @@ class SipRemoteCrack:
         if nthreads < 1:
             nthreads = 1
 
-        print(f"{self.c.BWHITE}[✓] IP/Network: {self.c.GREEN}{str(self.ip)}")
+        if self.file != "":
+            print(f"{self.c.BWHITE}[✓] Targets file: {self.c.GREEN}{self.file}")
+        else:
+            print(f"{self.c.BWHITE}[✓] IP/Network: {self.c.GREEN}{str(self.ip)}")
         if self.proxy != "":
             print(f"{self.c.BWHITE}[✓] Outbound Proxy: {self.c.GREEN}{self.proxy}")
         print(f"{self.c.BWHITE}[✓] Port: {self.c.GREEN}{self.rport}")
         if self.prefix != "":
             print(f"{self.c.BWHITE}[✓] Users prefix: {self.c.GREEN}{self.prefix}")
-        print(f"{self.c.BWHITE}[✓] Exten range: {self.c.GREEN}{self.exten}")
+        if self.effile != "":
+            print(f"{self.c.BWHITE}[✓] Extensions file: {self.c.GREEN}{self.effile}")
+        if self.exten != "":
+            print(f"{self.c.BWHITE}[✓] Exten range: {self.c.GREEN}{self.exten}")
         if self.authuser != "":
             print(f"{self.c.BWHITE}[✓] Auth User: {self.c.GREEN}{self.authuser}")
         print(f"{self.c.BWHITE}[✓] Protocol: {self.c.GREEN}{self.proto.upper()}")
@@ -517,11 +579,39 @@ class SipRemoteCrack:
             print(self.c.WHITE)
             sys.exit()
 
-        values = product(self.ips, self.extens)
+        start = time.time()
+
+        # one pass per (port, proto): the workers read self.rport and
+        # self.proto many times, so they are only reassigned between passes,
+        # with no threads alive
+        grupos = dict()
+
+        for (ip, port, proto) in self.targets:
+            grupos.setdefault((port, proto), [])
+
+            if ip not in grupos[(port, proto)]:
+                grupos[(port, proto)].append(ip)
+
+        for (port, proto), lista in grupos.items():
+            if self.run == False:
+                break
+
+            self.rport = port
+            self.proto = proto
+
+            self.run_pass(lista, nthreads, max_values)
+
+        end = time.time()
+        self.totaltime = int(end - start)
+
+        self.found.sort(key=host_sort_key)
+        self.print()
+
+    def run_pass(self, ips, nthreads, max_values):
+        total = len(ips) * len(self.extens)
+        values = product(ips, self.extens)
         values2 = []
         count = 0
-
-        start = time.time()
 
         for i, val in enumerate(values):
             if self.run == True:
@@ -552,12 +642,6 @@ class SipRemoteCrack:
                     cursor.show()
                 except: 
                     pass
-
-        end = time.time()
-        self.totaltime = int(end - start)
-
-        self.found.sort(key=host_sort_key)
-        self.print()
 
     def scan_host(self, ipaddr, to_user):
         data = dict()
