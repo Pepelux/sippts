@@ -93,8 +93,8 @@ Alcatel-Lucent Omnipcx;8.0;CVE-2011-0344;Multiple stack-based buffer overflows i
 Alcatel-Lucent Omnipcx;<= 7.1;CVE-2007-5361;The Communication Server in Alcatel-Lucent OmniPCX Enterprise 7.1 and earlier caches an...;https://nvd.nist.gov/vuln/detail/CVE-2007-5361
 Alcatel-Lucent Omnipcx;<= 9.0;CVE-2011-0344;Multiple stack-based buffer overflows in unspecified CGI programs in the Unified Mainte...;https://nvd.nist.gov/vuln/detail/CVE-2011-0344
 Alcatel-Lucent Omnipcx;>= 7.0 and <= 7.1;CVE-2011-0344;Multiple stack-based buffer overflows in unspecified CGI programs in the Unified Mainte...;https://nvd.nist.gov/vuln/detail/CVE-2011-0344
-Alcatel-Lucent Omnitouch 8400 Instant Communications Suite;<= 6.7.2;CVE-2013-4653;Multiple cross-site scripting (XSS) vulnerabilities in the signin functionality of ics...;https://nvd.nist.gov/vuln/detail/CVE-2013-4653
-Alcatel-Lucent Omnitouch 8460 Advanced Communication Server;<= 9.0;CVE-2013-4653;Multiple cross-site scripting (XSS) vulnerabilities in the signin functionality of ics...;https://nvd.nist.gov/vuln/detail/CVE-2013-4653
+Alcatel-Lucent Omnitouch 8400 Instant Communications;<= 6.7.2;CVE-2013-4653;Multiple cross-site scripting (XSS) vulnerabilities in the signin functionality of ics...;https://nvd.nist.gov/vuln/detail/CVE-2013-4653
+Alcatel-Lucent Omnitouch 8460 Advanced Communication;<= 9.0;CVE-2013-4653;Multiple cross-site scripting (XSS) vulnerabilities in the signin functionality of ics...;https://nvd.nist.gov/vuln/detail/CVE-2013-4653
 Alcatel-Lucent Voice Mail System;;CVE-2007-1822;Alcatel-Lucent Lucent Technologies voice mail systems allow remote attackers to retriev...;https://nvd.nist.gov/vuln/detail/CVE-2007-1822
 Asterisk Appliance Developer KIT;1.3;CVE-2008-1332;Unspecified vulnerability in Asterisk Open Source 1.2.x before 1.2.27, 1.4.x before 1.4...;https://nvd.nist.gov/vuln/detail/CVE-2008-1332
 Asterisk Appliance Developer KIT;1.4;CVE-2008-1289;Multiple buffer overflows in Asterisk Open Source 1.4.x before 1.4.18.1 and 1.4.19-rc3,...;https://nvd.nist.gov/vuln/detail/CVE-2008-1289
@@ -112,7 +112,6 @@ Asterisk Appliance Developer KIT;>= 0.2 and <= 0.8;CVE-2008-1332;Unspecified vul
 Asterisk Appliance Developer KIT;>= 0.2 and <= 0.8;CVE-2008-1390;The AsteriskGUI HTTP server in Asterisk Open Source 1.4.x before 1.4.19-rc3 and 1.6.x b...;https://nvd.nist.gov/vuln/detail/CVE-2008-1390
 Asterisk Appliance Developer KIT;>= 0.2 and <= 0.8;CVE-2008-1897;The IAX2 channel driver (chan_iax2) in Asterisk Open Source 1.0.x, 1.2.x before 1.2.28,...;https://nvd.nist.gov/vuln/detail/CVE-2008-1897
 Asterisk Appliance Developer KIT;>= 0.2 and <= 0.8;CVE-2008-3264;The FWDOWNL firmware-download implementation in Asterisk Open Source 1.0.x, 1.2.x befor...;https://nvd.nist.gov/vuln/detail/CVE-2008-3264
-Asterisk Appliance S800I;>= 1.3 and <= 1.3.0.2;CVE-2009-2346;The IAX2 protocol implementation in Asterisk Open Source 1.2.x before 1.2.35, 1.4.x bef...;https://nvd.nist.gov/vuln/detail/CVE-2009-2346
 Asterisk Business Edition;<= a;CVE-2008-1332;Unspecified vulnerability in Asterisk Open Source 1.2.x before 1.2.27, 1.4.x before 1.4...;https://nvd.nist.gov/vuln/detail/CVE-2008-1332
 Asterisk Business Edition;<= b.2.5.0;CVE-2008-1332;Unspecified vulnerability in Asterisk Open Source 1.2.x before 1.2.27, 1.4.x before 1.4...;https://nvd.nist.gov/vuln/detail/CVE-2008-1332
 Asterisk Business Edition;<= b.2.5.1;CVE-2008-1897;The IAX2 channel driver (chan_iax2) in Asterisk Open Source 1.0.x, 1.2.x before 1.2.28,...;https://nvd.nist.gov/vuln/detail/CVE-2008-1897
@@ -148,21 +147,22 @@ Asterisk Edition;>= c.3.2.2 and <= c.3.3.2;CVE-2013-2264;The SIP channel driver 
 Asterisk Edition;c.3.0;CVE-2012-2186;Incomplete blacklist vulnerability in main/manager.c in Asterisk Open Source 1.8.x befo...;https://nvd.nist.gov/vuln/detail/CVE-2012-2186
 Asterisk Opensource;>= 1.4.23.2 and <= 1.4.26.1;CVE-2009-2346;The IAX2 protocol implementation in Asterisk Open Source 1.2.x before 1.2.35, 1.4.x bef...;https://nvd.nist.gov/vuln/detail/CVE-2009-2346
 Asterisk PBX;>= 1.2 and <= 1.6;CVE-2008-3903;Asterisk Open Source 1.2.x before 1.2.32, 1.4.x before 1.4.24.1, and 1.6.0.x before 1.6...;https://nvd.nist.gov/vuln/detail/CVE-2008-3903
-Asterisk S800I Appliance;1.2;CVE-2009-0041;IAX2 in Asterisk Open Source 1.2.x before 1.2.31, 1.4.x before 1.4.23-rc4, and 1.6.x be...;https://nvd.nist.gov/vuln/detail/CVE-2009-0041
-Asterisk S800I Appliance;>= 1.0 and <= 1.0.1;CVE-2007-3762;Stack-based buffer overflow in the IAX2 channel driver (chan_iax2) in Asterisk before 1...;https://nvd.nist.gov/vuln/detail/CVE-2007-3762
-Asterisk S800I Appliance;>= 1.0 and <= 1.0.1;CVE-2007-3763;The IAX2 channel driver (chan_iax2) in Asterisk before 1.2.22 and 1.4.x before 1.4.8, B...;https://nvd.nist.gov/vuln/detail/CVE-2007-3763
-Asterisk S800I Appliance;>= 1.0 and <= 1.0.1;CVE-2007-3764;The Skinny channel driver (chan_skinny) in Asterisk before 1.2.22 and 1.4.x before 1.4....;https://nvd.nist.gov/vuln/detail/CVE-2007-3764
-Asterisk S800I Appliance;>= 1.0 and <= 1.0.1;CVE-2007-3765;The STUN implementation in Asterisk 1.4.x before 1.4.8, AsteriskNOW before beta7, Appli...;https://nvd.nist.gov/vuln/detail/CVE-2007-3765
+Asterisk S800I;1.2;CVE-2009-0041;IAX2 in Asterisk Open Source 1.2.x before 1.2.31, 1.4.x before 1.4.23-rc4, and 1.6.x be...;https://nvd.nist.gov/vuln/detail/CVE-2009-0041
 Asterisk S800I;<= 1.0.2;CVE-2007-4280;The Skinny channel driver (chan_skinny) in Asterisk Open Source before 1.4.10, Asterisk...;https://nvd.nist.gov/vuln/detail/CVE-2007-4280
 Asterisk S800I;<= 1.0.3.3;CVE-2008-0095;The SIP channel driver in Asterisk Open Source 1.4.x before 1.4.17, Business Edition be...;https://nvd.nist.gov/vuln/detail/CVE-2008-0095
 Asterisk S800I;<= 1.1.0.1;CVE-2008-1289;Multiple buffer overflows in Asterisk Open Source 1.4.x before 1.4.18.1 and 1.4.19-rc3,...;https://nvd.nist.gov/vuln/detail/CVE-2008-1289
 Asterisk S800I;<= 1.1.0.1;CVE-2008-1332;Unspecified vulnerability in Asterisk Open Source 1.2.x before 1.2.27, 1.4.x before 1.4...;https://nvd.nist.gov/vuln/detail/CVE-2008-1332
 Asterisk S800I;<= 1.1.0.2;CVE-2008-1897;The IAX2 channel driver (chan_iax2) in Asterisk Open Source 1.0.x, 1.2.x before 1.2.28,...;https://nvd.nist.gov/vuln/detail/CVE-2008-1897
 Asterisk S800I;<= 1.1.0.2;CVE-2008-1923;The IAX2 channel driver (chan_iax2) in Asterisk 1.2 before revision 72630 and 1.4 befor...;https://nvd.nist.gov/vuln/detail/CVE-2008-1923
+Asterisk S800I;>= 1.0 and <= 1.0.1;CVE-2007-3762;Stack-based buffer overflow in the IAX2 channel driver (chan_iax2) in Asterisk before 1...;https://nvd.nist.gov/vuln/detail/CVE-2007-3762
+Asterisk S800I;>= 1.0 and <= 1.0.1;CVE-2007-3763;The IAX2 channel driver (chan_iax2) in Asterisk before 1.2.22 and 1.4.x before 1.4.8, B...;https://nvd.nist.gov/vuln/detail/CVE-2007-3763
+Asterisk S800I;>= 1.0 and <= 1.0.1;CVE-2007-3764;The Skinny channel driver (chan_skinny) in Asterisk before 1.2.22 and 1.4.x before 1.4....;https://nvd.nist.gov/vuln/detail/CVE-2007-3764
+Asterisk S800I;>= 1.0 and <= 1.0.1;CVE-2007-3765;The STUN implementation in Asterisk 1.4.x before 1.4.8, AsteriskNOW before beta7, Appli...;https://nvd.nist.gov/vuln/detail/CVE-2007-3765
 Asterisk S800I;>= 1.0 and <= 1.1.0.1;CVE-2008-1897;The IAX2 channel driver (chan_iax2) in Asterisk Open Source 1.0.x, 1.2.x before 1.2.28,...;https://nvd.nist.gov/vuln/detail/CVE-2008-1897
 Asterisk S800I;>= 1.0 and <= 1.1.0.1;CVE-2008-1923;The IAX2 channel driver (chan_iax2) in Asterisk 1.2 before revision 72630 and 1.4 befor...;https://nvd.nist.gov/vuln/detail/CVE-2008-1923
 Asterisk S800I;>= 1.0 and <= 1.1.0;CVE-2008-1332;Unspecified vulnerability in Asterisk Open Source 1.2.x before 1.2.27, 1.4.x before 1.4...;https://nvd.nist.gov/vuln/detail/CVE-2008-1332
 Asterisk S800I;>= 1.0 and <= 1.1.0;CVE-2008-1390;The AsteriskGUI HTTP server in Asterisk Open Source 1.4.x before 1.4.19-rc3 and 1.6.x b...;https://nvd.nist.gov/vuln/detail/CVE-2008-1390
+Asterisk S800I;>= 1.3 and <= 1.3.0.2;CVE-2009-2346;The IAX2 protocol implementation in Asterisk Open Source 1.2.x before 1.2.35, 1.4.x bef...;https://nvd.nist.gov/vuln/detail/CVE-2009-2346
 Asterisk Zaptel;1.4.5.1;CVE-2007-5690;Buffer overflow in sethdlc.c in the Asterisk Zaptel 1.4.5.1 might allow local users to...;https://nvd.nist.gov/vuln/detail/CVE-2007-5690
 Asterisk Zaptel;<= 1.4.11;CVE-2008-5396;Array index error in the (1) torisa.c and (2) dahdi/tor2.c drivers in Zaptel (aka DAHDI...;https://nvd.nist.gov/vuln/detail/CVE-2008-5396
 Asterisk Zaptel;<= 1.4.11;CVE-2008-5744;Array index error in the dahdi/tor2.c driver in Zaptel (aka DAHDI) 1.4.11 and earlier a...;https://nvd.nist.gov/vuln/detail/CVE-2008-5744
@@ -306,9 +306,9 @@ AudioCodes 405HD;2.2.12;CVE-2018-16220;Cross Site Scripting in different input f
 AudioCodes 405HD;<= 3.4.4.1000;CVE-2023-22955;An issue was discovered on AudioCodes VoIP desk phones through 3.4.4.1000;https://nvd.nist.gov/vuln/detail/CVE-2023-22955
 AudioCodes 405HD;<= 3.4.4.1000;CVE-2023-22956;An issue was discovered on AudioCodes VoIP desk phones through 3.4.4.1000;https://nvd.nist.gov/vuln/detail/CVE-2023-22956
 AudioCodes 405HD;<= 3.4.4.1000;CVE-2023-22957;An issue was discovered in libac_des3.so on AudioCodes VoIP desk phones through 3.4.4.1000;https://nvd.nist.gov/vuln/detail/CVE-2023-22957
-AudioCodes 420HD IP Phone;2.2.12.126;CVE-2018-10091;AudioCodes IP phone 420HD devices using firmware version 2.2.12.126 allow XSS.;https://nvd.nist.gov/vuln/detail/CVE-2018-10091
-AudioCodes 420HD IP Phone;2.2.12.126;CVE-2018-10093;AudioCodes IP phone 420HD devices using firmware version 2.2.12.126 allow Remote Code E...;https://nvd.nist.gov/vuln/detail/CVE-2018-10093
-AudioCodes 420HD IP Phone;3.0.0.535.106;CVE-2018-5757;An issue was discovered on AudioCodes 450HD IP Phone devices with firmware 3.0.0.535.106;https://nvd.nist.gov/vuln/detail/CVE-2018-5757
+AudioCodes 420HD;2.2.12.126;CVE-2018-10091;AudioCodes IP phone 420HD devices using firmware version 2.2.12.126 allow XSS.;https://nvd.nist.gov/vuln/detail/CVE-2018-10091
+AudioCodes 420HD;2.2.12.126;CVE-2018-10093;AudioCodes IP phone 420HD devices using firmware version 2.2.12.126 allow Remote Code E...;https://nvd.nist.gov/vuln/detail/CVE-2018-10093
+AudioCodes 420HD;3.0.0.535.106;CVE-2018-5757;An issue was discovered on AudioCodes 450HD IP Phone devices with firmware 3.0.0.535.106;https://nvd.nist.gov/vuln/detail/CVE-2018-5757
 AudioCodes 440HD;<= 3.1.2.89;CVE-2018-18567;AudioCodes 440HD and 450HD devices 3.1.2.89 and earlier allows man-in-the-middle attack...;https://nvd.nist.gov/vuln/detail/CVE-2018-18567
 AudioCodes 445HD;<= 3.4.4.1000;CVE-2023-22955;An issue was discovered on AudioCodes VoIP desk phones through 3.4.4.1000;https://nvd.nist.gov/vuln/detail/CVE-2023-22955
 AudioCodes 445HD;<= 3.4.4.1000;CVE-2023-22956;An issue was discovered on AudioCodes VoIP desk phones through 3.4.4.1000;https://nvd.nist.gov/vuln/detail/CVE-2023-22956
@@ -368,38 +368,38 @@ AudioCodes Mediant Session Border Controller;< 7.40a.501.841;CVE-2024-52884;An i
 AudioCodes ONE Voice Operations Center;< 8.4.582;CVE-2024-52881;An issue was discovered in AudioCodes One Voice Operations Center (OVOC) before 8.4.582;https://nvd.nist.gov/vuln/detail/CVE-2024-52881
 AudioCodes ONE Voice Operations Center;< 8.4.582;CVE-2024-52882;An issue was discovered in AudioCodes One Voice Operations Center (OVOC) before 8.4.582;https://nvd.nist.gov/vuln/detail/CVE-2024-52882
 AudioCodes ONE Voice Operations Center;< 8.4.582;CVE-2024-52883;An issue was discovered in AudioCodes One Voice Operations Center (OVOC) before 8.4.582;https://nvd.nist.gov/vuln/detail/CVE-2024-52883
-Auerswald Comfortel 1200 IP;3.4.4.1-10589;CVE-2018-19977;A command injection (missing input validation, escaping) in the ftp upgrade configurati...;https://nvd.nist.gov/vuln/detail/CVE-2018-19977
-Auerswald Comfortel 1200 IP;3.4.4.1-10589;CVE-2018-19978;A buffer overflow vulnerability in the DHCP and PPPOE configuration interface of the Au...;https://nvd.nist.gov/vuln/detail/CVE-2018-19978
-Auerswald Comfortel 1400 IP;<= 2.8f;CVE-2021-40856;Auerswald COMfortel 1400 IP and 2600 IP before 2.8G devices allow Authentication Bypass...;https://nvd.nist.gov/vuln/detail/CVE-2021-40856
-Auerswald Comfortel 2600 IP;<= 2.8f;CVE-2021-40856;Auerswald COMfortel 1400 IP and 2600 IP before 2.8G devices allow Authentication Bypass...;https://nvd.nist.gov/vuln/detail/CVE-2021-40856
-Auerswald Comfortel 3600 IP;<= 2.8f;CVE-2021-40856;Auerswald COMfortel 1400 IP and 2600 IP before 2.8G devices allow Authentication Bypass...;https://nvd.nist.gov/vuln/detail/CVE-2021-40856
-Auerswald Commander 6000R IP;<= 8.0b;CVE-2021-40857;Auerswald COMpact 5500R devices before 8.2B allow Privilege Escalation via the passwd=1...;https://nvd.nist.gov/vuln/detail/CVE-2021-40857
-Auerswald Commander 6000R IP;<= 8.0b;CVE-2021-40858;Auerswald COMpact 5500R devices before 8.2B allow Arbitrary File Disclosure;https://nvd.nist.gov/vuln/detail/CVE-2021-40858
-Auerswald Commander 6000RX IP;<= 8.0b;CVE-2021-40857;Auerswald COMpact 5500R devices before 8.2B allow Privilege Escalation via the passwd=1...;https://nvd.nist.gov/vuln/detail/CVE-2021-40857
-Auerswald Commander 6000RX IP;<= 8.0b;CVE-2021-40858;Auerswald COMpact 5500R devices before 8.2B allow Arbitrary File Disclosure;https://nvd.nist.gov/vuln/detail/CVE-2021-40858
-Auerswald Commander BASIC.2(19") IP;<= 8.0b;CVE-2021-40857;Auerswald COMpact 5500R devices before 8.2B allow Privilege Escalation via the passwd=1...;https://nvd.nist.gov/vuln/detail/CVE-2021-40857
-Auerswald Commander BASIC.2(19") IP;<= 8.0b;CVE-2021-40858;Auerswald COMpact 5500R devices before 8.2B allow Arbitrary File Disclosure;https://nvd.nist.gov/vuln/detail/CVE-2021-40858
-Auerswald Commander BUSINESS(19") IP;<= 8.0b;CVE-2021-40857;Auerswald COMpact 5500R devices before 8.2B allow Privilege Escalation via the passwd=1...;https://nvd.nist.gov/vuln/detail/CVE-2021-40857
-Auerswald Commander BUSINESS(19") IP;<= 8.0b;CVE-2021-40858;Auerswald COMpact 5500R devices before 8.2B allow Arbitrary File Disclosure;https://nvd.nist.gov/vuln/detail/CVE-2021-40858
-Auerswald Compact 4000 IP;<= 8.0b;CVE-2021-40857;Auerswald COMpact 5500R devices before 8.2B allow Privilege Escalation via the passwd=1...;https://nvd.nist.gov/vuln/detail/CVE-2021-40857
-Auerswald Compact 4000 IP;<= 8.0b;CVE-2021-40858;Auerswald COMpact 5500R devices before 8.2B allow Arbitrary File Disclosure;https://nvd.nist.gov/vuln/detail/CVE-2021-40858
-Auerswald Compact 5000R IP;<= 8.0b;CVE-2021-40857;Auerswald COMpact 5500R devices before 8.2B allow Privilege Escalation via the passwd=1...;https://nvd.nist.gov/vuln/detail/CVE-2021-40857
-Auerswald Compact 5000R IP;<= 8.0b;CVE-2021-40858;Auerswald COMpact 5500R devices before 8.2B allow Arbitrary File Disclosure;https://nvd.nist.gov/vuln/detail/CVE-2021-40858
-Auerswald Compact 5010 Voip IP;<= 8.0b;CVE-2021-40857;Auerswald COMpact 5500R devices before 8.2B allow Privilege Escalation via the passwd=1...;https://nvd.nist.gov/vuln/detail/CVE-2021-40857
-Auerswald Compact 5010 Voip IP;<= 8.0b;CVE-2021-40858;Auerswald COMpact 5500R devices before 8.2B allow Arbitrary File Disclosure;https://nvd.nist.gov/vuln/detail/CVE-2021-40858
-Auerswald Compact 5020 Voip IP;<= 8.0b;CVE-2021-40857;Auerswald COMpact 5500R devices before 8.2B allow Privilege Escalation via the passwd=1...;https://nvd.nist.gov/vuln/detail/CVE-2021-40857
-Auerswald Compact 5020 Voip IP;<= 8.0b;CVE-2021-40858;Auerswald COMpact 5500R devices before 8.2B allow Arbitrary File Disclosure;https://nvd.nist.gov/vuln/detail/CVE-2021-40858
-Auerswald Compact 5200R IP;<= 8.0b;CVE-2021-40857;Auerswald COMpact 5500R devices before 8.2B allow Privilege Escalation via the passwd=1...;https://nvd.nist.gov/vuln/detail/CVE-2021-40857
-Auerswald Compact 5200R IP;<= 8.0b;CVE-2021-40858;Auerswald COMpact 5500R devices before 8.2B allow Arbitrary File Disclosure;https://nvd.nist.gov/vuln/detail/CVE-2021-40858
-Auerswald Compact 5500R IP;<= 8.0b;CVE-2021-40857;Auerswald COMpact 5500R devices before 8.2B allow Privilege Escalation via the passwd=1...;https://nvd.nist.gov/vuln/detail/CVE-2021-40857
-Auerswald Compact 5500R IP;<= 8.0b;CVE-2021-40858;Auerswald COMpact 5500R devices before 8.2B allow Arbitrary File Disclosure;https://nvd.nist.gov/vuln/detail/CVE-2021-40858
+Auerswald Comfortel 1200;3.4.4.1-10589;CVE-2018-19977;A command injection (missing input validation, escaping) in the ftp upgrade configurati...;https://nvd.nist.gov/vuln/detail/CVE-2018-19977
+Auerswald Comfortel 1200;3.4.4.1-10589;CVE-2018-19978;A buffer overflow vulnerability in the DHCP and PPPOE configuration interface of the Au...;https://nvd.nist.gov/vuln/detail/CVE-2018-19978
+Auerswald Comfortel 1400;<= 2.8f;CVE-2021-40856;Auerswald COMfortel 1400 IP and 2600 IP before 2.8G devices allow Authentication Bypass...;https://nvd.nist.gov/vuln/detail/CVE-2021-40856
+Auerswald Comfortel 2600;<= 2.8f;CVE-2021-40856;Auerswald COMfortel 1400 IP and 2600 IP before 2.8G devices allow Authentication Bypass...;https://nvd.nist.gov/vuln/detail/CVE-2021-40856
+Auerswald Comfortel 3600;<= 2.8f;CVE-2021-40856;Auerswald COMfortel 1400 IP and 2600 IP before 2.8G devices allow Authentication Bypass...;https://nvd.nist.gov/vuln/detail/CVE-2021-40856
+Auerswald Commander 6000R;<= 8.0b;CVE-2021-40857;Auerswald COMpact 5500R devices before 8.2B allow Privilege Escalation via the passwd=1...;https://nvd.nist.gov/vuln/detail/CVE-2021-40857
+Auerswald Commander 6000R;<= 8.0b;CVE-2021-40858;Auerswald COMpact 5500R devices before 8.2B allow Arbitrary File Disclosure;https://nvd.nist.gov/vuln/detail/CVE-2021-40858
+Auerswald Commander 6000RX;<= 8.0b;CVE-2021-40857;Auerswald COMpact 5500R devices before 8.2B allow Privilege Escalation via the passwd=1...;https://nvd.nist.gov/vuln/detail/CVE-2021-40857
+Auerswald Commander 6000RX;<= 8.0b;CVE-2021-40858;Auerswald COMpact 5500R devices before 8.2B allow Arbitrary File Disclosure;https://nvd.nist.gov/vuln/detail/CVE-2021-40858
+Auerswald Commander BASIC.2(19");<= 8.0b;CVE-2021-40857;Auerswald COMpact 5500R devices before 8.2B allow Privilege Escalation via the passwd=1...;https://nvd.nist.gov/vuln/detail/CVE-2021-40857
+Auerswald Commander BASIC.2(19");<= 8.0b;CVE-2021-40858;Auerswald COMpact 5500R devices before 8.2B allow Arbitrary File Disclosure;https://nvd.nist.gov/vuln/detail/CVE-2021-40858
+Auerswald Commander BUSINESS(19");<= 8.0b;CVE-2021-40857;Auerswald COMpact 5500R devices before 8.2B allow Privilege Escalation via the passwd=1...;https://nvd.nist.gov/vuln/detail/CVE-2021-40857
+Auerswald Commander BUSINESS(19");<= 8.0b;CVE-2021-40858;Auerswald COMpact 5500R devices before 8.2B allow Arbitrary File Disclosure;https://nvd.nist.gov/vuln/detail/CVE-2021-40858
+Auerswald Compact 4000;<= 8.0b;CVE-2021-40857;Auerswald COMpact 5500R devices before 8.2B allow Privilege Escalation via the passwd=1...;https://nvd.nist.gov/vuln/detail/CVE-2021-40857
+Auerswald Compact 4000;<= 8.0b;CVE-2021-40858;Auerswald COMpact 5500R devices before 8.2B allow Arbitrary File Disclosure;https://nvd.nist.gov/vuln/detail/CVE-2021-40858
+Auerswald Compact 5000R;<= 8.0b;CVE-2021-40857;Auerswald COMpact 5500R devices before 8.2B allow Privilege Escalation via the passwd=1...;https://nvd.nist.gov/vuln/detail/CVE-2021-40857
+Auerswald Compact 5000R;<= 8.0b;CVE-2021-40858;Auerswald COMpact 5500R devices before 8.2B allow Arbitrary File Disclosure;https://nvd.nist.gov/vuln/detail/CVE-2021-40858
+Auerswald Compact 5010;<= 8.0b;CVE-2021-40857;Auerswald COMpact 5500R devices before 8.2B allow Privilege Escalation via the passwd=1...;https://nvd.nist.gov/vuln/detail/CVE-2021-40857
+Auerswald Compact 5010;<= 8.0b;CVE-2021-40858;Auerswald COMpact 5500R devices before 8.2B allow Arbitrary File Disclosure;https://nvd.nist.gov/vuln/detail/CVE-2021-40858
+Auerswald Compact 5020;<= 8.0b;CVE-2021-40857;Auerswald COMpact 5500R devices before 8.2B allow Privilege Escalation via the passwd=1...;https://nvd.nist.gov/vuln/detail/CVE-2021-40857
+Auerswald Compact 5020;<= 8.0b;CVE-2021-40858;Auerswald COMpact 5500R devices before 8.2B allow Arbitrary File Disclosure;https://nvd.nist.gov/vuln/detail/CVE-2021-40858
+Auerswald Compact 5200R;<= 8.0b;CVE-2021-40857;Auerswald COMpact 5500R devices before 8.2B allow Privilege Escalation via the passwd=1...;https://nvd.nist.gov/vuln/detail/CVE-2021-40857
+Auerswald Compact 5200R;<= 8.0b;CVE-2021-40858;Auerswald COMpact 5500R devices before 8.2B allow Arbitrary File Disclosure;https://nvd.nist.gov/vuln/detail/CVE-2021-40858
 Auerswald Compact 5500R;7.8a;CVE-2021-40859;Backdoors were discovered in Auerswald COMpact 5500R 7.8A and 8.0B devices, that allow...;https://nvd.nist.gov/vuln/detail/CVE-2021-40859
 Auerswald Compact 5500R;8.0b;CVE-2021-40859;Backdoors were discovered in Auerswald COMpact 5500R 7.8A and 8.0B devices, that allow...;https://nvd.nist.gov/vuln/detail/CVE-2021-40859
+Auerswald Compact 5500R;<= 8.0b;CVE-2021-40857;Auerswald COMpact 5500R devices before 8.2B allow Privilege Escalation via the passwd=1...;https://nvd.nist.gov/vuln/detail/CVE-2021-40857
+Auerswald Compact 5500R;<= 8.0b;CVE-2021-40858;Auerswald COMpact 5500R devices before 8.2B allow Arbitrary File Disclosure;https://nvd.nist.gov/vuln/detail/CVE-2021-40858
 Auerswald Comsuite CTI Controlcenter;3.1;CVE-2003-1457;Auerswald COMsuite CTI ControlCenter 3.1 creates a default "runasositron" user account...;https://nvd.nist.gov/vuln/detail/CVE-2003-1457
-Avaya 4602SW IP Phone;<= r2.2;CVE-2007-3320;The Avaya 4602SW IP Phone (Model 4602D02A) with 2.2.2 and earlier SIP firmware accepts...;https://nvd.nist.gov/vuln/detail/CVE-2007-3320
-Avaya 4602SW IP Phone;<= r2.2;CVE-2007-3321;The Avaya 4602 SW IP Phone (Model 4602D02A) with 2.2.2 and earlier SIP firmware allows...;https://nvd.nist.gov/vuln/detail/CVE-2007-3321
-Avaya 4602SW IP Phone;<= r2.2;CVE-2007-3322;The Avaya 4602 SW IP Phone (Model 4602D02A) with 2.2.2 and earlier SIP firmware uses a...;https://nvd.nist.gov/vuln/detail/CVE-2007-3322
-Avaya 4602SW IP Phone;r2.2;CVE-2007-3319;The Avaya 4602SW IP Phone (Model 4602D02A) with 2.2.2 and earlier SIP firmware does not...;https://nvd.nist.gov/vuln/detail/CVE-2007-3319
+Avaya 4602SW;<= r2.2;CVE-2007-3320;The Avaya 4602SW IP Phone (Model 4602D02A) with 2.2.2 and earlier SIP firmware accepts...;https://nvd.nist.gov/vuln/detail/CVE-2007-3320
+Avaya 4602SW;<= r2.2;CVE-2007-3321;The Avaya 4602 SW IP Phone (Model 4602D02A) with 2.2.2 and earlier SIP firmware allows...;https://nvd.nist.gov/vuln/detail/CVE-2007-3321
+Avaya 4602SW;<= r2.2;CVE-2007-3322;The Avaya 4602 SW IP Phone (Model 4602D02A) with 2.2.2 and earlier SIP firmware uses a...;https://nvd.nist.gov/vuln/detail/CVE-2007-3322
+Avaya 4602SW;r2.2;CVE-2007-3319;The Avaya 4602SW IP Phone (Model 4602D02A) with 2.2.2 and earlier SIP firmware does not...;https://nvd.nist.gov/vuln/detail/CVE-2007-3319
 Avaya 96X1 IP Deskphone;>= 6.0.0 and <= 6.6.0;CVE-2011-4326;The udp6_ufo_fragment function in net/ipv6/udp.c in the Linux kernel before 2.6.39, whe...;https://nvd.nist.gov/vuln/detail/CVE-2011-4326
 Avaya Aura Appliance Virtualization Platform;>= 8.0.0.0 and <= 8.1.3.1;CVE-2021-25652;An information disclosure vulnerability was discovered in the directory and file manage...;https://nvd.nist.gov/vuln/detail/CVE-2021-25652
 Avaya Aura Appliance Virtualization Platform;>= 8.0.0.0 and <= 8.1.3.1;CVE-2021-25653;A privilege escalation vulnerability was discovered in Avaya Aura Appliance Virtualizat...;https://nvd.nist.gov/vuln/detail/CVE-2021-25653
@@ -637,7 +637,7 @@ Brekeke PBX;2.4.4.8;CVE-2010-2114;Cross-site request forgery (CSRF) vulnerabilit
 Calix Gigacenter ONT;854ge;CVE-2025-7635;Unauthenticated Telnet access vulnerability in Calix GigaCenter ONT allows root access....;https://nvd.nist.gov/vuln/detail/CVE-2025-7635
 Calix Gigacenter ONT;;CVE-2025-7635;Unauthenticated Telnet access vulnerability in Calix GigaCenter ONT allows root access....;https://nvd.nist.gov/vuln/detail/CVE-2025-7635
 Calix Gigacenter ONT;>= 844e and <= 844ge;CVE-2025-7635;Unauthenticated Telnet access vulnerability in Calix GigaCenter ONT allows root access....;https://nvd.nist.gov/vuln/detail/CVE-2025-7635
-Cisco 8800 Series;11.0(0.1);CVE-2017-6656;A vulnerability in Session Initiation Protocol (SIP) call handling of Cisco IP Phone 88...;https://nvd.nist.gov/vuln/detail/CVE-2017-6656
+Cisco 8800;11.0(0.1);CVE-2017-6656;A vulnerability in Session Initiation Protocol (SIP) call handling of Cisco IP Phone 88...;https://nvd.nist.gov/vuln/detail/CVE-2017-6656
 Cisco Spa 2102;5.2.10;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
 Cisco Spa 2102;5.2.3;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
 Cisco Spa 2102;5.2.5;CVE-2011-2545;Cross site scripting (XSS);https://www.cvedetails.com/cve/CVE-2011-2545
@@ -2037,12 +2037,12 @@ Grandstream GXV3601HD;1.0.4.11;CVE-2013-3542;Grandstream GXV3501, GXV3504, GXV36
 Grandstream GXV3601LL;1.0.4.11;CVE-2013-3542;Grandstream GXV3501, GXV3504, GXV3601, GXV3601HD/LL, GXV3611HD/LL, GXV3615W/P, GXV3651F...;https://nvd.nist.gov/vuln/detail/CVE-2013-3542
 Grandstream GXV3601hd/ll;;CVE-2013-3962;Cross-site scripting (XSS);https://www.cvedetails.com/cve/CVE-2013-3962
 Grandstream GXV3601hd/ll;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
-Grandstream GXV3611 HD;<= 1.0.3.6;CVE-2015-2866;SQL injection vulnerability on the Grandstream GXV3611_HD camera with firmware before 1...;https://nvd.nist.gov/vuln/detail/CVE-2015-2866
+Grandstream GXV3611;<= 1.0.3.6;CVE-2015-2866;SQL injection vulnerability on the Grandstream GXV3611_HD camera with firmware before 1...;https://nvd.nist.gov/vuln/detail/CVE-2015-2866
 Grandstream GXV3611HD/LL;;CVE-2013-3962;Cross-site scripting (XSS) vulnerability in Grandstream GXV3501, GXV3504, GXV3601, GXV3...;https://nvd.nist.gov/vuln/detail/CVE-2013-3962
 Grandstream GXV3611HD/LL;;CVE-2013-3963;Cross-site request forgery (CSRF) vulnerability in goform/usermanage in Grandstream GXV...;https://nvd.nist.gov/vuln/detail/CVE-2013-3963
 Grandstream GXV3611HD;1.0.4.11;CVE-2013-3542;Grandstream GXV3501, GXV3504, GXV3601, GXV3601HD/LL, GXV3611HD/LL, GXV3615W/P, GXV3651F...;https://nvd.nist.gov/vuln/detail/CVE-2013-3542
-Grandstream GXV3611IR HD;< 1.0.3.23;CVE-2019-10660;Grandstream GXV3611IR_HD before 1.0.3.23 devices allow remote authenticated users to ex...;https://nvd.nist.gov/vuln/detail/CVE-2019-10660
-Grandstream GXV3611IR HD;< 1.0.3.23;CVE-2019-10661;On Grandstream GXV3611IR_HD before 1.0.3.23 devices, the root account lacks a password.;https://nvd.nist.gov/vuln/detail/CVE-2019-10661
+Grandstream GXV3611IR;< 1.0.3.23;CVE-2019-10660;Grandstream GXV3611IR_HD before 1.0.3.23 devices allow remote authenticated users to ex...;https://nvd.nist.gov/vuln/detail/CVE-2019-10660
+Grandstream GXV3611IR;< 1.0.3.23;CVE-2019-10661;On Grandstream GXV3611IR_HD before 1.0.3.23 devices, the root account lacks a password.;https://nvd.nist.gov/vuln/detail/CVE-2019-10661
 Grandstream GXV3611LL;1.0.4.11;CVE-2013-3542;Grandstream GXV3501, GXV3504, GXV3601, GXV3601HD/LL, GXV3611HD/LL, GXV3615W/P, GXV3651F...;https://nvd.nist.gov/vuln/detail/CVE-2013-3542
 Grandstream GXV3611hd/ll;;CVE-2013-3962;Cross-site scripting (XSS);https://www.cvedetails.com/cve/CVE-2013-3962
 Grandstream GXV3611hd/ll;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
@@ -2050,9 +2050,9 @@ Grandstream GXV3615P;1.0.4.11;CVE-2013-3542;Grandstream GXV3501, GXV3504, GXV360
 Grandstream GXV3615W/P;;CVE-2013-3962;Cross-site scripting (XSS) vulnerability in Grandstream GXV3501, GXV3504, GXV3601, GXV3...;https://nvd.nist.gov/vuln/detail/CVE-2013-3962
 Grandstream GXV3615W/P;;CVE-2013-3963;Cross-site request forgery (CSRF) vulnerability in goform/usermanage in Grandstream GXV...;https://nvd.nist.gov/vuln/detail/CVE-2013-3963
 Grandstream GXV3615W;1.0.4.11;CVE-2013-3542;Grandstream GXV3501, GXV3504, GXV3601, GXV3601HD/LL, GXV3611HD/LL, GXV3615W/P, GXV3651F...;https://nvd.nist.gov/vuln/detail/CVE-2013-3542
-Grandstream GXV3615WP HD;1.0.4.11;CVE-2013-3542;Grandstream GXV3501, GXV3504, GXV3601, GXV3601HD/LL, GXV3611HD/LL, GXV3615W/P, GXV3651F...;https://nvd.nist.gov/vuln/detail/CVE-2013-3542
-Grandstream GXV3615WP HD;;CVE-2013-3962;Cross-site scripting (XSS) vulnerability in Grandstream GXV3501, GXV3504, GXV3601, GXV3...;https://nvd.nist.gov/vuln/detail/CVE-2013-3962
-Grandstream GXV3615WP HD;;CVE-2013-3963;Cross-site request forgery (CSRF) vulnerability in goform/usermanage in Grandstream GXV...;https://nvd.nist.gov/vuln/detail/CVE-2013-3963
+Grandstream GXV3615WP;1.0.4.11;CVE-2013-3542;Grandstream GXV3501, GXV3504, GXV3601, GXV3601HD/LL, GXV3611HD/LL, GXV3615W/P, GXV3651F...;https://nvd.nist.gov/vuln/detail/CVE-2013-3542
+Grandstream GXV3615WP;;CVE-2013-3962;Cross-site scripting (XSS) vulnerability in Grandstream GXV3501, GXV3504, GXV3601, GXV3...;https://nvd.nist.gov/vuln/detail/CVE-2013-3962
+Grandstream GXV3615WP;;CVE-2013-3963;Cross-site request forgery (CSRF) vulnerability in goform/usermanage in Grandstream GXV...;https://nvd.nist.gov/vuln/detail/CVE-2013-3963
 Grandstream GXV3615w/p;;CVE-2013-3962;Cross-site scripting (XSS);https://www.cvedetails.com/cve/CVE-2013-3962
 Grandstream GXV3615w/p;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
 Grandstream GXV3615wp;;CVE-2013-3962;Cross-site scripting (XSS);https://www.cvedetails.com/cve/CVE-2013-3962
@@ -2127,9 +2127,9 @@ Grandstream Gxv-3000;1.0.0.6;CVE-2007-4498;Denial of service (DoS);https://www.c
 Grandstream Gxv-3000;1.0.1.7;CVE-2007-4498;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2007-4498
 Grandstream Gxv3370;< 1.0.1.41;CVE-2019-10659;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2019-10659
 Grandstream Gxv3611;<= 1.0.3.6;CVE-2015-2866;SQL Injection;https://www.cvedetails.com/cve/CVE-2015-2866
-Grandstream Gxv3611ir Hd;< 1.0.3.23;CVE-2019-10660;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2019-10660
-Grandstream Gxv3611ir Hd;< 1.0.3.23;CVE-2019-10661;No root password;https://www.cvedetails.com/cve/CVE-2019-10661
-Grandstream Gxv3615wp Hd;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream Gxv3611ir;< 1.0.3.23;CVE-2019-10660;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2019-10660
+Grandstream Gxv3611ir;< 1.0.3.23;CVE-2019-10661;No root password;https://www.cvedetails.com/cve/CVE-2019-10661
+Grandstream Gxv3615wp;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
 Grandstream Gxv;1.0.2.3;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
 Grandstream Gxv;1.0.3.9;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
 Grandstream Gxv;1.0.4.11;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
@@ -2523,7 +2523,7 @@ Kamailio;>= 5.1.0 and < 5.1.4;CVE-2018-14767;In Kamailio before 5.0.7 and 5.1.x 
 Kamailio;>= 5.1.0 and < 5.1.4;CVE-2018-16657;In Kamailio before 5.0.7 and 5.1.x before 5.1.4, a crafted SIP message with an invalid...;https://nvd.nist.gov/vuln/detail/CVE-2018-16657
 Kamailio;>= 6.0.0 and < 6.0.5;CVE-2026-39864;Kamailio is an open source implementation of a SIP Signaling Server;https://nvd.nist.gov/vuln/detail/CVE-2026-39864
 Kamailio;>= 6.0.0 and < 6.0.6;CVE-2026-39863;Kamailio is an open source implementation of a SIP Signaling Server;https://nvd.nist.gov/vuln/detail/CVE-2026-39863
-LifeSize Express 220;ls_ex2_4.7.10_2000_(14);CVE-2018-17981;Lifesize Express ls ex2_4.7.10 2000 (14) devices allow XSS via the interface/interface....;https://nvd.nist.gov/vuln/detail/CVE-2018-17981
+LifeSize 220;ls_ex2_4.7.10_2000_(14);CVE-2018-17981;Lifesize Express ls ex2_4.7.10 2000 (14) devices allow XSS via the interface/interface....;https://nvd.nist.gov/vuln/detail/CVE-2018-17981
 LifeSize Icon 300;ls_rm3_3.7.0(2421);CVE-2019-3702;A Remote Code Execution issue in the DNS Query Web UI in Lifesize Icon LS_RM3_3.7.0 (24...;https://nvd.nist.gov/vuln/detail/CVE-2019-3702
 LifeSize Icon 500;ls_rm3_3.7.0(2421);CVE-2019-3702;A Remote Code Execution issue in the DNS Query Web UI in Lifesize Icon LS_RM3_3.7.0 (24...;https://nvd.nist.gov/vuln/detail/CVE-2019-3702
 LifeSize Icon 700;ls_rm3_3.7.0(2421);CVE-2019-3702;A Remote Code Execution issue in the DNS Query Web UI in Lifesize Icon LS_RM3_3.7.0 (24...;https://nvd.nist.gov/vuln/detail/CVE-2019-3702
@@ -2537,8 +2537,8 @@ LifeSize Room Appliance Software;ls_rm1_3.5.3;CVE-2011-2763;The web interface on
 LifeSize Team 220;;CVE-2019-7632;LifeSize Team, Room, Passport, and Networker 220 devices allow Authenticated Remote OS ...;https://nvd.nist.gov/vuln/detail/CVE-2019-7632
 Linksys SPA-2102 Phone Adapter;3.3.6;CVE-2008-2092;Linksys SPA-2102 Phone Adapter 3.3.6 allows remote attackers to cause a denial of servi...;https://nvd.nist.gov/vuln/detail/CVE-2008-2092
 Linksys Spa-2102;3.3.6;CVE-2008-2092;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2008-2092
-Linksys WIP 330 Wireless-g IP Phone;1.0.6_a;CVE-2006-6411;PhoneCtrl.exe in Linksys WIP 330 Wireless-G IP Phone 1.00.06A allows remote attackers t...;https://nvd.nist.gov/vuln/detail/CVE-2006-6411
-Mitel 3300 Integrated Communication Platform;;CVE-2004-0945;The web management interface for Mitel 3300 Integrated Communications Platform (ICP) be...;https://nvd.nist.gov/vuln/detail/CVE-2004-0945
+Linksys WIP 330 Wireless-g;1.0.6_a;CVE-2006-6411;PhoneCtrl.exe in Linksys WIP 330 Wireless-G IP Phone 1.00.06A allows remote attackers t...;https://nvd.nist.gov/vuln/detail/CVE-2006-6411
+Mitel 3300 Integrated Communication;;CVE-2004-0945;The web management interface for Mitel 3300 Integrated Communications Platform (ICP) be...;https://nvd.nist.gov/vuln/detail/CVE-2004-0945
 Mitel 6863I SIP;<= 6.4.0.136;CVE-2024-41710;A vulnerability in the Mitel 6800 Series, 6900 Series, and 6900w Series SIP Phones, inc...;https://nvd.nist.gov/vuln/detail/CVE-2024-41710
 Mitel 6865I SIP;< 5.1.0.8017;CVE-2022-29855;Mitel 6800 and 6900 Series SIP phone devices through 2022-04-27 have "undocumented func...;https://nvd.nist.gov/vuln/detail/CVE-2022-29855
 Mitel 6865I SIP;<= 6.4.0.136;CVE-2024-41710;A vulnerability in the Mitel 6800 Series, 6900 Series, and 6900w Series SIP Phones, inc...;https://nvd.nist.gov/vuln/detail/CVE-2024-41710
@@ -2580,7 +2580,7 @@ Mitel 6940 SIP;< 5.1.0;CVE-2020-27639;The Bluetooth handset of Mitel MiVoice 687
 Mitel 6940 SIP;<= 6.4.0.136;CVE-2024-41710;A vulnerability in the Mitel 6800 Series, 6900 Series, and 6900w Series SIP Phones, inc...;https://nvd.nist.gov/vuln/detail/CVE-2024-41710
 Mitel 6940 SIP;>= 6.0.0.368 and < 6.1.0.171;CVE-2022-29855;Mitel 6800 and 6900 Series SIP phone devices through 2022-04-27 have "undocumented func...;https://nvd.nist.gov/vuln/detail/CVE-2022-29855
 Mitel 6940W SIP;<= 6.4.0.136;CVE-2024-41710;A vulnerability in the Mitel 6800 Series, 6900 Series, and 6900w Series SIP Phones, inc...;https://nvd.nist.gov/vuln/detail/CVE-2024-41710
-Mitel 700D Dect;>= 1.10.4.3 and < 1.11.3.0;CVE-2024-28066;In Unify CP IP Phone firmware 1.10.4.3, Weak Credentials are used (a hardcoded root pas...;https://nvd.nist.gov/vuln/detail/CVE-2024-28066
+Mitel 700D;>= 1.10.4.3 and < 1.11.3.0;CVE-2024-28066;In Unify CP IP Phone firmware 1.10.4.3, Weak Credentials are used (a hardcoded root pas...;https://nvd.nist.gov/vuln/detail/CVE-2024-28066
 Mitel Micloud Management Portal;6.1;CVE-2020-24592;Mitel MiCloud Management Portal before 6.1 SP5 could allow an attacker, by sending a cr...;https://nvd.nist.gov/vuln/detail/CVE-2020-24592
 Mitel Micloud Management Portal;6.1;CVE-2020-24593;Mitel MiCloud Management Portal before 6.1 SP5 could allow a remote attacker to conduct...;https://nvd.nist.gov/vuln/detail/CVE-2020-24593
 Mitel Micloud Management Portal;6.1;CVE-2020-24594;Mitel MiCloud Management Portal before 6.1 SP5 could allow an unauthenticated attacker...;https://nvd.nist.gov/vuln/detail/CVE-2020-24594
@@ -3050,10 +3050,10 @@ Snom 300;>= 7.1 and < 7.1.39;CVE-2009-1048;The web interface on the snom VoIP ph
 Snom 300;>= 7.3 and < 7.3.14;CVE-2009-1048;The web interface on the snom VoIP phones snom 300, snom 320, snom 360, snom 370, and s...;https://nvd.nist.gov/vuln/detail/CVE-2009-1048
 Snom 320 Linux;3.25;CVE-2007-3439;The Snom 320 SIP Phone, running snom320 linux 3.25, snom320-SIP 6.2.3, and snom320 jffs...;https://nvd.nist.gov/vuln/detail/CVE-2007-3439
 Snom 320 Linux;3.25;CVE-2007-3440;The Snom 320 SIP Phone, running snom320 linux 3.25, snom320-SIP 6.2.3, and snom320 jffs...;https://nvd.nist.gov/vuln/detail/CVE-2007-3440
-Snom 320 SIP Phone;;CVE-2008-1248;The web interface on the central phone server for the Snom 320 SIP Phone allows remote...;https://nvd.nist.gov/vuln/detail/CVE-2008-1248
-Snom 320 SIP Phone;;CVE-2008-1249;snomControl.swf in the central phone server for the Snom 320 SIP Phone allows remote at...;https://nvd.nist.gov/vuln/detail/CVE-2008-1249
-Snom 320 SIP Phone;;CVE-2008-1250;Multiple cross-site request forgery (CSRF) vulnerabilities in the web interface on the...;https://nvd.nist.gov/vuln/detail/CVE-2008-1250
-Snom 320 SIP Phone;;CVE-2008-1251;Cross-site scripting (XSS) vulnerability in the web interface on the central phone serv...;https://nvd.nist.gov/vuln/detail/CVE-2008-1251
+Snom 320 SIP;;CVE-2008-1248;The web interface on the central phone server for the Snom 320 SIP Phone allows remote...;https://nvd.nist.gov/vuln/detail/CVE-2008-1248
+Snom 320 SIP;;CVE-2008-1249;snomControl.swf in the central phone server for the Snom 320 SIP Phone allows remote at...;https://nvd.nist.gov/vuln/detail/CVE-2008-1249
+Snom 320 SIP;;CVE-2008-1250;Multiple cross-site request forgery (CSRF) vulnerabilities in the web interface on the...;https://nvd.nist.gov/vuln/detail/CVE-2008-1250
+Snom 320 SIP;;CVE-2008-1251;Cross-site scripting (XSS) vulnerability in the web interface on the central phone serv...;https://nvd.nist.gov/vuln/detail/CVE-2008-1251
 Snom 320;>= 6.5 and < 6.5.20;CVE-2009-1048;The web interface on the snom VoIP phones snom 300, snom 320, snom 360, snom 370, and s...;https://nvd.nist.gov/vuln/detail/CVE-2009-1048
 Snom 320;>= 7.1 and < 7.1.39;CVE-2009-1048;The web interface on the snom VoIP phones snom 300, snom 320, snom 360, snom 370, and s...;https://nvd.nist.gov/vuln/detail/CVE-2009-1048
 Snom 320;>= 7.3 and < 7.3.14;CVE-2009-1048;The web interface on the snom VoIP phones snom 300, snom 320, snom 360, snom 370, and s...;https://nvd.nist.gov/vuln/detail/CVE-2009-1048
@@ -3072,8 +3072,8 @@ Starface;<= 7.3.0.10;CVE-2023-33243;RedTeam Pentesting discovered that the web i
 Teluu;<= 2.11.1;CVE-2021-37706;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2021-37706
 Teluu;<= 2.11.1;CVE-2022-21723;Out-of-bound read access;https://www.cvedetails.com/cve/CVE-2022-21723
 Teluu;<= 2.11.1;CVE-2022-23608;Hash key shared;https://www.cvedetails.com/cve/CVE-2022-23608
-Thomson ST 2030 SIP Phone;1.52.1;CVE-2007-4753;The Thomson ST 2030 SIP phone with software 1.52.1 allows remote attackers to cause a d...;https://nvd.nist.gov/vuln/detail/CVE-2007-4753
-Thomson ST 2030 SIP Phone;1;CVE-2007-4553;The Thomson ST 2030 SIP phone with software 1.52.1 allows remote attackers to cause a d...;https://nvd.nist.gov/vuln/detail/CVE-2007-4553
+Thomson ST 2030 SIP;1.52.1;CVE-2007-4753;The Thomson ST 2030 SIP phone with software 1.52.1 allows remote attackers to cause a d...;https://nvd.nist.gov/vuln/detail/CVE-2007-4753
+Thomson ST 2030 SIP;1;CVE-2007-4553;The Thomson ST 2030 SIP phone with software 1.52.1 allows remote attackers to cause a d...;https://nvd.nist.gov/vuln/detail/CVE-2007-4553
 Unify Openscape Deployment Service;7.0;CVE-2014-2652;SQL injection vulnerability in OpenScape Deployment Service (DLS) before 6.x and 7.x be...;https://nvd.nist.gov/vuln/detail/CVE-2014-2652
 Unify Openscape Deployment Service;< 6.0;CVE-2014-2652;SQL injection vulnerability in OpenScape Deployment Service (DLS) before 6.x and 7.x be...;https://nvd.nist.gov/vuln/detail/CVE-2014-2652
 Unify Openscape Desk Phone IP 35G ECO SIP;3.0;CVE-2015-8251;OpenStage 60 and OpenScape Desk Phone IP 55G SIP V3, OpenStage 15, 20E, 20 and 40 and O...;https://nvd.nist.gov/vuln/detail/CVE-2015-8251
@@ -3146,7 +3146,7 @@ Yeastar N824;;CVE-2022-47732;In Yeastar N412 and N824 Configuration Panel 42.x a
 Yeastar Neogate TG400;91.3.0.3;CVE-2021-27328;Yeastar NeoGate TG400 91.3.0.3 devices are affected by Directory Traversal;https://nvd.nist.gov/vuln/detail/CVE-2021-27328
 Zoiper;<= 2.22;CVE-2009-3704;ZoIPer 2.22, and possibly other versions before 2.24 Library 5324, allows remote attack...;https://nvd.nist.gov/vuln/detail/CVE-2009-3704
 Zoiper;>= 2.0 and <= 2.11;CVE-2009-3704;ZoIPer 2.22, and possibly other versions before 2.24 Library 5324, allows remote attack...;https://nvd.nist.gov/vuln/detail/CVE-2009-3704
-ZyXEL P2000W Version 1 Voip Wifi Phone;wj.00.10;CVE-2005-3724;Zyxel P2000W Version 1 VOIP WIFI Phone Wj.00.10 allows remote attackers to obtain sensi...;https://nvd.nist.gov/vuln/detail/CVE-2005-3724
-ZyXEL P2000W Version 2 Voip Wifi Phone;wv.00.02;CVE-2006-0302;ZyXel P2000W VoIP 802.11b Wireless Phone running firmware WV.00.02 allows remote attack...;https://nvd.nist.gov/vuln/detail/CVE-2006-0302
-ZyXEL Prestige 2000W V.1VOIP Wi-fi Phone;wj.00.10;CVE-2005-3724;Zyxel P2000W Version 1 VOIP WIFI Phone Wj.00.10 allows remote attackers to obtain sensi...;https://nvd.nist.gov/vuln/detail/CVE-2005-3724
-ZyXEL Prestige 2000W V.1VOIP Wi-fi Phone;wj.00.10;CVE-2005-3725;Zyxel P2000W Version 1 VOIP WIFI Phone Wj.00.10 uses hardcoded IP addresses for its DNS...;https://nvd.nist.gov/vuln/detail/CVE-2005-3725
+ZyXEL P2000W Version 1;wj.00.10;CVE-2005-3724;Zyxel P2000W Version 1 VOIP WIFI Phone Wj.00.10 allows remote attackers to obtain sensi...;https://nvd.nist.gov/vuln/detail/CVE-2005-3724
+ZyXEL P2000W Version 2;wv.00.02;CVE-2006-0302;ZyXel P2000W VoIP 802.11b Wireless Phone running firmware WV.00.02 allows remote attack...;https://nvd.nist.gov/vuln/detail/CVE-2006-0302
+ZyXEL Prestige 2000W V.1VOIP Wi-fi;wj.00.10;CVE-2005-3724;Zyxel P2000W Version 1 VOIP WIFI Phone Wj.00.10 allows remote attackers to obtain sensi...;https://nvd.nist.gov/vuln/detail/CVE-2005-3724
+ZyXEL Prestige 2000W V.1VOIP Wi-fi;wj.00.10;CVE-2005-3725;Zyxel P2000W Version 1 VOIP WIFI Phone Wj.00.10 uses hardcoded IP addresses for its DNS...;https://nvd.nist.gov/vuln/detail/CVE-2005-3725

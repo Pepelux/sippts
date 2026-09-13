@@ -4,7 +4,7 @@ import random
 import sys
 import subprocess
 import requests
-from sippts.lib.functions import load_cve_version, SIPPTS_VERSION
+from sippts.lib.functions import load_cve_version, version_is_older, SIPPTS_VERSION
 from sippts.lib.logos import Logo
 
 BRED = "\033[1;31;20m"
@@ -57,7 +57,7 @@ def get_sippts_args():
     except:
         current_version = local_version
 
-    if local_version != current_version:
+    if version_is_older(local_version, current_version):
         local_version_status = BRED + """ (last version """ + current_version + """)"""
     else:
         local_version_status = BWHITE + """ (updated)"""
@@ -90,7 +90,7 @@ def get_sippts_args():
     except:
         current_cve_version = local_cve_version
 
-    if local_cve_version != current_cve_version:
+    if version_is_older(local_cve_version, current_cve_version):
         local_cve_version_status = (
             BRED + """ (last version """ + current_cve_version + """)"""
         )
@@ -3651,7 +3651,7 @@ Usage examples:
         except:
             sys.exit()
 
-        if local_version != current_version:
+        if version_is_older(local_version, current_version):
             download_file(giturl + "bin/sippts", binpath, "bin/sippts")
 
             download_file(
@@ -3813,7 +3813,7 @@ Usage examples:
         except:
             sys.exit()
 
-        if local_cve_version != current_cve_version:
+        if version_is_older(local_cve_version, current_cve_version):
             download_file(giturl + "src/sippts/data/cve.csv", path, "cve.csv")
             print(f"{BYELLOW}CVE file has been updated")
         else:

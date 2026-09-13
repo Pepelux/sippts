@@ -41,6 +41,18 @@ New in this version:
   Crestron, Yeastar, Zoiper and the rest. The version ranges come from the CPEs
   of the NVD instead of being written by hand, and the rows the NVD does not
   cover are kept
+- global: the banner said 'last version 0.1' while running 0.3, as if the old
+  one were the good one, to anyone working from a branch or with a CVE list
+  just regenerated. It compared with != instead of looking at which one is
+  actually behind
+- data/cve.csv: 64 product names carried words no device says in its
+  User-Agent ('P2000W Version 1 Voip Wifi Phone'), so those rows could never
+  match. They are only trimmed when the name has a model with digits to anchor
+  on: without that guard an 'Asterisk Business Edition' would end up as
+  'Asterisk' and start confirming the CVEs of Business Edition on any Asterisk
+- README: a section on the CVE list, what -cve does, how confirmed and possible
+  differ, the two limits it has (a hidden User-Agent cannot be checked, and
+  letter versions cannot be ordered) and how to rebuild the list
 - fingerprinting(): a device of the TSW- series was reported as 'Creston'. The
   vendor is Crestron, so whoever looked the name up found nothing
 - scan: the version ranges of the CVE list can carry the punctuation the CPEs

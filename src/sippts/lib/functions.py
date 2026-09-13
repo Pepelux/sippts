@@ -529,6 +529,24 @@ def version_file():
     return path
 
 
+def version_is_older(local, remote):
+    """
+    Whether `local` is really behind `remote`.
+
+    Comparing with != said "last version 0.1" while running 0.3, as if the old
+    one were the good one, to anyone working from a branch or with a list they
+    had just regenerated. Falls back to != when either of them cannot be read
+    as numbers, which is the case of "Unknown".
+    """
+    a = version_key(local)
+    b = version_key(remote)
+
+    if a == None or b == None:
+        return str(local) != str(remote)
+
+    return a < b
+
+
 def load_version():
     """
     Version of sippts, read from the version file so that releasing means

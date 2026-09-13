@@ -19,6 +19,7 @@ from sippts.lib.color import Color
 from sippts.lib.logos import Logo
 from sippts.lib.functions import (
     SIPPTS_VERSION,
+    version_is_older,
     get_machine_default_ip,
     get_default_gateway_linux,
     get_default_gateway_mac,
@@ -589,7 +590,7 @@ def get_version():
     except:
         current_version = local_version
 
-    if local_version != current_version:
+    if version_is_older(local_version, current_version):
         local_version_status = (
             c.BRED + """ (last version """ + current_version + """)"""
         )
@@ -624,7 +625,7 @@ def get_version():
     except:
         current_cve_version = local_cve_version
 
-    if local_cve_version != current_cve_version:
+    if version_is_older(local_cve_version, current_cve_version):
         local_cve_version_status = (
             c.BRED + """ (last version """ + current_cve_version + """)"""
         )

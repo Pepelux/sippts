@@ -221,6 +221,62 @@ Sippts is a set of tools for auditing VoIP servers and devices using the SIP pro
 
   * _**rtpbleedinject**_ to exploit RTP Bleed vulnerability injecting RTP traffic. [Click here to read more about rtpbleedinject command](https://github.com/Pepelux/sippts/wiki/Command-rtpbleedinject)
 
+## Known vulnerabilities ##
+
+With `-cve`, the `scan` module compares what it fingerprints against a list of
+known vulnerabilities that travels inside the package
+(`src/sippts/data/cve.csv`). It holds around 1400 CVEs of 54 vendors, built
+from the [NVD of NIST](https://nvd.nist.gov), and the version ranges come from
+the CPEs of each CVE:
+
+```bash
+sippts scan -i 192.168.0.0/24 -fp -cve
+```
+
+Results whose version really falls inside the affected range are listed first.
+The rest are shown behind them as merely possible, because in a scanner a CVE
+that exists and is not reported is worse than one reported in excess. A row
+with no range means every version of that device is affected.
+
+Two limits worth knowing. The detection leans on the `User-Agent`, so a server
+that hides it cannot be checked against anything. And some products are
+versioned with letters (the A, B and C of Asterisk Business Edition, or
+`beta_5`), which no numeric comparison can order: those are matched by text
+only, and always come out as possible rather than confirmed.
+
+To update the list:
+
+```bash
+sippts -up
+```
+
+which downloads it from github along with the rest of the modules.
+
+### Rebuilding the list (maintainers) ###
+
+`tools/cve_update.py` rebuilds `cve.csv` from the NVD. It is not something the
+user of sippts runs: the idea is to regenerate it, look at the diff, commit it,
+and let everybody else get it with `sippts -up`. That keeps the API key and the
+rate limits of the NVD out of the middle of an audit.
+
+```bash
+./tools/cve_update.py --dry-run          # what would change, writing nothing
+./tools/cve_update.py                    # rebuild it
+./tools/cve_update.py --vendor yealink   # only one vendor
+NVD_API_KEY=xxxx ./tools/cve_update.py   # ten times faster
+```
+
+Without an API key the NVD allows 5 requests every 30 seconds and a full run
+takes around fifteen minutes. They are free at
+[nvd.nist.gov](https://nvd.nist.gov/developers/request-an-api-key).
+
+Two lists at the top of the script control what is looked for. `VENDORS` holds
+the vendors, and each one can be the whole vendor, a list of products, or
+filtered by tag. `TAGS_VOIP` holds the tags (`voip`, `sip`, `ip_phone`, `ata`,
+`pbx`, `ip_office`, `mivoice`...). The filter matters for vendors that also
+make routers and firewalls: asking the NVD for the whole of Zyxel brings 3223
+rows of WiFi and DSL kit that sippts is never going to see over SIP.
+
 ## Operating Systems ##
 Sippts has been tested on:
   * Linux
