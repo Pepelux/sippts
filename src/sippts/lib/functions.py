@@ -2248,6 +2248,32 @@ def load_cve():
     return cve
 
 
+def _solo_alnum(texto):
+    """Lower case with no spaces or punctuation, to compare model names."""
+    return re.sub(r"[^0-9a-z]", "", str(texto).lower())
+
+
+def _producto_en_ua(producto, ua_plano):
+    """
+    Whether the product of the CVE list is the one announced in the
+    User-Agent.
+
+    Every word of the product has to appear in the User-Agent. A plain
+    substring is not enough: a Polycom says "PolycomVVX-VVX_500-UA", with the
+    model repeated, and "Polycom VVX 500" is not contiguous in there. Checking
+    word by word still tells a Grandstream HT802 from a GXV3501, which is the
+    part that matters.
+    """
+    for palabra in re.split(r"[^0-9A-Za-z]+", str(producto)):
+        if palabra == "":
+            continue
+
+        if palabra.lower() not in ua_plano:
+            return False
+
+    return True
+
+
 _VERSION_SPEC = re.compile(
     r"^\s*(?:(<=|>=|<|>|=)\s*)?([0-9][0-9A-Za-z.\-_]*)"
     r"\s*(?:and\s+(?:(<=|>=|<|>|=)\s*)?([0-9][0-9A-Za-z.\-_]*)\s*)?$",
@@ -2281,7 +2307,15 @@ def version_matches(version, spec):
     Returns None when the spec cannot be parsed, so the caller can fall back
     to what it did before instead of losing the row.
     """
-    m = _VERSION_SPEC.match(str(spec).strip())
+    spec = str(spec).strip()
+
+    # 97 rows of the list carry no range: those CVEs affect every version of
+    # the device, so anything matches. Without this they could never be
+    # confirmed and were reported as merely possible
+    if spec == "":
+        return True
+
+    m = _VERSION_SPEC.match(spec)
 
     if m == None:
         return None
@@ -2352,6 +2386,7 @@ def check_model(ua, fp, type, cvelist):
     # into asterisk / pbx / 1.4.9. Any token that looks like a version is
     # tried, and one match is enough
     candidatas = [x for x in ua.lower().split(" ") if re.match(r"^\d[\d.\-_]*$", x)]
+    ua_plano = _solo_alnum(ua)
 
     for cve in cvelist:
         columnas = cve.lower().split("###")
@@ -2362,7 +2397,17 @@ def check_model(ua, fp, type, cvelist):
         producto = columnas[0].strip()
         spec = columnas[1].strip()
 
-        if producto == "" or producto.find(model) < 0:
+        # the WHOLE product has to be in the User-Agent, not just the vendor:
+        # matching only the first word made a Grandstream HT802 confirm the
+        # CVEs of a GXV3501. Compared without spaces or punctuation, so
+        # "Cisco Spa 8000" matches a "Cisco/SPA8000-6.1.11"
+        if producto == "" or not _producto_en_ua(producto, ua_plano):
+            continue
+
+        # a CVE with no range affects every version, so matching the product
+        # is enough even when the User-Agent carries no version at all
+        if spec == "":
+            confirmados.append(cve.lower())
             continue
 
         for candidata in candidatas:

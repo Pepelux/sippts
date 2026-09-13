@@ -34,6 +34,20 @@ New in this version:
 - send: new params -ppid and -paid for the domain of P-Preferred-Identity and
   P-Asserted-Identity, which was hardcoded to telefonica.net (still the
   default). A value that already carries a @ is used as it is
+- data/cve.csv: the row of CVE-2013-2686 said '>=11.0.0 and >= 11.2.1', two
+  lower bounds, so it matched every Asterisk from 11 upwards. Checked against
+  the NVD, the 11.x branch ends at 11.2.1, so the second one is a <=. With it
+  wrong, an Asterisk 20.5.0 was reported as affected by a 2013 bug
+- data/cve.csv: 23 rows named their product with different capitalization
+  ('Grandstream Gxv3501' and 'Grandstream GXV3501' were two different
+  products), unified now
+- scan: a CVE with no version range in the list means every version is
+  affected, which is the case of 97 of the rows, all of them devices. They
+  could never be confirmed and were reported as merely possible
+- scan: the whole product name has to be in the User-Agent, not only the
+  vendor: a Grandstream HT802 was confirming the CVEs of a GXV3501. It is
+  compared word by word, so a "Polycom VVX 500" still matches a
+  "PolycomVVX-VVX_500-UA" where the model appears twice
 - scan: the CVE list is compared by version for real. check_model() ran find()
   over the whole line of the CSV, which carries the description and the URL, so
   a version like 2.0 matched a piece of a link, and "<= 1.4.11" never matched

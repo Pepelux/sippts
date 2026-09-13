@@ -34,7 +34,7 @@ Asterisk;>= 11.0.0 and <= 11.2.1;CVE-2013-2264;Enumerate account names;https://w
 Asterisk;>= 10.0.0 and <= 10.12.1;CVE-2013-2264;Enumerate account names;https://www.cvedetails.com/cve/CVE-2013-2264
 Asterisk;>= 1.8.0 and <= 1.8.20.1;CVE-2013-2264;Enumerate account names;https://www.cvedetails.com/cve/CVE-2013-2264
 Asterisk;>= 11.0.0 and <= 11.2.1;CVE-2013-2685;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2013-2685
-Asterisk;>=11.0.0 and >= 11.2.1;CVE-2013-2686;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2013-2686
+Asterisk;>= 11.0.0 and <= 11.2.1;CVE-2013-2686;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2013-2686
 Asterisk;>= 1.8.0 and <= 1.8.20.1;CVE-2013-2686;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2013-2686
 Asterisk;>= 10.0.0 and <= 10.12.1;CVE-2013-2686;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2013-2686
 Asterisk;= 13.0.0 and <= 14.4.0;CVE-2017-9358;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2017-9358
@@ -190,16 +190,16 @@ Grandstream Gxv;1.0.2.3;CVE-2013-3963;Cross-site request forgery (CSRF);https://
 Grandstream Gxv;1.0.4.42;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
 Grandstream Gxv;1.0.4.11;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
 Grandstream Gxv;1.0.4.6;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
-Grandstream Gxv3501;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
-Grandstream Gxv3504;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
-Grandstream Gxv3601;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
-Grandstream Gxv3601hd/ll;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
-Grandstream Gxv3611hd/ll;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
-Grandstream Gxv3615w/p;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
-Grandstream Gxv3662hd;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
-Grandstream Gxv3651fhd;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream GXV3501;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream GXV3504;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream GXV3601;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream GXV3601hd/ll;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream GXV3611hd/ll;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream GXV3615w/p;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream GXV3662hd;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream GXV3651fhd;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
 Grandstream Gxv3615wp Hd;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
-Grandstream Gxv3500;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
+Grandstream GXV3500;;CVE-2013-3963;Cross-site request forgery (CSRF);https://www.cvedetails.com/cve/CVE-2013-3963
 Grandstream Gxv3611;<= 1.0.3.6;CVE-2015-2866;SQL Injection;https://www.cvedetails.com/cve/CVE-2015-2866
 Grandstream Wave;<= 1.0.1.26;CVE-2016-1518;System log access;https://www.cvedetails.com/cve/CVE-2016-1518
 Grandstream Wave;<= 1.0.1.26;CVE-2016-1519;Incorrect validation of SSL certificates;https://www.cvedetails.com/cve/CVE-2016-1519
@@ -254,19 +254,19 @@ Grandstream Ucm6204;< 1.0.20.22;CVE-2020-5726;SQL Injection;https://www.cvedetai
 Grandstream Ucm6202;< 1.0.20.22;CVE-2020-5726;SQL Injection;https://www.cvedetails.com/cve/CVE-2020-5726
 Grandstream Ucm6208;< 1.0.20.22;CVE-2020-5726;SQL Injection;https://www.cvedetails.com/cve/CVE-2020-5726
 Grandstream GXP1600;<= 1.0.4.152;CVE-2020-5738;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5738
-Grandstream GXP1610;<= 1.0.4.152;CVE-2020-5738;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5738
-Grandstream GXP1615;<= 1.0.4.152;CVE-2020-5738;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5738
-Grandstream GXP1620;<= 1.0.4.152;CVE-2020-5738;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5738
-Grandstream GXP1625;<= 1.0.4.152;CVE-2020-5738;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5738
-Grandstream GXP1628;<= 1.0.4.152;CVE-2020-5738;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5738
-Grandstream GXP1630;<= 1.0.4.152;CVE-2020-5738;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5738
+Grandstream Gxp1610;<= 1.0.4.152;CVE-2020-5738;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5738
+Grandstream Gxp1615;<= 1.0.4.152;CVE-2020-5738;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5738
+Grandstream Gxp1620;<= 1.0.4.152;CVE-2020-5738;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5738
+Grandstream Gxp1625;<= 1.0.4.152;CVE-2020-5738;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5738
+Grandstream Gxp1628;<= 1.0.4.152;CVE-2020-5738;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5738
+Grandstream Gxp1630;<= 1.0.4.152;CVE-2020-5738;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5738
 Grandstream GXP1600;<= 1.0.4.152;CVE-2020-5739;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5739
-Grandstream GXP1610;<= 1.0.4.152;CVE-2020-5739;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5739
-Grandstream GXP1615;<= 1.0.4.152;CVE-2020-5739;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5739
-Grandstream GXP1620;<= 1.0.4.152;CVE-2020-5739;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5739
-Grandstream GXP1625;<= 1.0.4.152;CVE-2020-5739;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5739
-Grandstream GXP1628;<= 1.0.4.152;CVE-2020-5739;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5739
-Grandstream GXP1630;<= 1.0.4.152;CVE-2020-5739;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5739
+Grandstream Gxp1610;<= 1.0.4.152;CVE-2020-5739;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5739
+Grandstream Gxp1615;<= 1.0.4.152;CVE-2020-5739;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5739
+Grandstream Gxp1620;<= 1.0.4.152;CVE-2020-5739;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5739
+Grandstream Gxp1625;<= 1.0.4.152;CVE-2020-5739;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5739
+Grandstream Gxp1628;<= 1.0.4.152;CVE-2020-5739;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5739
+Grandstream Gxp1630;<= 1.0.4.152;CVE-2020-5739;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2020-5739
 Grandstream Gwn7000;<= 1.0.9.4;CVE-2020-5756;Command Injection;https://www.cvedetails.com/cve/CVE-2020-5756
 Grandstream Ucm6204;<= 1.0.20.23;CVE-2020-5757;Command Injection;https://www.cvedetails.com/cve/CVE-2020-5757
 Grandstream Ucm6202;<= 1.0.20.23;CVE-2020-5757;Command Injection;https://www.cvedetails.com/cve/CVE-2020-5757
@@ -315,8 +315,8 @@ Grandstream Grp2613;1.0.3.6;CVE-2020-25218;Authentication Bypass;https://www.cve
 Grandstream Grp2614;1.0.3.6;CVE-2020-25218;Authentication Bypass;https://www.cvedetails.com/cve/CVE-2020-25218
 Grandstream Grp2615;1.0.3.6;CVE-2020-25218;Authentication Bypass;https://www.cvedetails.com/cve/CVE-2020-25218
 Grandstream Grp2616;1.0.3.6;CVE-2020-25218;Authentication Bypass;https://www.cvedetails.com/cve/CVE-2020-25218
-Grandstream HT801;< 1.0.29;CVE-2021-37748;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2021-37748
-Grandstream HT801;< 1.0.29.8;CVE-2021-37915;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2021-37915
+Grandstream Ht801;< 1.0.29;CVE-2021-37748;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2021-37748
+Grandstream Ht801;< 1.0.29.8;CVE-2021-37915;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2021-37915
 Grandstream GDS3710;1.0.11.13;CVE-2022-2025;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2022-2025
 Grandstream GDS3710;1.0.11.13;CVE-2022-2070;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2022-2070
 Grandstream Gxp1610;;CVE-2023-50015;Privilege Escalation;https://www.cvedetails.com/cve/CVE-2023-50015
