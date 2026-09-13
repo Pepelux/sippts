@@ -2755,6 +2755,33 @@ Usage examples:
         + YELLOW
         + """ performs a flood of a server by sending messages with a selected method."""
         + WHITE,
+        epilog="""
+Usage examples:
+"""
+        + YELLOW
+        + """  Flood a server with OPTIONS messages
+"""
+        + WHITE
+        + """     sippts flood -i 192.168.0.1
+"""
+        + YELLOW
+        + """  Send only 100 INVITE messages
+"""
+        + WHITE
+        + """     sippts flood -i 192.168.0.1 -m invite -n 100
+"""
+        + YELLOW
+        + """  Fuzzing: random methods and malformed headers
+"""
+        + WHITE
+        + """     sippts flood -i 192.168.0.1 -b
+"""
+        + YELLOW
+        + """  Fuzzing with short values, easier to reproduce
+"""
+        + WHITE
+        + """     sippts flood -i 192.168.0.1 -b -max 20 -n 500 -o flood.log
+""",
     )
 
     target = parser_flood.add_argument_group("Target")
@@ -2953,6 +2980,35 @@ Usage examples:
         + YELLOW
         + """ is a network sniffer for SIP protocol."""
         + WHITE,
+        epilog="""
+Usage examples:
+"""
+        + YELLOW
+        + """  Sniff SIP traffic on the default interface
+"""
+        + WHITE
+        + """     sippts sniff
+"""
+        + YELLOW
+        + """  Sniff a PBX that does not listen on 5060
+"""
+        + WHITE
+        + """     sippts sniff -d eth0 -r 5080
+"""
+        + YELLOW
+        + """  Show only the authentication digests seen
+"""
+        + WHITE
+        + """     sippts sniff -d eth0 -auth
+"""
+        + YELLOW
+        + """  Save the capture and crack the digests it caught
+"""
+        + WHITE
+        + """     sippts sniff -d eth0 -o capture.pcap
+     sippts dump -f capture.pcap -o digests.txt
+     sippts dcrack -f digests.txt -w wordlist.txt
+""",
     )
 
     options = parser_sniff.add_argument_group("Options")
@@ -3019,6 +3075,34 @@ Usage examples:
         + YELLOW
         + """ initiates ARP spoofing attack."""
         + WHITE,
+        epilog="""
+Usage examples:
+"""
+        + YELLOW
+        + """  Put yourself between a phone and the gateway
+"""
+        + WHITE
+        + """     sudo sippts spoof -i 192.168.0.10
+"""
+        + YELLOW
+        + """  Several victims at once, with an explicit gateway
+"""
+        + WHITE
+        + """     sudo sippts spoof -i 192.168.0.10,192.168.0.11 -gw 192.168.0.1
+"""
+        + YELLOW
+        + """  A whole network, from a file
+"""
+        + WHITE
+        + """     sudo sippts spoof -f targets.txt -gw 192.168.0.1
+"""
+        + YELLOW
+        + """  Spoof in one terminal and sniff in another
+"""
+        + WHITE
+        + """     sudo sippts spoof -i 192.168.0.10 -gw 192.168.0.1
+     sudo sippts sniff -d eth0
+""",
     )
 
     target = parser_spoof.add_argument_group("Target")
@@ -3077,6 +3161,34 @@ Usage examples:
         + YELLOW
         + """ extracts data from a PCAP file."""
         + WHITE,
+        epilog="""
+Usage examples:
+"""
+        + YELLOW
+        + """  Show the SIP dialogs of a capture
+"""
+        + WHITE
+        + """     sippts pcapdump -f capture.pcap -sip
+"""
+        + YELLOW
+        + """  Show the devices and the RTP streams
+"""
+        + WHITE
+        + """     sippts pcapdump -f capture.pcap -rtp
+"""
+        + YELLOW
+        + """  Extract the authentications and crack them
+"""
+        + WHITE
+        + """     sippts pcapdump -f capture.pcap -auth -o result/
+     sippts dcrack -f result/auth.txt -w wordlist.txt
+"""
+        + YELLOW
+        + """  Extract the audio of the calls as WAV files (needs sox and ffmpeg)
+"""
+        + WHITE
+        + """     sippts pcapdump -f capture.pcap -r -o result/
+""",
     )
 
     target = parser_pcapdump.add_argument_group("Target")
@@ -3169,6 +3281,34 @@ Payloads
   33 MP2T  (audio/video)
   34 H263  (video)
 """,
+        epilog="""
+Usage examples:
+"""
+        + YELLOW
+        + """  Look for the RTPBleed vulnerability on the usual RTP range
+"""
+        + WHITE
+        + """     sippts rtpbleed -i 192.168.0.1
+"""
+        + YELLOW
+        + """  Narrow the port range and save what leaks
+"""
+        + WHITE
+        + """     sippts rtpbleed -i 192.168.0.1 -s 10000 -e 12000 -o bleed.log
+"""
+        + YELLOW
+        + """  Probe with another codec
+"""
+        + WHITE
+        + """     sippts rtpbleed -i 192.168.0.1 -p 8
+"""
+        + YELLOW
+        + """  Once a port leaks, keep the stream and inject audio into it
+"""
+        + WHITE
+        + """     sippts rtpbleedflood -i 192.168.0.1 -r 11000
+     sippts rtpbleedinject -i 192.168.0.1 -r 11000 -f audio.wav
+""",
     )
 
     target = parser_rtpbleed.add_argument_group("Target")
@@ -3252,6 +3392,21 @@ Payloads
         + YELLOW
         + """ detects the RTP Bleed vulnerability sending RTCP streams. More info about the vulnerability: https://www.rtpbleed.com/"""
         + WHITE,
+        epilog="""
+Usage examples:
+"""
+        + YELLOW
+        + """  Look for the vulnerability sending RTCP instead of RTP
+"""
+        + WHITE
+        + """     sippts rtcpbleed -i 192.168.0.1
+"""
+        + YELLOW
+        + """  Narrow the port range and save the result
+"""
+        + WHITE
+        + """     sippts rtcpbleed -i 192.168.0.1 -s 10000 -e 12000 -o bleed.log
+""",
     )
 
     target = parser_rtcpbleed.add_argument_group("Target")
@@ -3319,6 +3474,21 @@ Payloads
         + YELLOW
         + """ exploit the RTP Bleed vulnerability sending RTP streams. More info about the vulnerability: https://www.rtpbleed.com/"""
         + WHITE,
+        epilog="""
+Usage examples:
+"""
+        + YELLOW
+        + """  Keep a leaking port sending its stream to you
+"""
+        + WHITE
+        + """     sippts rtpbleedflood -i 192.168.0.1 -r 11000
+"""
+        + YELLOW
+        + """  Use the codec the stream really carries
+"""
+        + WHITE
+        + """     sippts rtpbleedflood -i 192.168.0.1 -r 11000 -p 8
+""",
     )
 
     target = parser_rtpbleedflood.add_argument_group("Target")
@@ -3366,6 +3536,22 @@ Payloads
         + YELLOW
         + """ exploit the RTP Bleed vulnerability injecting RTP streams. More info about the vulnerability: https://www.rtpbleed.com/"""
         + WHITE,
+        epilog="""
+Usage examples:
+"""
+        + YELLOW
+        + """  Inject audio into a leaking RTP port
+"""
+        + WHITE
+        + """     sippts rtpbleedinject -i 192.168.0.1 -r 11000 -f audio.wav
+"""
+        + YELLOW
+        + """  The audio must already be encoded with the codec of -p (0 is G.711 u-law 8 kHz mono)
+"""
+        + WHITE
+        + """     sippts pcapdump -f capture.pcap -r -o audio/
+     sippts rtpbleedinject -i 192.168.0.1 -r 11000 -f audio/stream_sox.wav
+""",
     )
 
     target = parser_rtpbleedinject.add_argument_group("Target")

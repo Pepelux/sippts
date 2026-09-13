@@ -64,6 +64,11 @@ New in this version:
 - leak: new param -t TIMEOUT. It had 30 seconds hardcoded and waits that long
   per host, which against a whole network is forever
 - wssend, enumerate, ping, rtpbleedflood, rtpbleedinject: new param -o FILE
+- flood, sniff, spoof, pcapdump and the four rtp tools had no usage examples at
+  all in their help. They have them now, and they document the chains that were
+  invisible until today: 'sniff -o capture.pcap' feeds 'dump -f', and
+  'pcapdump -auth -o folder/' writes a folder/auth.txt in SipCrack format that
+  'dcrack -f' reads without touching it
 - README: it documented a tshark module that no longer exists (removed in
   v4.0), did not mention astami, sniff, spoof, pcapdump or video, claimed that
   exten and rcrack accept port ranges (their -r is a single port) and that scan
