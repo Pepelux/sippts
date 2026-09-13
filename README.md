@@ -1,5 +1,4 @@
-![logo](sippts.png)
-
+<center><img src="sippts.png" alt="logo" width="300"></center>
 
 # What is Sippts? #
 
