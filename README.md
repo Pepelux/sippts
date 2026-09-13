@@ -1,4 +1,4 @@
-![logo](http://blog.pepelux.org/wp-content/uploads/logo-de-sippts.png)
+![logo](sippts.png)
 
 
 # What is Sippts? #
