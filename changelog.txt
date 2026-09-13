@@ -1,14 +1,286 @@
-devel:
+v4.2.0 (Sep/2026):
 - rtpbleed: 
   - bug fixes
 - rtcpbleed: 
   - bug fixes
-- sipscan
+- sipscan:
   - force domain name when target server is a domain
+  - use the target address as SIP domain on each host, instead of the first one scanned
+  - fix -r ALL (was 1-65536) and validate the port range
+  - do not skip addresses ending in .0/.255 that are valid hosts of the network
+  - do not leak the socket when the local port cannot be bound
+  - fix -oi crash when nothing is found
+  - fix error hidden by an unguarded close of the TLS socket on hosts without TLS
+  - order the results by address and port instead of as text (10.0.0.9 before
+    10.0.0.100), also in exten, rcrack, leak and astami
+  - report the number of errors swallowed during the scan
+  - cast the socket timeout and drop unused leftovers
+  - target expansion shared with the other modules: a comma separated list is
+    no longer a whole range, address ranges are accepted with -f and with -i,
+    an unresolvable host is reported instead of scanned as a literal string,
+    and an empty line no longer scans 0.0.0.0
+- sipexten:
+  - report the number of errors swallowed during the run
+- sipexten, siprcrack, sipdigestleak:
+  - a comma separated target list is no longer expanded as a whole range
+  - use the target address as SIP domain on each host (a network is not a domain)
+  - report an error when the target host cannot be resolved
+  - accept address ranges (192.168.0.10-192.168.0.20 and 192.168.0.10-20)
+- sipdigestleak:
+  - -auth proxy had no effect at all: the dispatcher wrote it into an attribute
+    that does not exist, so the challenge always went out as WWW-Authenticate
+  - capture the digest of a victim that answers a 407 with Proxy-Authorization:
+    that header was not recognized, so the attack ended with 'No Auth Digest
+    received' even though the victim had sent it (with -am proxy, the pairing
+    RFC 3261 asks for, it could never work)
+  - use the port and protocol of each line with -f, and skip invalid lines
+  - the result was formatted with %d for the port, so from the sippts-gui
+    console (where the port travels as text) leak ended with a TypeError that
+    took the whole console down
+- sipenumerate:
+  - -ft FROM_TAG was offered in the help and never read: now it really sets the
+    tag of the From header
+  - a missing header on fingerprinting no longer discards the result
+  - a stray + in the error handler raised TypeError, so an unreadable answer
+    (for example a server that replies with non UTF-8 bytes) was reported
+    nowhere and the method disappeared from the table
+  - stop waiting for a final answer after 10 provisional ones, and treat a
+    closed TCP connection as the end of the answer
+- video:
+  - the scan demo listed seven hosts in the final table but only announced four
+    of them while scanning: three were tied to ports outside the range the
+    animation walks
+  - one of the hosts changed address between the scan and the table (.195 while
+    scanning, .175 in the table) and another one changed port
+- sipsend:
+  - -nocolor was applied after the banner and the whole list of options had
+    already been printed, so those lines kept their escape codes
+  - with -user/-pass, if the server did not answer the authenticated request
+    the tool reported a socket error that never happened: after authenticating,
+    the final code was read from the parsed digest, which does not carry one
+  - a server that answers 200 Ok without any provisional response left the Via
+    of the answer unset and the ACK died silently
+  - stop waiting for a final answer after 10 provisional ones, and treat a
+    closed TCP connection as the end of the answer
+  - remove a stray quote from the answer printed after authenticating
+- sipping:
+  - -user and -pass were offered in the help and never used: the challenge of a
+    PBX that asks for authentication is answered now, and what gets reported is
+    the result of the authenticated attempt
+  - fix crash with -p TLS against a host that does not answer TLS
+- sipinvite:
+  - against a PBX that answers the INVITE with a plain 200 Ok, neither the ACK
+    nor the transfer were sent: the variables of the challenge were undefined
+    and the ACK died with NameError inside a bare except
+  - fix the REFER of -t, built with one argument less than create_message()
+    needs, so the transfer always raised TypeError
+- sipflood:
+  - -o FILE was offered in the help and did nothing: it now writes the target
+    of the flood and the number of messages sent
+  - -n sends exactly that number of requests: every thread checked the counter
+    at the same time, so -n 3 sent as many requests as threads got through
+  - -b now randomizes the method too: -m defaulted to 'options', so the fuzzer
+    always sent OPTIONS and the random method code was dead. Without -b and
+    without -m it keeps sending OPTIONS, as documented
+  - the random method never included FUZZ (a garbage method name), the index
+    was hardcoded to the length of the list without it
 - sippcapdump:
   - bug fixes
+  - -r crashed with AttributeError before looking at the capture: the method
+    that checks for the external tools did not exist, and tshark is now located
+    the way pyshark does, outside the PATH
+  - print the SIP dialogs once, after reading the capture, and not once per packet
+  - do not write the color codes into rtp_frames.txt
+  - check that tshark and xxd are available before using them
+  - read IPv6 packets
+  - -folder is honoured when extracting RTP, instead of being replaced by the
+    name of the capture, and the temporary dump no longer lands on the current
+    directory
+- sipdump:
+  - read IPv6 packets and report an unreadable capture instead of a traceback
+  - tshark fails while reading the capture, not while opening it, so a
+    truncated or unsupported file still ended in a traceback (and closed the
+    sippts-gui console)
+- sipsniff:
+  - new param -r PORT: the bpf filter was fixed to 5060/5061, so a PBX on any
+    other port was silently never captured
+  - do not resolve the captured domains: a DNS failure was discarding the
+    analysis of the packet, digest included, and a passive sniffer must not
+    generate traffic about what it captures
+  - the user of the From/To headers is extracted again on packets with no digest
+  - fix the Contact header regexp, that never matched
+  - added -r parameter
+- rtpbleed, rtpbleedflood:
+  - fix the sequence number, timestamp and SSRC of the received stream: a byte
+    below 0x10 lost its leading zero (SSRC 0a0b0c0d was reported as abcd)
+  - close the socket and document the delay in milliseconds, as implemented
+- rtpbleed, rtcpbleed:
+  - write the log of -o line by line: it was flushed only on a clean exit, so
+    killing the process lost everything found
+- rtpbleed, rtcpbleed, rtpbleedflood:
+  - the 'no data available' handler no longer swallows Ctrl+C
+- rtcpbleed:
+  - close the socket, report only non empty answers, delay in milliseconds
+  - the loop says what it does: the port range is probed again and again until
+    Ctrl+C, it was hidden behind a condition that looked like a single pass
+- rtpbleedinject:
+  - use the payload type of -p instead of always PCMU
+  - skip the WAV header instead of injecting it as audio
+  - the injection stopped without a word when the sequence number (or the
+    timestamp) wrapped around: the hex string grew one digit and the packet
+    could no longer be built. Both fields wrap now, as RTP asks for
+- arpspoof:
+  - resolve the MAC addresses always, not only with -v: without them the ARP
+    packet went out 6 bytes short, and the packet to the gateway was malformed
+    even with -v
+  - do not include the gateway and the local address in the target list
+  - restore both directions of every victim, not only the last one
+  - same target expansion as the rest of the modules: the 10.0.0.10-20
+    shorthand was dropped silently, an unresolvable host is reported now, and
+    an empty line in -f no longer adds 0.0.0.0 to the victims
+  - require root on macOS too and wait for every thread
+- sipdigestcrack, rcrack:
+  - use every candidate of the wordlist as it is: the quotes, the < and > and
+    everything past the 50th character were removed, so those passwords could
+    never be cracked, and a non ASCII line was skipped
+  - report a wordlist that cannot be read: it was opened inside the worker
+    threads, so a wrong path ended the run with 'Nothing found', as if every
+    password had been tried
+- sipdigestcrack:
+  - an invalid line no longer aborts the rest of the file
+  - save the resume point in bruteforce mode (it was raising a TypeError)
+  - a saved password out of the charset no longer discards the whole bruteforce
+  - the resume offset applies only to the length of the saved password
+  - crack each user once, with the lock that was already created
+- wssend:
+  - -p accepts ws|wss and the Via and Contact headers use that transport, as
+    RFC 7118 requires, instead of always UDP over a WebSocket
+  - plain ws:// targets are reachable now
+  - honour -local-ip
+  - new param -t TIMEOUT: a server that accepts the connection and never
+    answers left the tool waiting forever, the only way out was Ctrl+C
+- setup.py:
+  - drop 'resource' from install_requires: it is a module of the standard
+    library on Unix and pip was pulling an unrelated package from PyPI
+  - extras_require instead of extra_requires, which setuptools ignored
 - astami:
+  - -t TIMEOUT was accepted and never used: it now reaches the AMI client
   - remove param -p PROTOCOL
+  - validate the port range
+  - skip the local IP address correctly
+  - same target expansion as sipscan (comma separated lists, address ranges,
+    unresolvable hosts reported, empty lines skipped)
+  - -c COMMAND never ran: the login status was overwritten by the status of the
+    internal 'core show version' action, which Asterisk answers with 'Follows'
+    and not with 'Success'
+  - do not crash the worker thread on logoff() of a connection that was never
+    established, nor on cursor.show() when the optional cursor module is not
+    installed
+- sippts-gui:
+  - Ctrl+C while a module was running closed the whole console: the handler
+    called stop() on every module and half of them do not have one, so it died
+    with AttributeError. Now those are interrupted the usual way and the
+    console goes back to the prompt
+  - the handler stayed installed after the run, so Ctrl+C at the prompt was
+    trying to stop a module that was no longer running, instead of closing the
+    application. It is only in place while the module runs, and dcrack no
+    longer takes it over from its constructor
+  - any error inside a module (an unresolvable host, an invalid port) closed
+    the console: the modules end with exit(), which also closes stdin, so even
+    catching SystemExit was not enough. They use sys.exit() now
+  - after a Ctrl+C the module kept its stop flag set and every later run did
+    nothing at all, without saying a word
+  - numeric options given from the console travel as text and the modules were
+    comparing them against numbers: 'set timeout' broke send, exten, enumerate
+    and rcrack with a socket error that never happened, 'set requests' made
+    flood send nothing, and 'set interval' closed the console from ping
+  - same reason, 'set sdes 1' on send sent an SDP with no crypto lines at all,
+    'set ping 1' on leak never pinged, and leaving the port at its default with
+    proto TLS connected to 5060 instead of 5061 on seven modules
+  - wssend offered (and only accepted) udp|tcp|tls, the two protocols it really
+    speaks, ws and wss, were rejected
+  - the delay of rtpbleed/rtcpbleed is in milliseconds, not microseconds
+  - a module that cannot be imported (an optional dependency that is not
+    installed) closed the whole console instead of reporting it and going back
+    to the prompt
+  - 'set cve 1' on scan wrote over the list of CVEs found instead of the switch
+    that turns the lookup on, so the option did nothing and the report at the
+    end of the scan ended in a traceback
+  - the check for mandatory params had an and/or precedence problem: any module
+    with a mandatory 'file' took a set 'ip' as good enough, and rtpbleedinject
+    started with no audio file at all
+  - new options: -t for wssend, -o for flood, the From tag for enumerate, the
+    number of threads for invite and 'do not send Contact' for send, all of
+    them already supported by the modules
+  - on leak, 'set ip' answered 'Wrong option: ip': an if where an elif was
+    meant sent it down the whole chain to the final else
+  - TAB after 'set ' offered module names instead of parameter names
+  - 'network' no longer crashes on a machine without a default route
+  - setg compared a set against a list, so 'already in global params' never
+    happened, and the list was being modified while it was walked
+- global:
+  - scan, exten, rcrack, send, invite, enumerate and leak kept reading answers
+    while they were provisional (1xx) with no limit: a peer that answers
+    180 Ringing over and over left the tool spinning forever and it never got
+    to print a result. They stop after 10 provisional answers now
+  - the banner asks github for the latest version and the latest CVE list on
+    every run, with curl and without any timeout: on a network that swallows
+    the packets (a captive portal, a blackholed route) any sippts command hung
+    forever before printing a single line. Both requests time out now
+  - the Cache-Control header travelled with its own quotes inside the argument,
+    so what was sent was a header named 'Cache-Control and the cache was never
+    skipped
+  - find the CVE list next to the package instead of inside site-packages, so
+    it also works on an editable install and from a source tree (it was
+    silently loading an empty CVE list)
+  - -up: replace the files where the running code lives, refuse to overwrite a
+    git checkout (use git pull), fix the call to download_file() that raised a
+    TypeError, and never write a failed download over a module that works
+  - bin/sippts and bin/sippts-gui: #!/usr/bin/env python3 instead of a hardcoded
+    interpreter path
+  - new expand_targets(), bind_local_port(), close_sockets(),
+    packet_addresses() and close_capture() helpers
+  - closing a pyshark capture after tshark crashed left the processes in the
+    list and the interpreter printed an 'Exception ignored while calling
+    deallocator' traceback that had nothing to do with the command
+  - fix the -local-ip hint, that raised AttributeError in 5 modules
+  - close the TLS socket: wrap_socket() detaches the plain one, so its close() does nothing
+  - do not build the whole target/port/proto product just to count it
+  - digest: accept the algorithm in any case and with the -sess suffix, which
+    raised UnboundLocalError (MD5-sess was implemented but could never run)
+  - digest: read the quoted values up to their closing quote, so a username
+    with + or @ (an E.164 number), a realm with a space or a response in upper
+    case hex are no longer dropped as empty
+  - every key of a parsed message always exists: reading a header that was not
+    present raised KeyError and the caller discarded the whole packet, which
+    hid every SIP answer from the sniffer and broke the digest flow of send,
+    invite and leak on any answer without a challenge
+  - IP forwarding: on macOS it was called through exec(), which read the
+    command line as Python source and always failed, so arpspoof never enabled
+    it; on Linux the 'already enabled' check compared text with a number; and
+    both were skipped when the verbosity was 0. It now reports whether it was
+    really enabled, because without it the traffic of the victims is dropped
+    instead of relayed
+  - do not return the whole CVE list when there is nothing to look for
+  - a log file that cannot be opened is reported instead of aborting with a
+    traceback in the middle of printing the results, which threw away the work
+    already done, and -template of send reports a missing file the same way
+  - -nocolor also applies to the banner, which kept its own colors and left
+    escape codes in a redirected output
+  - fail when there is no default route instead of returning None, which put
+    the string 'None' inside the SIP messages and hid the -local-ip hint
+  - fingerprinting: remove a leftover debug print that wrote into the results
+    table, and a duplicated match
+  - make pyshark 0.6 (its last release) work on current Python: it asks for an
+    event loop of the current thread, which raises RuntimeError since 3.12,
+    and calls asyncio.set_child_watcher(), removed in 3.14. dump, pcapdump and
+    sniff died before reading a single packet
+  - assign the numeric params instead of comparing them (30 statements that did
+    nothing across 15 modules)
+  - fix fingerprinting list build
+  - only expand numeric ranges when the whole value is a range
+  - minor bug fixes
+
 v4.1.2 (Nov/2024):
 - scan:
   - control ulimit handler and adjust according to threads

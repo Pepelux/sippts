@@ -17,8 +17,10 @@ import threading
 import time
 from .lib.color import Color
 from .lib.functions import (
+    open_log,
     create_message,
-    get_free_port,
+    close_sockets,
+    bind_local_port,
     generate_random_integer,
     generate_random_string,
 )
@@ -48,6 +50,9 @@ class SipFlood:
         self.nthreads = "300"
         self.count = 0
         self.number = 0
+        self.ofile = ""
+        self.flog = None
+        self.lock = threading.Lock()
         self.bad = 0
         self.supported_methods = []
 
@@ -60,6 +65,18 @@ class SipFlood:
         self.run = True
 
     def start(self):
+        # from sippts-gui it arrives as text and the comparison against 5060
+        # below never matched, so -p TLS did not switch to the default 5061
+        try:
+            self.rport = int(self.rport)
+        except (TypeError, ValueError):
+            self.rport = 5060
+
+        # reset the stop flag: after a Ctrl+C the object kept it set, so from
+        # sippts-gui (where the module instance is reused) every later run
+        # did nothing at all
+        self.run = True
+
         supported_protos = ["UDP", "TCP", "TLS"]
         self.supported_methods = [
             "REGISTER",
@@ -79,14 +96,30 @@ class SipFlood:
         ]
 
         try:
-            self.verbose == int(self.verbose)
+            self.verbose = int(self.verbose)
         except:
             self.verbose = 0
 
         try:
-            self.bad == int(self.bad)
+            self.bad = int(self.bad)
         except:
             self.bad = 0
+
+        # from sippts-gui these arrive as text: the counter then compared an
+        # int against a str, every thread died with TypeError inside a bare
+        # except and the flood sent nothing at all
+        try:
+            self.number = int(self.number)
+        except (TypeError, ValueError):
+            self.number = 0
+
+        try:
+            self.nthreads = int(self.nthreads)
+        except (TypeError, ValueError):
+            self.nthreads = 300
+
+        if self.nthreads < 1:
+            self.nthreads = 1
 
         if self.bad:
             self.supported_methods.append("FUZZ")
@@ -100,9 +133,8 @@ class SipFlood:
 
         # check method
         if not self.bad and self.method == "":
-            print(f"{self.c.BRED}Method is mandatory")
-            print(self.c.WHITE)
-            sys.exit()
+            # documented default of -m
+            self.method = "OPTIONS"
         if not self.bad and self.method not in self.supported_methods:
             print(f"{self.c.BRED}Method {self.method} is not supported")
             print(self.c.WHITE)
@@ -140,9 +172,27 @@ class SipFlood:
             print(f"{self.c.BWHITE}[✓] Max length: {self.c.GREEN}{str(self.max)}")
         print(self.c.WHITE)
 
+        # -o was offered in the help and went nowhere
+        if self.ofile != "":
+            print(
+                f"{self.c.BWHITE}[✓] Saving logs info file: {self.c.GREEN}{self.ofile}"
+            )
+
+            try:
+                # line buffered: the tool runs until Ctrl+C
+                self.flog = open_log(self.ofile)
+                self.flog.write(
+                    "Flooding %s:%s/%s with %s\n"
+                    % (self.ip, self.rport, self.proto, self.method)
+                )
+            except OSError as error:
+                print(f"{self.c.RED}Error writing {self.ofile} ({error})")
+                print(self.c.WHITE)
+                self.flog = None
+
         threads = list()
 
-        for i in range(int(self.nthreads)):
+        for i in range(self.nthreads):
             if self.run == True:
                 t = threading.Thread(target=self.flood, daemon=True)
                 threads.append(t)
@@ -159,6 +209,11 @@ class SipFlood:
         print(
             f"{self.c.YELLOW}\n\n[+] Sent {self.c.BGREEN}{str(self.count)}{self.c.YELLOW} messages{self.c.WHITE}"
         )
+
+        if self.flog != None:
+            self.flog.write("Sent %s messages\n" % str(self.count))
+            self.flog.close()
+            self.flog = None
         print(self.c.WHITE)
 
     def signal_handler(self, sig, frame):
@@ -171,8 +226,25 @@ class SipFlood:
         print(f"{self.c.BWHITE}\nStopping flood ... wait a moment\n")
         print(self.c.WHITE)
 
+    def take_slot(self):
+        """
+        Claim one of the requests asked with -n. Returns False when there are
+        none left: without this every thread checked the counter at the same
+        time and -n 3 sent as many requests as threads got through.
+        """
+        with self.lock:
+            if self.number != 0 and self.count >= self.number:
+                return False
+
+            self.count += 1
+
+            return True
+
     def flood(self):
-        while self.run == True and (self.count <= self.number or self.number == 0):
+        sock = None
+        sock_ssl = None
+
+        while self.run == True and self.take_slot():
             try:
                 if self.proto == "UDP":
                     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -184,6 +256,7 @@ class SipFlood:
                 sys.exit(1)
             fcntl.fcntl(sock, fcntl.F_SETFL, os.O_NONBLOCK)
 
+            sock_ssl = None
             bind = "0.0.0.0"
 
             if self.proxy == "":
@@ -198,8 +271,13 @@ class SipFlood:
                 host = (str(proxy_ip), int(proxy_port))
 
             try:
-                lport = get_free_port()
-                sock.bind((bind, lport))
+                lport = bind_local_port(sock, bind)
+
+                if lport == 0:
+                    sock.close()
+                    print(f"{self.c.RED}Failed to bind a local port")
+                    print(self.c.WHITE)
+                    return
 
                 if not self.bad:
                     if self.host != "" and self.domain == "":
@@ -273,8 +351,13 @@ class SipFlood:
                 try:
                     if self.bad:
                         if not self.method or self.method == "":
+                            # hardcoded 13 left out the last entry of the
+                            # list, which with -bad is precisely FUZZ: the
+                            # random garbage method was never generated
                             method = self.supported_methods[
-                                generate_random_integer(0, 13)
+                                generate_random_integer(
+                                    0, len(self.supported_methods) - 1
+                                )
                             ]
                             if method == "FUZZ":
                                 method = generate_random_string(
@@ -389,8 +472,6 @@ class SipFlood:
                         sock_ssl.sendall(bytes(msg[:8192], "utf-8"))
                     else:
                         sock.sendto(bytes(msg[:8192], "utf-8"), host)
-
-                    self.count += 1
                 except socket.timeout:
                     pass
                 except:
@@ -398,11 +479,8 @@ class SipFlood:
             except:
                 pass
 
-            sock.close()
+            close_sockets(sock, sock_ssl)
 
-        try:
-            sock.close()
-        except:
-            pass
+        close_sockets(sock, sock_ssl)
 
         return

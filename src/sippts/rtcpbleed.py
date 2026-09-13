@@ -15,6 +15,7 @@ import os
 import sys
 import time
 from .lib.color import Color
+from .lib.functions import open_log
 from .lib.logos import Logo
 
 
@@ -48,12 +49,14 @@ class RTCPBleed:
             f"{self.c.BWHITE}[✓] Port range: {self.c.YELLOW}{self.start_port}{self.c.WHITE}-{self.c.YELLOW}{self.end_port}"
         )
         print(
-            f"{self.c.BWHITE}[✓] Delay between tries: {self.c.YELLOW}{self.delay} microseconds"
+            f"{self.c.BWHITE}[✓] Delay between tries: {self.c.YELLOW}{self.delay} milliseconds"
         )
         print(self.c.WHITE)
 
         if self.ofile != "":
-            f = open(self.ofile, "a+")
+            # line buffered: these tools run until Ctrl+C, so a log flushed
+            # only on a clean exit is lost when the process is killed
+            f = open_log(self.ofile)
             f.write(f"Target IP: {self.ip}\n")
             
         # Create a UDP socket
@@ -69,49 +72,50 @@ class RTCPBleed:
         byte_array = bytearray.fromhex(message)
         port = self.start_port
 
-        # while True:
-        while port < self.end_port + 2:
-            if self.run == True:
+        # the port range is probed over and over until Ctrl+C: the stream can
+        # start at any moment, so a single pass would miss it
+        while self.run == True:
+            try:
+                host = (str(self.ip), port)
+
+                print(f"{self.c.YELLOW}[+] Checking port: {str(port)}", end="\r")
+
+                # Send data
+                sock.sendto(byte_array, host)
+                time.sleep(self.delay / 1000.0)
+
                 try:
-                    host = (str(self.ip), port)
+                    (msg, addr) = sock.recvfrom(4096)
 
-                    print(f"{self.c.YELLOW}[+] Checking port: {str(port)}", end="\r")
+                    if addr[1] == port:
+                        (ipaddr, rport) = host
+                        size = len(msg)
 
-                    # Send data
-                    sock.sendto(byte_array, host)
-                    time.sleep(self.delay / 1000.0)
+                        if size > 0:
+                            print(
+                                f"\n{self.c.WHITE}received {str(size)} bytes from target port {str(rport)}"
+                            )
 
-                    try:
-                        (msg, addr) = sock.recvfrom(4096)
-
-                        if addr[1] == port:
-                            (ipaddr, rport) = host
-                            size = len(msg)
-
-                            if size >= 0:
-                                print(
-                                    f"\n{self.c.WHITE}received {str(size)} bytes from target port {str(rport)}"
-                                )
-
-                                if self.ofile != "":
-                                    f.write(f"received {str(size)} bytes from target port {str(rport)}\n")
-                    except:
-                        # No data available
-                        pass
-                except KeyboardInterrupt:
-                    print(f"{self.c.YELLOW}\nYou pressed Ctrl+C!")
-                    print(self.c.WHITE)
-                    self.run = False
-                except:
+                            if self.ofile != "":
+                                f.write(f"received {str(size)} bytes from target port {str(rport)}\n")
+                except OSError:
+                    # No data available (a bare except swallowed Ctrl+C)
                     pass
+            except KeyboardInterrupt:
+                print(f"{self.c.YELLOW}\nYou pressed Ctrl+C!")
+                print(self.c.WHITE)
+                self.run = False
+            except:
+                pass
 
-                port += 2
-                if port > self.end_port:
-                    port = self.start_port
-            else:
-                port = self.end_port + 2
+            port += 2
+
+            if port > self.end_port:
+                port = self.start_port
 
         print(self.c.WHITE)
+
+        sock.close()
 
         if self.ofile != "":
             f.write("\n")

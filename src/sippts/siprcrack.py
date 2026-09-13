@@ -9,7 +9,6 @@ __email__ = "pepeluxx@gmail.com"
 
 import socket
 import sys
-import ipaddress
 import ssl
 import re
 import threading
@@ -23,12 +22,13 @@ except:
 
 from .lib.functions import (
     create_message,
+    close_sockets,
     parse_message,
     parse_digest,
-    ip2long,
-    long2ip,
+    expand_targets,
+    host_sort_key,
+    bind_local_port,
     generate_random_string,
-    get_free_port,
     calculateHash,
     format_time,
 )
@@ -83,14 +83,16 @@ class SipRemoteCrack:
                 print(self.c.WHITE)
                 sys.exit(1)
 
+            sock_ssl = None
             bind = "0.0.0.0"
-            lport = get_free_port()
+            lport = bind_local_port(sock, bind)
 
-            try:
-                sock.bind((bind, lport))
-            except:
-                lport = get_free_port()
-                sock.bind((bind, lport))
+            if lport == 0:
+                sock.close()
+
+                if self.verbose == 2:
+                    print(f"{self.c.RED}\nFailed to bind a local port{self.c.WHITE}")
+                return
 
             if self.proxy == "":
                 host = (str(ip), int(self.rport))
@@ -108,18 +110,22 @@ class SipRemoteCrack:
 
             data = dict()
 
+            domain = self.domain
+            if domain == "":
+                domain = ip
+
             msg = create_message(
                 "REGISTER",
                 "",
                 self.contact_domain,
                 to_user,
                 "",
-                self.domain,
+                domain,
                 to_user,
                 "",
-                self.domain,
+                domain,
                 self.proto,
-                self.domain,
+                domain,
                 self.user_agent,
                 lport,
                 "",
@@ -164,8 +170,11 @@ class SipRemoteCrack:
                     sock.sendto(bytes(msg[:8192], "utf-8"), host)
 
                 rescode = "100"
+                tries = 0
 
-                while rescode[:1] == "1":
+                while rescode[:1] == "1" and tries < 10:
+                    tries += 1
+
                     # receive temporary code
                     if self.proto == "TLS":
                         resp = sock_ssl.recv(4096)
@@ -186,6 +195,9 @@ class SipRemoteCrack:
                                 f"{self.c.BWHITE}[-] Receiving from {ip}:{self.rport}/{self.proto} ..."
                             )
                             print(f"{self.c.GREEN}{resp.decode()}{self.c.WHITE}")
+                    else:
+                        # not a SIP response, stop waiting for a final code
+                        break
 
                 headers = parse_message(resp.decode())
 
@@ -213,7 +225,7 @@ class SipRemoteCrack:
 
                         realm = headers["realm"]
                         nonce = headers["nonce"]
-                        uri = "sip:%s" % (self.domain)
+                        uri = "sip:%s" % (domain)
                         algorithm = headers["algorithm"]
                         cnonce = headers["cnonce"]
                         nc = headers["nc"]
@@ -255,12 +267,12 @@ class SipRemoteCrack:
                             self.contact_domain,
                             to_user,
                             "",
-                            self.domain,
+                            domain,
                             to_user,
                             "",
-                            self.domain,
+                            domain,
                             self.proto,
-                            self.domain,
+                            domain,
                             self.user_agent,
                             lport,
                             "",
@@ -292,8 +304,12 @@ class SipRemoteCrack:
                             sock.sendto(bytes(msg[:8192], "utf-8"), host)
 
                         rescode = "100"
+                        # a peer that keeps answering 1xx used to keep this loop going forever
+                        tries = 0
 
-                        while rescode[:1] == "1":
+                        while rescode[:1] == "1" and tries < 10:
+                            tries += 1
+
                             # receive temporary code
                             if self.proto == "TLS":
                                 resp = sock_ssl.recv(4096)
@@ -321,17 +337,17 @@ class SipRemoteCrack:
             except socket.timeout:
                 print(f"{self.c.RED}\nSocket timeout error")
                 if self.run == True:
-                    exit()
+                    sys.exit()
                 else:
                     pass
             except:
                 print(f"{self.c.RED}Socket error{self.c.WHITE}")
                 if self.run == True:
-                    exit()
+                    sys.exit()
                 else:
                     pass
             finally:
-                sock.close()
+                close_sockets(sock, sock_ssl)
 
         return data
 
@@ -353,12 +369,32 @@ class SipRemoteCrack:
                     pass
 
     def start(self):
+        # from sippts-gui it arrives as text and the comparison against 5060
+        # below never matched, so -p TLS did not switch to the default 5061
+        try:
+            self.rport = int(self.rport)
+        except (TypeError, ValueError):
+            self.rport = 5060
+
+        # from sippts-gui it arrives as text, and settimeout() then raised
+        # TypeError inside a bare except: the module reported a socket error
+        # that never happened
+        try:
+            self.timeout = int(self.timeout)
+        except (TypeError, ValueError):
+            self.timeout = 5
+
+        # reset the stop flag: after a Ctrl+C the object kept it set, so from
+        # sippts-gui (where the module instance is reused) every later run
+        # did nothing at all
+        self.run = True
+
         supported_protos = ["UDP", "TCP", "TLS"]
 
         self.proto = self.proto.upper()
 
         try:
-            self.verbose == int(self.verbose)
+            self.verbose = int(self.verbose)
         except:
             self.verbose = 0
 
@@ -375,44 +411,32 @@ class SipRemoteCrack:
             print(self.c.WHITE)
             sys.exit()
 
-        if self.host != "" and self.domain == "":
-            self.domain = self.host
-        if self.domain == "":
-            self.domain = self.ip
-
-        logo = Logo("siprcrack")
-        logo.print()
-
         # create a list of IP addresses
-        self.ips = []
-        hosts = []
-        for i in self.ip.split(","):
-            try:
-                i = socket.gethostbyname(i)
-            except:
-                pass
-            hlist = list(ipaddress.ip_network(str(i)).hosts())
+        try:
+            (self.ips, names) = expand_targets(self.ip)
+        except ValueError as error:
+            print(f"{self.c.BRED}{error}")
+            print(self.c.WHITE)
+            sys.exit()
 
-            if hlist == []:
-                hosts.append(i)
-            else:
-                for h in hlist:
-                    hosts.append(h)
+        if self.ips == []:
+            print(f"{self.c.BRED}No target to attack in {self.ip}")
+            print(self.c.WHITE)
+            sys.exit()
 
-        last = len(hosts) - 1
-        start_ip = hosts[0]
-        end_ip = hosts[last]
+        # when the target is a single host name, keep the name as SIP domain
+        # (for a network or a range each host uses its own address, see register)
+        if self.domain == "" and len(names) == 1 and len(self.ips) == 1:
+            self.domain = names[0]
 
-        ipini = int(ip2long(str(start_ip)))
-        ipend = int(ip2long(str(end_ip)))
-
-        for i in range(ipini, ipend + 1):
-            self.ips.append(long2ip(i))
+        logo = Logo("siprcrack", self.nocolor)
+        logo.print()
 
         # create a list of extens
         self.extens = []
         for p in self.exten.split(","):
-            m = re.search(r"([0-9]+)-([0-9]+)", p)
+            p = p.strip()
+            m = re.fullmatch(r"([0-9]+)-([0-9]+)", p)
             if m:
                 for x in range(int(m.group(1)), int(m.group(2)) + 1):
                     if self.ext_len != "":
@@ -441,7 +465,7 @@ class SipRemoteCrack:
 
         # threads to use
         nthreads = int(self.threads)
-        total = len(list(product(self.ips, self.extens)))
+        total = len(self.ips) * len(self.extens)
         if nthreads > total:
             nthreads = total
         if nthreads < 1:
@@ -477,14 +501,19 @@ class SipRemoteCrack:
         print(f"{self.c.BWHITE}[✓] Wordlist: {self.c.GREEN}{self.wordlist}")
         print(self.c.WHITE)
 
+        # the wordlist was opened inside the worker threads, so a wrong path
+        # was swallowed by the executor and the run ended with 'Nothing found'
+        # as if every password had been tried
+        try:
+            open(self.wordlist, "rb").close()
+        except OSError as error:
+            print(f"{self.c.RED}Error reading wordlist {self.wordlist} ({error})")
+            print(self.c.WHITE)
+            sys.exit()
+
         values = product(self.ips, self.extens)
         values2 = []
         count = 0
-
-        iter = (a for a in enumerate(values))
-        total = sum(1 for _ in iter)
-
-        values = product(self.ips, self.extens)
 
         start = time.time()
 
@@ -521,7 +550,7 @@ class SipRemoteCrack:
         end = time.time()
         self.totaltime = int(end - start)
 
-        self.found.sort()
+        self.found.sort(key=host_sort_key)
         self.print()
 
     def scan_host(self, ipaddr, to_user):
@@ -532,14 +561,15 @@ class SipRemoteCrack:
                 for pwd in f:
                     if self.run == True:
                         try:
-                            pwd = pwd.decode("ascii")
-                            pwd = pwd.replace("'", "")
-                            pwd = pwd.replace('"', "")
-                            pwd = pwd.replace("<", "")
-                            pwd = pwd.replace(">", "")
-                            pwd = pwd.replace("\n", "")
-                            pwd = pwd.strip()
-                            pwd = pwd[0:50]
+                            # the candidate is used as it is in the wordlist:
+                            # any character removed here is a password that can
+                            # never be cracked
+                            try:
+                                pwd = pwd.decode("utf-8")
+                            except UnicodeDecodeError:
+                                pwd = pwd.decode("latin-1")
+
+                            pwd = pwd.rstrip("\r\n")
 
                             if self.run == True:
                                 try:

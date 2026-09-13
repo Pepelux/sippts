@@ -1,4 +1,4 @@
-#!/opt/homebrew/opt/python@3.12/bin/python3.12
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 __author__ = "Jose Luis Verdeguer"
@@ -9,6 +9,7 @@ __email__ = "pepeluxx@gmail.com"
 
 import os
 import random
+import sys
 import subprocess
 import signal
 import platform
@@ -160,6 +161,7 @@ enumerate = (
     ("from_name", "From Name. Ex: Bob", False),
     ("from_user", "From User", False),
     ("from_domain", "From Domain", False),
+    ("from_tag", "From Tag", False),
     ("to_name", "To Name. Ex: Alice", False),
     ("to_user", "To User", False),
     ("to_domain", "To Domain", False),
@@ -198,6 +200,7 @@ send = (
         'Add custom header (ex: "Allow-Events: presence"). Multiple headers: hdr1&hdr2',
         False,
     ),
+    ("no_contact", "Do not send the Contact header", False),
     ("branch", "Customize Branch header", False),
     ("callid", "Customize CallID header", False),
     ("cseq", "Customize Seq number", False),
@@ -215,7 +218,7 @@ send = (
 wssend = (
     ("ip", "Target Host/IP address", True),
     ("rport", "Target port. Ex: 5060", True),
-    ("proto", "Protocol: udp|tcp|tls", True),
+    ("proto", "Protocol: ws|wss", True),
     ("path", "WS path. Ex: /ws", False),
     ("method", "Method used to scan: options, invite, register", True),
     (
@@ -236,6 +239,7 @@ wssend = (
     ("ppi", "P-Preferred-Identity header", False),
     ("pai", "P-Asserted-Identity header", False),
     ("verbose", "Verbosity level: 0|1", True),
+    ("timeout", "Time to wait for an answer", True),
     ("local_ip", "Set local IP address (by default try to get it)", False),
 )
 
@@ -266,6 +270,7 @@ invite = (
     ("pass", "Authentication password", False),
     ("verbose", "Verbosity level: 0|1", True),
     ("output_file", "Save data into a log file", False),
+    ("threads", "Number of threads", True),
     ("transfer", "Phone number to transfer the call", False),
     ("local_ip", "Set local IP address (by default try to get it)", False),
 )
@@ -388,6 +393,7 @@ flood = (
     ("verbose", "Verbosity level: 0|1", True),
     ("threads", "Number of threads", True),
     ("requests", "Number of requests", False),
+    ("output_file", "Save data into a log file", False),
 )
 
 rtpbleed = (
@@ -397,7 +403,7 @@ rtpbleed = (
     ("end", "End port of the host", True),
     ("loops", "Number of times to probe the port ranges on the target(s)", True),
     ("payload", "Codec payload", True),
-    ("delay", "Delay for timeout in microseconds", True),
+    ("delay", "Delay for timeout in milliseconds", True),
 )
 
 rtcpbleed = (
@@ -405,7 +411,7 @@ rtcpbleed = (
     ("output_file", "Save data into a log file", False),
     ("start", "Start port of the host", True),
     ("end", "End port of the host", True),
-    ("delay", "Delay for timeout in microseconds", True),
+    ("delay", "Delay for timeout in milliseconds", True),
 )
 
 rtpbleedflood = (
@@ -504,19 +510,31 @@ def signal_handler(self, sig):
     print(c.WHITE)
     print("Bye! See you soon\n")
 
-    exit(0)
+    # exit() closes sys.stdin on its way out
+    sys.exit(0)
 
 
 def network():
-    local_ip = get_machine_default_ip()
-    local_mask = get_machine_default_ip("mask")
+    # a machine without a default route made this raise and the console never
+    # got to the prompt, and gw stayed undefined outside Linux/macOS
+    try:
+        local_ip = get_machine_default_ip()
+        local_mask = get_machine_default_ip("mask")
+    except Exception:
+        local_ip = ""
+        local_mask = ""
+
     ops = platform.system()
+    gw = ""
 
-    if ops == "Linux":
-        gw = get_default_gateway_linux()
+    try:
+        if ops == "Linux":
+            gw = get_default_gateway_linux()
 
-    if ops == "Darwin":
-        gw = get_default_gateway_mac().strip()
+        if ops == "Darwin":
+            gw = get_default_gateway_mac().strip()
+    except Exception:
+        gw = ""
 
     dev = ""
 
@@ -546,8 +564,14 @@ def get_version():
     try:
         command = [
             "curl",
+            "-s",
+            "--connect-timeout",
+            "2",
+            "--max-time",
+            "4",
             "https://raw.githubusercontent.com/Pepelux/sippts/master/version",
-            "-H 'Cache-Control: no-cache, no-store'",
+            "-H",
+            "Cache-Control: no-cache, no-store",
         ]
         result = subprocess.run(
             command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
@@ -575,8 +599,14 @@ def get_version():
     try:
         command = [
             "curl",
+            "-s",
+            "--connect-timeout",
+            "2",
+            "--max-time",
+            "4",
             "https://raw.githubusercontent.com/Pepelux/sippts/master/cveversion",
-            "-H 'Cache-Control: no-cache, no-store'",
+            "-H",
+            "Cache-Control: no-cache, no-store",
         ]
         result = subprocess.run(
             command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
@@ -662,13 +692,22 @@ class SIPPTS(Cmd):
 
     print(f"Type {c.BWHITE}? {c.WHITE}or {c.BWHITE}help {c.WHITE}to list commands\n")
 
-    singhandle = False
-
     def signal_handler(self, sig, x):
         print(c.BYELLOW + "\n\nYou pressed Ctrl+C!")
         print(c.WHITE)
 
-        self.mod.stop()
+        # half of the modules have no stop(): calling it blindly raised
+        # AttributeError inside the signal handler and took the whole console
+        # down. Those are interrupted the usual way and do_run catches it
+        stop = getattr(self.mod, "stop", None)
+
+        if callable(stop):
+            try:
+                stop()
+            except Exception:
+                pass
+        else:
+            raise KeyboardInterrupt
 
     def complete_use(self, text, line, start_index, end_index):
         if text:
@@ -680,7 +719,7 @@ class SIPPTS(Cmd):
         if text:
             return [param for param in parameters if param.startswith(text)]
         else:
-            return modules
+            return parameters
 
     # show available commands
     def available_commands(self, globalcmd):
@@ -793,9 +832,11 @@ class SIPPTS(Cmd):
             value = self.set_option(self.active_mod, param, "", True, True)
 
             if required == True and value == "":
-                if (
-                    (self.active_mod == "scan" or self.active_mod == "leak")
-                    and (
+                # and binds tighter than or: the second half was not tied to
+                # scan/leak, so any module with a mandatory 'file' took a set
+                # 'ip' as good enough (rtpbleedinject ran with no audio file)
+                if (self.active_mod == "scan" or self.active_mod == "leak") and (
+                    (
                         param == "ip"
                         and self.set_option(self.active_mod, "file", "", True, False)
                         != ""
@@ -837,6 +878,10 @@ class SIPPTS(Cmd):
         if param == "ip":
             if run == False:
                 self.mod.ip = value
+                # the CLI keeps a copy in .host, which is what gives the SIP
+                # domain when the target is a name instead of an address; the
+                # console never set it, so the domain ended up being the IP
+                self.mod.host = value
             else:
                 value = self.mod.ip
         elif param == "file":
@@ -959,10 +1004,12 @@ class SIPPTS(Cmd):
             else:
                 value = self.mod.oifile
         elif param == "cve":
+            # this wrote over self.cve, which is the list of CVEs found, so the
+            # option did nothing and the report at the end blew up
             if run == False:
-                self.mod.cve = value
+                self.mod.getcve = value
             else:
-                value = self.mod.cve
+                value = self.mod.getcve
         elif param == "threads":
             if run == False:
                 self.mod.threads = value
@@ -1037,6 +1084,10 @@ class SIPPTS(Cmd):
         if param == "ip":
             if run == False:
                 self.mod.ip = value
+                # the CLI keeps a copy in .host, which is what gives the SIP
+                # domain when the target is a name instead of an address; the
+                # console never set it, so the domain ended up being the IP
+                self.mod.host = value
             else:
                 value = self.mod.ip
         elif param == "rport":
@@ -1157,6 +1208,10 @@ class SIPPTS(Cmd):
         if param == "ip":
             if run == False:
                 self.mod.ip = value
+                # the CLI keeps a copy in .host, which is what gives the SIP
+                # domain when the target is a name instead of an address; the
+                # console never set it, so the domain ended up being the IP
+                self.mod.host = value
             else:
                 value = self.mod.ip
         elif param == "rport":
@@ -1264,6 +1319,10 @@ class SIPPTS(Cmd):
         if param == "ip":
             if run == False:
                 self.mod.ip = value
+                # the CLI keeps a copy in .host, which is what gives the SIP
+                # domain when the target is a name instead of an address; the
+                # console never set it, so the domain ended up being the IP
+                self.mod.host = value
             else:
                 value = self.mod.ip
         elif param == "rport":
@@ -1317,6 +1376,11 @@ class SIPPTS(Cmd):
                 self.mod.from_domain = value
             else:
                 value = self.mod.from_domain
+        elif param == "from_tag":
+            if run == False:
+                self.mod.from_tag = value
+            else:
+                value = self.mod.from_tag
         elif param == "to_name":
             if run == False:
                 self.mod.to_name = value
@@ -1372,6 +1436,10 @@ class SIPPTS(Cmd):
         if param == "ip":
             if run == False:
                 self.mod.ip = value
+                # the CLI keeps a copy in .host, which is what gives the SIP
+                # domain when the target is a name instead of an address; the
+                # console never set it, so the domain ended up being the IP
+                self.mod.host = value
             else:
                 value = self.mod.ip
         elif param == "template":
@@ -1493,6 +1561,11 @@ class SIPPTS(Cmd):
                 self.mod.header = value
             else:
                 value = self.mod.header
+        elif param == "no_contact":
+            if run == False:
+                self.mod.nocontact = value
+            else:
+                value = self.mod.nocontact
         elif param == "branch":
             if run == False:
                 self.mod.branch = value
@@ -1570,7 +1643,9 @@ class SIPPTS(Cmd):
         return value
 
     def set_option_wssend(self, param, value, run, log):
-        supported_protos = ["UDP", "TCP", "TLS"]
+        # wssend only speaks WebSockets: the console was offering (and only
+        # accepting) udp|tcp|tls, so 'set proto ws' was rejected
+        supported_protos = ["WS", "WSS"]
         supported_methods = ["OPTIONS", "REGISTER", "INVITE"]
 
         ok = True
@@ -1589,14 +1664,11 @@ class SIPPTS(Cmd):
             if run == False:
                 value = value.upper()
                 if value not in supported_protos:
-                    if value == "ALL":
-                        self.mod.proto = "UDP|TCP|TLS"
-                    else:
-                        if log == True:
-                            print(
-                                f"{c.WHITE}Protocol {c.BRED}{value} {c.WHITE}is not supported\n"
-                            )
-                        ok = False
+                    if log == True:
+                        print(
+                            f"{c.WHITE}Protocol {c.BRED}{value} {c.WHITE}is not supported\n"
+                        )
+                    ok = False
                 else:
                     self.mod.proto = value
             else:
@@ -1694,6 +1766,11 @@ class SIPPTS(Cmd):
                     self.mod.verbose = value
             else:
                 value = self.mod.verbose
+        elif param == "timeout":
+            if run == False:
+                self.mod.timeout = value
+            else:
+                value = self.mod.timeout
         elif param == "local_ip":
             if run == False:
                 self.mod.localip = value
@@ -1718,6 +1795,10 @@ class SIPPTS(Cmd):
         if param == "ip":
             if run == False:
                 self.mod.ip = value
+                # the CLI keeps a copy in .host, which is what gives the SIP
+                # domain when the target is a name instead of an address; the
+                # console never set it, so the domain ended up being the IP
+                self.mod.host = value
             else:
                 value = self.mod.ip
         elif param == "rport":
@@ -1841,6 +1922,11 @@ class SIPPTS(Cmd):
                 self.mod.ofile = value
             else:
                 value = self.mod.ofile
+        elif param == "threads":
+            if run == False:
+                self.mod.threads = value
+            else:
+                value = self.mod.threads
         elif param == "transfer":
             if run == False:
                 self.mod.transfer = value
@@ -1870,9 +1956,15 @@ class SIPPTS(Cmd):
         if param == "ip":
             if run == False:
                 self.mod.ip = value
+                # the CLI keeps a copy in .host, which is what gives the SIP
+                # domain when the target is a name instead of an address; the
+                # console never set it, so the domain ended up being the IP
+                self.mod.host = value
             else:
                 value = self.mod.ip
-        if param == "file":
+        # this was an if instead of an elif, so 'set ip' walked the whole chain
+        # down to the final else and answered 'Wrong option: ip'
+        elif param == "file":
             if run == False:
                 self.mod.file = value
             else:
@@ -2182,6 +2274,10 @@ class SIPPTS(Cmd):
         if param == "ip":
             if run == False:
                 self.mod.ip = value
+                # the CLI keeps a copy in .host, which is what gives the SIP
+                # domain when the target is a name instead of an address; the
+                # console never set it, so the domain ended up being the IP
+                self.mod.host = value
             else:
                 value = self.mod.ip
         elif param == "rport":
@@ -2358,6 +2454,10 @@ class SIPPTS(Cmd):
         if param == "ip":
             if run == False:
                 self.mod.ip = value
+                # the CLI keeps a copy in .host, which is what gives the SIP
+                # domain when the target is a name instead of an address; the
+                # console never set it, so the domain ended up being the IP
+                self.mod.host = value
             else:
                 value = self.mod.ip
         elif param == "rport":
@@ -2474,6 +2574,11 @@ class SIPPTS(Cmd):
                 self.mod.nthreads = value
             else:
                 value = self.mod.nthreads
+        elif param == "output_file":
+            if run == False:
+                self.mod.ofile = value
+            else:
+                value = self.mod.ofile
         elif param == "verbose":
             if run == False:
                 if value != "0" and value != "1":
@@ -2658,7 +2763,8 @@ class SIPPTS(Cmd):
 
     # set global value for a param
     def set_global_option(self, param, value):
-        if {param, value} in self.globalop:
+        # this compared a set against a list of lists, so it never matched
+        if [param, value] in self.globalop:
             print(
                 f"{c.BYELLOW}{param} {c.WHITE}=> {c.GREEN}{value} {c.WHITE}is already in global params"
             )
@@ -2666,7 +2772,8 @@ class SIPPTS(Cmd):
 
         updated = False
 
-        for p, v in self.globalop:
+        # iterate over a copy: removing while walking the list skipped entries
+        for p, v in list(self.globalop):
             if p == param:
                 self.globalop.remove([p, v])
                 updated = True
@@ -2682,7 +2789,7 @@ class SIPPTS(Cmd):
 
     # unset global value
     def unset_global_option(self, param):
-        for p, v in self.globalop:
+        for p, v in list(self.globalop):
             if p == param:
                 self.globalop.remove([p, v])
                 print(f"{c.BYELLOW}{param} {c.WHITE}removed from global params")
@@ -2840,9 +2947,14 @@ class SIPPTS(Cmd):
                     from sippts.rtpbleedinject import RTPBleedInject
 
                     self.mod = RTPBleedInject()
-            except:
-                print(f"{c.RED}Error loading module {module}{c.WHITE}\n")
-                exit()
+            except Exception as error:
+                # a module that cannot be imported (an optional dependency that
+                # is not installed) used to close the whole console
+                print(f"{c.RED}Error loading module {module} ({error}){c.WHITE}\n")
+                self.prompt = f"{c.BGREEN}SIPPTS> {c.WHITE}"
+                self.active_mod = ""
+                self.mod = ""
+                return
 
             for p, v in self.globalop:
                 self.set_option(self.active_mod, p, v, False, False)
@@ -2952,10 +3064,6 @@ class SIPPTS(Cmd):
 
     # command run
     def do_run(self, inp):
-        if self.singhandle == False:
-            signal.signal(signal.SIGINT, self.signal_handler)
-            self.singhandle = True
-
         if self.active_mod == "":
             print(f"{c.RED}No module selected{c.WHITE}")
             print(
@@ -3006,9 +3114,13 @@ class SIPPTS(Cmd):
                 value = self.set_option(self.active_mod, param, "", True, False)
 
                 if required == True and value == "":
+                    # same precedence problem as in show: without the
+                    # parentheses any module with a mandatory 'file' was happy
+                    # with a set 'ip'
                     if (
-                        (self.active_mod == "scan" or self.active_mod == "leak")
-                        and (
+                        self.active_mod == "scan" or self.active_mod == "leak"
+                    ) and (
+                        (
                             param == "ip"
                             and self.set_option(
                                 self.active_mod, "file", "", True, False
@@ -3036,7 +3148,30 @@ class SIPPTS(Cmd):
                         print(f"{c.WHITE}Param {c.BRED}{param} {c.WHITE}is mandatory\n")
 
             if ok == True:
-                self.mod.start()
+                # the handler is only in place while the module runs: it used
+                # to stay installed afterwards, so Ctrl+C at the prompt ended
+                # up calling stop() on the module that was no longer running.
+                # SystemExit is caught because the modules call exit() on any
+                # error (an unresolvable host, an invalid port), and that
+                # closed the console instead of going back to the prompt
+                signal.signal(signal.SIGINT, self.signal_handler)
+
+                try:
+                    self.mod.start()
+                except KeyboardInterrupt:
+                    print(f"{c.BYELLOW}\nStopped{c.WHITE}\n")
+                except SystemExit:
+                    pass
+                except Exception as error:
+                    # any failure inside a module used to close the console:
+                    # report it and go back to the prompt
+                    print(f"{c.RED}Error running {self.active_mod}: {error}{c.WHITE}\n")
+                finally:
+                    # back to the handler of the console itself: some modules
+                    # install their own in __init__ (dcrack), so restoring
+                    # 'whatever was there' left Ctrl+C at the prompt unable to
+                    # close the application
+                    signal.signal(signal.SIGINT, signal_handler)
 
     # command clear
     def do_clear(self, inp):

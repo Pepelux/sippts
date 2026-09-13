@@ -11,8 +11,10 @@ import socket
 import sys
 import ssl
 from .lib.functions import (
+    open_log,
     create_message,
-    get_free_port,
+    close_sockets,
+    bind_local_port,
     parse_message,
     parse_digest,
     generate_random_string,
@@ -68,6 +70,31 @@ class SipSend:
         self.c = Color()
 
     def start(self):
+        # from sippts-gui it arrives as text and the comparison against 5060
+        # below never matched, so -p TLS did not switch to the default 5061
+        try:
+            self.rport = int(self.rport)
+        except (TypeError, ValueError):
+            self.rport = 5060
+
+        # -nocolor was applied after the banner and the whole list of options
+        # had already been printed, so those lines kept their escape codes
+        try:
+            self.nocolor = int(self.nocolor)
+        except (TypeError, ValueError):
+            self.nocolor = 0
+
+        if self.nocolor == 1:
+            self.c.ansy()
+
+        # from sippts-gui it arrives as text, and settimeout() then raised
+        # TypeError inside a bare except: the module reported a socket error
+        # that never happened
+        try:
+            self.timeout = int(self.timeout)
+        except (TypeError, ValueError):
+            self.timeout = 5
+
         supported_protos = ["UDP", "TCP", "TLS"]
         supported_methods = [
             "REGISTER",
@@ -87,7 +114,7 @@ class SipSend:
         ]
 
         try:
-            self.nocontact == int(self.nocontact)
+            self.nocontact = int(self.nocontact)
         except:
             self.nocontact = 0
 
@@ -111,10 +138,10 @@ class SipSend:
             except:
                 print(f"{self.c.BRED}Error getting local IP")
                 print(
-                    f"{self.c.BWHITE}Try with {self.c.BYELLOW}-local-ip{self.cBWHITE} param"
+                    f"{self.c.BWHITE}Try with {self.c.BYELLOW}-local-ip{self.c.BWHITE} param"
                 )
                 print(self.c.WHITE)
-                exit()
+                sys.exit()
 
         # if rport is by default but we want to scan TLS protocol, use port 5061
         if self.rport == 5060 and self.proto == "TLS":
@@ -145,7 +172,7 @@ class SipSend:
             print(self.c.WHITE)
             sys.exit(1)
 
-        logo = Logo("sipsend")
+        logo = Logo("sipsend", self.nocolor)
         logo.print()
 
         print(
@@ -202,7 +229,7 @@ class SipSend:
         print(self.c.WHITE)
 
         if self.ofile != "":
-            fw = open(self.ofile, "w")
+            fw = open_log(self.ofile, "w")
 
             fw.write("[✓] Target: %s:%s/%s\n" % (self.ip, self.rport, self.proto))
             if self.proxy != "":
@@ -244,11 +271,18 @@ class SipSend:
         if self.from_tag == "":
             self.from_tag = generate_random_string(8, 8, "hex")
 
-        if self.nocolor == 1:
-            self.c.ansy()
-
-        if self.sdp == None:
+        # from sippts-gui they arrive as text, so 'set sdes 1' never matched and
+        # the SDP went out without the crypto lines
+        try:
+            self.sdp = int(self.sdp)
+        except (TypeError, ValueError):
             self.sdp = 0
+
+        try:
+            self.sdes = int(self.sdes)
+        except (TypeError, ValueError):
+            self.sdes = 0
+
         if self.sdes == 1:
             self.sdp = 2
         if self.cseq == None or self.cseq == "":
@@ -257,18 +291,24 @@ class SipSend:
         if self.user != "" and self.pwd != "" and self.from_user == "100":
             self.from_user = self.user
 
+        sock_ssl = None
         bind = "0.0.0.0"
 
         if self.lport == "" or self.lport == None:
-            lport = get_free_port()
+            lport = bind_local_port(sock, bind)
         else:
-            lport = self.lport
+            lport = bind_local_port(sock, bind, self.lport)
 
-        try:
-            sock.bind((bind, lport))
-        except:
-            lport = get_free_port()
-            sock.bind((bind, lport))
+            if lport != 0 and str(lport) != str(self.lport):
+                print(
+                    f"{self.c.YELLOW}[!] Local port {self.lport} is not available, using {lport} instead{self.c.WHITE}"
+                )
+
+        if lport == 0:
+            sock.close()
+            print(f"{self.c.RED}Failed to bind a local port")
+            print(self.c.WHITE)
+            sys.exit(1)
 
         if self.proxy == "":
             host = (str(self.ip), int(self.rport))
@@ -298,10 +338,15 @@ class SipSend:
 
         if self.template != "":
             msg = ""
-            tf = open(self.template, "r")
 
-            for line in tf:
-                msg = msg + line.replace("\n", "\r\n")
+            try:
+                with open(self.template, "r") as tf:
+                    for line in tf:
+                        msg = msg + line.replace("\n", "\r\n")
+            except OSError as error:
+                print(f"{self.c.RED}Error reading template {self.template} ({error})")
+                print(self.c.WHITE)
+                sys.exit()
 
             msg = msg + "\r\n"
         else:
@@ -375,15 +420,35 @@ class SipSend:
                 fw.write(msg + "\n")
 
             rescode = "100"
+            tries = 0
+            # a server that answers 200 Ok straight away never went through the
+            # branch that assigns these, and the ACK below died with NameError
+            # inside a bare except
+            via = ""
+            totag = ""
+            rescode_final = ""
+            headers = None
 
-            while rescode[:1] == "1":
+            # the same guard as the loop after the authentication: without it
+            # an answer that is not a SIP response left rescode at 100 and the
+            # loop kept reading forever
+            while rescode[:1] == "1" and tries < 10:
+                tries += 1
+
                 # receive temporary code
                 if self.proto == "TLS":
                     resp = sock_ssl.recv(4096)
                 else:
                     resp = sock.recv(4096)
 
+                if not resp:
+                    break
+
                 headers = parse_message(resp.decode())
+
+                if headers and headers["response_code"] == "":
+                    # not a SIP response, stop waiting for a final code
+                    break
 
                 if headers:
                     via = headers["via"]
@@ -393,6 +458,7 @@ class SipSend:
                         headers["response_text"],
                     )
                     rescode = headers["response_code"]
+                    rescode_final = rescode
                     if self.verbose == 1:
                         print(
                             f"{self.c.BWHITE}[-] Receiving from {self.ip}:{self.rport}/{self.proto} ..."
@@ -413,10 +479,7 @@ class SipSend:
             if (
                 self.user != ""
                 and self.pwd != ""
-                and (
-                    headers["response_code"] == "401"
-                    or headers["response_code"] == "407"
-                )
+                and (rescode_final == "401" or rescode_final == "407")
             ):
                 if headers["auth"] != "":
                     auth = headers["auth"]
@@ -518,8 +581,11 @@ class SipSend:
                             fw.write(msg + "\n")
 
                         rescode = "100"
+                        tries = 0
 
-                        while rescode[:1] == "1":
+                        while rescode[:1] == "1" and tries < 10:
+                            tries += 1
+
                             # receive temporary code
                             if self.proto == "TLS":
                                 resp = sock_ssl.recv(4096)
@@ -528,12 +594,17 @@ class SipSend:
 
                             headers = parse_message(resp.decode())
 
+                            if headers and headers["response_code"] == "":
+                                # not a SIP response, stop waiting for a final code
+                                break
+
                             if headers and headers["response_code"] != "":
                                 response = "%s %s" % (
                                     headers["response_code"],
                                     headers["response_text"],
                                 )
                                 rescode = headers["response_code"]
+                                rescode_final = rescode
                                 if self.verbose == 1:
                                     print(
                                         f"{self.c.BWHITE}[-] Receiving from {self.ip}:{self.rport}/{self.proto} ..."
@@ -542,7 +613,7 @@ class SipSend:
                                         f"{self.c.GREEN}{resp.decode()}{self.c.WHITE}"
                                     )
                                 else:
-                                    print(f"{self.c.BGREEN}'[<=] Response {response}")
+                                    print(f"{self.c.BGREEN}[<=] Response {response}")
 
                                 if self.ofile != "":
                                     fw.write(
@@ -554,8 +625,13 @@ class SipSend:
                         print(self.c.WHITE)
 
             # receive 200 Ok - call answered
-            if headers["response_code"] == "200":
-                totag = headers["totag"]
+            # this used to read headers[], but the authentication block above
+            # replaces headers with the parsed digest, which has no
+            # response_code: the ACK ended in the generic except and the tool
+            # reported a socket error that never happened
+            if rescode_final == "200":
+                if headers:
+                    totag = headers.get("totag", totag)
 
                 # send ACK
                 msg = create_message(
@@ -612,7 +688,7 @@ class SipSend:
             print(f"{self.c.RED}[!] Socket connection error\n{self.c.WHITE}")
             pass
         finally:
-            sock.close()
+            close_sockets(sock, sock_ssl)
 
         if self.ofile != "":
             fw.close()

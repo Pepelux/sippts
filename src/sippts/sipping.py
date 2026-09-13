@@ -14,8 +14,11 @@ import time
 import signal
 from .lib.functions import (
     create_message,
-    get_free_port,
+    close_sockets,
+    bind_local_port,
     parse_message,
+    parse_digest,
+    calculateHash,
     generate_random_string,
     get_machine_default_ip,
 )
@@ -64,6 +67,26 @@ class SipPing:
         self.c = Color()
 
     def start(self):
+        # from sippts-gui it arrives as text and the comparison against 5060
+        # below never matched, so -p TLS did not switch to the default 5061
+        try:
+            self.rport = int(self.rport)
+        except (TypeError, ValueError):
+            self.rport = 5060
+
+        # from sippts-gui it arrives as text, and settimeout() then raised
+        # TypeError inside a bare except: the module reported a socket error
+        # that never happened
+        try:
+            self.timeout = int(self.timeout)
+        except (TypeError, ValueError):
+            self.timeout = 5
+
+        # reset the stop flag: after a Ctrl+C the object kept it set, so from
+        # sippts-gui (where the module instance is reused) every later run
+        # did nothing at all
+        self.run = True
+
         supported_protos = ["UDP", "TCP", "TLS"]
         supported_methods = [
             "REGISTER",
@@ -83,12 +106,19 @@ class SipPing:
         ]
 
         try:
-            self.number == int(self.number)
+            self.number = int(self.number)
         except:
             self.number = 0
 
         if self.number == 0:
             self.number = 99999
+
+        # from sippts-gui it arrives as text and time.sleep() raised TypeError,
+        # which closed the console
+        try:
+            self.interval = float(self.interval)
+        except (TypeError, ValueError):
+            self.interval = 1
 
         self.method = self.method.upper()
         self.proto = self.proto.upper()
@@ -101,10 +131,10 @@ class SipPing:
             except:
                 print(f"{self.c.BRED}Error getting local IP")
                 print(
-                    f"{self.c.BWHITE}Try with {self.c.BYELLOW}-local-ip{self.cBWHITE} param"
+                    f"{self.c.BWHITE}Try with {self.c.BYELLOW}-local-ip{self.c.BWHITE} param"
                 )
                 print(self.c.WHITE)
-                exit()
+                sys.exit()
 
         # if rport is by default but we want to scan TLS protocol, use port 5061
         if self.rport == 5060 and self.proto == "TLS":
@@ -231,8 +261,15 @@ class SipPing:
                 print(self.c.WHITE)
                 sys.exit(1)
 
+            sock_ssl = None
             bind = "0.0.0.0"
-            lport = get_free_port()
+            lport = bind_local_port(sock, bind)
+
+            if lport == 0:
+                sock.close()
+                print(f"{self.c.RED}Failed to bind a local port")
+                print(self.c.WHITE)
+                break
 
             msg = create_message(
                 self.method,
@@ -264,12 +301,6 @@ class SipPing:
                 "",
                 1,
             )
-
-            try:
-                sock.bind((bind, lport))
-            except:
-                lport = get_free_port()
-                sock.bind((bind, lport))
 
             if self.proxy == "":
                 host = (str(self.ip), int(self.rport))
@@ -324,6 +355,111 @@ class SipPing:
                         headers["response_text"],
                     )
 
+                    # -user and -pass were accepted and never used: the
+                    # challenge is answered and the result of the
+                    # authenticated attempt is the one reported
+                    if (
+                        self.user != ""
+                        and self.pwd != ""
+                        and headers["auth"] != ""
+                        and (
+                            headers["response_code"] == "401"
+                            or headers["response_code"] == "407"
+                        )
+                    ):
+                        auth = headers["auth"]
+                        auth_type = headers["auth-type"]
+                        digestheaders = parse_digest(auth)
+                        realm = digestheaders["realm"]
+                        nonce = digestheaders["nonce"]
+                        uri = "sip:%s@%s" % (self.to_user, self.domain)
+                        algorithm = digestheaders["algorithm"]
+                        cnonce = digestheaders["cnonce"]
+                        nc = digestheaders["nc"]
+                        qop = digestheaders["qop"]
+
+                        if qop != "" and cnonce == "":
+                            cnonce = generate_random_string(8, 8, "ascii")
+                        if qop != "" and nc == "":
+                            nc = "00000001"
+
+                        hash = calculateHash(
+                            self.user,
+                            realm,
+                            self.pwd,
+                            self.method,
+                            uri,
+                            nonce,
+                            algorithm,
+                            cnonce,
+                            nc,
+                            qop,
+                            0,
+                            "",
+                        )
+
+                        digest = (
+                            'Digest username="%s", realm="%s", nonce="%s",'
+                            ' uri="%s", response="%s", algorithm=%s'
+                            % (self.user, realm, nonce, uri, hash, algorithm)
+                        )
+
+                        if qop != "":
+                            digest += ", qop=%s" % qop
+                        if cnonce != "":
+                            digest += ', cnonce="%s"' % cnonce
+                        if nc != "":
+                            digest += ", nc=%s" % nc
+
+                        authmsg = create_message(
+                            self.method,
+                            "",
+                            self.contact_domain,
+                            self.from_user,
+                            self.from_name,
+                            self.from_domain,
+                            self.to_user,
+                            self.to_name,
+                            self.to_domain,
+                            self.proto,
+                            self.domain,
+                            self.user_agent,
+                            lport,
+                            generate_random_string(71, 71, "ascii"),
+                            self.callid,
+                            self.from_tag,
+                            str(int(self.cseq) + 1),
+                            self.to_tag,
+                            digest,
+                            auth_type,
+                            1,
+                            0,
+                            "",
+                            self.route,
+                            self.ppi,
+                            self.pai,
+                            "",
+                            1,
+                        )
+
+                        if self.proto == "TLS":
+                            sock_ssl.sendall(bytes(authmsg[:8192], "utf-8"))
+                        else:
+                            sock.sendto(bytes(authmsg[:8192], "utf-8"), host)
+
+                        if self.proto == "TLS":
+                            resp = sock_ssl.recv(4096)
+                        else:
+                            resp = sock.recv(4096)
+
+                        headers = parse_message(resp.decode())
+
+                        if headers:
+                            response = "%s %s" % (
+                                headers["response_code"],
+                                headers["response_text"],
+                            )
+
                 end = time.time()
                 totaltime = end - start
 
@@ -342,7 +478,7 @@ class SipPing:
             except socket.timeout:
                 self.pingcount += 1
                 print(
-                    f"{self.c.CYAN}[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} UTC] {self.c.GREEN}{ccolor}{self.c.WHITE} from {self.c.BYELLOW}{ip}{self.c.WHITE} cseq={self.c.BYELLOW}{str(self.pingcount)}{self.c.WHITE} Destination Host Unreachable{self.c.WHITE}"
+                    f"{self.c.CYAN}[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} UTC] {self.c.WHITE}from {self.c.BYELLOW}{ip}{self.c.WHITE} cseq={self.c.BYELLOW}{str(self.pingcount)}{self.c.RED} Destination Host Unreachable{self.c.WHITE}"
                 )
                 pass
             except KeyboardInterrupt:
@@ -352,13 +488,13 @@ class SipPing:
             except:
                 self.pingcount += 1
                 print(
-                    f"{self.c.CYAN}[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} UTC] {self.c.GREEN}{ccolor}{self.c.WHITE} from {self.c.BYELLOW}{ip}{self.c.WHITE} cseq={self.c.BYELLOW}{str(self.pingcount)}{self.c.WHITE} Destination Host Unreachable{self.c.WHITE}"
+                    f"{self.c.CYAN}[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} UTC] {self.c.WHITE}from {self.c.BYELLOW}{ip}{self.c.WHITE} cseq={self.c.BYELLOW}{str(self.pingcount)}{self.c.RED} Destination Host Unreachable{self.c.WHITE}"
                 )
                 pass
 
             time.sleep(self.interval)
 
-            sock.close()
+            close_sockets(sock, sock_ssl)
 
     def signal_handler(self, sig, frame):
         self.stop()

@@ -8,7 +8,7 @@ __copyright__ = "Copyright (C) 2015-2024, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
 
 import pyshark
-from .lib.functions import parse_digest
+from .lib.functions import parse_digest, packet_addresses, pyshark_compat, open_log, close_capture
 from .lib.color import Color
 from .lib.logos import Logo
 
@@ -21,6 +21,8 @@ class SipDump:
         self.c = Color()
 
     def start(self):
+        pyshark_compat()
+
         logo = Logo("sipdump")
         logo.print()
 
@@ -28,15 +30,35 @@ class SipDump:
         print(f"{self.c.BWHITE}[✓] Output file: {self.c.GREEN}{self.ofile}")
         print(self.c.WHITE)
 
-        fw = open(self.ofile, "w")
+        try:
+            capture = pyshark.FileCapture(self.file, display_filter="sip")
+        except Exception as error:
+            print(f"{self.c.RED}Error reading file {self.file}: {error}")
+            print(self.c.WHITE)
+            return
 
-        capture = pyshark.FileCapture(self.file, display_filter="sip")
+        fw = open_log(self.ofile, "w")
 
         sipauth = []
 
-        for packet in capture:
-            ipsrc = packet.ip.src
-            ipdst = packet.ip.dst
+        # tshark fails while reading, not while opening: a truncated or
+        # unsupported capture raised in the middle of the loop and, from
+        # sippts-gui, took the console down
+        try:
+            paquetes = list(capture)
+        except Exception as error:
+            print(f"{self.c.RED}Error reading file {self.file}: {error}")
+            print(self.c.WHITE)
+            close_capture(capture)
+            fw.close()
+            return
+
+        for packet in paquetes:
+            (ipsrc, ipdst) = packet_addresses(packet)
+
+            if ipsrc == None:
+                continue
+
             try:
                 method = packet.sip.Method
             except:
@@ -85,8 +107,7 @@ class SipDump:
 
                         fw.write(authline)
 
-        capture.clear()
-        capture.close()
+        close_capture(capture)
 
         print(self.c.WHITE)
         print("The found data has been saved")

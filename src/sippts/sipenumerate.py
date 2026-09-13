@@ -13,7 +13,8 @@ import ssl
 import time
 from .lib.functions import (
     create_message,
-    get_free_port,
+    close_sockets,
+    bind_local_port,
     parse_message,
     fingerprinting,
     format_time,
@@ -36,6 +37,7 @@ class SipEnumerate:
         self.from_user = "100"
         self.from_name = ""
         self.from_domain = ""
+        self.from_tag = ""
         self.to_user = "100"
         self.to_name = ""
         self.to_domain = ""
@@ -52,6 +54,26 @@ class SipEnumerate:
         self.c = Color()
 
     def start(self):
+        # from sippts-gui it arrives as text and the comparison against 5060
+        # below never matched, so -p TLS did not switch to the default 5061
+        try:
+            self.rport = int(self.rport)
+        except (TypeError, ValueError):
+            self.rport = 5060
+
+        # from sippts-gui it arrives as text, and settimeout() then raised
+        # TypeError inside a bare except: the module reported a socket error
+        # that never happened
+        try:
+            self.timeout = int(self.timeout)
+        except (TypeError, ValueError):
+            self.timeout = 5
+
+        # reset the stop flag: after a Ctrl+C the object kept it set, so from
+        # sippts-gui (where the module instance is reused) every later run
+        # did nothing at all
+        self.quit = False
+
         supported_protos = ["UDP", "TCP", "TLS"]
         supported_methods = [
             "REGISTER",
@@ -71,7 +93,7 @@ class SipEnumerate:
         ]
 
         try:
-            self.verbose == int(self.verbose)
+            self.verbose = int(self.verbose)
         except:
             self.verbose = 0
 
@@ -112,6 +134,10 @@ class SipEnumerate:
         if self.from_domain != "":
             print(
                 f"{self.c.BWHITE}[✓] Customized From Domain: {self.c.GREEN}{self.from_domain}"
+            )
+        if self.from_tag != "":
+            print(
+                f"{self.c.BWHITE}[✓] Customized From Tag: {self.c.GREEN}{self.from_tag}"
             )
         if self.to_name != "":
             print(
@@ -171,14 +197,15 @@ class SipEnumerate:
                 print(self.c.WHITE)
                 sys.exit(1)
 
+            sock_ssl = None
             bind = "0.0.0.0"
-            lport = get_free_port()
+            lport = bind_local_port(sock, bind)
 
-            try:
-                sock.bind((bind, lport))
-            except:
-                lport = get_free_port()
-                sock.bind((bind, lport))
+            if lport == 0:
+                sock.close()
+                print(f"{self.c.RED}Failed to bind a local port")
+                print(self.c.WHITE)
+                return
 
             if self.proxy == "":
                 host = (str(self.ip), int(self.rport))
@@ -208,7 +235,7 @@ class SipEnumerate:
             except:
                 print(f"{self.c.RED}Socket connection error")
                 print(self.c.WHITE)
-                exit()
+                sys.exit()
 
             from_user = self.from_user
             to_user = self.to_user
@@ -237,7 +264,7 @@ class SipEnumerate:
                 lport,
                 "",
                 "",
-                "",
+                self.from_tag,
                 "1",
                 "",
                 self.digest,
@@ -267,12 +294,23 @@ class SipEnumerate:
                 rescode = "100"
                 resdata = ""
                 resdataua = ""
+                ua = "Not found"
+                headers = None
+                tries = 0
 
-                while rescode[:1] == "1":
+                # a server that answers something unparseable (or a TCP peer
+                # that closes the connection, where recv() returns b'' right
+                # away) left rescode at 100 and this loop spinning forever
+                while rescode[:1] == "1" and tries < 10:
+                    tries += 1
+
                     if self.proto == "TLS":
                         resp = sock_ssl.recv(4096)
                     else:
                         resp = sock.recv(4096)
+
+                    if not resp:
+                        break
 
                     headers = parse_message(resp.decode())
 
@@ -304,11 +342,15 @@ class SipEnumerate:
                 else:
                     print(f"{self.c.BCYAN}{method}{self.c.WHITE} => {resdataua}")
 
-                fps = fingerprinting(method, resp.decode(), headers, self.verbose)
+                try:
+                    fps = fingerprinting(method, resp.decode(), headers, self.verbose)
+                except Exception:
+                    # a missing header must not discard the whole result
+                    fps = []
 
                 fp = ""
                 for f in fps:
-                    if f == "":
+                    if fp == "":
                         fp = "%s" % f
                     else:
                         fp += "/%s" % f
@@ -329,12 +371,14 @@ class SipEnumerate:
                 self.found.append(line)
                 pass
             except:
-                print(f"{self.c.BGREEN}{method}{ + self.c.RED} => Error{self.c.WHITE}")
+                # the stray + made this handler raise TypeError, so the error
+                # was never reported and the row never reached the table
+                print(f"{self.c.BGREEN}{method}{self.c.RED} => Error{self.c.WHITE}")
                 line = "%s###Error######" % method
                 self.found.append(line)
                 pass
 
-            sock.close()
+            close_sockets(sock, sock_ssl)
 
     def print(self):
         mlen = len("Method")

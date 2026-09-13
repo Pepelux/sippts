@@ -31,14 +31,16 @@ import re
 from concurrent.futures import ThreadPoolExecutor
 from itertools import product
 from .lib.functions import (
+    open_log,
     create_message,
+    close_sockets,
     create_response_ok,
     parse_message,
     generate_random_string,
     get_machine_default_ip,
     parse_digest,
     calculateHash,
-    get_free_port,
+    bind_local_port,
 )
 from .lib.color import Color
 from .lib.logos import Logo
@@ -93,20 +95,24 @@ class SipInvite:
                 print(self.c.WHITE)
                 sys.exit(1)
 
+            sock_ssl = None
             bind = "0.0.0.0"
 
             if self.lport == "" or self.lport == None:
-                try:
-                    # First try
-                    lport = get_free_port()
-                    sock.bind((bind, lport))
-                except:
-                    # Second try
-                    lport = get_free_port()
-                    sock.bind((bind, lport))
+                lport = bind_local_port(sock, bind)
             else:
-                lport = self.lport
-                sock.bind((bind, lport))
+                lport = bind_local_port(sock, bind, self.lport)
+
+                if lport != 0 and str(lport) != str(self.lport):
+                    print(
+                        f"{self.c.YELLOW}[!] Local port {self.lport} is not available, using {lport} instead{self.c.WHITE}"
+                    )
+
+            if lport == 0:
+                sock.close()
+                print(f"{self.c.RED}Failed to bind a local port")
+                print(self.c.WHITE)
+                sys.exit(1)
 
             if self.proxy == "":
                 host = (str(self.ip), int(self.rport))
@@ -177,6 +183,15 @@ class SipInvite:
                 sock_ssl = context.wrap_socket(sock, server_hostname=str(host[0]))
                 sock_ssl.connect(host)
 
+            # only assigned when the server challenges the INVITE: against a
+            # PBX that answers 200 Ok directly they were undefined and the ACK
+            # died with NameError inside a bare except, so neither the ACK nor
+            # the transfer were ever sent
+            digest = ""
+            auth_type = 1
+            via = ""
+            totag = ""
+
             try:
                 # send INVITE
                 if self.proto == "TLS":
@@ -185,8 +200,12 @@ class SipInvite:
                     sock.sendto(bytes(msg[:8192], "utf-8"), host)
 
                 rescode = "100"
+                # a peer that keeps answering 1xx used to keep this loop going forever
+                tries = 0
 
-                while rescode[:1] == "1":
+                while rescode[:1] == "1" and tries < 10:
+                    tries += 1
+
                     # receive temporary code
                     if self.proto == "TLS":
                         resp = sock_ssl.recv(4096)
@@ -368,8 +387,12 @@ class SipInvite:
                             sock.sendto(bytes(msg[:8192], "utf-8"), host)
 
                         rescode = "100"
+                        # a peer that keeps answering 1xx used to keep this loop going forever
+                        tries = 0
 
-                        while rescode[:1] == "1":
+                        while rescode[:1] == "1" and tries < 10:
+                            tries += 1
+
                             # receive temporary code
                             if self.proto == "TLS":
                                 resp = sock_ssl.recv(4096)
@@ -478,6 +501,7 @@ class SipInvite:
                             "",
                             "",
                             "",
+                            "",
                             1,
                         )
 
@@ -529,35 +553,45 @@ class SipInvite:
                         try:
                             headers = parse_message(resp.decode())
                             bye = headers["method"]
-                            print(
-                                f"{self.c.CYAN}[<=] Response from {dst} to {src}: {bye}"
-                            )
-                            if self.verbose == 1 and self.ofile == "":
-                                print(f"{self.c.GREEN}{resp.decode()}")
 
-                            if self.ofile != "":
-                                fw.write(
-                                    "[<=] Response from %s to %s: %s\n"
-                                    % (dst, src, response)
+                            # only a request ends the wait: the answers that
+                            # arrive meanwhile are not reported as a method
+                            if bye != "":
+                                print(
+                                    f"{self.c.CYAN}[<=] Response from {dst} to {src}: {bye}"
                                 )
-                                if self.verbose == 1:
-                                    fw.write(resp.decode() + "\n")
+                                if self.verbose == 1 and self.ofile == "":
+                                    print(f"{self.c.GREEN}{resp.decode()}")
+
+                                if self.ofile != "":
+                                    fw.write(
+                                        "[<=] Response from %s to %s: %s\n"
+                                        % (dst, src, response)
+                                    )
+                                    if self.verbose == 1:
+                                        fw.write(resp.decode() + "\n")
                         except:
                             pass
 
                     # send 200 Ok
-                    cseq = headers["cseq"]
+                    try:
+                        cseq = int(headers["cseq"])
+                    except (ValueError, TypeError):
+                        cseq = 1
                     msg = create_response_ok(
                         src,
                         dst,
                         self.proto,
                         self.domain,
                         lport,
-                        int(cseq),
+                        cseq,
                         branch,
                         callid,
                         tag,
                         totag,
+                        headers["via2"],
+                        headers["from"],
+                        headers["to"],
                     )
 
                     print(f"{self.c.YELLOW}[=>] Sending 200 Ok from {src} to {dst}\n")
@@ -581,9 +615,16 @@ class SipInvite:
             except:
                 pass
             finally:
-                sock.close()
+                close_sockets(sock, sock_ssl)
 
     def start(self):
+        # from sippts-gui it arrives as text and the comparison against 5060
+        # below never matched, so -p TLS did not switch to the default 5061
+        try:
+            self.rport = int(self.rport)
+        except (TypeError, ValueError):
+            self.rport = 5060
+
         supported_protos = ["UDP", "TCP", "TLS"]
 
         self.proto = self.proto.upper()
@@ -594,12 +635,12 @@ class SipInvite:
             self.verbose = 0
 
         try:
-            self.nosdp == int(self.nosdp)
+            self.nosdp = int(self.nosdp)
         except:
             self.nosdp = 0
 
         try:
-            self.sdes == int(self.sdes)
+            self.sdes = int(self.sdes)
         except:
             self.sdes = 0
 
@@ -630,11 +671,11 @@ class SipInvite:
                     f"{self.c.BWHITE}Try with {self.c.BYELLOW}-local-ip{self.c.BWHITE} param"
                 )
                 print(self.c.WHITE)
-                exit()
+                sys.exit()
 
         self.ip = str(self.ip)
 
-        logo = Logo("sipinvite")
+        logo = Logo("sipinvite", self.nocolor)
         logo.print()
 
         if self.auth_user != "" and self.auth_pwd != "" and self.from_user == "100":
@@ -643,7 +684,8 @@ class SipInvite:
         # create a list of callers
         origin = []
         for p in self.from_user.split(","):
-            m = re.search(r"([0-9]+)-([0-9]+)", p)
+            p = p.strip()
+            m = re.fullmatch(r"([0-9]+)-([0-9]+)", p)
             if m:
                 for x in range(int(m.group(1)), int(m.group(2)) + 1):
                     origin.append(x)
@@ -653,7 +695,8 @@ class SipInvite:
         # create a list of callees
         destinations = []
         for p in self.to_user.split(","):
-            m = re.search(r"([0-9]+)-([0-9]+)", p)
+            p = p.strip()
+            m = re.fullmatch(r"([0-9]+)-([0-9]+)", p)
             if m:
                 for x in range(int(m.group(1)), int(m.group(2)) + 1):
                     destinations.append(x)
@@ -662,7 +705,7 @@ class SipInvite:
 
         # threads to use
         nthreads = int(self.threads)
-        total = len(list(product(origin, destinations)))
+        total = len(origin) * len(destinations)
         if nthreads > total:
             nthreads = total
         if nthreads < 1:
@@ -726,7 +769,7 @@ class SipInvite:
             self.route = "<sip:%s;lr>" % self.proxy
 
         if self.ofile != "":
-            fw = open(self.ofile, "w")
+            fw = open_log(self.ofile, "w")
 
             fw.write("[✓] Target: %s:%s/%s\n" % (self.ip, self.rport, self.proto))
             if self.proxy != "":

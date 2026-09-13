@@ -10,9 +10,8 @@ __email__ = "pepeluxx@gmail.com"
 import random
 import re
 import socket
-import ipaddress
+import sys
 import time
-from IPy import IP
 from asterisk.ami import AMIClient, SimpleAction
 
 try:
@@ -21,9 +20,10 @@ except:
     pass
 
 from .lib.functions import (
+    open_log,
     get_machine_default_ip,
-    ip2long,
-    long2ip,
+    expand_targets,
+    host_sort_key,
     format_time
 )
 from .lib.color import Color
@@ -70,10 +70,20 @@ class SipAstAMI:
 
 
     def start(self):
+        # reset the stop flag: after a Ctrl+C the object kept it set, so from
+        # sippts-gui (where the module instance is reused) every later run
+        # did nothing at all
+        self.quit = False
+
         try:
-            self.verbose == int(self.verbose)
+            self.verbose = int(self.verbose)
         except:
             self.verbose = 0
+
+        try:
+            self.timeout = int(self.timeout)
+        except (TypeError, ValueError):
+            self.timeout = 5
 
         if self.nocolor == 1:
             self.c.ansy()
@@ -90,12 +100,12 @@ class SipAstAMI:
             except:
                 print(f"{self.c.BRED}Error getting local IP")
                 print(
-                    f"{self.c.BWHITE}Try with {self.c.BYELLOW}-local-ip{self.cBWHITE} param"
+                    f"{self.c.BWHITE}Try with {self.c.BYELLOW}-local-ip{self.c.BWHITE} param"
                 )
                 print(self.c.WHITE)
-                exit()
+                sys.exit()
 
-        logo = Logo("astami")
+        logo = Logo("astami", self.nocolor)
         logo.print()
 
         # AMI connections are always TCP
@@ -104,129 +114,72 @@ class SipAstAMI:
         # create a list of ports
         ports = []
         for p in self.rport.split(","):
-            m = re.search(r"([0-9]+)-([0-9]+)", p)
+            p = p.strip()
+            m = re.fullmatch(r"([0-9]+)-([0-9]+)", p)
             if m:
-                for x in range(int(m.group(1)), int(m.group(2)) + 1):
+                pini = max(int(m.group(1)), 1)
+                pend = min(int(m.group(2)), 65535)
+
+                for x in range(pini, pend + 1):
                     ports.append(x)
             else:
-                ports.append(p)
+                if not p.isdigit() or int(p) < 1 or int(p) > 65535:
+                    print(f"{self.c.BRED}Invalid port {p} (valid range is 1-65535)")
+                    print(self.c.WHITE)
+                    sys.exit()
+
+                ports.append(int(p))
+
+        if ports == []:
+            print(f"{self.c.BRED}No valid ports to scan in {self.rport}")
+            print(self.c.WHITE)
+            sys.exit()
 
         # create a list of IP addresses
         if self.file != "":
             try:
-                with open(self.file) as f:
-                    line = f.readline()
-
-                    while line:
-                        error = 0
-                        line = line.replace("\n", "")
-
-                        try:
-                            if self.quit == False:
-                                try:
-                                    ip = socket.gethostbyname(line)
-                                    self.ip = IP(ip, make_net=True)
-                                except:
-                                    try:
-                                        self.ip = IP(line, make_net=True)
-
-                                    except:
-                                        if line.find("-") > 0:
-                                            val = line.split("-")
-                                            start_ip = val[0]
-                                            end_ip = val[1]
-                                            self.ip = line
-
-                                            error = 1
-
-                                ips = []
-
-                                if error == 0:
-                                    hosts = list(
-                                        ipaddress.ip_network(str(self.ip)).hosts()
-                                    )
-
-                                    if hosts == []:
-                                        hosts.append(self.ip)
-
-                                    last = len(hosts) - 1
-                                    start_ip = hosts[0]
-                                    end_ip = hosts[last]
-
-                                ipini = int(ip2long(str(start_ip)))
-                                ipend = int(ip2long(str(end_ip)))
-
-                                for i in range(ipini, ipend + 1):
-                                    if (
-                                        i != self.localip
-                                        and long2ip(i)[-2:] != ".0"
-                                        and long2ip(i)[-4:] != ".255"
-                                    ):
-                                        ips.append(long2ip(i))
-
-                                self.prepare_scan(ips, ports, protos, self.ip)
-                        except:
-                            pass
-
-                        line = f.readline()
-
-                f.close()
-            except:
+                f = open(self.file)
+            except OSError:
                 print(f"{self.c.RED}Error reading file {self.file}")
                 print(self.c.WHITE)
-                exit()
+                sys.exit()
+
+            with f:
+                for line in f:
+                    if self.quit == True:
+                        break
+
+                    line = line.strip()
+
+                    if line == "":
+                        continue
+
+                    try:
+                        (ips, names) = expand_targets(line)
+                    except ValueError as error:
+                        print(f"{self.c.RED}{error}")
+                        print(self.c.WHITE)
+                        continue
+
+                    ips = [ip for ip in ips if ip != self.localip]
+
+                    self.prepare_scan(ips, ports, protos, line)
         else:
-            ips = []
-            
-            for i in self.ip.split(","):
-                hosts = []
-                error = 0
+            try:
+                (ips, names) = expand_targets(self.ip)
+            except ValueError as error:
+                print(f"{self.c.RED}{error}")
+                print(self.c.WHITE)
+                sys.exit()
 
-                try:
-                    if i.find("/") < 1:
-                        i = socket.gethostbyname(i)
-                        i = IP(i, make_net=True)
-                    else:
-                        i = IP(i, make_net=True)
-                except:
-                    if i.find("-") > 0:
-                        val = i.split("-")
-                        start_ip = val[0]
-                        end_ip = val[1]
+            if ips == []:
+                print(f"{self.c.RED}No target to scan in {self.ip}")
+                print(self.c.WHITE)
+                sys.exit()
 
-                        error = 1
-                try:
-                    if error == 0:
-                        hlist = list(ipaddress.ip_network(str(i)).hosts())
+            ips = [ip for ip in ips if ip != self.localip]
 
-                        if hlist == []:
-                            hosts.append(i)
-                        else:
-                            for h in hlist:
-                                hosts.append(h)
-
-                        last = len(hosts) - 1
-                        start_ip = hosts[0]
-                        end_ip = hosts[last]
-
-                    ipini = int(ip2long(str(start_ip)))
-                    ipend = int(ip2long(str(end_ip)))
-                    iplist = i
-
-                    for i in range(ipini, ipend + 1):
-                        if (
-                            i != self.localip
-                            and long2ip(i)[-2:] != ".0"
-                            and long2ip(i)[-4:] != ".255"
-                        ):
-                            ips.append(long2ip(i))
-
-                except:
-                    if ips == []:
-                        ips.append(self.ip)
-                        iplist = self.ip
-
-            self.prepare_scan(ips, ports, protos, iplist)
+            self.prepare_scan(ips, ports, protos, self.ip)
 
 
     def prepare_scan(self, ips, ports, protos, iplist):
@@ -234,7 +187,7 @@ class SipAstAMI:
         
         # threads to use
         nthreads = self.threads
-        total = len(list(product(ips, ports, protos)))
+        total = len(ips) * len(ports) * len(protos)
         if nthreads > total:
             nthreads = total
         if nthreads < 1:
@@ -257,11 +210,6 @@ class SipAstAMI:
         values = product(ips, ports, protos)
         values2 = []
         count = 0
-
-        iter = (a for a in enumerate(values))
-        total = sum(1 for _ in iter)
-
-        values = product(ips, ports, protos)
 
         start = time.time()
 
@@ -309,8 +257,8 @@ class SipAstAMI:
         end = time.time()
         self.totaltime = int(end - start)
 
-        self.found.sort()
-        self.ipsfound.sort()
+        self.found.sort(key=host_sort_key)
+        self.ipsfound.sort(key=host_sort_key)
         self.print()
  
  
@@ -332,7 +280,8 @@ class SipAstAMI:
             if self.pos > 3:
                 self.pos = 0
 
-            amiclient = AMIClient(address=ipaddr,port=port)
+            # -t was accepted and never used: the client kept its own default
+            amiclient = AMIClient(address=ipaddr, port=port, timeout=self.timeout)
 
             try:
                 if self.verbose == 2:
@@ -349,9 +298,16 @@ class SipAstAMI:
                 if hasattr(response, 'keys') and isinstance(response.keys, dict):
                     message = response.keys.get('Message', '') 
 
+                # the 'core show version' block below rebinds response, so the
+                # login status has to be kept aside: the table used to show the
+                # status of the Command action (usually 'Follows'), and -x was
+                # gated on it, so the user command never ran after a successful
+                # login
+                login_status = response.status
+
                 rcolor = self.c.BBLUE
                 
-                if response.status == "Error":
+                if login_status == "Error":
                     rcolor = self.c.BRED
                 else:
                     rcolor = self.c.BGREEN
@@ -360,7 +316,7 @@ class SipAstAMI:
                     print(f"{self.c.BYELLOW}[{self.line[self.pos]}] Scanning {ipaddr}:{str(port)}/TCP ... {rcolor}{message}{self.c.WHITE}{' '.ljust(100)}")
 
                 output = ''
-                if response.status == "Success":
+                if login_status == "Success":
                     action = SimpleAction(
                         'Command',
                         Command='core show version'
@@ -371,11 +327,11 @@ class SipAstAMI:
                     if hasattr(response, 'keys') and isinstance(response.keys, dict):
                         output = response.keys.get('Output', '') 
 
-                line = f"{ipaddr}###{str(port)}###{response.status}###{message}###{output}"
+                line = f"{ipaddr}###{str(port)}###{login_status}###{message}###{output}"
                 self.found.append(line)
 
                 output = ''
-                if response.status == "Success" and self.cmd != '':
+                if login_status == "Success" and self.cmd != '':
                     print(f'{self.c.WHITE}\n\n/--------------------/')
                     print(f"{self.c.BWHITE}Command: '{self.cmd}'")
 
@@ -403,8 +359,19 @@ class SipAstAMI:
 
                 pass
 
-            amiclient.logoff()
-            cursor.show()
+            # logoff() on a connection that never came up raises, and the
+            # unguarded cursor.show() was a NameError when cursor is not
+            # installed (the import at the top is optional): both killed the
+            # worker thread silently and left the cursor hidden
+            try:
+                amiclient.logoff()
+            except:
+                pass
+
+            try:
+                cursor.show()
+            except:
+                pass
 
 
     def print(self):
@@ -441,7 +408,7 @@ class SipAstAMI:
         )
 
         if self.ofile != "":
-            f = open(self.ofile, "a+")
+            f = open_log(self.ofile)
 
         if len(self.found) == 0:
             print(f"{self.c.WHITE}| {self.c.WHITE}{'Nothing found'.ljust(tlen - 2)} |")

@@ -1,4 +1,4 @@
-#!/opt/homebrew/opt/python@3.12/bin/python3.12
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 __author__ = "Jose Luis Verdeguer"
@@ -313,6 +313,7 @@ def main():
             from_name,
             from_user,
             from_domain,
+            from_tag,
             to_name,
             to_user,
             to_domain,
@@ -334,6 +335,7 @@ def main():
         s.from_name = from_name
         s.from_user = from_user
         s.from_domain = from_domain
+        s.from_tag = from_tag
         s.to_user = to_user
         s.to_name = to_name
         s.to_domain = to_domain
@@ -394,7 +396,7 @@ def main():
         s.localip = localip
         s.user = user
         s.pwd = pwd
-        s.auth_code = auth
+        s.auth_mode = auth
         s.verbose = verbose
         s.sdp = sdp
         s.sdes = sdes
@@ -588,6 +590,7 @@ def main():
             verbose,
             number,
             bad,
+            ofile,
             alphabet,
             max,
             min,
@@ -615,6 +618,7 @@ def main():
         s.verbose = verbose
         s.number = number
         s.bad = bad
+        s.ofile = ofile
         s.alphabet = alphabet
         s.max = max
         s.min = min
@@ -641,6 +645,7 @@ def main():
             localip,
             ppi,
             pai,
+            timeout,
         ) = params
 
         from sippts.wssend import WsSend
@@ -666,8 +671,9 @@ def main():
         s.verbose = verbose
         s.ppi = ppi
         s.pai = pai
+        s.timeout = timeout
     elif params[0] == "sniff":
-        (cmd, dev, ofile, auth, verbose, proto) = params
+        (cmd, dev, ofile, auth, verbose, proto, rport) = params
 
         from sippts.sipsniff import SipSniff
 
@@ -677,6 +683,7 @@ def main():
         s.auth = auth
         s.verbose = verbose
         s.proto = proto
+        s.rport = rport
     elif params[0] == "spoof":
         (cmd, ip, verbose, gw, file) = params
 

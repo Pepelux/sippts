@@ -9,7 +9,6 @@ __email__ = "pepeluxx@gmail.com"
 
 import socket
 import sys
-import ipaddress
 import ssl
 import re
 import time
@@ -20,11 +19,13 @@ except:
     pass
 
 from .lib.functions import (
+    open_log,
     create_message,
+    close_sockets,
     parse_message,
-    ip2long,
-    long2ip,
-    get_free_port,
+    expand_targets,
+    host_sort_key,
+    bind_local_port,
     format_time,
 )
 from .lib.color import Color
@@ -60,17 +61,26 @@ class SipExten:
         self.line = ["-", "\\", "|", "/"]
         self.pos = 0
         self.quit = False
+        self.errors = 0
 
         self.c = Color()
 
     def start(self):
+        # from sippts-gui it arrives as text, and settimeout() then raised
+        # TypeError inside a bare except: the module reported a socket error
+        # that never happened
+        try:
+            self.timeout = int(self.timeout)
+        except (TypeError, ValueError):
+            self.timeout = 5
+
         max_values = 100000
 
         supported_protos = ["UDP", "TCP", "TLS"]
         supported_methods = ["OPTIONS", "REGISTER", "INVITE"]
 
         try:
-            self.verbose == int(self.verbose)
+            self.verbose = int(self.verbose)
         except:
             self.verbose = 0
 
@@ -94,46 +104,29 @@ class SipExten:
             print(self.c.WHITE)
             sys.exit()
 
-        if self.host != "" and self.domain == "":
-            self.domain = self.host
-        if self.domain == "":
-            self.domain = self.ip
-
         # create a list of IP addresses
-        ips = []
-        hosts = []
         try:
-            for i in self.ip.split(","):
-                try:
-                    i = socket.gethostbyname(i)
-                except:
-                    pass
+            (ips, names) = expand_targets(self.ip)
+        except ValueError as error:
+            print(f"{self.c.BRED}{error}")
+            print(self.c.WHITE)
+            sys.exit()
 
-                hlist = list(ipaddress.ip_network(str(i)).hosts())
+        if ips == []:
+            print(f"{self.c.BRED}No target to scan in {self.ip}")
+            print(self.c.WHITE)
+            sys.exit()
 
-                if hlist == []:
-                    hosts.append(i)
-                else:
-                    for h in hlist:
-                        hosts.append(h)
-        except:
-            pass
-
-        if hosts != []:
-            last = len(hosts) - 1
-            start_ip = hosts[0]
-            end_ip = hosts[last]
-
-            ipini = int(ip2long(str(start_ip)))
-            ipend = int(ip2long(str(end_ip)))
-
-            for i in range(ipini, ipend + 1):
-                ips.append(long2ip(i))
+        # when the target is a single host name, keep the name as SIP domain
+        # (for a network or a range each host uses its own address, see scan_host)
+        if self.domain == "" and len(names) == 1 and len(ips) == 1:
+            self.domain = names[0]
 
         # create a list of extens
         extens = []
         for p in self.exten.split(","):
-            m = re.search(r"([0-9]+)-([0-9]+)", p)
+            p = p.strip()
+            m = re.fullmatch(r"([0-9]+)-([0-9]+)", p)
             if m:
                 for x in range(int(m.group(1)), int(m.group(2)) + 1):
                     extens.append(x)
@@ -142,13 +135,13 @@ class SipExten:
 
         # threads to use
         nthreads = int(self.threads)
-        total = len(list(product(ips, extens)))
+        total = len(ips) * len(extens)
         if nthreads > total:
             nthreads = total
         if nthreads < 1:
             nthreads = 1
 
-        logo = Logo("sipexten")
+        logo = Logo("sipexten", self.nocolor)
         logo.print()
 
         print(f"{self.c.BWHITE}[✓] IP/Network: {self.c.GREEN}{self.ip}")
@@ -191,16 +184,9 @@ class SipExten:
             )
         print(self.c.WHITE)
 
-        if ips == []:
-            ips.append(self.ip)
         values = product(ips, extens)
         values2 = []
         count = 0
-
-        iter = (a for a in enumerate(values))
-        total = sum(1 for _ in iter)
-
-        values = product(ips, extens)
 
         start = time.time()
 
@@ -250,7 +236,7 @@ class SipExten:
         end = time.time()
         self.totaltime = int(end - start)
 
-        self.found.sort()
+        self.found.sort(key=host_sort_key)
         self.print()
 
     def scan_host(self, ipaddr, to_user):
@@ -278,14 +264,16 @@ class SipExten:
                 print(self.c.WHITE)
                 sys.exit(1)
 
+            sock_ssl = None
             bind = "0.0.0.0"
-            lport = get_free_port()
+            lport = bind_local_port(sock, bind)
 
-            try:
-                sock.bind((bind, lport))
-            except:
-                lport = get_free_port()
-                sock.bind((bind, lport))
+            if lport == 0:
+                sock.close()
+
+                if self.verbose == 2:
+                    print(f"{self.c.RED}\nFailed to bind a local port{self.c.WHITE}")
+                return
 
             if self.proxy == "":
                 host = (str(ipaddr), int(self.rport))
@@ -302,6 +290,10 @@ class SipExten:
             if contact_domain == "":
                 contact_domain = "10.0.0.1"
 
+            domain = self.domain
+            if domain == "":
+                domain = ipaddr
+
             if self.proxy != "":
                 self.route = "<sip:%s;lr>" % self.proxy
 
@@ -314,12 +306,12 @@ class SipExten:
                 contact_domain,
                 self.from_user,
                 "",
-                self.domain,
+                domain,
                 to_user,
                 "",
-                self.domain,
+                domain,
                 self.proto,
-                self.domain,
+                domain,
                 self.user_agent,
                 lport,
                 "",
@@ -364,8 +356,11 @@ class SipExten:
                     print(f"{self.c.WHITE}{msg}")
 
                 rescode = "100"
+                tries = 0
 
-                while rescode[:1] == "1":
+                while rescode[:1] == "1" and tries < 10:
+                    tries += 1
+
                     # receive temporary code
                     if self.proto == "TLS":
                         resp = sock_ssl.recv(4096)
@@ -388,6 +383,9 @@ class SipExten:
                                 f"{self.c.BWHITE}[-] Receiving from {ipaddr}:{rport}/{self.proto} ..."
                             )
                             print(f"{self.c.GREEN}{resp.decode()}{self.c.WHITE}")
+                    else:
+                        # not a SIP response, stop waiting for a final code
+                        break
 
                 headers = parse_message(resp.decode())
 
@@ -417,10 +415,14 @@ class SipExten:
                 return headers
             except socket.timeout:
                 pass
-            except:
-                pass
+            except Exception as error:
+                # counted, so a run that swallows errors says so at the end
+                self.errors += 1
+
+                if self.verbose == 2:
+                    print(f"{self.c.RED}\n{error}{self.c.WHITE}")
             finally:
-                sock.close()
+                close_sockets(sock, sock_ssl)
                 try:
                     cursor.show()
                 except: 
@@ -467,7 +469,7 @@ class SipExten:
             print(f"{self.c.WHITE}| {self.c.WHITE}{'Nothing found'.ljust(tlen - 2)} |")
         else:
             if self.ofile != "":
-                f = open(self.ofile, "a+")
+                f = open_log(self.ofile)
 
             for x in self.found:
                 (ip, port, proto, exten, res, ua) = x.split("###")
@@ -493,3 +495,10 @@ class SipExten:
             f"{self.c.BWHITE}Time elapsed: {self.c.YELLOW}{str(format_time(self.totaltime))}{self.c.WHITE}"
         )
         print(self.c.WHITE)
+
+        if self.errors > 0:
+            print(
+                f"{self.c.YELLOW}[!] {str(self.errors)} error(s) while scanning, hidden without {self.c.BYELLOW}-vv{self.c.WHITE}"
+            )
+            print(self.c.WHITE)
+            self.errors = 0

@@ -12,6 +12,7 @@ import websocket
 import sys
 import ssl
 import rel
+import threading
 import time
 from .lib.functions import create_message, get_free_port, get_machine_default_ip
 from .lib.color import Color
@@ -41,12 +42,15 @@ class WsSend:
         self.pai = ""
         self.localip = ""
         self.path = ""
+        self.timeout = 5
 
         self.msg = ""
+        self.answered = False
+        self.watchdog = None
         self.c = Color()
 
     def start(self):
-        supported_protos = ["UDP", "TCP", "TLS", "WS", "WSS"]
+        supported_protos = ["WS", "WSS"]
         supported_methods = [
             "REGISTER",
             "SUBSCRIBE",
@@ -69,31 +73,26 @@ class WsSend:
         except:
             self.verbose = 0
 
+        try:
+            self.timeout = int(self.timeout)
+        except (TypeError, ValueError):
+            self.timeout = 5
+
         self.method = self.method.upper()
         self.proto = self.proto.upper()
 
         # my IP address
         local_ip = self.localip
-        if self.localip == "":
+        if local_ip == "":
             try:
                 local_ip = get_machine_default_ip()
             except:
                 print(f"{self.c.BRED}Error getting local IP")
                 print(
-                    f"{self.c.BWHITE}Try with {self.c.BYELLOW}-local-ip{self.cBWHITE} param"
+                    f"{self.c.BWHITE}Try with {self.c.BYELLOW}-local-ip{self.c.BWHITE} param"
                 )
                 print(self.c.WHITE)
-                exit()
-
-        try:
-            local_ip = get_machine_default_ip()
-        except:
-            print(f"{self.c.BRED}Error getting local IP")
-            print(
-                f"{self.c.BWHITE}Try with {self.c.BYELLOW}-local-ip{self.cBWHITE} param"
-            )
-            print(self.c.WHITE)
-            exit()
+                sys.exit()
 
         # check method
         if self.method not in supported_methods:
@@ -103,7 +102,7 @@ class WsSend:
 
         # check protocol
         if self.proto not in supported_protos:
-            print(f"{self.c.RED} + 'Protocol {self.proto} is not supported")
+            print(f"{self.c.RED}Protocol {self.proto} is not supported")
             print(self.c.WHITE)
             sys.exit()
 
@@ -202,26 +201,28 @@ class WsSend:
             1,
         )
 
-        try:
-            custom_protocol = "sip"
-            protocol_str = "Sec-WebSocket-Protocol: " + custom_protocol
+        custom_protocol = "sip"
+        protocol_str = "Sec-WebSocket-Protocol: " + custom_protocol
+        sslcipher = ""
 
-            c = self.get_ciphers()
-            sslcipher = c[0]
-        except:
-            print(f"{self.c.RED}Socket error")
-            print(self.c.WHITE)
-            return
+        if self.proto == "WSS":
+            try:
+                c = self.get_ciphers()
+                sslcipher = c[0]
+            except:
+                print(f"{self.c.RED}Socket error")
+                print(self.c.WHITE)
+                return
 
         print(self.c.WHITE)
 
         if self.verbose == 1:
             websocket.enableTrace(True)
 
-        sslproto = ssl.PROTOCOL_TLS
+        scheme = "wss" if self.proto == "WSS" else "ws"
 
         wss = websocket.WebSocketApp(
-            "wss://%s:%s%s" % (self.ip, self.rport, self.path),
+            "%s://%s:%s%s" % (scheme, self.ip, self.rport, self.path),
             on_open=self.on_open,
             on_message=self.on_message,
             on_error=self.on_error,
@@ -229,19 +230,48 @@ class WsSend:
             header=[protocol_str],
         )
 
-        wss.run_forever(
-            sslopt={
-                "check_hostname": False,
-                "cert_reqs": ssl.CERT_NONE,
-                "ssl_version": sslproto,
-                "ciphers": sslcipher,
-            }
-        )
+        # a server that accepts the connection and never answers left the tool
+        # waiting forever, there was no way out other than Ctrl+C
+        self.watchdog = threading.Timer(self.timeout, self.give_up, args=(wss,))
+        self.watchdog.daemon = True
+        self.watchdog.start()
+
+        if self.proto == "WSS":
+            wss.run_forever(
+                sslopt={
+                    "check_hostname": False,
+                    "cert_reqs": ssl.CERT_NONE,
+                    "ssl_version": ssl.PROTOCOL_TLS_CLIENT,
+                    "ciphers": sslcipher,
+                }
+            )
+        else:
+            wss.run_forever()
+
+        self.watchdog.cancel()
 
         rel.signal(2, rel.abort)  # Keyboard Interrupt
         rel.dispatch()
 
+    def give_up(self, ws):
+        # on_close() ends the process, so the notice has to go out from here
+        if self.answered == False:
+            print(
+                f"{self.c.RED}No answer from {self.ip}:{self.rport} "
+                f"after {self.timeout} sec(s){self.c.WHITE}"
+            )
+
+        try:
+            ws.close()
+        except Exception:
+            pass
+
     def on_message(self, ws, message):
+        self.answered = True
+
+        if self.watchdog != None:
+            self.watchdog.cancel()
+
         if self.verbose == 1:
             print(self.c.WHITE)
 

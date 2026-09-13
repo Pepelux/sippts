@@ -9,6 +9,7 @@ __email__ = "pepeluxx@gmail.com"
 
 from threading import Lock
 import signal
+import sys
 from concurrent.futures import ThreadPoolExecutor
 import threading
 import io
@@ -21,7 +22,7 @@ try:
 except:
     pass
 
-from .lib.functions import calculateHash, format_time
+from .lib.functions import calculateHash, format_time, open_log
 import itertools
 import string
 from .lib.color import Color
@@ -42,12 +43,13 @@ class SipDigestCrack:
         self.verbose = 0
         self.threads = 10
 
-        self.pwdvalue = ""
+        self.pwdvalue = dict()
         self.run = True
 
         self.totaltime = 0
         self.found = []
         self.saved = []
+        self.checked = []
         
         self.lock = None
 
@@ -60,17 +62,23 @@ class SipDigestCrack:
         signal.signal(signal.SIGINT, self.signal_handler)
 
     def start(self):
+        # reset the stop flag: after a Ctrl+C the object kept it set, so from
+        # sippts-gui (where the module instance is reused) every later run
+        # did nothing at all
+        self.run = True
+        self.run_event.set()
+
         self.lock = Lock()
         
         try:
-            self.verbose == int(self.verbose)
+            self.verbose = int(self.verbose)
         except:
             self.verbose = 0
 
         if not os.path.isfile(self.file):
             print(f"{self.c.RED}[-] File {self.file} not found")
             print(self.c.WHITE)
-            exit()
+            sys.exit()
 
         if self.charset == "digits":
             self.chars = string.digits
@@ -94,7 +102,7 @@ class SipDigestCrack:
             self.chars = self.charset
 
         try:
-            self.bruteforce == int(self.bruteforce)
+            self.bruteforce = int(self.bruteforce)
         except:
             self.bruteforce = 0
 
@@ -105,6 +113,17 @@ class SipDigestCrack:
         print(f"{self.c.BWHITE}[✓] Wordlist: {self.c.GREEN}{self.wordlist}")
         print(f"{self.c.BWHITE}[✓] Used threads: {self.c.GREEN}{str(self.threads)}")
         print(self.c.WHITE)
+
+        # the wordlist was opened inside the worker threads, so a wrong path
+        # was swallowed by the executor and the run ended with 'Nothing found'
+        # as if every password had been tried
+        if self.bruteforce == 0:
+            try:
+                open(self.wordlist, "rb").close()
+            except OSError as error:
+                print(f"{self.c.RED}Error reading wordlist {self.wordlist} ({error})")
+                print(self.c.WHITE)
+                return
 
         print(f"{self.c.BYELLOW}\nPress Ctrl+C to stop")
         print(self.c.WHITE)
@@ -119,6 +138,14 @@ class SipDigestCrack:
                             break
                         line = line.strip()
                         values = line.split('"')
+
+                        if len(values) < 12:
+                            if line != "":
+                                print(
+                                    f"{self.c.YELLOW}[!] Skipping line: {line}{self.c.WHITE}"
+                                )
+                            continue
+
                         ipsrc = values[0]
                         ipdst = values[1]
                         username = values[2]
@@ -183,12 +210,18 @@ class SipDigestCrack:
         response,
     ):
         try:
-            rows = []
             start = time.time()
 
             row = "%s#%s#%s#%s" % (ipsrc, ipdst, username, realm)
 
-            if row in rows:
+            # shared between threads: the same user with another nonce has the
+            # same password, so it is cracked only once
+            with self.lock:
+                already = row in self.checked
+                if not already:
+                    self.checked.append(row)
+
+            if already:
                 print(
                     f"{self.c.YELLOW}username {username}@{ipdst} already checked{self.c.WHITE}"
                 )
@@ -309,19 +342,19 @@ class SipDigestCrack:
                         )
                     else:
                         if self.run == False:
+                            lastpwd = self.pwdvalue.get(username, "")
+
                             if self.bruteforce == 1:
                                 self.save_data(
-                                    self.charset, username, self.pwdvalue, "false"
+                                    self.charset, username, lastpwd, "false"
                                 )
                             else:
                                 self.save_data(
-                                    self.wordlist, username, self.pwdvalue, "false"
+                                    self.wordlist, username, lastpwd, "false"
                                 )
                         print(
                             f"{self.c.RED}[-] Password not found. Try with another wordlist{self.c.WHITE}"
                         )
-
-                rows.append(row)
 
             end = time.time()
             self.totaltime = int(end - start)
@@ -332,6 +365,10 @@ class SipDigestCrack:
         pos = len(chars)
         value = 0
         for i, c in enumerate(reversed(password)):
+            if c not in chars:
+                # the saved password does not belong to this charset, so there
+                # is no valid offset: start this length from the beginning
+                return 0
             value += (pos**i) * chars.index(c)
         return value
 
@@ -403,7 +440,7 @@ class SipDigestCrack:
                     status,
                 )
             else:
-                pl = "bf:%s:%s:%s:%s:%s" % (
+                pl = "bf:%s:%s:%s:%s:%s:%s" % (
                     self.charset,
                     self.prefix,
                     self.suffix,
@@ -453,7 +490,7 @@ class SipDigestCrack:
 
         aux2.sort()
 
-        f = open(self.backupfile, 'w+')
+        f = open_log(self.backupfile, 'w+')
         
         for line in aux2:
             f.write(line + "\n")
@@ -480,15 +517,23 @@ class SipDigestCrack:
 
             try:
                 START_VALUE = self.check_value(word_start, self.chars)
+                # the offset only belongs to the length of the saved password:
+                # shorter lengths are already done, longer ones start at 0
+                start_len = len(word_start)
 
                 for n in range(int(self.min), int(self.max) + 1):
                     if not self.run_event.is_set():
                         break
 
-                    xs = itertools.product(self.chars, repeat=n)
-                    combos = itertools.islice(xs, START_VALUE, None)
+                    if n < start_len:
+                        continue
 
-                    for i, pwd in enumerate(combos, start=START_VALUE):
+                    offset = START_VALUE if n == start_len else 0
+
+                    xs = itertools.product(self.chars, repeat=n)
+                    combos = itertools.islice(xs, offset, None)
+
+                    for i, pwd in enumerate(combos, start=offset):
                         if not self.run_event.is_set():
                             break
 
@@ -501,7 +546,7 @@ class SipDigestCrack:
                             end="\r",
                         )
 
-                        self.pwdvalue = pwd
+                        self.pwdvalue[username] = pwd
 
                         if self.verbose == 1:
                             print(f"{self.c.WHITE}\nPassword:{pwd}")
@@ -529,6 +574,8 @@ class SipDigestCrack:
             except:
                 pass
         else:
+            pwd = ""
+
             with open(self.wordlist, "rb") as fd:
                 for pwd in fd:
                     # if not self.run_event.is_set():
@@ -538,14 +585,15 @@ class SipDigestCrack:
                     #     break
 
                     try:
-                        pwd = pwd.decode("ascii")
-                        pwd = pwd.replace("'", "")
-                        pwd = pwd.replace('"', "")
-                        pwd = pwd.replace("<", "")
-                        pwd = pwd.replace(">", "")
-                        pwd = pwd.replace("\n", "")
-                        pwd = pwd.strip()
-                        pwd = pwd[0:50]
+                        # the candidate is used as it is in the wordlist: any
+                        # character removed here is a password that can never
+                        # be cracked
+                        try:
+                            pwd = pwd.decode("utf-8")
+                        except UnicodeDecodeError:
+                            pwd = pwd.decode("latin-1")
+
+                        pwd = pwd.rstrip("\r\n")
 
                         print(
                             f"{self.c.BWHITE}   [-] Trying pass {self.c.YELLOW}{pwd}{self.c.WHITE} for user {self.c.GREEN}{username}{self.c.WHITE}".ljust(250),
@@ -628,15 +676,10 @@ class SipDigestCrack:
             print(f"{self.c.WHITE}| {self.c.WHITE}{'Nothing found'.ljust(tlen - 2)} |")
         else:
             for x in self.found:
-                (ip, port, proto, res) = x.split("###")
-
-                if res == "No Auth Digest received :(":
-                    colorres = self.c.BBLUE
-                else:
-                    colorres = self.c.BRED
+                (ipsrc, ipdst, username, password) = x.split("###")
 
                 print(
-                    f"{self.c.WHITE}| {self.c.BGREEN}{ip.ljust(slen)}{self.c.WHITE} | {self.c.BMAGENTA}{port.ljust(dlen)}{self.c.WHITE} | {self.c.BYELLOW}{proto.ljust(ulen)}{self.c.WHITE} | {colorres}{res.ljust(plen)}{self.c.WHITE} |"
+                    f"{self.c.WHITE}| {self.c.BGREEN}{ipsrc.ljust(slen)}{self.c.WHITE} | {self.c.BMAGENTA}{ipdst.ljust(dlen)}{self.c.WHITE} | {self.c.BYELLOW}{username.ljust(ulen)}{self.c.WHITE} | {self.c.BRED}{password.ljust(plen)}{self.c.WHITE} |"
                 )
 
         print(

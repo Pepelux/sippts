@@ -1,5 +1,6 @@
 import random
 from random import randint
+import ipaddress
 import re
 import netifaces
 import socket
@@ -46,8 +47,12 @@ def system_call(command):
 
 def searchInterface():
     ifaces = netifaces.interfaces()
-    local_ip = get_machine_default_ip()
     networkInterface = ""
+
+    try:
+        local_ip = get_machine_default_ip()
+    except OSError:
+        return networkInterface
 
     for iface in ifaces:
         data = netifaces.ifaddresses(iface)
@@ -90,11 +95,17 @@ def get_default_gateway_linux():
 
 
 def get_machine_default_ip(type="ip"):
-    """Return the default gateway IP for the machine."""
+    """
+    Return the default gateway IP for the machine.
+
+    It used to return None when there was no default route, and the callers,
+    which expect an exception to suggest -local-ip, silently put the string
+    'None' inside the SIP messages.
+    """
     gateways = netifaces.gateways()
     defaults = gateways.get("default")
     if not defaults:
-        return
+        raise OSError("no default gateway")
 
     def default_ip(family):
         gw_info = defaults.get(family)
@@ -107,23 +118,47 @@ def get_machine_default_ip(type="ip"):
             else:
                 return addresses[0]["addr"]
 
-    return default_ip(netifaces.AF_INET) or default_ip(netifaces.AF_INET6)
+    address = default_ip(netifaces.AF_INET) or default_ip(netifaces.AF_INET6)
+
+    if not address:
+        raise OSError("no address on the default interface")
+
+    return address
+
+
+def _set_mac_iproute(value):
+    """
+    Enable or disable IP forwarding on macOS.
+
+    It used to call exec() with the command line, which Python read as source
+    code and always failed with SyntaxError: forwarding was never touched.
+    """
+    cmd = ["sysctl", "-w", "net.inet.ip.forwarding=%s" % value]
+
+    try:
+        result = subprocess.run(
+            cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True
+        )
+
+        if result.returncode != 0:
+            raise OSError(result.stderr.strip())
+
+        return True
+    except Exception as error:
+        print(
+            f"{RED}\nError running {' '.join(cmd)} ({error})."
+            f" Please execute it manually with sudo{WHITE}"
+        )
+
+        return False
 
 
 def _enable_mac_iproute():
-    cmd = "sudo sysctl -w net.inet.ip.forwarding=1"
-    try:
-        exec(cmd)
-    except:
-        print(f'{RED}\nError executing {cmd}. Please execute it manually{WHITE}')
+    return _set_mac_iproute(1)
 
 
 def _disable_mac_iproute():
-    cmd = "sudo sysctl -w net.inet.ip.forwarding=0"
-    try:
-        exec(cmd)
-    except:
-        print(f'{RED}\nError executing {cmd}. Please execute it manually{WHITE}')
+    return _set_mac_iproute(0)
 
 
 def _enable_linux_iproute():
@@ -132,12 +167,22 @@ def _enable_linux_iproute():
     """
 
     file_path = "/proc/sys/net/ipv4/ip_forward"
-    with open(file_path) as f:
-        if f.read() == 1:
-            # already enabled
-            return
-    with open(file_path, "w") as f:
-        print(1, file=f)
+
+    try:
+        with open(file_path) as f:
+            # the file holds text: comparing it with the number never matched
+            if f.read().strip() == "1":
+                # already enabled
+                return True
+
+        with open(file_path, "w") as f:
+            print(1, file=f)
+
+        return True
+    except OSError as error:
+        print(f"{RED}\nError writing {file_path} ({error}){WHITE}")
+
+        return False
 
 
 def _disable_linux_iproute():
@@ -145,12 +190,22 @@ def _disable_linux_iproute():
     Disables IP route ( IP Forward ) in linux-based distro
     """
     file_path = "/proc/sys/net/ipv4/ip_forward"
-    with open(file_path) as f:
-        if f.read() == 0:
-            # already enabled
-            return
-    with open(file_path, "w") as f:
-        print(0, file=f)
+
+    try:
+        with open(file_path) as f:
+            # the file holds text: comparing it with the number never matched
+            if f.read().strip() == "0":
+                # already disabled
+                return True
+
+        with open(file_path, "w") as f:
+            print(0, file=f)
+
+        return True
+    except OSError as error:
+        print(f"{RED}\nError writing {file_path} ({error}){WHITE}")
+
+        return False
 
 
 # def _enable_windows_iproute():
@@ -169,14 +224,23 @@ def disable_ip_route(verbose=1):
     """
     if verbose > 0:
         print(f"{YELLOW}[!] Disabling IP Routing...{WHITE}")
-        # _enable_windows_iproute() if "nt" in os.name else _disable_linux_iproute()
-        ops = platform.system()
-        if ops == "Darwin":
-            _disable_mac_iproute()
-        if ops == "Linux":
-            _disable_linux_iproute()
+
+    # outside the verbose check: with -v 0 the forwarding was never touched
+    ops = platform.system()
+    done = False
+
+    if ops == "Darwin":
+        done = _disable_mac_iproute()
+    elif ops == "Linux":
+        done = _disable_linux_iproute()
+
     if verbose > 0:
-        print(f"{YELLOW}[!] IP Routing disabled.\n{WHITE}")
+        if done:
+            print(f"{YELLOW}[!] IP Routing disabled.\n{WHITE}")
+        else:
+            print(f"{RED}[!] IP Routing could not be disabled\n{WHITE}")
+
+    return done
 
 
 def enable_ip_route(verbose=1):
@@ -185,14 +249,27 @@ def enable_ip_route(verbose=1):
     """
     if verbose > 0:
         print(f"{BWHITE}[!] Enabling IP Routing...{WHITE}")
-        # _enable_windows_iproute() if "nt" in os.name else _enable_linux_iproute()
-        ops = platform.system()
-        if ops == "Darwin":
-            _enable_mac_iproute()
-        if ops == "Linux":
-            _enable_linux_iproute()
+
+    # outside the verbose check: with -v 0 the forwarding was never touched
+    ops = platform.system()
+    done = False
+
+    if ops == "Darwin":
+        done = _enable_mac_iproute()
+    elif ops == "Linux":
+        done = _enable_linux_iproute()
+
     if verbose > 0:
-        print(f"{BWHITE}[!] IP Routing enabled\n{WHITE}")
+        if done:
+            print(f"{BWHITE}[!] IP Routing enabled\n{WHITE}")
+        else:
+            # without forwarding the victim traffic is dropped, not relayed
+            print(
+                f"{RED}[!] IP Routing is NOT enabled: the traffic of the"
+                f" victims will be dropped instead of relayed\n{WHITE}"
+            )
+
+    return done
 
 
 def ip2long(ip):
@@ -217,6 +294,297 @@ def long2ip(ip):
         # If the IP is too large for IPv4, assume it's IPv6
         packed_ip = ip.to_bytes(16, byteorder='big')  # Assuming the `ip` is in integer form
         return socket.inet_ntop(socket.AF_INET6, packed_ip)
+
+
+# Maximum number of addresses a single target item may expand to (a /8)
+MAX_TARGET_ADDRESSES = 2**24
+
+
+def expand_targets(target):
+    """
+    Expand a target specification into a list of IP addresses.
+
+    `target` is a comma separated list and every item can be:
+      - an IP address         192.168.0.10
+      - a hostname            mysipserver.com
+      - a network             192.168.0.0/24  (network and broadcast are skipped)
+      - a range of addresses  192.168.0.10-192.168.0.20  or  192.168.0.10-20
+
+    Each item is expanded on its own, so 10.0.0.1,10.0.5.1 gives those two
+    addresses and not the 1281 addresses between them.
+
+    Returns a tuple (ips, names):
+      ips    ordered list of addresses, without duplicates
+      names  items that were given as a hostname, so the caller can keep using
+             the name as the SIP domain instead of the resolved address
+
+    Raises ValueError, with a message ready to be shown to the user, when an
+    item cannot be expanded.
+    """
+    ips = []
+    names = []
+    seen = set()
+
+    def add(addr):
+        addr = str(addr)
+        if addr not in seen:
+            seen.add(addr)
+            ips.append(addr)
+
+    for item in str(target).split(","):
+        item = item.strip()
+
+        if item == "":
+            continue
+
+        # range of addresses: 192.168.0.10-192.168.0.20 or 192.168.0.10-20
+        m = re.fullmatch(r"([0-9]{1,3}(?:\.[0-9]{1,3}){3})\s*-\s*([0-9.]+)", item)
+        if m:
+            (first, last) = (m.group(1), m.group(2))
+
+            if last.find(".") < 0:
+                # only the last octet of the end address was given
+                last = "%s.%s" % (first.rsplit(".", 1)[0], last)
+
+            try:
+                ipini = int(ip2long(first))
+                ipend = int(ip2long(last))
+            except OSError:
+                raise ValueError("Invalid address range %s" % item)
+
+            if ipend < ipini:
+                raise ValueError(
+                    "Invalid address range %s: %s is lower than %s" % (item, last, first)
+                )
+            if ipend - ipini + 1 > MAX_TARGET_ADDRESSES:
+                raise ValueError("Address range %s is too big" % item)
+
+            for i in range(ipini, ipend + 1):
+                add(long2ip(i))
+
+            continue
+
+        # hostname
+        name = ""
+        if item.find("/") < 0:
+            try:
+                ipaddress.ip_address(item)
+            except ValueError:
+                try:
+                    name = item
+                    item = socket.gethostbyname(item)
+                except socket.error:
+                    raise ValueError("Cannot resolve host %s" % name)
+
+        # single address or network
+        try:
+            net = ipaddress.ip_network(item, strict=False)
+        except ValueError:
+            raise ValueError("Invalid target %s" % item)
+
+        if net.num_addresses > MAX_TARGET_ADDRESSES:
+            raise ValueError("Network %s is too big" % net)
+
+        for h in net.hosts():
+            add(h)
+
+        if name != "":
+            names.append(name)
+
+    return (ips, names)
+
+
+def host_sort_key(line):
+    """
+    Sort key for result lines that start with an address (address###port###...).
+
+    Sorting them as text puts 10.0.0.100 before 10.0.0.9, so the address is
+    compared as a number and the port as an integer.
+    """
+    aux = str(line).split("###")
+
+    try:
+        ip = ipaddress.ip_address(aux[0])
+        addr = (ip.version, int(ip))
+    except (ValueError, IndexError):
+        addr = (0, 0)
+
+    try:
+        port = int(aux[1])
+    except (ValueError, IndexError):
+        port = 0
+
+    return (addr, port, str(line))
+
+
+class _NoChildWatcher:
+    """
+    Stand-in for the asyncio child watchers, removed in Python 3.14.
+
+    They are no longer needed (asyncio reaps its own subprocesses since 3.12),
+    but pyshark 0.6 still asks for one.
+    """
+
+    def attach_loop(self, loop):
+        pass
+
+    def add_child_handler(self, pid, callback, *args):
+        pass
+
+    def remove_child_handler(self, pid):
+        return True
+
+    def is_active(self):
+        return True
+
+    def close(self):
+        pass
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        return False
+
+
+def pyshark_compat():
+    """
+    Make pyshark 0.6 usable on current Python versions.
+
+    0.6 is its last release and it (a) asks for an event loop of the current
+    thread, which raises RuntimeError since Python 3.12 when there is none,
+    and (b) calls asyncio.set_child_watcher(), removed in 3.14. Without this,
+    dump, pcapdump and sniff die before reading a single packet.
+    """
+    import asyncio
+
+    try:
+        asyncio.get_event_loop_policy().get_event_loop()
+    except (RuntimeError, DeprecationWarning):
+        asyncio.set_event_loop(asyncio.new_event_loop())
+
+    if not hasattr(asyncio, "set_child_watcher"):
+        watcher = _NoChildWatcher()
+
+        asyncio.SafeChildWatcher = _NoChildWatcher
+        asyncio.set_child_watcher = lambda w: None
+        asyncio.get_child_watcher = lambda: watcher
+
+
+class _NullLog:
+    """Stands in for a log file that could not be opened, so a wrong path with
+    -o does not throw away the results already gathered."""
+
+    def write(self, data):
+        pass
+
+    def close(self):
+        pass
+
+
+def open_log(path, mode="a+"):
+    """
+    Open a log file reporting the problem instead of raising.
+
+    A wrong path with -o used to abort with a traceback in the middle of
+    printing the results, and everything found was lost.
+    """
+    try:
+        return open(path, mode, buffering=1)
+    except OSError as error:
+        print(f"{RED}Error writing {path} ({error}){WHITE}")
+
+        return _NullLog()
+
+
+def packet_addresses(packet):
+    """
+    Return the (source, destination) addresses of a captured packet.
+
+    A packet with no IPv4 or IPv6 layer gives (None, None) instead of raising
+    AttributeError in the middle of reading a capture.
+    """
+    for layer in ("ip", "ipv6"):
+        try:
+            l = getattr(packet, layer)
+            return (l.src, l.dst)
+        except AttributeError:
+            pass
+
+    return (None, None)
+
+
+def close_capture(capture):
+    """
+    Close a pyshark capture without leaving noise behind.
+
+    When tshark crashes, close() raises and the running processes stay in the
+    list, so pyshark's __del__ tries again at garbage collection time and the
+    interpreter prints an 'Exception ignored while calling deallocator'
+    traceback that has nothing to do with what the user was doing.
+    """
+    if capture is None:
+        return
+
+    try:
+        capture.clear()
+    except Exception:
+        pass
+
+    try:
+        capture.close()
+    except Exception:
+        pass
+
+    try:
+        capture._running_processes.clear()
+    except Exception:
+        pass
+
+
+def close_sockets(sock, sock_ssl=None):
+    """
+    Close a socket and its TLS wrapper.
+
+    wrap_socket() takes over the file descriptor of `sock` (the plain socket is
+    detached and its close() becomes a no-op), so closing only `sock` leaves
+    the TLS connection open until the garbage collector gets to it.
+    """
+    for s in (sock_ssl, sock):
+        if s is not None:
+            try:
+                s.close()
+            except OSError:
+                pass
+
+
+def bind_local_port(sock, bind="0.0.0.0", lport=0):
+    """
+    Bind `sock` to a local port and return the bound port number.
+
+    Tries `lport` when given, then a few free ports, and finally lets the
+    kernel pick one. Returns 0 when every attempt failed, so the caller can
+    close the socket instead of leaking it.
+    """
+    if lport:
+        try:
+            sock.bind((bind, int(lport)))
+            return sock.getsockname()[1]
+        except (OSError, ValueError):
+            pass
+
+    for _ in range(3):
+        try:
+            sock.bind((bind, get_free_port()))
+            return sock.getsockname()[1]
+        except OSError:
+            pass
+
+    try:
+        sock.bind((bind, 0))
+        return sock.getsockname()[1]
+    except OSError:
+        return 0
 
 
 def generate_random_string(len_ini, len_end, type):
@@ -541,26 +909,66 @@ def create_response_error(
 
 
 def create_response_ok(
-    fromuser, touser, proto, domain, fromport, cseq, branch, callid, tag, totag
+    fromuser,
+    touser,
+    proto,
+    domain,
+    fromport,
+    cseq,
+    branch,
+    callid,
+    tag,
+    totag,
+    via="",
+    fromhdr="",
+    tohdr="",
 ):
     starting_line = "SIP/2.0 200 Ok"
 
     headers = dict()
-    headers["Via"] = "SIP/2.0/%s %s:%s;branch=%s" % (
-        proto.upper(),
-        domain,
-        fromport,
-        branch,
-    )
-    headers["From"] = "<sip:%s@%s>;tag=%s" % (fromuser, domain, totag)
-    headers["To"] = "<sip:%s@%s>;tag=%s" % (touser, domain, tag)
+
+    # a response has to copy the Via, From and To of the request (RFC 3261
+    # 8.2.6.2): rebuilt from parts, the request had no matching transaction on
+    # the other side and it kept retransmitting
+    if via != "":
+        count = 0
+
+        for v in via.split("#")[::-1]:
+            count += 1
+            headers["Via %s" % str(count)] = v
+    else:
+        headers["Via"] = "SIP/2.0/%s %s:%s;branch=%s" % (
+            proto.upper(),
+            domain,
+            fromport,
+            branch,
+        )
+
+    if fromhdr != "":
+        headers["From"] = fromhdr
+    else:
+        headers["From"] = "<sip:%s@%s>;tag=%s" % (fromuser, domain, totag)
+
+    if tohdr != "":
+        headers["To"] = tohdr
+    else:
+        headers["To"] = "<sip:%s@%s>;tag=%s" % (touser, domain, tag)
+
     headers["Call-ID"] = "%s" % callid
     headers["CSeq"] = "%d BYE" % cseq
     headers["Content-Length"] = "0"
 
     msg = starting_line + "\r\n"
+
     for h in headers.items():
-        msg += "%s: %s\r\n" % h
+        name = h[0]
+        value = h[1]
+
+        m = re.search(r"^Via", name)
+        if m:
+            name = "Via"
+
+        msg += "%s: %s\r\n" % (name, value)
 
     msg += "\r\n"
 
@@ -582,6 +990,22 @@ def parse_message(buffer):
     data["route"] = ""
     data["auth-type"] = 1
     data["type"] = "Unknown"
+    # every key always exists: these were created only when the header was
+    # present, so reading them raised KeyError on any other message and the
+    # callers silently discarded the whole packet
+    data["method"] = ""
+    data["sipport"] = ""
+    data["fromuser"] = ""
+    data["fromtag"] = ""
+    data["branch"] = ""
+    data["callid"] = ""
+    data["cseq"] = ""
+    data["from"] = ""
+    data["to"] = ""
+    data["totag"] = ""
+    data["contactuser"] = ""
+    data["contactdomain"] = ""
+    data["auth"] = ""
 
     for header in headers:
         m = re.search(r"^SIP\/[0-9|\.]+\s([0-9]+)\s(.+)", header)
@@ -613,6 +1037,7 @@ def parse_message(buffer):
         m = re.search(r"^From:\s*(.+)", header)
         if m:
             hfrom = "%s" % (m.group(1))
+            data["from"] = hfrom
 
             try:
                 n = re.search(r".*;tag=(.+)", hfrom)
@@ -698,15 +1123,22 @@ def parse_message(buffer):
         if m:
             data["auth"] = "%s" % (m.group(1))
         else:
-            m = re.search(r"^WWW-Authenticate:\s*(.+)", header)
+            # the answer to a 407 challenge: it was not recognized, so the
+            # digest of a victim that honours a 407 was never captured
+            m = re.search(r"^Proxy-Authorization:\s*(.+)", header)
             if m:
                 data["auth"] = "%s" % (m.group(1))
-                data["auth-type"] = 1
+                data["auth-type"] = 2
             else:
-                m = re.search(r"^Proxy-Authenticate:\s*(.+)", header)
+                m = re.search(r"^WWW-Authenticate:\s*(.+)", header)
                 if m:
                     data["auth"] = "%s" % (m.group(1))
-                    data["auth-type"] = 2
+                    data["auth-type"] = 1
+                else:
+                    m = re.search(r"^Proxy-Authenticate:\s*(.+)", header)
+                    if m:
+                        data["auth"] = "%s" % (m.group(1))
+                        data["auth-type"] = 2
 
         m = re.search(r"^CSeq:\s*([0-9]+)\s.*", header)
         if m:
@@ -720,75 +1152,66 @@ def parse_digest(buffer):
 
     data = dict()
 
+    # the defaults are set once: inside the loop every line reset the fields
+    # matched by the previous one
+    data["username"] = ""
+    data["realm"] = ""
+    data["nonce"] = ""
+    data["uri"] = ""
+    data["response"] = ""
     data["algorithm"] = "MD5"
+    data["cnonce"] = ""
+    data["nc"] = ""
+    data["qop"] = ""
+
+    # a quoted value is read up to its closing quote: the hand made character
+    # classes dropped a username with + or @ (an E.164 number), a realm with a
+    # space and a response in upper case hex, leaving the field empty
+    quoted = {
+        "username": r"username=\"([^\"]*)\"",
+        "realm": r"realm=\"([^\"]*)\"",
+        "nonce": r"(?<!c)nonce=\"([^\"]*)\"",
+        "uri": r"uri=\"([^\"]*)\"",
+        "response": r"response=\"([^\"]*)\"",
+        "cnonce": r"cnonce=\"([^\"]*)\"",
+    }
 
     for header in headers:
-        m = re.search(r"username=\"([a-z|A-Z|0-9|-|_|\.|:]+)\"", header)
-        if m:
-            data["username"] = "%s" % (m.group(1))
-        else:
-            data["username"] = ""
+        for field, regex in quoted.items():
+            m = re.search(regex, header)
+            if m:
+                data[field] = "%s" % (m.group(1))
 
-        m = re.search(r"realm=\"([a-z|A-Z|0-9|-|_|\.]+)\"", header)
-        if m:
-            data["realm"] = "%s" % (m.group(1))
-        else:
-            data["realm"] = ""
-
-        m = re.search(r"nonce=\"([a-z|A-Z|0-9|\/|\+|\=|:|\|_|-|\.]+)\"", header)
-        if m:
-            data["nonce"] = "%s" % (m.group(1))
-        else:
-            data["nonce"] = ""
-
-        m = re.search(r"uri=\"([a-z|A-Z|0-9|-|_|\.|\:|\;|\=|\@|\#]+)\"", header)
-        if m:
-            data["uri"] = "%s" % (m.group(1))
-        else:
-            data["uri"] = ""
-
-        m = re.search(r"response=\"([a-z|0-9]+)\"", header)
-        if m:
-            data["response"] = "%s" % (m.group(1))
-        else:
-            data["response"] = ""
-
-        m = re.search(r"algorithm=([a-z|A-Z|0-9|-|_]+)", header)
+        # these three travel quoted or bare depending on the implementation
+        m = re.search(r"algorithm=\"*([\w\-]+)\"*", header)
         if m:
             data["algorithm"] = "%s" % (m.group(1))
-        else:
-            data["algorithm"] = "MD5"
 
-        m = re.search(r"cnonce=\"([\w\+\/]+)\"", header)
-        if m:
-            data["cnonce"] = "%s" % (m.group(1))
-        else:
-            data["cnonce"] = ""
-
-        m = re.search(r"nc=\"*([\w\+]+)\"*", header)
+        m = re.search(r"\bnc=\"*([\w\+]+)\"*", header)
         if m:
             data["nc"] = "%s" % (m.group(1))
-        else:
-            data["nc"] = ""
 
-        m = re.search(r"qop=\"*([\w\+]+)\"*", header)
+        m = re.search(r"\bqop=\"*([\w\+]+)\"*", header)
         if m:
             data["qop"] = "%s" % (m.group(1))
-        else:
-            data["qop"] = ""
 
     return data
 
 
 def getHash(algorithm, string):
-    if algorithm == "MD5":
-        hashfunc = hashlib.md5
-    elif algorithm == "SHA":
+    # the algorithm can arrive in any case, empty, or with the -sess suffix
+    # (MD5-sess, SHA-256-sess): the hash function is the same one
+    alg = str(algorithm).upper().replace("-SESS", "").replace("SESS", "")
+
+    if alg in ("SHA", "SHA1", "SHA-1"):
         hashfunc = hashlib.sha1
-    elif algorithm == "SHA-256":
+    elif alg in ("SHA-256", "SHA256"):
         hashfunc = hashlib.sha256
-    elif algorithm == "SHA-512":
+    elif alg in ("SHA-512", "SHA512"):
         hashfunc = hashlib.sha512
+    else:
+        # MD5 is the default of RFC 2617 when the server sends no algorithm
+        hashfunc = hashlib.md5
 
     return hashfunc(string.encode()).hexdigest()
 
@@ -906,9 +1329,8 @@ def fingerprinting(method, msg, headers, verbose):
                 fp.append("ReadyNet")
                 fp.append("Tesira")
         m = re.search(r"^[a-z0-9]{10}$", tag)
-        if m:
-            fp.append("Panasonic")
         if m and tag[0:2] != "as":
+            # Panasonic was added twice, so it showed up duplicated
             fp.append("Panasonic")
             fp.append("RM")
             fp.append("Grandstream")
@@ -1211,7 +1633,6 @@ def fingerprinting(method, msg, headers, verbose):
                 fp.append("Aastra")
             m = re.search(r"^[a-f0-9]{7}-[a-f0-9]{6}$", tag)
             if m and ua[0:5] == "SONUS":
-                print(ua[0:5])
                 fp.append("Skype for Business")
 
         if tag == "12345678":
@@ -1262,7 +1683,21 @@ def fingerprinting(method, msg, headers, verbose):
     return clearfp
 
 
-def load_cve_version():
+def cve_file():
+    """
+    Path of the bundled CVE list.
+
+    Resolved from the package itself, so it works on a normal install, on an
+    editable install (where site-packages holds no sippts directory) and when
+    running from a checkout. The install paths are kept as a fallback.
+    """
+    path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "cve.csv"
+    )
+
+    if os.path.isfile(path):
+        return path
+
     import sysconfig
 
     path = sysconfig.get_paths()["purelib"] + "/sippts/data/cve.csv"
@@ -1271,6 +1706,12 @@ def load_cve_version():
         path = path.replace("/usr/", "/usr/local/").replace(
             "site-packages", "dist-packages"
         )
+
+    return path
+
+
+def load_cve_version():
+    path = cve_file()
 
     if not os.path.isfile(path):
         return "Unknown"
@@ -1288,14 +1729,7 @@ def load_cve_version():
         return "Unknown"
 
 def load_cve():
-    import sysconfig
-
-    path = sysconfig.get_paths()["purelib"] + "/sippts/data/cve.csv"
-
-    if not os.path.isfile(path):
-        path = path.replace("/usr/", "/usr/local/").replace(
-            "site-packages", "dist-packages"
-        )
+    path = cve_file()
 
     if not os.path.isfile(path):
         return []
@@ -1328,6 +1762,10 @@ def check_model(ua, fp, type, cvelist):
     l = len(aux)
 
     model = aux[0]
+
+    # an empty needle makes find() match every line of the list
+    if model == "" and fp == "":
+        return found
 
     # if model == 'grandstream':
     if l > 1:
@@ -1362,9 +1800,12 @@ def check_model(ua, fp, type, cvelist):
         aux = fp.lower().split(" ")
         model = aux[0]
 
-        for cve in cvelist:
-            cve = cve.lower()
-            if cve.find(model) > -1:
-                found.append(cve)
+        # without a fingerprint there is nothing to look for: searching for an
+        # empty string returned the whole CVE list as a match
+        if model != "":
+            for cve in cvelist:
+                cve = cve.lower()
+                if cve.find(model) > -1:
+                    found.append(cve)
 
     return found

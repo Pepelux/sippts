@@ -8,6 +8,8 @@ __copyright__ = "Copyright (C) 2015-2024, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
 
 
+import ipaddress
+import sys
 import pyshark
 import signal
 import os
@@ -16,7 +18,7 @@ import re
 import socket
 import threading
 import time
-from .lib.functions import parse_message, parse_digest, searchInterface
+from .lib.functions import parse_message, parse_digest, searchInterface, pyshark_compat, close_capture
 from .lib.color import Color
 from .lib.logos import Logo
 
@@ -25,6 +27,7 @@ class SipSniff:
     def __init__(self):
         self.dev = ""
         self.ofile = ""
+        self.rport = 0
         self.proto = "ALL"
         self.verbose = 0
         self.auth = 0
@@ -38,6 +41,25 @@ class SipSniff:
 
         self.c = Color()
 
+    def sniff_port(self):
+        """
+        Port of the bpf filter: the one given with -r, or the usual one of the
+        protocol. It used to be fixed to 5060/5061, so a PBX on another port
+        was captured by nobody and nothing was reported.
+        """
+        try:
+            port = int(self.rport)
+        except (TypeError, ValueError):
+            port = 0
+
+        if port > 0:
+            return port
+
+        if self.proto == "TLS":
+            return 5061
+
+        return 5060
+
     def signal_handler(self, sig, frame):
         print(f"{self.c.BYELLOW}You pressed Ctrl+C!")
         print(f"{self.c.BWHITE}\nStopping sniffer ...")
@@ -47,16 +69,18 @@ class SipSniff:
 
     def stop(self):
         self.run = False
-        exit()
+        sys.exit()
 
     def start(self):
+        pyshark_compat()
+
         try:
-            self.verbose == int(self.verbose)
+            self.verbose = int(self.verbose)
         except:
             self.verbose = 0
 
         try:
-            self.auth == int(self.auth)
+            self.auth = int(self.auth)
         except:
             self.auth = 0
 
@@ -96,6 +120,9 @@ class SipSniff:
         else:
             print(f"{self.c.BWHITE}[✓] Protocol: {self.c.GREEN}{self.proto}")
 
+        if self.proto != "ALL":
+            print(f"{self.c.BWHITE}[✓] Port: {self.c.GREEN}{self.sniff_port()}")
+
         if self.ofile != "":
             print(
                 f"{self.c.BWHITE}[✓] Save captured data in the file: {self.c.GREEN}{self.ofile}"
@@ -133,21 +160,21 @@ class SipSniff:
             if self.proto == "UDP":
                 capture = pyshark.LiveCapture(
                     interface=networkInterface,
-                    bpf_filter="udp port 5060",
+                    bpf_filter="udp port %d" % self.sniff_port(),
                     include_raw=True,
                     use_json=True,
                 )
             elif self.proto == "TCP":
                 capture = pyshark.LiveCapture(
                     interface=networkInterface,
-                    bpf_filter="tcp port 5060",
+                    bpf_filter="tcp port %d" % self.sniff_port(),
                     include_raw=True,
                     use_json=True,
                 )
             elif self.proto == "TLS":
                 capture = pyshark.LiveCapture(
                     interface=networkInterface,
-                    bpf_filter="tcp port 5061",
+                    bpf_filter="tcp port %d" % self.sniff_port(),
                     include_raw=True,
                     use_json=True,
                 )
@@ -160,8 +187,7 @@ class SipSniff:
         for packet in capture.sniff_continuously():
             if self.run == False:
                 try:
-                    capture.clear()
-                    capture.close()
+                    close_capture(capture)
                 except:
                     pass
                 return
@@ -196,6 +222,7 @@ class SipSniff:
                             headers = parse_message(ascii_string)
 
                             if headers:
+                                headers_auth = None
                                 ua = headers["ua"]
                                 method = headers["method"]
                                 sipuser = headers["sipuser"]
@@ -210,19 +237,27 @@ class SipSniff:
                                             f"{self.c.WHITE}[{method}] {src_addr}:{src_port} => {dst_addr}:{dst_port} - {ua}"
                                         )
 
-                                    ip = socket.gethostbyname(sipdomain)
-                                    if ip != sipdomain:
+                                    # a name, not an address: reported without
+                                    # asking the DNS, a passive sniffer must not
+                                    # generate traffic about what it captures
+                                    isname = False
+                                    try:
+                                        ipaddress.ip_address(sipdomain)
+                                    except ValueError:
+                                        isname = True
+
+                                    if isname and sipdomain != "":
                                         print(
                                             f"{self.c.CYAN}Found Domain {sipdomain} for user {sipuser} connecting to {dst_addr}:{dst_port}"
                                         )
 
-                                    try:
-                                        auth = headers["auth"]
+                                    auth = headers["auth"]
+
+                                    if auth != "":
                                         headers_auth = parse_digest(auth)
+
                                         if headers_auth:
                                             print(f"{self.c.GREEN}Auth={auth}\n")
-                                    except:
-                                        pass
 
                                 # Search in headers
                                 headers = ascii_string.split("\r\n")
@@ -272,11 +307,10 @@ class SipSniff:
                                             username = ""
                                         if (
                                             username == ""
-                                            and headers_auth["username"]
+                                            and headers_auth
                                             and headers_auth["username"] != ""
                                         ):
                                             username = headers_auth["username"]
-                                        ipfound = socket.gethostbyname(ipfound)
                                         if self.verbose == 1:
                                             print(
                                                 f"{self.c.WHITE}\tFound IP {ipfound} in header From"
@@ -295,11 +329,10 @@ class SipSniff:
                                             username = ""
                                         if (
                                             username == ""
-                                            and headers_auth["username"]
+                                            and headers_auth
                                             and headers_auth["username"] != ""
                                         ):
                                             username = headers_auth["username"]
-                                        ipfound = socket.gethostbyname(ipfound)
 
                                         if self.verbose == 1:
                                             print(
@@ -307,7 +340,7 @@ class SipSniff:
                                             )
 
                                     m = re.search(
-                                        r"^Contact:\s\<sip:(.*)\@(.*)>.*>", header
+                                        r"^Contact:.*\<sips?:([^@]*)\@([^>]*)>", header
                                     )
                                     if m:
                                         userfound = "%s" % (m.group(1))
@@ -333,5 +366,4 @@ class SipSniff:
                 except AttributeError as e:
                     # ignore packets other than TCP, UDP and IPv4
                     pass
-        capture.clear()
-        capture.close()
+        close_capture(capture)

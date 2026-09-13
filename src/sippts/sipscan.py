@@ -10,11 +10,9 @@ __email__ = "pepeluxx@gmail.com"
 import random
 import socket
 import sys
-import ipaddress
 import ssl
 import re
 import time
-from IPy import IP
 
 try:
     import cursor
@@ -22,12 +20,14 @@ except:
     pass
 
 from .lib.functions import (
+    open_log,
     create_message,
     parse_message,
+    close_sockets,
+    host_sort_key,
     get_machine_default_ip,
-    ip2long,
-    long2ip,
-    get_free_port,
+    expand_targets,
+    bind_local_port,
     ping,
     fingerprinting,
     format_time,
@@ -82,6 +82,7 @@ class SipScan:
         self.quit = False
         self.totaltime = 0
         self.fail = 0
+        self.errors = 0
         self.cvelist = []
         self.cve = []
 
@@ -99,8 +100,7 @@ class SipScan:
 
     def set_ulimit(self, threads):
         # Get current 'ulimit -n' value
-        soft,ohard = res.getrlimit(res.RLIMIT_NOFILE)
-        hard = ohard
+        soft,hard = res.getrlimit(res.RLIMIT_NOFILE)
         
         # If ulimit < threads, set new value
         if soft < int(threads):
@@ -121,10 +121,13 @@ class SipScan:
                 soft,hard = res.getrlimit(res.RLIMIT_NOFILE)
                 self.threads = soft
 
-        soft,hard = res.getrlimit(res.RLIMIT_NOFILE)
-
 
     def start(self):
+        # reset the stop flag: after a Ctrl+C the object kept it set, so from
+        # sippts-gui (where the module instance is reused) every later run
+        # did nothing at all
+        self.quit = False
+
         self.threads = int(self.threads)
         self.set_ulimit(self.threads)
     
@@ -140,29 +143,34 @@ class SipScan:
             self.proto = "ALL"
 
         try:
-            self.verbose == int(self.verbose)
+            self.verbose = int(self.verbose)
         except:
             self.verbose = 0
 
         try:
-            self.ping == int(self.ping)
+            self.ping = int(self.ping)
         except:
             self.ping = 0
 
         try:
-            self.fp == int(self.fp)
+            self.fp = int(self.fp)
         except:
             self.fp = 0
 
         try:
-            self.random == int(self.random)
+            self.random = int(self.random)
         except:
             self.random = 0
 
         try:
-            self.getcve == int(self.getcve)
+            self.getcve = int(self.getcve)
         except:
             self.getcve = 0
+
+        try:
+            self.timeout = float(self.timeout)
+        except (TypeError, ValueError):
+            self.timeout = 5
 
         # check method
         if self.method not in supported_methods:
@@ -188,12 +196,12 @@ class SipScan:
                     f"{self.c.BWHITE}Try with {self.c.BYELLOW}-local-ip{self.c.BWHITE} param"
                 )
                 print(self.c.WHITE)
-                exit()
+                sys.exit()
 
         if self.rport.upper() == "ALL":
-            self.rport = "1-65536"
+            self.rport = "1-65535"
 
-        logo = Logo("sipscan")
+        logo = Logo("sipscan", self.nocolor)
         logo.print()
 
         # create a list of protocols
@@ -208,12 +216,26 @@ class SipScan:
         # create a list of ports
         ports = []
         for p in self.rport.split(","):
-            m = re.search(r"([0-9]+)-([0-9]+)", p)
+            p = p.strip()
+            m = re.fullmatch(r"([0-9]+)-([0-9]+)", p)
             if m:
-                for x in range(int(m.group(1)), int(m.group(2)) + 1):
+                pini = max(int(m.group(1)), 1)
+                pend = min(int(m.group(2)), 65535)
+
+                for x in range(pini, pend + 1):
                     ports.append(x)
             else:
-                ports.append(p)
+                if not p.isdigit() or int(p) < 1 or int(p) > 65535:
+                    print(f"{self.c.BRED}Invalid port {p} (valid range is 1-65535)")
+                    print(self.c.WHITE)
+                    sys.exit()
+
+                ports.append(int(p))
+
+        if ports == []:
+            print(f"{self.c.BRED}No valid ports to scan in {self.rport}")
+            print(self.c.WHITE)
+            sys.exit()
 
         # load cve file
         self.cvelist = load_cve()
@@ -221,146 +243,79 @@ class SipScan:
         # create a list of IP addresses
         if self.file != "":
             try:
-                with open(self.file) as f:
-                    line = f.readline()
-
-                    while line:
-                        error = 0
-                        line = line.replace("\n", "")
-
-                        try:
-                            if self.quit == False:
-                                try:
-                                    ip = socket.gethostbyname(line)
-                                    self.ip = IP(ip, make_net=True)
-                                except:
-                                    try:
-                                        self.ip = IP(line, make_net=True)
-
-                                    except:
-                                        if line.find("-") > 0:
-                                            val = line.split("-")
-                                            start_ip = val[0]
-                                            end_ip = val[1]
-                                            self.ip = line
-
-                                            error = 1
-
-                                ips = []
-
-                                if error == 0:
-                                    hosts = list(
-                                        ipaddress.ip_network(str(self.ip)).hosts()
-                                    )
-
-                                    if hosts == []:
-                                        hosts.append(self.ip)
-
-                                    last = len(hosts) - 1
-                                    start_ip = hosts[0]
-                                    end_ip = hosts[last]
-
-                                ipini = int(ip2long(str(start_ip)))
-                                ipend = int(ip2long(str(end_ip)))
-
-                                for i in range(ipini, ipend + 1):
-                                    if (
-                                        i != self.localip
-                                        and long2ip(i)[-2:] != ".0"
-                                        and long2ip(i)[-4:] != ".255"
-                                    ):
-                                        if self.ping == 0:
-                                            ips.append(long2ip(i))
-                                        else:
-                                            print(
-                                                f"{self.c.YELLOW}[+] Ping {str(long2ip(i))} ...{self.c.WHITE}",
-                                                end="\r",
-                                            )
-
-                                            if ping(long2ip(i), "0.1") == True:
-                                                print(
-                                                    f"{self.c.GREEN}\n   [-] ... Pong {str(long2ip(i))}{self.c.WHITE}"
-                                                )
-                                                ips.append(long2ip(i))
-
-                                self.prepare_scan(ips, ports, protos, self.ip)
-                        except:
-                            pass
-
-                        line = f.readline()
-
-                f.close()
-            except:
+                f = open(self.file)
+            except OSError:
                 print(f"{self.c.RED}Error reading file {self.file}")
                 print(self.c.WHITE)
-                exit()
+                sys.exit()
+
+            with f:
+                for line in f:
+                    if self.quit == True:
+                        break
+
+                    line = line.strip()
+
+                    if line == "":
+                        continue
+
+                    try:
+                        (ips, names) = expand_targets(line)
+                    except ValueError as error:
+                        print(f"{self.c.RED}{error}")
+                        print(self.c.WHITE)
+                        continue
+
+                    self.prepare_scan(
+                        self.select_hosts(ips), ports, protos, line
+                    )
         else:
-            ips = []
-            
-            for i in self.ip.split(","):
-                hosts = []
-                error = 0
+            try:
+                (ips, names) = expand_targets(self.ip)
+            except ValueError as error:
+                print(f"{self.c.RED}{error}")
+                print(self.c.WHITE)
+                sys.exit()
 
-                try:
-                    if i.find("/") < 1:
-                        i = socket.gethostbyname(i)
-                        i = IP(i, make_net=True)
+            if ips == []:
+                print(f"{self.c.RED}No target to scan in {self.ip}")
+                print(self.c.WHITE)
+                sys.exit()
 
-                        if str(self.ip) != str(i) and self.ip.find(",") < 1:
-                            self.domain = self.ip
-                            self.forcedomain = True
-                    else:
-                        i = IP(i, make_net=True)
-                except:
-                    if i.find("-") > 0:
-                        val = i.split("-")
-                        start_ip = val[0]
-                        end_ip = val[1]
+            # a single host given by name is used as SIP domain
+            if self.domain == "" and len(names) == 1 and len(ips) == 1:
+                self.domain = names[0]
+                self.forcedomain = True
 
-                        error = 1
-                try:
-                    if error == 0:
-                        hlist = list(ipaddress.ip_network(str(i)).hosts())
+            self.prepare_scan(self.select_hosts(ips), ports, protos, self.ip)
 
-                        if hlist == []:
-                            hosts.append(i)
-                        else:
-                            for h in hlist:
-                                hosts.append(h)
+    def select_hosts(self, ips):
+        """
+        Drop the local address from the list of targets and, with -ping, the
+        hosts that do not answer to a ping.
+        """
+        selected = []
 
-                        last = len(hosts) - 1
-                        start_ip = hosts[0]
-                        end_ip = hosts[last]
+        for ip in ips:
+            if self.quit == True:
+                break
 
-                    ipini = int(ip2long(str(start_ip)))
-                    ipend = int(ip2long(str(end_ip)))
-                    iplist = i
+            if ip == self.localip:
+                continue
 
-                    for i in range(ipini, ipend + 1):
-                        if (
-                            i != self.localip
-                            and long2ip(i)[-2:] != ".0"
-                            and long2ip(i)[-4:] != ".255"
-                        ):
-                            if self.ping == 0:
-                                ips.append(long2ip(i))
-                            else:
-                                print(
-                                    f"{self.c.YELLOW}[+] Ping {str(long2ip(i))} ...{self.c.WHITE}",
-                                    end="\r",
-                                )
+            if self.ping == 0:
+                selected.append(ip)
+            else:
+                print(
+                    f"{self.c.YELLOW}[+] Ping {ip} ...{self.c.WHITE}",
+                    end="\r",
+                )
 
-                                if ping(long2ip(i), "0.1") == True:
-                                    print(
-                                        f"{self.c.GREEN}\n   [-] ... Pong {str(long2ip(i))}{self.c.WHITE}"
-                                    )
-                                    ips.append(long2ip(i))
-                except:
-                    if ips == []:
-                        ips.append(self.ip)
-                        iplist = self.ip
+                if ping(ip, "0.1") == True:
+                    print(f"{self.c.GREEN}\n   [-] ... Pong {ip}{self.c.WHITE}")
+                    selected.append(ip)
 
-            self.prepare_scan(ips, ports, protos, iplist)
+        return selected
 
     def prepare_scan(self, ips, ports, protos, iplist):
         max_values = 100000
@@ -368,7 +323,7 @@ class SipScan:
         # threads to use
         self.threads = int(self.threads)
         nthreads = self.threads
-        total = len(list(product(ips, ports, protos)))
+        total = len(ips) * len(ports) * len(protos)
         if nthreads > total:
             nthreads = total
         if nthreads < 1:
@@ -442,11 +397,6 @@ class SipScan:
         values2 = []
         count = 0
 
-        iter = (a for a in enumerate(values))
-        total = sum(1 for _ in iter)
-
-        values = product(ips, ports, protos)
-
         start = time.time()
 
         for i, val in enumerate(values):
@@ -467,7 +417,6 @@ class SipScan:
                                         val_ipaddr = val2[0]
                                         val_port = int(val2[1])
                                         val_proto = val2[2]
-                                        scan = 1
 
                                         if (
                                             self.proto == "ALL"
@@ -475,9 +424,6 @@ class SipScan:
                                             and val_proto == "TLS"
                                         ):
                                             val_port = 5061
-
-                                        if self.domain == "":
-                                            self.domain = val_ipaddr
 
                                         executor.submit(
                                             self.scan_host,
@@ -504,8 +450,8 @@ class SipScan:
         end = time.time()
         self.totaltime = int(end - start)
 
-        self.found.sort()
-        self.ipsfound.sort()
+        self.found.sort(key=host_sort_key)
+        self.ipsfound.sort(key=host_sort_key)
         self.print()
         if len(self.cve) > 0:
             self.print_cve()
@@ -517,6 +463,9 @@ class SipScan:
 
     def scan_host(self, ipaddr, port, proto):
         if self.quit == False:
+            headers = None
+            sock_ssl = None
+
             try:
                 cursor.hide()
             except:
@@ -547,13 +496,22 @@ class SipScan:
                 return
 
             bind = "0.0.0.0"
-            lport = get_free_port()
+            lport = bind_local_port(sock, bind)
 
-            try:
-                sock.bind((bind, lport))
-            except:
-                lport = get_free_port()
-                sock.bind((bind, lport))
+            if lport == 0:
+                sock.close()
+                self.fail += 1
+
+                if self.fail > 50:
+                    print(
+                        f"{self.c.RED}Too many socket bind errors. Consider reducing the number of threads"
+                    )
+                    self.quit = True
+                    return
+
+                if self.verbose == 2:
+                    print(f"{self.c.RED}\nFailed to bind a local port{self.c.WHITE}")
+                return
 
             if self.proxy == "":
                 host = (str(ipaddr), port)
@@ -578,9 +536,9 @@ class SipScan:
             tdomain = self.to_domain
 
             if not self.from_domain or self.from_domain == "":
-                fdomain = self.domain
+                fdomain = domain
             if not self.to_domain or self.to_domain == "":
-                tdomain = self.domain
+                tdomain = domain
 
             if self.method == "REGISTER":
                 if self.to_user == "100" and self.from_user != "100":
@@ -647,8 +605,12 @@ class SipScan:
                     print(f"{self.c.YELLOW}{msg}")
 
                 rescode = "100"
+                # a peer that keeps answering 1xx used to keep this loop going forever
+                tries = 0
 
-                while rescode[:1] == "1":
+                while rescode[:1] == "1" and tries < 10:
+                    tries += 1
+
                     # receive temporary code
                     if proto == "TLS":
                         resp = sock_ssl.recv(4096)
@@ -693,13 +655,17 @@ class SipScan:
                         headers["response_text"],
                     )
 
-                    fps = fingerprinting(
-                        self.method, resp.decode(), headers, self.verbose
-                    )
+                    try:
+                        fps = fingerprinting(
+                            self.method, resp.decode(), headers, self.verbose
+                        )
+                    except Exception:
+                        # a missing header must not discard the whole result
+                        fps = []
 
                     fp = ""
                     for f in fps:
-                        if f == "":
+                        if fp == "":
                             fp = "%s" % f
                         else:
                             fp += "/%s" % f
@@ -734,21 +700,21 @@ class SipScan:
 
                     if headers["ua"] != "" and self.getcve == 1:
                         val = check_model(headers["ua"], fp, sip_type, self.cvelist)
-                        if val != "":
+                        if len(val) > 0:
                             for v in val:
                                 if v not in self.cve:
                                     self.cve.append(v)
             except socket.timeout:
                 pass
             except Exception as error:
+                # counted, so a scan that swallows errors says so at the end
+                self.errors += 1
+
                 if self.verbose == 2:
                     print(f"{self.c.RED}\n{error}{self.c.WHITE}")
                 pass
             finally:
-                sock.close()
-
-                if proto == "TLS":
-                    sock_ssl.close()
+                close_sockets(sock, sock_ssl)
 
             return headers
 
@@ -810,17 +776,13 @@ class SipScan:
                 f"{self.c.WHITE}+{'-' * (iplen + 2)}+{'-' * (polen + 2)}+{'-' * (prlen + 2)}+{'-' * (relen + 2)}+{'-' * (ualen + 2)}+{'-' * (tplen + 2)}+"
             )
 
-        if self.oifile != "":
-            if len(self.ipsfound) > 0:
-                f = open(self.oifile, "a+")
-
+        if self.oifile != "" and len(self.ipsfound) > 0:
+            with open(self.oifile, "a+") as fi:
                 for x in self.ipsfound:
-                    f.write(x + "\n")
-
-            f.close()
+                    fi.write(x + "\n")
 
         if self.ofile != "":
-            f = open(self.ofile, "a+")
+            f = open_log(self.ofile)
 
         if len(self.found) == 0:
             print(f"{self.c.WHITE}| {self.c.WHITE}{'Nothing found'.ljust(tlen - 2)} |")
@@ -890,6 +852,13 @@ class SipScan:
         )
         print(self.c.WHITE)
 
+        if self.errors > 0:
+            print(
+                f"{self.c.YELLOW}[!] {str(self.errors)} error(s) while scanning, hidden without {self.c.BYELLOW}-vv{self.c.WHITE}"
+            )
+            print(self.c.WHITE)
+            self.errors = 0
+
         if self.fp == 1 and len(self.found) > 0:
             print(
                 f"{self.c.YELLOW}[!] Fingerprinting is based on `To-tag` and other header values. The result may not be correct{self.c.WHITE}"
@@ -942,7 +911,7 @@ class SipScan:
         )
 
         if self.ofile != "":
-            f = open(self.ofile, "a+")
+            f = open_log(self.ofile)
 
         if len(self.cve) == 0:
             print(f"{self.c.WHITE}| {self.c.WHITE}{'Nothing found'.ljust(tlen - 2)} |")

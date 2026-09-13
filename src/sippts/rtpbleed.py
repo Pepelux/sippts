@@ -15,6 +15,7 @@ import os
 import sys
 import time
 from .lib.color import Color
+from .lib.functions import open_log
 from .lib.logos import Logo
 
 
@@ -55,12 +56,14 @@ class RTPBleed:
             f"{self.c.BWHITE}[✓] Number of tries per port: {self.c.YELLOW}{self.loops}"
         )
         print(
-            f"{self.c.BWHITE}[✓] Delay between tries: {self.c.YELLOW}{self.delay} microseconds"
+            f"{self.c.BWHITE}[✓] Delay between tries: {self.c.YELLOW}{self.delay} milliseconds"
         )
         print(self.c.WHITE)
 
         if self.ofile != "":
-            f = open(self.ofile, "a+")
+            # line buffered: these tools run until Ctrl+C, so a log flushed
+            # only on a clean exit is lost when the process is killed
+            f = open_log(self.ofile)
             f.write(f"Target IP: {self.ip}\n")
 
         # Create a UDP socket
@@ -109,21 +112,11 @@ class RTPBleed:
                                 size = len(msg)
 
                                 if size >= 12:
-                                    x = "%s%s" % (hex(msg[2])[2:], hex(msg[3])[2:])
-                                    seq = int("0x%s" % x, base=16)
-                                    x = "%s%s%s%s" % (
-                                        hex(msg[4])[2:],
-                                        hex(msg[5])[2:],
-                                        hex(msg[6])[2:],
-                                        hex(msg[7])[2:],
-                                    )
-                                    timestamp = int("0x%s" % x, base=16)
-                                    ssrc = "%s%s%s%s" % (
-                                        hex(msg[8])[2:],
-                                        hex(msg[9])[2:],
-                                        hex(msg[10])[2:],
-                                        hex(msg[11])[2:],
-                                    )
+                                    # hex() drops the leading zero of a byte
+                                    # below 0x10, so the fields are read as bytes
+                                    seq = int.from_bytes(msg[2:4], "big")
+                                    timestamp = int.from_bytes(msg[4:8], "big")
+                                    ssrc = msg[8:12].hex()
 
                                     print(
                                         f"\n{self.c.WHITE}received {str(size)} bytes from target port {str(rport)} - loop {str(loop)}"
@@ -133,8 +126,8 @@ class RTPBleed:
                                     )
                                     if self.ofile != "":
                                         f.write(f"received {str(size)} bytes from target port {str(rport)} - loop {str(loop)} - SSRC: {ssrc} - Timestamp: {timestamp} - Seq number: {seq}\n")
-                        except:
-                            # No data available
+                        except OSError:
+                            # No data available (a bare except swallowed Ctrl+C)
                             continue
                 except KeyboardInterrupt:
                     print(f"{self.c.YELLOW}\nYou pressed Ctrl+C!")
@@ -148,6 +141,8 @@ class RTPBleed:
                 port = self.end_port + 2
 
         print(self.c.WHITE)
+
+        sock.close()
 
         if self.ofile != "":
             f.write("\n")

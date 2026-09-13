@@ -9,10 +9,15 @@ from .color import Color
 
 
 class Logo:
-    def __init__(self, script):
+    def __init__(self, script, nocolor=0):
         self.script = script
 
         self.c = Color()
+
+        # the logo had its own Color instance, so -nocolor left escape codes
+        # of the banner in a redirected output
+        if nocolor == 1:
+            self.c.ansy()
         
     def print(self):
         print(f'\n' + self.c.RED + u'''☎️  SIPPTS''' + self.c.WHITE +

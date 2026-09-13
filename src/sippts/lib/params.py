@@ -33,8 +33,14 @@ def get_sippts_args():
     try:
         command = [
             "curl",
+            "-s",
+            "--connect-timeout",
+            "2",
+            "--max-time",
+            "4",
             "https://raw.githubusercontent.com/Pepelux/sippts/master/version",
-            "-H 'Cache-Control: no-cache, no-store'",
+            "-H",
+            "Cache-Control: no-cache, no-store",
         ]
         result = subprocess.run(
             command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
@@ -60,8 +66,14 @@ def get_sippts_args():
     try:
         command = [
             "curl",
+            "-s",
+            "--connect-timeout",
+            "2",
+            "--max-time",
+            "4",
             "https://raw.githubusercontent.com/Pepelux/sippts/master/cveversion",
-            "-H 'Cache-Control: no-cache, no-store'",
+            "-H",
+            "Cache-Control: no-cache, no-store",
         ]
         result = subprocess.run(
             command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
@@ -377,7 +389,7 @@ Usage examples:
         "-r",
         metavar="REMOTE_PORT",
         type=str,
-        help="Ports to scan. Ex: 5060 | 5070,5080 | 5060-5080 | 5060,5062,5070-5080 | ALL for 1-65536 (default: 5060)",
+        help="Ports to scan. Ex: 5060 | 5070,5080 | 5060-5080 | 5060,5062,5070-5080 | ALL for 1-65535 (default: 5060)",
         dest="rport",
         default="5060",
     )
@@ -1228,10 +1240,10 @@ Usage examples:
         "-p",
         metavar="PROTOCOL",
         type=str.upper,
-        help="Protocol: udp|tcp|tls (default: udp)",
+        help="Protocol: ws|wss (default: wss)",
         dest="proto",
-        choices=["UDP", "TCP", "TLS"],
-        default="udp",
+        choices=["WS", "WSS"],
+        default="WSS",
     )
     target.add_argument(
         "-path",
@@ -1356,6 +1368,14 @@ Usage examples:
     log.add_argument("-v", help="Increase verbosity", dest="verbose", action="count")
 
     other = parser_wssend.add_argument_group("Other options")
+    other.add_argument(
+        "-t",
+        metavar="TIMEOUT",
+        type=int,
+        help="Time to wait for an answer (default: 5)",
+        dest="timeout",
+        default=5,
+    )
     other.add_argument(
         "-local-ip",
         metavar="IP",
@@ -2502,7 +2522,11 @@ Usage examples:
         help="SIP method: options, invite, register, subscribe, notify, publish, message, ack, cancel, bye, prack, info, refer, update (default: options)",
         dest="method",
         choices=["OPTIONS", "REGISTER", "INVITE", "SUBSCRIBE", "NOTIFY", "PUBLISH", "MESSAGE", "ACK", "CANCEL", "BYE", "PRACK", "INFO", "REFER", "UPDATE"],
-        default="options",
+        # empty by default so that -b can randomize the method (including the
+        # FUZZ one); with 'options' hardcoded here the fuzzer always sent
+        # OPTIONS and the random method code was never reached. Without -b the
+        # module still falls back to OPTIONS
+        default="",
     )
     headers.add_argument(
         "-d",
@@ -2670,6 +2694,14 @@ Usage examples:
         help="Set Device (by default try to get it)",
         dest="dev",
         default="",
+    )
+    options.add_argument(
+        "-r",
+        metavar="REMOTE_PORT",
+        type=int,
+        help="Port to sniff (default: 5060, and 5061 for tls)",
+        dest="rport",
+        default=0,
     )
     options.add_argument(
         "-p",
@@ -2918,7 +2950,7 @@ Payloads
         metavar="DELAY",
         dest="delay",
         type=int,
-        help="Delay for timeout in microseconds (default: 1)",
+        help="Delay for timeout in milliseconds (default: 1)",
         default=1,
     )
     other.add_argument(
@@ -2982,7 +3014,7 @@ Payloads
         metavar="DELAY",
         dest="delay",
         type=int,
-        help="Delay for timeout in microseconds (default: 1)",
+        help="Delay for timeout in milliseconds (default: 1)",
         default=1,
     )
     other.add_argument(
@@ -3091,17 +3123,12 @@ Payloads
     if args.update == 1:
         import sysconfig
 
-        path = sysconfig.get_paths()["purelib"] + "/sippts/data/cve.csv"
-        if not os.path.isfile(path):
-            path = path.replace("/usr/", "/usr/local/").replace(
-                "site-packages", "dist-packages"
-            )
-
-        modulepath = sysconfig.get_paths()["purelib"] + "/sippts/"
-        if not os.path.isdir(modulepath):
-            modulepath = modulepath.replace("/usr/", "/usr/local/").replace(
-                "site-packages", "dist-packages"
-            )
+        # the files are replaced where the running code lives: with an editable
+        # install site-packages holds no sippts directory at all
+        modulepath = (
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + os.sep
+        )
+        path = modulepath + "data/cve.csv"
 
         binpath = sysconfig.get_paths()["scripts"] + "/sippts"
         if not os.path.isfile(binpath):
@@ -3109,13 +3136,34 @@ Payloads
                 "site-packages", "dist-packages"
             )
 
+        # a source checkout is updated with git, not by overwriting its files
+        checkout = source_checkout(modulepath)
+
+        if checkout != "":
+            print(f"{BYELLOW}SIPPTS is running from the source tree {BWHITE}{checkout}")
+            print(
+                f"{BWHITE}Update it with {BGREEN}git pull{BWHITE}, not with {BGREEN}-up"
+            )
+            print(WHITE)
+            sys.exit()
+
+        if not os.path.isdir(modulepath):
+            print(f"{BRED}Cannot find the installed modules in {modulepath}")
+            print(WHITE)
+            sys.exit()
+
         giturl = "https://raw.githubusercontent.com/Pepelux/sippts/master/"
 
         try:
             command = [
                 "curl",
+                "--connect-timeout",
+                "5",
+                "--max-time",
+                "30",
                 "https://raw.githubusercontent.com/Pepelux/sippts/master/version",
-                "-H 'Cache-Control: no-cache, no-store'",
+                "-H",
+                "Cache-Control: no-cache, no-store",
             ]
             result = subprocess.run(
                 command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
@@ -3124,9 +3172,7 @@ Payloads
             output = result.stdout
             error = result.stderr
 
-            if result.returncode == 0 and output != "404: Not Found":
-                current_cve_version = output.replace("\n", "")
-            else:
+            if result.returncode != 0 or output == "404: Not Found":
                 print(f"{BRED}Error downloading scripts")
                 print(WHITE)
                 sys.exit()
@@ -3271,8 +3317,13 @@ Payloads
         try:
             command = [
                 "curl",
+                "--connect-timeout",
+                "5",
+                "--max-time",
+                "30",
                 giturl + "cveversion",
-                "-H 'Cache-Control: no-cache, no-store'",
+                "-H",
+                "Cache-Control: no-cache, no-store",
             ]
             result = subprocess.run(
                 command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
@@ -3291,7 +3342,7 @@ Payloads
             sys.exit()
 
         if local_cve_version != current_cve_version:
-            download_file(giturl + "src/sippts/data/cve.csv", path)
+            download_file(giturl + "src/sippts/data/cve.csv", path, "cve.csv")
             print(f"{BYELLOW}CVE file has been updated")
         else:
             print(f"{BYELLOW}CVE file is in the last version")
@@ -3677,6 +3728,7 @@ Payloads
         PPI = args.ppi
         PAI = args.pai
         LOCALIP = args.localip
+        TIMEOUT = args.timeout
 
         return (
             COMMAND,
@@ -3700,6 +3752,7 @@ Payloads
             LOCALIP,
             PPI,
             PAI,
+            TIMEOUT,
         )
     elif COMMAND == "enumerate":
         if args.help == 1:
@@ -3723,6 +3776,7 @@ Payloads
         FROMNAME = args.from_name
         FROMUSER = args.from_user
         FROMDOMAIN = args.from_domain
+        FROMTAG = args.from_tag
         TONAME = args.to_name
         TOUSER = args.to_user
         TODOMAIN = args.to_domain
@@ -3742,6 +3796,7 @@ Payloads
             FROMNAME,
             FROMUSER,
             FROMDOMAIN,
+            FROMTAG,
             TONAME,
             TOUSER,
             TODOMAIN,
@@ -4066,6 +4121,7 @@ Payloads
         UA = args.user_agent
         THREADS = args.threads
         VERBOSE = args.verbose
+        OFILE = args.ofile
         NUMBER = args.number
         BAD = args.bad
         ALPHABET = args.alphabet
@@ -4093,6 +4149,7 @@ Payloads
             VERBOSE,
             NUMBER,
             BAD,
+            OFILE,
             ALPHABET,
             MAX,
             MIN,
@@ -4107,8 +4164,9 @@ Payloads
         PROTO = args.proto
         AUTH = args.auth
         VERBOSE = args.verbose
+        RPORT = args.rport
 
-        return COMMAND, DEV, OFILE, AUTH, VERBOSE, PROTO
+        return COMMAND, DEV, OFILE, AUTH, VERBOSE, PROTO, RPORT
     elif COMMAND == "spoof":
         if args.help == 1:
             parser_spoof.print_help()
@@ -4259,20 +4317,48 @@ Payloads
         exit()
 
 
+def source_checkout(path):
+    """
+    Root of the git checkout `path` belongs to, or an empty string when it does
+    not live inside one.
+    """
+    path = os.path.abspath(path)
+
+    while True:
+        if os.path.isdir(os.path.join(path, ".git")):
+            return path
+
+        parent = os.path.dirname(path)
+
+        if parent == path:
+            return ""
+
+        path = parent
+
+
 def download_file(url, path, file):
-    command = ["curl", url, "-H 'Cache-Control: no-cache, no-store'"]
-    result = subprocess.run(
-        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
-    )
+    if not os.path.isdir(os.path.dirname(path)):
+        print(f"{BRED}Cannot write {BGREEN}{path}{BRED}: directory not found")
+        return
 
-    output = result.stdout
-    error = result.stderr
+    try:
+        r = requests.get(url, headers={"Cache-Control": "no-cache, no-store"})
+    except Exception as error:
+        print(f"{BRED}Error downloading file {BGREEN}{url}{BRED}: {error}")
+        return
 
-    if result.returncode != 0 or output == "404: Not Found":
+    # a 404 page must not be written over a module that works
+    if not r.ok or r.content == b"" or r.content == b"404: Not Found":
         print(f"{BRED}Error downloading file {BGREEN}{url}")
+        return
 
-    else:
-        print(f"{WHITE}Updating {file}")
+    print(f"{WHITE}Updating {file}")
 
-        r = requests.get(url)
-        open(path, "wb").write(r.content)
+    # written aside and moved into place, so an interrupted write does not
+    # leave a truncated module behind
+    tmp = path + ".sippts-new"
+
+    with open(tmp, "wb") as f:
+        f.write(r.content)
+
+    os.replace(tmp, path)

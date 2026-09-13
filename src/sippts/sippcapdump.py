@@ -8,10 +8,12 @@ __copyright__ = "Copyright (C) 2015-2024, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
 
 import os
+import sys
 import re
+import shutil
 import subprocess
 import pyshark
-from .lib.functions import parse_digest
+from .lib.functions import parse_digest, packet_addresses, pyshark_compat, close_capture
 from .lib.color import Color
 from .lib.logos import Logo
 
@@ -30,15 +32,17 @@ class SipPcapDump:
         self.c = Color()
 
     def start(self):
+        pyshark_compat()
+
         try:
-            self.nocolor == int(self.nocolor)
+            self.nocolor = int(self.nocolor)
         except:
             self.nocolor = 0
 
         if self.nocolor == 1:
             self.c.ansy()
 
-        logo = Logo("sippcapdump")
+        logo = Logo("sippcapdump", self.nocolor)
         logo.print()
 
         if self.folder != "" and not os.path.isdir(self.folder):
@@ -46,30 +50,30 @@ class SipPcapDump:
                 os.mkdir(self.folder)
             except:
                 print(f"Error making folder {self.folder}")
-                exit()
+                sys.exit()
 
         try:
-            self.verbose == int(self.verbose)
+            self.verbose = int(self.verbose)
         except:
             self.verbose = 0
 
         try:
-            self.rtp_extract == int(self.rtp_extract)
+            self.rtp_extract = int(self.rtp_extract)
         except:
             self.rtp_extract = 0
 
         try:
-            self.sip == int(self.sip)
+            self.sip = int(self.sip)
         except:
             self.sip = 0
 
         try:
-            self.rtp == int(self.rtp)
+            self.rtp = int(self.rtp)
         except:
             self.rtp = 0
 
         try:
-            self.auth == int(self.auth)
+            self.auth = int(self.auth)
         except:
             self.auth = 0
 
@@ -106,8 +110,7 @@ class SipPcapDump:
             if self.folder != "":
                 fw.close()
 
-            capture.clear()
-            capture.close()
+            close_capture(capture)
 
         print(f"{self.c.BWHITE}SIP dialogs:{self.c.WHITE}")
 
@@ -122,8 +125,11 @@ class SipPcapDump:
 
         for packet in capture:
             protocol = packet.transport_layer
-            srcip = packet.ip.src
-            dstip = packet.ip.dst
+            (srcip, dstip) = packet_addresses(packet)
+
+            if srcip == None:
+                continue
+
             srcport = packet[protocol].srcport
             dstport = packet[protocol].dstport
 
@@ -178,47 +184,60 @@ class SipPcapDump:
 
             if cid not in sipcid:
                 sipcid.append(cid)
+
+            # every field of the packet travels with it: the dialogs are printed
+            # after reading the whole capture, not once per packet
             sipdata.append(
-                f"{cid}###{srcip}###{srcport}###{dstip}###{dstport}###{protocol}###{firstline}"
+                f"{cid}###{srcip}###{srcport}###{dstip}###{dstport}###{protocol}###{firstline}###{ua}###{sipfrom}###{sipto}###{sipcontact}"
             )
 
-            for cid in sipcid:
-                cont = 0
+        for cid in sipcid:
+            cont = 0
 
-                for line in sipdata:
-                    if line.find(cid) > -1:
-                        cont = cont + 1
+            for line in sipdata:
+                (
+                    c,
+                    srcip,
+                    srcport,
+                    dstip,
+                    dstport,
+                    protocol,
+                    firstline,
+                    ua,
+                    sipfrom,
+                    sipto,
+                    sipcontact,
+                ) = line.split("###")
 
-                        (c, srcip, srcport, dstip, dstport, protocol, firstline) = (
-                            line.split("###")
-                        )
+                if c != cid:
+                    continue
 
-                        data = f"{self.c.BWHITE}{str(cont)}{self.c.WHITE} [{self.c.BYELLOW}{srcip}{self.c.WHITE}:{self.c.BYELLOW}{srcport}{self.c.WHITE} => {self.c.BYELLOW}{dstip}{self.c.WHITE}:{self.c.BYELLOW}{dstport}{self.c.WHITE} {self.c.BWHITE}{protocol}{self.c.WHITE}] {self.c.BGREEN}{firstline}{self.c.WHITE}"
-                        dataf = f"{str(cont)} [{srcip}:{srcport} => {dstip}:{dstport} {protocol}] {firstline}"
-                        if ua != "":
-                            data = f"{data} - UA: {self.c.BMAGENTA}{ua}{self.c.WHITE}"
-                            dataf = f"{dataf} - UA: {ua}"
-                        if sipfrom != "":
-                            data = (
-                                f"{data} - From: {self.c.BCYAN}{sipfrom}{self.c.WHITE}"
-                            )
-                            dataf = f"{dataf} - From: {sipfrom}"
-                        if sipto != "":
-                            data = f"{data} - To: {self.c.BCYAN}{sipto}{self.c.WHITE}"
-                            dataf = f"{dataf} - To: {sipto}"
-                        if sipcontact != "":
-                            data = f"{data} - Contact: {self.c.BCYAN}{sipcontact}{self.c.WHITE}"
-                            dataf = f"{dataf} - Contact: {sipcontact}"
+                cont = cont + 1
 
-                        print(data)
+                data = f"{self.c.BWHITE}{str(cont)}{self.c.WHITE} [{self.c.BYELLOW}{srcip}{self.c.WHITE}:{self.c.BYELLOW}{srcport}{self.c.WHITE} => {self.c.BYELLOW}{dstip}{self.c.WHITE}:{self.c.BYELLOW}{dstport}{self.c.WHITE} {self.c.BWHITE}{protocol}{self.c.WHITE}] {self.c.BGREEN}{firstline}{self.c.WHITE}"
+                dataf = f"{str(cont)} [{srcip}:{srcport} => {dstip}:{dstport} {protocol}] {firstline}"
+                if ua != "":
+                    data = f"{data} - UA: {self.c.BMAGENTA}{ua}{self.c.WHITE}"
+                    dataf = f"{dataf} - UA: {ua}"
+                if sipfrom != "":
+                    data = f"{data} - From: {self.c.BCYAN}{sipfrom}{self.c.WHITE}"
+                    dataf = f"{dataf} - From: {sipfrom}"
+                if sipto != "":
+                    data = f"{data} - To: {self.c.BCYAN}{sipto}{self.c.WHITE}"
+                    dataf = f"{dataf} - To: {sipto}"
+                if sipcontact != "":
+                    data = f"{data} - Contact: {self.c.BCYAN}{sipcontact}{self.c.WHITE}"
+                    dataf = f"{dataf} - Contact: {sipcontact}"
 
-                        if self.folder != "":
-                            fw.write(dataf + "\n")
-
-                print(self.c.WHITE)
+                print(data)
 
                 if self.folder != "":
-                    fw.write("\n")
+                    fw.write(dataf + "\n")
+
+            print(self.c.WHITE)
+
+            if self.folder != "":
+                fw.write("\n")
 
         if self.folder != "":
             fw.close()
@@ -248,8 +267,7 @@ class SipPcapDump:
 
         print(self.c.WHITE)
 
-        capture.clear()
-        capture.close()
+        close_capture(capture)
 
     def sip_auth(self):
         print(f"{self.c.BWHITE}SIP authentications:{self.c.WHITE}")
@@ -265,8 +283,11 @@ class SipPcapDump:
         for packet in capture:
             cont = cont + 1
 
-            ipsrc = packet.ip.src
-            ipdst = packet.ip.dst
+            (ipsrc, ipdst) = packet_addresses(packet)
+
+            if ipsrc == None:
+                continue
+
             try:
                 method = packet.sip.Method
             except:
@@ -325,8 +346,7 @@ class SipPcapDump:
                 f"{self.c.BWHITE}To crack hashes use '{self.c.BGREEN}sippts dump{self.c.BWHITE}' and '{self.c.BGREEN}sippts dcrack{self.c.WHITE}'"
             )
 
-        capture.clear()
-        capture.close()
+        close_capture(capture)
 
         print(self.c.WHITE)
 
@@ -350,8 +370,7 @@ class SipPcapDump:
             if self.folder != "":
                 fw.close()
 
-            capture.clear()
-            capture.close()
+            close_capture(capture)
 
         if self.folder != "":
             fw = open(f"{self.folder}/rtp_frames.txt", "w")
@@ -363,8 +382,11 @@ class SipPcapDump:
                 protocol = packet.transport_layer
             except:
                 protocol = ""
-            srcip = packet.ip.src
-            dstip = packet.ip.dst
+            (srcip, dstip) = packet_addresses(packet)
+
+            if srcip == None:
+                continue
+
             try:
                 srcport = packet[protocol].srcport
             except:
@@ -406,16 +428,16 @@ class SipPcapDump:
             dataf = f"[{srcip}:{srcport} => {dstip}:{dstport} {protocol}] {firstline}"
             if ua != "":
                 data = f"{data} - UA: {self.c.BMAGENTA}{ua}{self.c.WHITE}"
-                dataf = f"{data} - UA: {ua}"
+                dataf = f"{dataf} - UA: {ua}"
             if sipfrom != "":
                 data = f"{data} - From: {self.c.BCYAN}{sipfrom}{self.c.WHITE}"
-                dataf = f"{data} - From: {sipfrom}"
+                dataf = f"{dataf} - From: {sipfrom}"
             if sipto != "":
                 data = f"{data} - To: {self.c.BCYAN}{sipto}{self.c.WHITE}"
-                dataf = f"{data} - To: {sipto}"
+                dataf = f"{dataf} - To: {sipto}"
             if sipcontact != "":
                 data = f"{data} - Contact: {self.c.BCYAN}{sipcontact}{self.c.WHITE}"
-                dataf = f"{data} - Contact: {sipcontact}"
+                dataf = f"{dataf} - Contact: {sipcontact}"
 
             print(data)
 
@@ -425,10 +447,28 @@ class SipPcapDump:
         if self.folder != "":
             fw.close()
 
-        capture.clear()
-        capture.close()
+        close_capture(capture)
 
         print(self.c.WHITE)
+
+    def which(self, program):
+        """
+        Path of an external tool, or None when it is not installed.
+
+        It was called without being defined anywhere, so -r died with
+        AttributeError before looking at the capture. tshark is asked to
+        pyshark first, which knows where it lives outside the PATH (inside
+        the Wireshark bundle on macOS, for instance).
+        """
+        if program == "tshark":
+            try:
+                from pyshark.tshark.tshark import get_process_path
+
+                return get_process_path()
+            except Exception:
+                pass
+
+        return shutil.which(program)
 
     def extract_rtp(self):
         print(f"{self.c.BYELLOW}Looking for RTP conversations ...{self.c.WHITE}")
@@ -436,20 +476,35 @@ class SipPcapDump:
         if self.which("sox") == None:
             print(f"{self.c.RED}Error: sox not found")
             print(self.c.WHITE)
-            exit()
+            sys.exit()
 
         if self.which("ffmpeg") == None:
             print(f"{self.c.RED}Error: ffmpeg not found")
             print(self.c.WHITE)
-            exit()
+            sys.exit()
+
+        if self.which("tshark") == None:
+            print(f"{self.c.RED}Error: tshark not found")
+            print(self.c.WHITE)
+            sys.exit()
+
+        if self.which("xxd") == None:
+            print(f"{self.c.RED}Error: xxd not found")
+            print(self.c.WHITE)
+            sys.exit()
+
+        tshark_bin = self.which("tshark")
 
         ssrc = []
 
-        pos = self.file.rfind(".")
-        self.folder = self.file[0:pos]
-        pos = self.folder.rfind("/")
-        if pos > -1:
-            self.folder = self.folder[pos + 1 :]
+        # the folder given with -folder is respected: only when there is none
+        # the name of the capture is used
+        if self.folder == "":
+            pos = self.file.rfind(".")
+            self.folder = self.file[0:pos]
+            pos = self.folder.rfind("/")
+            if pos > -1:
+                self.folder = self.folder[pos + 1 :]
 
         if not os.path.isdir(self.folder):
             try:
@@ -457,27 +512,36 @@ class SipPcapDump:
             except:
                 print(f"{self.c.RED}Error making folder {self.folder}")
                 print(self.c.WHITE)
-                exit()
+                sys.exit()
 
-        with open("sippts_dump.txt", "w") as out, open(self.file, "rb") as inp:
-            subprocess.run(
-                ["tshark", "-i", "-"],
-                stdin=inp,
-                stdout=out,
-                stderr=subprocess.DEVNULL,
-            )
+        # the dump goes to a temporary file, not to the current directory,
+        # where it collided between runs and needed write permission
+        import tempfile
 
-        f = open("sippts_dump.txt", "r")
-        for line in f:
-            line = line.replace("\n", "")
-            m = re.search(r".*RTP.*SSRC=(0x[a-f|A-F|0-9]*),.*", line)
-            if m:
-                val = m.group(1)
-                if val not in ssrc:
-                    ssrc.append(val)
+        fd, dumpfile = tempfile.mkstemp(prefix="sippts_dump_", suffix=".txt")
+        os.close(fd)
 
-        f.close()
-        os.remove("sippts_dump.txt")
+        try:
+            with open(dumpfile, "w") as out, open(self.file, "rb") as inp:
+                subprocess.run(
+                    [tshark_bin, "-i", "-"],
+                    stdin=inp,
+                    stdout=out,
+                    stderr=subprocess.DEVNULL,
+                )
+
+            with open(dumpfile, "r") as f:
+                for line in f:
+                    line = line.replace("\n", "")
+                    m = re.search(r".*RTP.*SSRC=(0x[a-f|A-F|0-9]*),.*", line)
+                    if m:
+                        val = m.group(1)
+                        if val not in ssrc:
+                            ssrc.append(val)
+        finally:
+            if os.path.isfile(dumpfile):
+                os.remove(dumpfile)
+
         cont = 0
 
         for s in ssrc:
@@ -486,7 +550,7 @@ class SipPcapDump:
 
             tshark = subprocess.run(
                 [
-                    "tshark", "-n", "-r", self.file, "-2",
+                    tshark_bin, "-n", "-r", self.file, "-2",
                     "-R", "rtp", "-R", f"rtp.ssrc == {s}",
                     "-T", "fields", "-e", "rtp.payload",
                 ],

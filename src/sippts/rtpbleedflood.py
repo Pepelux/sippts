@@ -39,7 +39,7 @@ class RTPBleedFlood:
         self.payload = int(self.payload)
 
         try:
-            self.verbose == int(self.verbose)
+            self.verbose = int(self.verbose)
         except:
             self.verbose = 0
 
@@ -94,21 +94,9 @@ class RTPBleedFlood:
                     size = len(msg)
 
                     if size >= 12:
-                        x = "%s%s" % (hex(msg[2])[2:], hex(msg[3])[2:])
-                        seq = int("0x%s" % x, base=16)
-                        x = "%s%s%s%s" % (
-                            hex(msg[4])[2:],
-                            hex(msg[5])[2:],
-                            hex(msg[6])[2:],
-                            hex(msg[7])[2:],
-                        )
-                        timestamp = int("0x%s" % x, base=16)
-                        ssrc = "%s%s%s%s" % (
-                            hex(msg[8])[2:],
-                            hex(msg[9])[2:],
-                            hex(msg[10])[2:],
-                            hex(msg[11])[2:],
-                        )
+                        # hex() drops the leading zero of a byte below 0x10,
+                        # so the fields are read as bytes
+                        seq = int.from_bytes(msg[2:4], "big")
 
                         if self.verbose == 1:
                             print(
@@ -120,8 +108,8 @@ class RTPBleedFlood:
                                 end="\r",
                             )
                         count += 1
-                except:
-                    # No data available
+                except OSError:
+                    # No data available (a bare except swallowed Ctrl+C)
                     continue
             except KeyboardInterrupt:
                 print(f"{self.c.YELLOW}\nYou pressed Ctrl+C!")

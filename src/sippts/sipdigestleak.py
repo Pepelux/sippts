@@ -7,7 +7,6 @@ __license__ = "GPL"
 __copyright__ = "Copyright (C) 2015-2024, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
 
-import ipaddress
 import re
 import socket
 import sys
@@ -15,17 +14,19 @@ import ssl
 import time
 import signal
 from .lib.functions import (
+    open_log,
     create_message,
+    close_sockets,
     create_response_error,
     create_response_ok,
     parse_message,
     parse_digest,
     generate_random_string,
     get_machine_default_ip,
-    ip2long,
-    get_free_port,
+    expand_targets,
+    host_sort_key,
+    bind_local_port,
     calculateHash,
-    long2ip,
     ping,
 )
 from .lib.color import Color
@@ -69,22 +70,34 @@ class SipDigestLeak:
         self.c = Color()
 
     def start(self):
+        # from sippts-gui it arrives as text and the comparison against 5060
+        # below never matched, so -p TLS did not switch to the default 5061
+        try:
+            self.rport = int(self.rport)
+        except (TypeError, ValueError):
+            self.rport = 5060
+
+        # reset the stop flag: after a Ctrl+C the object kept it set, so from
+        # sippts-gui (where the module instance is reused) every later run
+        # did nothing at all
+        self.quit = False
+
         supported_protos = ["UDP", "TCP", "TLS"]
 
         self.proto = self.proto.upper()
 
         try:
-            self.verbose == int(self.verbose)
+            self.verbose = int(self.verbose)
         except:
             self.verbose = 0
 
         try:
-            self.sdp == int(self.sdp)
+            self.sdp = int(self.sdp)
         except:
             self.sdp = 0
 
         try:
-            self.sdes == int(self.sdes)
+            self.sdes = int(self.sdes)
         except:
             self.sdes = 0
 
@@ -95,6 +108,12 @@ class SipDigestLeak:
             self.auth_mode = "Proxy-Authenticate"
         else:
             self.auth_mode = "WWW-Authenticate"
+
+        # from sippts-gui it arrives as text and the pre-scan ping never ran
+        try:
+            self.ping = int(self.ping)
+        except (TypeError, ValueError):
+            self.ping = 0
 
         if self.ping == 1:
             self.ping = "True"
@@ -158,43 +177,40 @@ class SipDigestLeak:
             )
 
         if self.file == "":
+            try:
+                (targets, names) = expand_targets(self.ip)
+            except ValueError as error:
+                print(f"{self.c.BRED}{error}")
+                print(self.c.WHITE)
+                sys.exit()
+
+            if targets == []:
+                print(f"{self.c.BRED}No target to scan in {self.ip}")
+                print(self.c.WHITE)
+                sys.exit()
+
+            # when the target is a single host name, keep the name as SIP domain
+            # (for a network or a range each host uses its own address, see call)
+            if self.domain == "" and len(names) == 1 and len(targets) == 1:
+                self.domain = names[0]
+
             ips = []
-            hosts = []
-            for i in self.ip.split(","):
-                try:
-                    i = socket.gethostbyname(i)
-                except:
-                    pass
-                hlist = list(ipaddress.ip_network(str(i)).hosts())
 
-                if hlist == []:
-                    hosts.append(i)
-                else:
-                    for h in hlist:
-                        hosts.append(h)
-
-            last = len(hosts) - 1
-            start_ip = hosts[0]
-            end_ip = hosts[last]
-
-            ipini = int(ip2long(str(start_ip)))
-            ipend = int(ip2long(str(end_ip)))
-
-            for i in range(ipini, ipend + 1):
+            for target_ip in targets:
                 if self.quit == False:
                     if self.ping == "False":
-                        ips.append(long2ip(i))
+                        ips.append(target_ip)
                     else:
                         print(
-                            f"{self.c.YELLOW}[+] Ping {str(long2ip(i))} ...{self.c.WHITE}",
+                            f"{self.c.YELLOW}[+] Ping {target_ip} ...{self.c.WHITE}",
                             end="\r",
                         )
 
-                        if ping(long2ip(i), "0.1") == True:
+                        if ping(target_ip, "0.1") == True:
                             print(
-                                f"{self.c.GREEN}\n   [-] ... Pong {str(long2ip(i))}{self.c.WHITE}"
+                                f"{self.c.GREEN}\n   [-] ... Pong {target_ip}{self.c.WHITE}"
                             )
-                            ips.append(long2ip(i))
+                            ips.append(target_ip)
 
             for ip in ips:
                 if self.quit == False:
@@ -205,23 +221,38 @@ class SipDigestLeak:
                     line = f.readline()
 
                     while line and self.quit == False:
+                        # ip:port/proto, or just an address using -r and -p
                         m = re.search(
-                            r"([0-9]*.[0-9]*.[0-9]*.[0-9]*):([0-9]*)\/([A-Z]*)", line
+                            r"([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+):([0-9]+)\/([a-zA-Z]+)",
+                            line,
                         )
                         if m:
                             self.ip = "%s" % (m.group(1))
                             self.port = "%s" % (m.group(2))
-                            self.proto = "%s" % (m.group(3))
+                            self.proto = ("%s" % (m.group(3))).upper()
 
-                        self.call(self.ip, self.rport, self.proto)
+                            self.call(self.ip, self.port, self.proto)
+                        else:
+                            m = re.fullmatch(
+                                r"\s*([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)\s*", line
+                            )
+                            if m:
+                                self.ip = "%s" % (m.group(1))
+
+                                self.call(self.ip, self.rport, self.proto)
+                            elif line.strip() != "":
+                                print(
+                                    f"{self.c.YELLOW}[!] Skipping line: {line.strip()}{self.c.WHITE}"
+                                )
+
                         line = f.readline()
 
                 f.close()
             except:
                 print(f"Error reading file {self.file}")
-                exit()
+                sys.exit()
 
-        self.found.sort()
+        self.found.sort(key=host_sort_key)
         self.print()
 
     def signal_handler(self, sig, frame):
@@ -259,20 +290,23 @@ class SipDigestLeak:
             except:
                 print(f"{self.c.BRED}Error getting local IP")
                 print(
-                    f"{self.c.BWHITE}Try with {self.c.BYELLOW}-local-ip{self.cBWHITE} param"
+                    f"{self.c.BWHITE}Try with {self.c.BYELLOW}-local-ip{self.c.BWHITE} param"
                 )
                 print(self.c.WHITE)
-                exit()
+                sys.exit()
 
-        # SIP headers
-        if self.host != "" and self.domain == "":
-            self.domain = self.host
-        if self.domain == "":
-            self.domain = self.ip
-        if not self.from_domain or self.from_domain == "":
-            self.from_domain = self.domain
-        if not self.to_domain or self.to_domain == "":
-            self.to_domain = self.domain
+        # SIP headers (per host: a network or a range has no single domain)
+        domain = self.domain
+        if domain == "":
+            domain = ip
+
+        fdomain = self.from_domain
+        tdomain = self.to_domain
+
+        if not fdomain or fdomain == "":
+            fdomain = domain
+        if not tdomain or tdomain == "":
+            tdomain = domain
 
         if self.contact_domain == "":
             self.contact_domain = local_ip
@@ -290,14 +324,15 @@ class SipDigestLeak:
             print(self.c.WHITE)
             sys.exit(1)
 
+        sock_ssl = None
         bind = "0.0.0.0"
-        lport = 5060
+        lport = bind_local_port(sock, bind, 5060)
 
-        try:
-            sock.bind((bind, lport))
-        except:
-            lport = get_free_port()
-            sock.bind((bind, lport))
+        if lport == 0:
+            sock.close()
+            print(f"{self.c.RED}Failed to bind a local port")
+            print(self.c.WHITE)
+            return
 
         if self.proxy == "":
             host = (str(ip), int(port))
@@ -320,12 +355,12 @@ class SipDigestLeak:
             self.contact_domain,
             self.from_user,
             self.from_name,
-            self.from_domain,
+            fdomain,
             self.to_user,
             self.to_name,
-            self.to_domain,
+            tdomain,
             proto,
-            self.domain,
+            domain,
             self.user_agent,
             lport,
             branch,
@@ -373,8 +408,12 @@ class SipDigestLeak:
                 sock.sendto(bytes(msg[:8192], "utf-8"), host)
 
             rescode = "100"
+            # a peer that keeps answering 1xx used to keep this loop going forever
+            tries = 0
 
-            while rescode[:1] == "1":
+            while rescode[:1] == "1" and tries < 10:
+                tries += 1
+
                 # receive temporary code
                 if self.proto == "TLS":
                     resp = sock_ssl.recv(4096)
@@ -418,12 +457,12 @@ class SipDigestLeak:
                     self.contact_domain,
                     self.from_user,
                     self.from_name,
-                    self.from_domain,
+                    fdomain,
                     self.to_user,
                     self.to_name,
-                    self.to_domain,
+                    tdomain,
                     proto,
-                    self.domain,
+                    domain,
                     self.user_agent,
                     lport,
                     branch,
@@ -460,7 +499,7 @@ class SipDigestLeak:
                     headers = parse_digest(auth)
                     realm = headers["realm"]
                     nonce = headers["nonce"]
-                    uri = "sip:%s@%s" % (self.to_user, self.domain)
+                    uri = "sip:%s@%s" % (self.to_user, domain)
                     algorithm = headers["algorithm"]
                     cnonce = headers["cnonce"]
                     nc = headers["nc"]
@@ -508,12 +547,12 @@ class SipDigestLeak:
                         self.contact_domain,
                         self.from_user,
                         self.from_name,
-                        self.from_domain,
+                        fdomain,
                         self.to_user,
                         self.to_name,
-                        self.to_domain,
+                        tdomain,
                         self.proto,
-                        self.domain,
+                        domain,
                         self.user_agent,
                         lport,
                         branch,
@@ -591,12 +630,12 @@ class SipDigestLeak:
                                         self.contact_domain,
                                         self.from_user,
                                         self.from_name,
-                                        self.from_domain,
+                                        fdomain,
                                         self.to_user,
                                         self.to_name,
-                                        self.to_domain,
+                                        tdomain,
                                         proto,
-                                        self.domain,
+                                        domain,
                                         self.user_agent,
                                         lport,
                                         branch,
@@ -635,7 +674,7 @@ class SipDigestLeak:
                 cuser = headers["contactuser"]
                 cdomain = headers["contactdomain"]
                 if cdomain == "":
-                    cdomain = self.domain
+                    cdomain = domain
                 else:
                     if cuser != None and cuser != "":
                         cdomain = cuser + "@" + cdomain
@@ -651,10 +690,10 @@ class SipDigestLeak:
                     self.contact_domain,
                     self.from_user,
                     self.from_name,
-                    self.from_domain,
+                    fdomain,
                     self.to_user,
                     self.to_name,
-                    self.to_domain,
+                    tdomain,
                     proto,
                     cdomain,
                     self.user_agent,
@@ -727,7 +766,7 @@ class SipDigestLeak:
                     self.from_user,
                     self.to_user,
                     proto,
-                    self.domain,
+                    domain,
                     lport,
                     cseq,
                     "BYE",
@@ -780,13 +819,16 @@ class SipDigestLeak:
                     self.from_user,
                     self.to_user,
                     proto,
-                    self.domain,
+                    domain,
                     lport,
                     cseq,
                     branch,
                     callid,
                     tag,
                     totag,
+                    headers["via2"],
+                    headers["from"],
+                    headers["to"],
                 )
 
                 print(f"{self.c.YELLOW}[=>] Request 200 Ok")
@@ -805,7 +847,7 @@ class SipDigestLeak:
                 if auth != "":
                     print(f"{self.c.BGREEN}Auth={auth}\n{self.c.WHITE}")
 
-                    line = "%s###%d###%s###%s" % (ip, port, proto, auth)
+                    line = "%s###%s###%s###%s" % (ip, port, proto, auth)
                     self.found.append(line)
 
                     headers = parse_digest(auth)
@@ -824,7 +866,7 @@ class SipDigestLeak:
                             headers["response"],
                         )
 
-                        f = open(self.ofile, "a+")
+                        f = open_log(self.ofile)
                         f.write(data)
                         f.write("\n")
                         f.close()
@@ -832,7 +874,7 @@ class SipDigestLeak:
                         print(f"{self.c.WHITE}Auth data saved in file {self.ofile}")
                 else:
                     print(f"{self.c.BRED}No Auth Digest received :(\n{self.c.WHITE}")
-                    line = "%s###%d###%s###No Auth Digest received :(" % (
+                    line = "%s###%s###%s###No Auth Digest received :(" % (
                         ip,
                         port,
                         proto,
@@ -840,7 +882,7 @@ class SipDigestLeak:
                     self.found.append(line)
             else:
                 print(f"{self.c.BRED}No Auth Digest received :(\n{self.c.WHITE}")
-                line = "%s###%d###%s###%s %s" % (
+                line = "%s###%s###%s###%s %s" % (
                     ip,
                     port,
                     proto,
@@ -850,13 +892,13 @@ class SipDigestLeak:
                 self.found.append(line)
         except socket.timeout:
             print(f"{self.c.BRED}No Auth Digest received :(\n{self.c.WHITE}")
-            line = "%s###%d###%s###No Auth Digest received :(" % (ip, port, proto)
+            line = "%s###%s###%s###No Auth Digest received :(" % (ip, port, proto)
             self.found.append(line)
             pass
         except:
             pass
         finally:
-            sock.close()
+            close_sockets(sock, sock_ssl)
 
         return
 
@@ -895,7 +937,7 @@ class SipDigestLeak:
             print(f"{self.c.WHITE}| {self.c.WHITE}{'Nothing found'.ljust(tlen - 2)} |")
         else:
             if self.lfile != "":
-                f = open(self.lfile, "w")
+                f = open_log(self.lfile, "w")
 
             for x in self.found:
                 (ip, port, proto, res) = x.split("###")

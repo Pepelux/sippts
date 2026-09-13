@@ -18,7 +18,9 @@ class Video:
         except: 
             pass
 
-        self.scan(5060, 5061)
+        # 5060-5070: con 5060-5061 tres de los hosts de la tabla final
+        # nunca llegaban a anunciarse durante el barrido
+        self.scan(5060, 5070)
         self.exten(100, 999)
         self.rcrack()
 
@@ -113,21 +115,21 @@ class Video:
                 pos += 1
                 if pos > 3:
                     pos = 0
-                time.sleep(0.005)
+                time.sleep(0.002)
                 print(
                     f"[{line[pos]}] Scanning 192.168.1.{str(i)}:{str(j)}/TCP", end="\r"
                 )
                 pos += 1
                 if pos > 3:
                     pos = 0
-                time.sleep(0.005)
+                time.sleep(0.002)
                 print(
                     f"[{line[pos]}] Scanning 192.168.1.{str(i)}:{str(j)}/TLS", end="\r"
                 )
                 pos += 1
                 if pos > 3:
                     pos = 0
-                time.sleep(0.005)
+                time.sleep(0.002)
 
                 if i == 25 and j == 5060:
                     print(
@@ -139,7 +141,7 @@ class Video:
                     )
                 if i == 170 and j == 5068:
                     print(
-                        f"{self.c.WHITE}Response <200 Ok> from 192.168.1.170:5061/UDP with User-Agent Asterisk PBX 13.18.5{self.c.BYELLOW}"
+                        f"{self.c.WHITE}Response <200 Ok> from 192.168.1.170:5068/UDP with User-Agent Asterisk PBX 13.18.5{self.c.BYELLOW}"
                     )
                 if i == 180 and j == 5060:
                     print(
@@ -149,9 +151,9 @@ class Video:
                     print(
                         f"{self.c.WHITE}Response <200 Ok> from 192.168.1.182:5066/UDP with Grandstream HT701 1.0.8.2{self.c.BYELLOW}"
                     )
-                if i == 195 and j == 5070:
+                if i == 175 and j == 5070:
                     print(
-                        f"{self.c.WHITE}Response <200 Ok> from 192.168.1.195:5070/UDP with Grandstream GXP2130 1.0.11.57{self.c.BYELLOW}"
+                        f"{self.c.WHITE}Response <200 Ok> from 192.168.1.175:5070/UDP with Grandstream GXP2130 1.0.11.57{self.c.BYELLOW}"
                     )
                 if i == 198 and j == 5060:
                     print(
