@@ -251,6 +251,23 @@ v4.2.0 (Sep/2026):
   - digest: read the quoted values up to their closing quote, so a username
     with + or @ (an E.164 number), a realm with a space or a response in upper
     case hex are no longer dropped as empty
+  - digest: SHA-512-256, the algorithm RFC 8760 defines for SIP, was answered
+    with an MD5 hash without a word, so against a server that asks for it the
+    tools reported wrong credentials and dcrack never cracked the digest even
+    with the password in the wordlist. It is NOT SHA-512 cut down to 64
+    characters: it uses its own initialization vector
+  - digest: an algorithm that cannot be computed is reported on stderr instead
+    of silently falling back to MD5 and going out wrong
+  - digest: the -sess variant applies to every algorithm, not only to MD5-sess,
+    so SHA-256-sess and SHA-512-256-sess were building HA1 the wrong way
+  - digest: qop=auth-int hashes the body also when it is empty, H(""), as the
+    RFC asks. Deciding by the body instead of by the qop left auth-int wrong
+    even for REGISTER, OPTIONS or BYE, which carry no body
+  - digest: a server offering several algorithms sends one WWW-Authenticate per
+    algorithm, each with its own nonce, and the parser was walking all of them
+    accumulating into a single structure: the answer went out with the nonce of
+    one challenge and the realm of another. Now each challenge is read apart and
+    the strongest one that can really be computed is answered, as RFC 8760 asks
   - every key of a parsed message always exists: reading a header that was not
     present raised KeyError and the caller discarded the whole packet, which
     hid every SIP answer from the sniffer and broke the digest flow of send,

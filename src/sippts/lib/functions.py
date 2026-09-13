@@ -7,6 +7,7 @@ import socket
 import subprocess
 import struct
 import os
+import sys
 import hashlib
 import platform
 
@@ -1147,9 +1148,75 @@ def parse_message(buffer):
     return data
 
 
-def parse_digest(buffer):
-    headers = buffer.split("\r\n")
+def _sha512_256(data=b""):
+    """
+    SHA-512/256 of FIPS 180-4, the algorithm RFC 8760 defines for SIP.
 
+    It is NOT SHA-512 cut down to 64 hex characters: it uses a different
+    initialization vector, so truncating gives a completely different value
+    and the server rejects the credentials.
+    """
+    return hashlib.new("sha512_256", data)
+
+
+try:
+    _sha512_256(b"")
+    _HAS_SHA512_256 = True
+except ValueError:
+    # the OpenSSL of the system does not provide it
+    _HAS_SHA512_256 = False
+
+
+# RFC 8760 defines SHA-256 and SHA-512-256 for SIP. SHA-1 and plain SHA-512
+# are not in the RFC but are kept because they were already accepted here.
+_HASH_ALGORITHMS = {
+    "MD5": hashlib.md5,
+    "SHA": hashlib.sha1,
+    "SHA1": hashlib.sha1,
+    "SHA-1": hashlib.sha1,
+    "SHA-256": hashlib.sha256,
+    "SHA256": hashlib.sha256,
+    "SHA-512": hashlib.sha512,
+    "SHA512": hashlib.sha512,
+}
+
+if _HAS_SHA512_256:
+    _HASH_ALGORITHMS["SHA-512-256"] = _sha512_256
+    _HASH_ALGORITHMS["SHA512-256"] = _sha512_256
+    _HASH_ALGORITHMS["SHA-512/256"] = _sha512_256
+
+# algorithms already reported as unknown, to warn only once each
+_warned_algorithms = set()
+
+
+def normalize_algorithm(algorithm):
+    """
+    Upper case and without the -sess suffix, which only changes how HA1 is
+    built and not which hash function is used.
+    """
+    return re.sub(r"-?SESS$", "", str(algorithm).strip().upper())
+
+
+def supported_algorithms():
+    """Names of the digest algorithms this build can really compute."""
+    return sorted(set(_HASH_ALGORITHMS))
+
+
+def algorithm_supported(algorithm):
+    return normalize_algorithm(algorithm) in _HASH_ALGORITHMS
+
+
+# RFC 8760 asks the client to answer the strongest challenge it supports.
+# A -sess variant counts as its base algorithm.
+_ALGORITHM_STRENGTH = ["SHA-512-256", "SHA-256", "SHA-1", "MD5"]
+
+
+def parse_digest_challenge(header):
+    """
+    Read ONE authentication header and return its fields.
+
+    Returns None if the line carries no digest data at all.
+    """
     data = dict()
 
     # the defaults are set once: inside the loop every line reset the fields
@@ -1176,41 +1243,151 @@ def parse_digest(buffer):
         "cnonce": r"cnonce=\"([^\"]*)\"",
     }
 
-    for header in headers:
-        for field, regex in quoted.items():
-            m = re.search(regex, header)
-            if m:
-                data[field] = "%s" % (m.group(1))
+    visto = False
 
-        # these three travel quoted or bare depending on the implementation
-        m = re.search(r"algorithm=\"*([\w\-]+)\"*", header)
+    for field, regex in quoted.items():
+        m = re.search(regex, header)
         if m:
-            data["algorithm"] = "%s" % (m.group(1))
+            data[field] = "%s" % (m.group(1))
+            visto = True
 
-        m = re.search(r"\bnc=\"*([\w\+]+)\"*", header)
-        if m:
-            data["nc"] = "%s" % (m.group(1))
+    # these three travel quoted or bare depending on the implementation
+    m = re.search(r"algorithm=\"*([\w\-]+)\"*", header)
+    if m:
+        data["algorithm"] = "%s" % (m.group(1))
+        visto = True
 
-        m = re.search(r"\bqop=\"*([\w\+]+)\"*", header)
-        if m:
-            data["qop"] = "%s" % (m.group(1))
+    m = re.search(r"\bnc=\"*([\w\+]+)\"*", header)
+    if m:
+        data["nc"] = "%s" % (m.group(1))
+        visto = True
+
+    m = re.search(r"\bqop=\"*([\w\+]+)\"*", header)
+    if m:
+        data["qop"] = "%s" % (m.group(1))
+        visto = True
+
+    if visto == False:
+        return None
 
     return data
+
+
+def parse_digest_challenges(buffer):
+    """
+    All the authentication challenges of a message, one per header.
+
+    A server that offers several algorithms sends one WWW-Authenticate per
+    algorithm, each with its OWN nonce.
+    """
+    challenges = []
+
+    for header in buffer.split("\r\n"):
+        data = parse_digest_challenge(header)
+
+        if data != None:
+            challenges.append(data)
+
+    return challenges
+
+
+def select_challenge(challenges, preferred=""):
+    """
+    Pick the challenge to answer: the strongest one we can really compute,
+    or the one whose algorithm matches `preferred`.
+    """
+    if challenges == []:
+        return None
+
+    if preferred != "":
+        want = normalize_algorithm(preferred)
+
+        for data in challenges:
+            if normalize_algorithm(data["algorithm"]) == want:
+                return data
+
+        return None
+
+    mejor = None
+    posicion = len(_ALGORITHM_STRENGTH)
+
+    for data in challenges:
+        alg = normalize_algorithm(data["algorithm"])
+
+        if algorithm_supported(alg) == False:
+            continue
+
+        try:
+            pos = _ALGORITHM_STRENGTH.index(alg)
+        except ValueError:
+            # supported but not ranked (plain SHA-512): below the ranked ones
+            pos = len(_ALGORITHM_STRENGTH)
+
+        if mejor == None or pos < posicion:
+            mejor = data
+            posicion = pos
+
+    if mejor == None:
+        # none of them can be computed: answer the first one and let getHash
+        # report the unknown algorithm
+        return challenges[0]
+
+    return mejor
+
+
+def parse_digest(buffer, preferred=""):
+    """
+    Fields of the digest of a message.
+
+    This used to walk every line accumulating into a SINGLE dict, so a server
+    offering two algorithms (one WWW-Authenticate each, with different nonces)
+    ended up mixing fields of different challenges: the nonce of one and the
+    realm of another, and the response went out impossible to verify.
+    """
+    challenges = parse_digest_challenges(buffer)
+
+    data = select_challenge(challenges, preferred)
+
+    if data != None:
+        return data
+
+    # nothing recognizable: same empty structure as always, so the callers
+    # that only read fields keep working
+    return parse_digest_challenge("") or {
+        "username": "",
+        "realm": "",
+        "nonce": "",
+        "uri": "",
+        "response": "",
+        "algorithm": "MD5",
+        "cnonce": "",
+        "nc": "",
+        "qop": "",
+    }
 
 
 def getHash(algorithm, string):
     # the algorithm can arrive in any case, empty, or with the -sess suffix
     # (MD5-sess, SHA-256-sess): the hash function is the same one
-    alg = str(algorithm).upper().replace("-SESS", "").replace("SESS", "")
+    alg = normalize_algorithm(algorithm)
 
-    if alg in ("SHA", "SHA1", "SHA-1"):
-        hashfunc = hashlib.sha1
-    elif alg in ("SHA-256", "SHA256"):
-        hashfunc = hashlib.sha256
-    elif alg in ("SHA-512", "SHA512"):
-        hashfunc = hashlib.sha512
-    else:
-        # MD5 is the default of RFC 2617 when the server sends no algorithm
+    hashfunc = _HASH_ALGORITHMS.get(alg)
+
+    if hashfunc is None:
+        # MD5 is the default of RFC 2617 when the server sends no algorithm.
+        # With an algorithm that IS there but we cannot compute, the hash goes
+        # out wrong and the server just answers 401 again: say so instead of
+        # reporting wrong credentials. To stderr, so it does not get in the
+        # way of anything parsing the output
+        if alg != "" and alg not in _warned_algorithms:
+            _warned_algorithms.add(alg)
+            print(
+                f"[!] Unknown digest algorithm '{algorithm}', falling back to "
+                f"MD5: the response will be wrong. Supported: "
+                f"{', '.join(supported_algorithms())}",
+                file=sys.stderr,
+            )
+
         hashfunc = hashlib.md5
 
     return hashfunc(string.encode()).hexdigest()
@@ -1245,12 +1422,16 @@ def calculateHash(
     a2 = "%s:%s" % (method, uri)
 
     ha1 = getHash(algorithm, a1)
-    if algorithm == "MD5-sess":
+    # any -sess variant, not only MD5-sess: SHA-256-sess and SHA-512-256-sess
+    # were building HA1 the wrong way
+    if str(algorithm).strip().upper().endswith("-SESS"):
         a1 = "%s:%s:%s" % (ha1, nonce, cnonce)
         ha1 = getHash(algorithm, a1)
     ha2 = getHash(algorithm, a2)
     if (qop == "auth" or qop == "auth-int") and cnonce != "":
-        if entitybody != "":
+        # auth-int hashes the body ALSO when it is empty, H(""): deciding by
+        # the body instead of by the qop left auth-int wrong even with no body
+        if qop == "auth-int":
             a2 = "%s:%s:%s" % (method, uri, getHash(algorithm, entitybody))
             ha2 = getHash(algorithm, a2)
         b = "%s:%s:%s:%s:%s:%s" % (ha1, nonce, nc, cnonce, qop, ha2)
