@@ -19,6 +19,28 @@ New in this version:
   brought, respecting -el and -pr. -e is no longer mandatory when -ef is given.
   With this, 'scan -ot' -> 'exten -f -oe' -> 'rcrack -f -ef' runs end to end
   with nothing typed in between
+- leak: new params -realm, -alg and -nonce for the challenge sent to the
+  victim, which was hardcoded to realm="asterisk" and MD5. Quite a few
+  hardware phones only answer the challenge when the realm matches the one of
+  their provisioning, so against those sippts failed without saying why
+- leak: the algorithm written into the -o file was always MD5 no matter which
+  one the victim answered with, so a SHA-256 digest ended up in a file that
+  lied and dcrack could never crack it
+- send: new params -event, -accept and -se to subscribe to any event
+  (message-summary for the voicemail of another extension, presence, dialog),
+  where SUBSCRIBE was hardcoded to the as-feature-event of Asterisk. A NOTIFY
+  with -event also carries Subscription-State, mandatory in RFC 6665 and never
+  built before. Without -event everything goes out exactly as it did
+- send: new params -ppid and -paid for the domain of P-Preferred-Identity and
+  P-Asserted-Identity, which was hardcoded to telefonica.net (still the
+  default). A value that already carries a @ is used as it is
+- scan: the CVE list is compared by version for real. check_model() ran find()
+  over the whole line of the CSV, which carries the description and the URL, so
+  a version like 2.0 matched a piece of a link, and "<= 1.4.11" never matched
+  1.4.9 because the range was only text. Only the product and range columns are
+  compared now, the ones whose version really falls inside the range come
+  first, and nothing is dropped: in a scanner a false negative is worse than a
+  false positive
 - rcrack, dcrack: new param -o FILE. They were the only two modules with no
   output file at all, so the result of a crack that can take hours only
   existed in the terminal scrollback

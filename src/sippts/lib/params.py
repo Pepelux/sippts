@@ -1248,6 +1248,46 @@ Usage examples:
         dest="digest",
         default="",
     )
+    headers.add_argument(
+        "-event",
+        metavar="EVENT",
+        type=str,
+        help="Event header for SUBSCRIBE/NOTIFY (ex: message-summary, presence, dialog). By default SUBSCRIBE uses as-feature-event and NOTIFY keep-alive",
+        dest="event",
+        default="",
+    )
+    headers.add_argument(
+        "-accept",
+        metavar="MIME",
+        type=str,
+        help="Accept header (by default the usual one for the event given with -event)",
+        dest="accept",
+        default="",
+    )
+    headers.add_argument(
+        "-se",
+        metavar="SECONDS",
+        type=str,
+        help="Expires of the subscription, used with -event (default: 3600)",
+        dest="sub_expires",
+        default="",
+    )
+    headers.add_argument(
+        "-ppid",
+        metavar="DOMAIN",
+        type=str,
+        help="Domain for P-Preferred-Identity (default: telefonica.net)",
+        dest="ppi_domain",
+        default="",
+    )
+    headers.add_argument(
+        "-paid",
+        metavar="DOMAIN",
+        type=str,
+        help="Domain for P-Asserted-Identity (default: telefonica.net)",
+        dest="pai_domain",
+        default="",
+    )
 
     auth = parser_send.add_argument_group("Auth")
     auth.add_argument(
@@ -3873,6 +3913,11 @@ Payloads
         OFILE = args.ofile
         PPI = args.ppi
         PAI = args.pai
+        EVENT = args.event
+        ACCEPT = args.accept
+        SUBEXPIRES = args.sub_expires
+        PPIDOMAIN = args.ppi_domain
+        PAIDOMAIN = args.pai_domain
         HEADER = args.header
         NOCONTACT = args.nocontact
         TIMEOUT = args.timeout
@@ -3916,6 +3961,11 @@ Payloads
             NOCONTACT,
             TIMEOUT,
             VERBOSE,
+            EVENT,
+            ACCEPT,
+            SUBEXPIRES,
+            PPIDOMAIN,
+            PAIDOMAIN,
         )
     elif COMMAND == "wssend":
         if args.help == 1:

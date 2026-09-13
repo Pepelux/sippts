@@ -287,6 +287,11 @@ def main():
             nocontact,
             timeout,
             verbose,
+            event,
+            accept,
+            sub_expires,
+            ppi_domain,
+            pai_domain,
         ) = params
 
         from sippts.sipsend import SipSend
@@ -328,6 +333,11 @@ def main():
         s.nocontact = nocontact
         s.timeout = timeout
         s.verbose = verbose
+        s.event = event
+        s.accept = accept
+        s.sub_expires = sub_expires
+        s.ppi_domain = ppi_domain
+        s.pai_domain = pai_domain
     elif params[0] == "enumerate":
         (
             cmd,

@@ -27,6 +27,11 @@ from .lib.logos import Logo
 
 class SipSend:
     def __init__(self):
+        self.event = ""
+        self.accept = ""
+        self.sub_expires = ""
+        self.ppi_domain = ""
+        self.pai_domain = ""
         self.ip = ""
         self.host = ""
         self.template = ""
@@ -385,6 +390,11 @@ class SipSend:
                 self.pai,
                 self.header,
                 self.withcontact,
+                event=self.event,
+                accept=self.accept,
+                sub_expires=self.sub_expires,
+                ppi_domain=self.ppi_domain,
+                pai_domain=self.pai_domain,
             )
 
         try:
@@ -556,6 +566,11 @@ class SipSend:
                         self.pai,
                         self.header,
                         self.withcontact,
+                        event=self.event,
+                        accept=self.accept,
+                        sub_expires=self.sub_expires,
+                        ppi_domain=self.ppi_domain,
+                        pai_domain=self.pai_domain,
                     )
 
                     try:

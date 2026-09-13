@@ -2248,6 +2248,79 @@ def load_cve():
     return cve
 
 
+_VERSION_SPEC = re.compile(
+    r"^\s*(?:(<=|>=|<|>|=)\s*)?([0-9][0-9A-Za-z.\-_]*)"
+    r"\s*(?:and\s+(?:(<=|>=|<|>|=)\s*)?([0-9][0-9A-Za-z.\-_]*)\s*)?$",
+    re.I,
+)
+
+
+def version_key(value):
+    """
+    Version as a tuple of numbers, so 1.4.9 sorts before 1.4.11.
+
+    Tolerates suffixes (4.2.0-1.1, 1.4.11-cert3). Returns None when there is
+    nothing numeric to compare.
+    """
+    numeros = re.findall(r"\d+", str(value))
+
+    if numeros == []:
+        return None
+
+    return tuple(int(n) for n in numeros)
+
+
+def version_matches(version, spec):
+    """
+    Whether `version` satisfies `spec`, in the grammar the CVE list uses:
+
+        <= 1.4.11
+        >= 1.2 and <= 1.2.27
+        1.6.0                  (exact version)
+
+    Returns None when the spec cannot be parsed, so the caller can fall back
+    to what it did before instead of losing the row.
+    """
+    m = _VERSION_SPEC.match(str(spec).strip())
+
+    if m == None:
+        return None
+
+    v = version_key(version)
+
+    if v == None:
+        return None
+
+    condiciones = [(m.group(1) or "=", m.group(2))]
+
+    if m.group(4):
+        condiciones.append((m.group(3) or "=", m.group(4)))
+
+    for (op, valor) in condiciones:
+        objetivo = version_key(valor)
+
+        if objetivo == None:
+            return None
+
+        # compare on the same number of parts: "<= 1.4" must cover 1.4.11
+        largo = min(len(v), len(objetivo))
+        izq = v[:largo]
+        der = objetivo[:largo]
+
+        if op == "<=" and not izq <= der:
+            return False
+        if op == ">=" and not izq >= der:
+            return False
+        if op == "<" and not v[:len(objetivo)] < objetivo:
+            return False
+        if op == ">" and not v[:len(objetivo)] > objetivo:
+            return False
+        if op == "=" and izq != der:
+            return False
+
+    return True
+
+
 def check_model(ua, fp, type, cvelist):
     found = []
     model = "$$$"
@@ -2268,6 +2341,34 @@ def check_model(ua, fp, type, cvelist):
         version = aux[1]
     if l > 2:
         firmware = aux[2]
+
+    # real version comparison first: find() ran over the WHOLE line, which
+    # carries the description and the URL, so a version like "2.0" matched a
+    # piece of a link, and "<= 1.4.11" never matched 1.4.9 because the range
+    # was only text. Only the product and the range columns are compared here
+    confirmados = []
+
+    # the version is not always the second word: "Asterisk PBX 1.4.9" splits
+    # into asterisk / pbx / 1.4.9. Any token that looks like a version is
+    # tried, and one match is enough
+    candidatas = [x for x in ua.lower().split(" ") if re.match(r"^\d[\d.\-_]*$", x)]
+
+    for cve in cvelist:
+        columnas = cve.lower().split("###")
+
+        if len(columnas) < 2:
+            continue
+
+        producto = columnas[0].strip()
+        spec = columnas[1].strip()
+
+        if producto == "" or producto.find(model) < 0:
+            continue
+
+        for candidata in candidatas:
+            if version_matches(candidata, spec) == True:
+                confirmados.append(cve.lower())
+                break
 
     for cve in cvelist:
         cve = cve.lower()
@@ -2303,5 +2404,12 @@ def check_model(ua, fp, type, cvelist):
                 cve = cve.lower()
                 if cve.find(model) > -1:
                     found.append(cve)
+
+    # the ones whose version really falls inside the range go first, and
+    # nothing is dropped: in a scanner a false negative is worse than a false
+    # positive, so the text matches are kept behind them
+    if confirmados != []:
+        resto = [c for c in found if c not in confirmados]
+        found = confirmados + resto
 
     return found
