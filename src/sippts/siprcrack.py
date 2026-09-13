@@ -32,6 +32,8 @@ from .lib.functions import (
     calculateHash,
     format_time,
     open_log,
+    write_results,
+    RESULT_FIELDS,
 )
 from .lib.color import Color
 from .lib.logos import Logo
@@ -41,6 +43,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 class SipRemoteCrack:
     def __init__(self):
+        self.ojson = ""
+        self.ocsv = ""
         self.ip = ""
         self.host = ""
         self.proxy = ""
@@ -682,3 +686,19 @@ class SipRemoteCrack:
             f"{self.c.BWHITE}Time elapsed: {self.c.YELLOW}{str(format_time(self.totaltime))}{self.c.WHITE}"
         )
         print(self.c.WHITE)
+        write_results(
+            self.found,
+            RESULT_FIELDS["rcrack"],
+            "rcrack",
+            jsonfile=self.ojson,
+            csvfile=self.ocsv,
+            meta={
+                "target": self.ip,
+                "port": self.rport,
+                "proto": self.proto,
+                "extens": self.exten,
+                "wordlist": self.wordlist,
+                "elapsed": self.totaltime,
+            },
+        )
+

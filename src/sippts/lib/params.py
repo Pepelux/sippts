@@ -272,6 +272,22 @@ Usage examples:
         dest="ofile",
         default="",
     )
+    log.add_argument(
+        "-oj",
+        metavar="FILE",
+        type=str,
+        help="Save results into a JSON file",
+        dest="ojson",
+        default="",
+    )
+    log.add_argument(
+        "-ocsv",
+        metavar="FILE",
+        type=str,
+        help="Save results into a CSV file",
+        dest="ocsv",
+        default="",
+    )
 
     other = parser_astami.add_argument_group("Other options")
     other.add_argument(
@@ -543,6 +559,22 @@ Usage examples:
         dest="otfile",
         default="",
     )
+    log.add_argument(
+        "-oj",
+        metavar="FILE",
+        type=str,
+        help="Save results into a JSON file",
+        dest="ojson",
+        default="",
+    )
+    log.add_argument(
+        "-ocsv",
+        metavar="FILE",
+        type=str,
+        help="Save results into a CSV file",
+        dest="ocsv",
+        default="",
+    )
     log.add_argument("-cve", help="Show possible CVEs", dest="cve", action="count")
 
     other = parser_scan.add_argument_group("Other options")
@@ -734,6 +766,22 @@ Usage examples:
         dest="ofile",
         default="",
     )
+    log.add_argument(
+        "-oj",
+        metavar="FILE",
+        type=str,
+        help="Save results into a JSON file",
+        dest="ojson",
+        default="",
+    )
+    log.add_argument(
+        "-ocsv",
+        metavar="FILE",
+        type=str,
+        help="Save results into a CSV file",
+        dest="ocsv",
+        default="",
+    )
 
     other = parser_exten.add_argument_group("Other options")
     other.add_argument(
@@ -898,6 +946,22 @@ Usage examples:
         type=str,
         help="Save data into a log file",
         dest="ofile",
+        default="",
+    )
+    log.add_argument(
+        "-oj",
+        metavar="FILE",
+        type=str,
+        help="Save results into a JSON file",
+        dest="ojson",
+        default="",
+    )
+    log.add_argument(
+        "-ocsv",
+        metavar="FILE",
+        type=str,
+        help="Save results into a CSV file",
+        dest="ocsv",
         default="",
     )
 
@@ -1554,6 +1618,22 @@ Usage examples:
 
     log = parser_enumerate.add_argument_group("Log")
     log.add_argument("-v", help="Increase verbosity", dest="verbose", action="count")
+    log.add_argument(
+        "-oj",
+        metavar="FILE",
+        type=str,
+        help="Save results into a JSON file",
+        dest="ojson",
+        default="",
+    )
+    log.add_argument(
+        "-ocsv",
+        metavar="FILE",
+        type=str,
+        help="Save results into a CSV file",
+        dest="ocsv",
+        default="",
+    )
 
     other = parser_enumerate.add_argument_group("Other options")
     other.add_argument(
@@ -1800,6 +1880,22 @@ Usage examples:
         type=str,
         help="Save result into a log file",
         dest="lfile",
+        default="",
+    )
+    log.add_argument(
+        "-oj",
+        metavar="FILE",
+        type=str,
+        help="Save results into a JSON file",
+        dest="ojson",
+        default="",
+    )
+    log.add_argument(
+        "-ocsv",
+        metavar="FILE",
+        type=str,
+        help="Save results into a CSV file",
+        dest="ocsv",
         default="",
     )
 
@@ -2465,6 +2561,22 @@ Usage examples:
         type=str,
         help="Save data into a log file",
         dest="ofile",
+        default="",
+    )
+    log.add_argument(
+        "-oj",
+        metavar="FILE",
+        type=str,
+        help="Save results into a JSON file",
+        dest="ojson",
+        default="",
+    )
+    log.add_argument(
+        "-ocsv",
+        metavar="FILE",
+        type=str,
+        help="Save results into a CSV file",
+        dest="ocsv",
         default="",
     )
 
@@ -3429,6 +3541,8 @@ Payloads
         USER = args.user
         PWD = args.pwd
         CMD = args.cmd
+        OJSON = args.ojson
+        OCSV = args.ocsv
 
         return (
             COMMAND,
@@ -3445,7 +3559,9 @@ Payloads
             LOCALIP,
             USER,
             PWD,
-            CMD
+            CMD,
+            OJSON,
+            OCSV,
         )
     elif COMMAND == "scan":
         if args.help == 1:
@@ -3488,6 +3604,8 @@ Payloads
         OFILE = args.ofile
         OIFILE = args.oifile
         OTFILE = args.otfile
+        OJSON = args.ojson
+        OCSV = args.ocsv
         FP = args.fp
         RANDOM = args.random
         PPI = args.ppi
@@ -3527,6 +3645,8 @@ Payloads
             LOCALIP,
             CVE,
             OTFILE,
+            OJSON,
+            OCSV,
         )
     elif COMMAND == "exten":
         if args.help == 1:
@@ -3561,6 +3681,8 @@ Payloads
         FILTER = args.filter
         OFILE = args.ofile
         TIMEOUT = args.timeout
+        OJSON = args.ojson
+        OCSV = args.ocsv
 
         return (
             COMMAND,
@@ -3582,6 +3704,8 @@ Payloads
             OFILE,
             FILTER,
             TIMEOUT,
+            OJSON,
+            OCSV,
         )
     elif COMMAND == "rcrack":
         if args.help == 1:
@@ -3615,6 +3739,8 @@ Payloads
         NOCOLOR = args.nocolor
         TIMEOUT = args.timeout
         OFILE = args.ofile
+        OJSON = args.ojson
+        OCSV = args.ocsv
 
         return (
             COMMAND,
@@ -3636,6 +3762,8 @@ Payloads
             NOCOLOR,
             TIMEOUT,
             OFILE,
+            OJSON,
+            OCSV,
         )
     elif COMMAND == "send":
         if args.help == 1:
@@ -3812,6 +3940,8 @@ Payloads
         UA = args.user_agent
         VERBOSE = args.verbose
         TIMEOUT = args.timeout
+        OJSON = args.ojson
+        OCSV = args.ocsv
 
         return (
             COMMAND,
@@ -3832,6 +3962,8 @@ Payloads
             UA,
             VERBOSE,
             TIMEOUT,
+            OJSON,
+            OCSV,
         )
     elif COMMAND == "leak":
         if args.help == 1:
@@ -3874,6 +4006,8 @@ Payloads
         PING = args.ping
         PPI = args.ppi
         PAI = args.pai
+        OJSON = args.ojson
+        OCSV = args.ocsv
 
         return (
             COMMAND,
@@ -3904,6 +4038,8 @@ Payloads
             PING,
             PPI,
             PAI,
+            OJSON,
+            OCSV,
         )
     elif COMMAND == "ping":
         if args.help == 1:
@@ -4099,6 +4235,8 @@ Payloads
         VERBOSE = args.verbose
         THREADS = args.threads
         OFILE = args.ofile
+        OJSON = args.ojson
+        OCSV = args.ocsv
 
         return (
             COMMAND,
@@ -4113,6 +4251,8 @@ Payloads
             SUFFIX,
             THREADS,
             OFILE,
+            OJSON,
+            OCSV,
         )
     elif COMMAND == "flood":
         if args.help == 1:

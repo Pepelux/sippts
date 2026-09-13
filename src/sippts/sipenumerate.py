@@ -18,6 +18,8 @@ from .lib.functions import (
     parse_message,
     fingerprinting,
     format_time,
+    write_results,
+    RESULT_FIELDS,
 )
 from .lib.color import Color
 from .lib.logos import Logo
@@ -26,6 +28,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 class SipEnumerate:
     def __init__(self):
+        self.ojson = ""
+        self.ocsv = ""
         self.ip = ""
         self.host = ""
         self.proxy = ""
@@ -441,5 +445,19 @@ class SipEnumerate:
             print(
                 f"{self.c.YELLOW}[!] Fingerprinting is based on `To-tag` and other header values. The result may not be correct\n{self.c.WHITE}"
             )
+
+        write_results(
+            self.found,
+            RESULT_FIELDS["enumerate"],
+            "enumerate",
+            jsonfile=self.ojson,
+            csvfile=self.ocsv,
+            meta={
+                "target": self.ip,
+                "port": self.rport,
+                "proto": self.proto,
+                "elapsed": self.totaltime,
+            },
+        )
 
         self.found.clear()

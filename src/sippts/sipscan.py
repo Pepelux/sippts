@@ -34,6 +34,9 @@ from .lib.functions import (
     load_cve,
     check_model,
     write_targets,
+    write_results,
+    result_rows,
+    RESULT_FIELDS,
 )
 from .lib.color import Color
 from .lib.logos import Logo
@@ -67,6 +70,8 @@ class SipScan:
         self.ofile = ""
         self.oifile = ""
         self.otfile = ""
+        self.ojson = ""
+        self.ocsv = ""
         self.fp = 0
         self.random = 0
         self.ppi = ""
@@ -861,6 +866,8 @@ class SipScan:
         )
         print(self.c.WHITE)
 
+        errores = self.errors
+
         if self.errors > 0:
             print(
                 f"{self.c.YELLOW}[!] {str(self.errors)} error(s) while scanning, hidden without {self.c.BYELLOW}-vv{self.c.WHITE}"
@@ -880,6 +887,25 @@ class SipScan:
 
         if self.ofile != "":
             f.close()
+
+        write_results(
+            self.found,
+            RESULT_FIELDS["scan"],
+            "scan",
+            jsonfile=self.ojson,
+            csvfile=self.ocsv,
+            meta={
+                "target": self.ip if self.ip != "" else self.file,
+                "port": self.rport,
+                "proto": self.proto,
+                "method": self.method,
+                "elapsed": self.totaltime,
+                "errors": errores,
+                "cves": result_rows(self.cve, RESULT_FIELDS["scan_cve"])
+                if len(self.cve) > 0
+                else None,
+            },
+        )
 
         self.found.clear()
 

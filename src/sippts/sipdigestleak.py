@@ -28,6 +28,8 @@ from .lib.functions import (
     bind_local_port,
     calculateHash,
     ping,
+    write_results,
+    RESULT_FIELDS,
 )
 from .lib.color import Color
 from .lib.logos import Logo
@@ -35,6 +37,8 @@ from .lib.logos import Logo
 
 class SipDigestLeak:
     def __init__(self):
+        self.ojson = ""
+        self.ocsv = ""
         self.ip = ""
         self.host = ""
         self.proxy = ""
@@ -962,5 +966,18 @@ class SipDigestLeak:
             f"{self.c.WHITE}+{'-' * (iplen + 2)}+{'-' * (polen + 2)}+{'-' * (prlen + 2)}+{'-' * (relen + 2)}+"
         )
         print(self.c.WHITE)
+
+        write_results(
+            self.found,
+            RESULT_FIELDS["leak"],
+            "leak",
+            jsonfile=self.ojson,
+            csvfile=self.ocsv,
+            meta={
+                "target": self.ip if self.ip != "" else self.file,
+                "port": self.rport,
+                "proto": self.proto,
+            },
+        )
 
         self.found.clear()

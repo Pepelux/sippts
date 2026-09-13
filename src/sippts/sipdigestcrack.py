@@ -22,7 +22,7 @@ try:
 except:
     pass
 
-from .lib.functions import calculateHash, format_time, open_log
+from .lib.functions import calculateHash, format_time, open_log, write_results, RESULT_FIELDS
 import itertools
 import string
 from .lib.color import Color
@@ -31,6 +31,8 @@ from .lib.logos import Logo
 
 class SipDigestCrack:
     def __init__(self):
+        self.ojson = ""
+        self.ocsv = ""
         self.file = ""
         self.wordlist = ""
         self.ofile = ""
@@ -702,5 +704,18 @@ class SipDigestCrack:
             f"{self.c.BWHITE}Time elapsed: {self.c.YELLOW}{str(format_time(self.totaltime))}{self.c.WHITE}"
         )
         print(self.c.WHITE)
+
+        write_results(
+            self.found,
+            RESULT_FIELDS["dcrack"],
+            "dcrack",
+            jsonfile=self.ojson,
+            csvfile=self.ocsv,
+            meta={
+                "file": self.file,
+                "wordlist": self.wordlist,
+                "elapsed": self.totaltime,
+            },
+        )
 
         self.found.clear()

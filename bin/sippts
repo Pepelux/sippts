@@ -48,7 +48,9 @@ def main():
             local_ip,
             user,
             pwd,
-            cmd
+            cmd,
+            ojson,
+            ocsv,
         ) = params
 
         from sippts.astami import SipAstAMI
@@ -68,6 +70,8 @@ def main():
         s.user = user
         s.pwd = pwd
         s.cmd = cmd
+        s.ojson = ojson
+        s.ocsv = ocsv
     elif params[0] == "scan":
         (
             cmd,
@@ -101,6 +105,8 @@ def main():
             local_ip,
             cve,
             otfile,
+            ojson,
+            ocsv,
         ) = params
 
         from sippts.sipscan import SipScan
@@ -136,6 +142,8 @@ def main():
         s.pai = pai
         s.localip = local_ip
         s.getcve = cve
+        s.ojson = ojson
+        s.ocsv = ocsv
     elif params[0] == "exten":
         (
             cmd,
@@ -157,6 +165,8 @@ def main():
             ofile,
             filter,
             timeout,
+            ojson,
+            ocsv,
         ) = params
 
         from sippts.sipexten import SipExten
@@ -180,6 +190,8 @@ def main():
         s.ofile = ofile
         s.filter = filter
         s.timeout = timeout
+        s.ojson = ojson
+        s.ocsv = ocsv
     elif params[0] == "rcrack":
         (
             cmd,
@@ -201,6 +213,8 @@ def main():
             nocolor,
             timeout,
             ofile,
+            ojson,
+            ocsv,
         ) = params
 
         from sippts.siprcrack import SipRemoteCrack
@@ -224,6 +238,8 @@ def main():
         s.nocolor = nocolor
         s.timeout = timeout
         s.ofile = ofile
+        s.ojson = ojson
+        s.ocsv = ocsv
     elif params[0] == "send":
         (
             cmd,
@@ -324,6 +340,8 @@ def main():
             user_agent,
             verbose,
             timeout,
+            ojson,
+            ocsv,
         ) = params
 
         from sippts.sipenumerate import SipEnumerate
@@ -346,6 +364,8 @@ def main():
         s.user_agent = user_agent
         s.verbose = verbose
         s.timeout = timeout
+        s.ojson = ojson
+        s.ocsv = ocsv
     elif params[0] == "leak":
         (
             cmd,
@@ -376,6 +396,8 @@ def main():
             ping,
             ppi,
             pai,
+            ojson,
+            ocsv,
         ) = params
 
         from sippts.sipdigestleak import SipDigestLeak
@@ -408,6 +430,8 @@ def main():
         s.ping = ping
         s.ppi = ppi
         s.pai = pai
+        s.ojson = ojson
+        s.ocsv = ocsv
     elif params[0] == "ping":
         (
             cmd,
@@ -558,6 +582,8 @@ def main():
             suffix,
             threads,
             ofile,
+            ojson,
+            ocsv,
         ) = params
 
         from sippts.sipdigestcrack import SipDigestCrack
@@ -574,6 +600,8 @@ def main():
         s.suffix = suffix
         s.threads = threads
         s.ofile = ofile
+        s.ojson = ojson
+        s.ocsv = ocsv
     elif params[0] == "flood":
         (
             cmd,

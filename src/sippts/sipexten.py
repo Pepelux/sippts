@@ -27,6 +27,8 @@ from .lib.functions import (
     host_sort_key,
     bind_local_port,
     format_time,
+    write_results,
+    RESULT_FIELDS,
 )
 from .lib.color import Color
 from .lib.logos import Logo
@@ -36,6 +38,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 class SipExten:
     def __init__(self):
+        self.ojson = ""
+        self.ocsv = ""
         self.ip = ""
         self.host = ""
         self.proxy = ""
@@ -502,3 +506,19 @@ class SipExten:
             )
             print(self.c.WHITE)
             self.errors = 0
+        write_results(
+            self.found,
+            RESULT_FIELDS["exten"],
+            "exten",
+            jsonfile=self.ojson,
+            csvfile=self.ocsv,
+            meta={
+                "target": self.ip if self.ip != "" else self.file,
+                "port": self.rport,
+                "proto": self.proto,
+                "method": self.method,
+                "extens": self.exten,
+                "elapsed": self.totaltime,
+            },
+        )
+

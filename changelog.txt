@@ -12,6 +12,14 @@ New in this version:
 - rcrack, dcrack: new param -o FILE. They were the only two modules with no
   output file at all, so the result of a crack that can take hours only
   existed in the terminal scrollback
+- scan, exten, rcrack, enumerate, leak, dcrack, astami: new params -oj FILE and
+  -ocsv FILE, which save the results as JSON and as CSV. There was no machine
+  readable output anywhere in the package: the tables are ASCII built by hand
+  and -o writes free text, so anything automating sippts had to scrape it.
+  Both are new destinations and -o keeps its format untouched, so the chain
+  'leak -o' -> 'dcrack -f' does not change. The JSON carries the same envelope
+  for every tool (tool, version, timestamp, target, count and a flat results
+  array), so a single consumer works with all of them
 - global: new helpers write_results(), result_rows(), read_targets_file() and
   write_targets(), and a single place holding the version number, which was
   written by hand in params.py and in sippts-gui

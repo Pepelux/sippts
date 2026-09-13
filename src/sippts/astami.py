@@ -24,7 +24,9 @@ from .lib.functions import (
     get_machine_default_ip,
     expand_targets,
     host_sort_key,
-    format_time
+    format_time,
+    write_results,
+    RESULT_FIELDS,
 )
 from .lib.color import Color
 from .lib.logos import Logo
@@ -34,6 +36,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 class SipAstAMI:
     def __init__(self):
+        self.ojson = ""
+        self.ocsv = ""
         self.ip = ""
         self.host = ""
         self.route = ""
@@ -450,6 +454,20 @@ class SipAstAMI:
 
         if self.ofile != "":
             f.close()
+
+        write_results(
+            self.found,
+            RESULT_FIELDS["astami"],
+            "astami",
+            jsonfile=self.ojson,
+            csvfile=self.ocsv,
+            meta={
+                "target": self.ip if self.ip != "" else self.file,
+                "port": self.rport,
+                "user": self.user,
+                "elapsed": self.totaltime,
+            },
+        )
 
         self.found.clear()
 
