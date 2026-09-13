@@ -4,7 +4,7 @@ import random
 import sys
 import subprocess
 import requests
-from sippts.lib.functions import load_cve_version
+from sippts.lib.functions import load_cve_version, SIPPTS_VERSION
 from sippts.lib.logos import Logo
 
 BRED = "\033[1;31;20m"
@@ -26,7 +26,8 @@ CYAN = "\033[0;36;20m"
 BWHITE = "\033[1;37;20m"
 WHITE = "\033[0;37;20m"
 
-local_version = "4.1.2"
+# single source of truth in lib/functions.py
+local_version = SIPPTS_VERSION
 
 
 def get_sippts_args():
@@ -534,6 +535,14 @@ Usage examples:
         dest="oifile",
         default="",
     )
+    log.add_argument(
+        "-ot",
+        metavar="FILE",
+        type=str,
+        help="Save found hosts as ip:port/proto, ready for -f of exten, rcrack and leak",
+        dest="otfile",
+        default="",
+    )
     log.add_argument("-cve", help="Show possible CVEs", dest="cve", action="count")
 
     other = parser_scan.add_argument_group("Other options")
@@ -882,6 +891,14 @@ Usage examples:
     log.add_argument("-v", help="Increase verbosity", dest="verbose", action="count")
     log.add_argument(
         "-nocolor", help="Show result without colors", dest="nocolor", action="count"
+    )
+    log.add_argument(
+        "-o",
+        metavar="FILE",
+        type=str,
+        help="Save data into a log file",
+        dest="ofile",
+        default="",
     )
 
     other = parser_rcrack.add_argument_group("Other options")
@@ -2442,6 +2459,14 @@ Usage examples:
     
     log = parser_dcrack.add_argument_group("Log")
     log.add_argument("-v", help="Increase verbosity", dest="verbose", action="count")
+    log.add_argument(
+        "-o",
+        metavar="FILE",
+        type=str,
+        help="Save data into a log file",
+        dest="ofile",
+        default="",
+    )
 
     options = parser_dcrack.add_argument_group("Other options")
     options.add_argument(
@@ -3462,6 +3487,7 @@ Payloads
         NOCOLOR = args.nocolor
         OFILE = args.ofile
         OIFILE = args.oifile
+        OTFILE = args.otfile
         FP = args.fp
         RANDOM = args.random
         PPI = args.ppi
@@ -3500,6 +3526,7 @@ Payloads
             PAI,
             LOCALIP,
             CVE,
+            OTFILE,
         )
     elif COMMAND == "exten":
         if args.help == 1:
@@ -3587,6 +3614,7 @@ Payloads
         VERBOSE = args.verbose
         NOCOLOR = args.nocolor
         TIMEOUT = args.timeout
+        OFILE = args.ofile
 
         return (
             COMMAND,
@@ -3607,6 +3635,7 @@ Payloads
             VERBOSE,
             NOCOLOR,
             TIMEOUT,
+            OFILE,
         )
     elif COMMAND == "send":
         if args.help == 1:
@@ -4069,6 +4098,7 @@ Payloads
         SUFFIX = args.suffix
         VERBOSE = args.verbose
         THREADS = args.threads
+        OFILE = args.ofile
 
         return (
             COMMAND,
@@ -4081,7 +4111,8 @@ Payloads
             MIN,
             PREFIX,
             SUFFIX,
-            THREADS
+            THREADS,
+            OFILE,
         )
     elif COMMAND == "flood":
         if args.help == 1:

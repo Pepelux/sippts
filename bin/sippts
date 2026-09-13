@@ -100,6 +100,7 @@ def main():
             pai,
             local_ip,
             cve,
+            otfile,
         ) = params
 
         from sippts.sipscan import SipScan
@@ -128,6 +129,7 @@ def main():
         s.nocolor = nocolor
         s.ofile = ofile
         s.oifile = oifile
+        s.otfile = otfile
         s.fp = fp
         s.random = random
         s.ppi = ppi
@@ -198,6 +200,7 @@ def main():
             verbose,
             nocolor,
             timeout,
+            ofile,
         ) = params
 
         from sippts.siprcrack import SipRemoteCrack
@@ -220,6 +223,7 @@ def main():
         s.verbose = verbose
         s.nocolor = nocolor
         s.timeout = timeout
+        s.ofile = ofile
     elif params[0] == "send":
         (
             cmd,
@@ -552,7 +556,8 @@ def main():
             min,
             prefix,
             suffix,
-            threads
+            threads,
+            ofile,
         ) = params
 
         from sippts.sipdigestcrack import SipDigestCrack
@@ -568,6 +573,7 @@ def main():
         s.prefix = prefix
         s.suffix = suffix
         s.threads = threads
+        s.ofile = ofile
     elif params[0] == "flood":
         (
             cmd,

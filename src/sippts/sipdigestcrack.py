@@ -33,6 +33,7 @@ class SipDigestCrack:
     def __init__(self):
         self.file = ""
         self.wordlist = ""
+        self.ofile = ""
         self.username = ""
         self.bruteforce = 0
         self.charset = "printable"
@@ -672,6 +673,10 @@ class SipDigestCrack:
             f"{self.c.WHITE}+{'-' * (slen + 2)}+{'-' * (dlen + 2)}+{'-' * (ulen + 2)}+{'-' * (plen + 2)}+"
         )
 
+        # same as rcrack: the cracked passwords only existed on screen
+        if self.ofile != "":
+            f = open_log(self.ofile)
+
         if len(self.found) == 0:
             print(f"{self.c.WHITE}| {self.c.WHITE}{'Nothing found'.ljust(tlen - 2)} |")
         else:
@@ -681,6 +686,12 @@ class SipDigestCrack:
                 print(
                     f"{self.c.WHITE}| {self.c.BGREEN}{ipsrc.ljust(slen)}{self.c.WHITE} | {self.c.BMAGENTA}{ipdst.ljust(dlen)}{self.c.WHITE} | {self.c.BYELLOW}{username.ljust(ulen)}{self.c.WHITE} | {self.c.BRED}{password.ljust(plen)}{self.c.WHITE} |"
                 )
+
+                if self.ofile != "":
+                    f.write("%s => %s => %s/%s\n" % (ipsrc, ipdst, username, password))
+
+        if self.ofile != "":
+            f.close()
 
         print(
             f"{self.c.WHITE}+{'-' * (slen + 2)}+{'-' * (dlen + 2)}+{'-' * (ulen + 2)}+{'-' * (plen + 2)}+"

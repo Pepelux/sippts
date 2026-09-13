@@ -3,6 +3,19 @@ v4.2.0 (Sep/2026):
   - bug fixes
 - rtcpbleed: 
   - bug fixes
+New in this version:
+- scan: new param -ot FILE, saves the hosts found as ip:port/proto, which is
+  the format -f of exten, rcrack and leak reads. -oi only writes the address,
+  losing the port and the protocol, and its format cannot change without
+  breaking whoever already uses it: now 'scan -ot t.txt && leak -f t.txt'
+  needs no editing in between
+- rcrack, dcrack: new param -o FILE. They were the only two modules with no
+  output file at all, so the result of a crack that can take hours only
+  existed in the terminal scrollback
+- global: new helpers write_results(), result_rows(), read_targets_file() and
+  write_targets(), and a single place holding the version number, which was
+  written by hand in params.py and in sippts-gui
+
 - sipscan:
   - force domain name when target server is a domain
   - use the target address as SIP domain on each host, instead of the first one scanned

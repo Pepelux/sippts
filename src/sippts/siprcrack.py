@@ -31,6 +31,7 @@ from .lib.functions import (
     generate_random_string,
     calculateHash,
     format_time,
+    open_log,
 )
 from .lib.color import Color
 from .lib.logos import Logo
@@ -53,6 +54,7 @@ class SipRemoteCrack:
         self.domain = ""
         self.contact_domain = ""
         self.wordlist = ""
+        self.ofile = ""
         self.user_agent = "pplsip"
         self.threads = "100"
         self.verbose = 0
@@ -650,6 +652,11 @@ class SipRemoteCrack:
             f"{self.c.WHITE}+{'-' * (iplen + 2)}+{'-' * (polen + 2)}+{'-' * (prlen + 2)}+{'-' * (uslen + 2)}+{'-' * (pwlen + 2)}+"
         )
 
+        # rcrack had no way of saving anything: the result of a crack that can
+        # take hours only existed in the terminal scrollback
+        if self.ofile != "":
+            f = open_log(self.ofile)
+
         if len(self.found) == 0:
             print(f"{self.c.WHITE}| {self.c.WHITE}{'Nothing found'.ljust(tlen - 2)} |")
         else:
@@ -659,6 +666,12 @@ class SipRemoteCrack:
                 print(
                     f"{self.c.WHITE}| {self.c.BGREEN}{ip.ljust(iplen)}{self.c.WHITE} | {self.c.BMAGENTA}{port.ljust(polen)}{self.c.WHITE} | {self.c.BYELLOW}{proto.ljust(prlen)}{self.c.WHITE} | {self.c.BCYAN}{user.ljust(uslen)}{self.c.WHITE} | {self.c.BRED}{pwd.ljust(pwlen)}{self.c.WHITE} |"
                 )
+
+                if self.ofile != "":
+                    f.write("%s:%s/%s => %s/%s\n" % (ip, port, proto, user, pwd))
+
+        if self.ofile != "":
+            f.close()
 
         print(
             f"{self.c.WHITE}+{'-' * (iplen + 2)}+{'-' * (polen + 2)}+{'-' * (prlen + 2)}+{'-' * (uslen + 2)}+{'-' * (pwlen + 2)}+"

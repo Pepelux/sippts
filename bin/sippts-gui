@@ -18,13 +18,15 @@ from cmd import Cmd
 from sippts.lib.color import Color
 from sippts.lib.logos import Logo
 from sippts.lib.functions import (
+    SIPPTS_VERSION,
     get_machine_default_ip,
     get_default_gateway_linux,
     get_default_gateway_mac,
     load_cve_version,
 )
 
-local_version = "4.1.2"
+# single source of truth in lib/functions.py
+local_version = SIPPTS_VERSION
 local_version_status = ""
 local_cve_version = ""
 local_cve_version_status = ""

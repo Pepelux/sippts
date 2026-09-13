@@ -1,5 +1,6 @@
 import random
 from random import randint
+from datetime import datetime, timezone
 import ipaddress
 import re
 import netifaces
@@ -8,6 +9,8 @@ import subprocess
 import struct
 import os
 import sys
+import csv
+import json
 import hashlib
 import platform
 
@@ -481,6 +484,198 @@ class _NullLog:
 
     def close(self):
         pass
+
+
+SIPPTS_VERSION = "4.1.2"
+
+
+def load_version():
+    """Version of sippts, kept here so there is only one place to change it."""
+    return SIPPTS_VERSION
+
+
+# Names of the fields of self.found, in the same order in which each module
+# joins them with ### when it builds a result line.
+RESULT_FIELDS = {
+    "scan": ("ip", "port", "proto", "response", "user_agent", "type", "fingerprint"),
+    "scan_cve": ("device", "version", "cve", "type", "url"),
+    "exten": ("ip", "port", "proto", "exten", "response", "user_agent"),
+    "enumerate": ("method", "response", "user_agent", "fingerprint"),
+    "leak": ("ip", "port", "proto", "response"),
+    "rcrack": ("ip", "port", "proto", "user", "password"),
+    "dcrack": ("ip_src", "ip_dst", "username", "password"),
+    "astami": ("ip", "port", "status", "response", "version"),
+}
+
+_ANSI = re.compile(r"\x1b\[[0-9;]*m")
+
+
+def result_rows(found, fields, sep="###"):
+    """
+    Turn the lines of self.found into a list of dictionaries.
+
+    Extra fields are ignored and missing ones come out as "", so one badly
+    formed line does not throw away the whole result. Colour codes and line
+    breaks are stripped: the results are built from raw data, but some fields
+    (the User-Agent of a device, for one) come from the other end.
+    """
+    rows = []
+
+    for line in found:
+        values = str(line).split(sep)
+        row = dict()
+
+        for i, name in enumerate(fields):
+            value = values[i] if i < len(values) else ""
+            value = _ANSI.sub("", str(value))
+            row[name] = value.replace("\r", " ").replace("\n", " ").strip()
+
+        rows.append(row)
+
+    return rows
+
+
+def write_results(found, fields, tool, jsonfile="", csvfile="", meta=None, sep="###"):
+    """
+    Write the results of a tool as JSON and/or CSV.
+
+    found     the self.found list (lines joined with ###)
+    fields    a tuple from RESULT_FIELDS
+    tool      name of the command ("scan", "rcrack", ...)
+    jsonfile  path of the JSON, "" not to write it
+    csvfile   path of the CSV, "" not to write it
+    meta      data about the run (target, port, proto, elapsed, ...)
+
+    Never raises: a path that cannot be written is reported and the run goes
+    on, the same way open_log() does.
+    """
+    if jsonfile == "" and csvfile == "":
+        return
+
+    rows = result_rows(found, fields, sep)
+
+    if jsonfile != "":
+        envelope = {
+            "tool": tool,
+            "version": load_version(),
+            "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "count": len(rows),
+        }
+
+        if meta:
+            for key, value in meta.items():
+                if value != None:
+                    envelope[key] = value
+
+        envelope["results"] = rows
+
+        try:
+            with open(jsonfile, "w") as f:
+                json.dump(envelope, f, indent=2)
+                f.write("\n")
+        except OSError as error:
+            print(f"{BRED}Error writing {jsonfile} ({error}){WHITE}")
+
+    if csvfile != "":
+        # "w" and not append: a CSV in append mode piles up header rows
+        try:
+            with open(csvfile, "w", newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(fields)
+
+                for row in rows:
+                    writer.writerow([row[name] for name in fields])
+        except OSError as error:
+            print(f"{BRED}Error writing {csvfile} ({error}){WHITE}")
+
+
+def read_targets_file(path, default_port=5060, default_proto="UDP"):
+    """
+    Read a file of targets, one per line. Each line can be:
+
+        ip:port/proto      192.168.0.10:5060/udp   (what scan -ot writes)
+        ip:port            192.168.0.10:5060
+        ip | host | net    192.168.0.0/24, 10.0.0.1-20, mypbx.com
+
+    Empty lines and lines starting with # are skipped. Anything that is not
+    ip:port/proto goes through expand_targets(), so this accepts both the
+    network files of 'scan -f' and the target files of 'scan -ot'.
+
+    Returns a list of (ip, port, proto) with no duplicates, and a list of the
+    errors found, so the caller decides how to report them.
+    """
+    targets = []
+    errors = []
+    seen = set()
+
+    try:
+        f = open(path)
+    except OSError as error:
+        errors.append("Error reading file %s (%s)" % (path, error))
+        return (targets, errors)
+
+    with f:
+        for line in f:
+            line = line.strip()
+
+            if line == "" or line.startswith("#"):
+                continue
+
+            port = default_port
+            proto = default_proto
+            host = line
+
+            m = re.fullmatch(r"(.+?):(\d+)(?:/(\w+))?", line)
+            if m:
+                host = m.group(1)
+                port = int(m.group(2))
+                if m.group(3):
+                    proto = m.group(3).upper()
+
+            try:
+                (ips, names) = expand_targets(host)
+            except ValueError as error:
+                errors.append(str(error))
+                continue
+
+            for ip in ips:
+                key = (ip, port, proto)
+                if key not in seen:
+                    seen.add(key)
+                    targets.append(key)
+
+    return (targets, errors)
+
+
+def write_targets(path, found, sep="###"):
+    """
+    Write an ip:port/proto target file out of self.found, whose first three
+    fields must be ip, port and proto. The result feeds 'leak -f', 'exten -f'
+    and 'rcrack -f'.
+    """
+    lines = []
+    seen = set()
+
+    for line in found:
+        values = str(line).split(sep)
+
+        if len(values) < 3:
+            continue
+
+        entry = "%s:%s/%s" % (values[0], values[1], values[2])
+
+        if entry not in seen:
+            seen.add(entry)
+            lines.append(entry)
+
+    lines.sort(key=host_sort_key)
+
+    try:
+        with open(path, "w") as f:
+            for entry in lines:
+                f.write(entry + "\n")
+    except OSError as error:
+        print(f"{BRED}Error writing {path} ({error}){WHITE}")
 
 
 def open_log(path, mode="a+"):

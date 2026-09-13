@@ -33,6 +33,7 @@ from .lib.functions import (
     format_time,
     load_cve,
     check_model,
+    write_targets,
 )
 from .lib.color import Color
 from .lib.logos import Logo
@@ -65,6 +66,7 @@ class SipScan:
         self.nocolor = ""
         self.ofile = ""
         self.oifile = ""
+        self.otfile = ""
         self.fp = 0
         self.random = 0
         self.ppi = ""
@@ -780,6 +782,13 @@ class SipScan:
             with open(self.oifile, "a+") as fi:
                 for x in self.ipsfound:
                     fi.write(x + "\n")
+
+        # -oi only writes the address, losing the port and the protocol, which
+        # is exactly what 'leak -f', 'exten -f' and 'rcrack -f' ask for. Its
+        # format cannot change without breaking whoever uses it, so -ot writes
+        # the same hosts as ip:port/proto and closes the chain
+        if self.otfile != "" and len(self.found) > 0:
+            write_targets(self.otfile, self.found)
 
         if self.ofile != "":
             f = open_log(self.ofile)
