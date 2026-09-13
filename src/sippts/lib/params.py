@@ -1895,6 +1895,30 @@ Usage examples:
         dest="pwd",
         default="",
     )
+    auth.add_argument(
+        "-realm",
+        metavar="REALM",
+        type=str,
+        help="Realm of the challenge sent to the victim (default: asterisk). Some phones only answer when it matches their provisioning",
+        dest="realm",
+        default="asterisk",
+    )
+    auth.add_argument(
+        "-alg",
+        metavar="ALGORITHM",
+        type=str,
+        help="Algorithm of the challenge sent to the victim (default: MD5)",
+        dest="auth_alg",
+        default="MD5",
+    )
+    auth.add_argument(
+        "-nonce",
+        metavar="NONCE",
+        type=str,
+        help="Use a fixed nonce in the challenge instead of a random one",
+        dest="nonce",
+        default="",
+    )
 
     log = parser_leak.add_argument_group("Log")
     log.add_argument("-v", help="Increase verbosity", dest="verbose", action="count")
@@ -4046,6 +4070,9 @@ Payloads
         PING = args.ping
         PPI = args.ppi
         PAI = args.pai
+        REALM = args.realm
+        AUTHALG = args.auth_alg
+        NONCE = args.nonce
         OJSON = args.ojson
         OCSV = args.ocsv
 
@@ -4080,6 +4107,9 @@ Payloads
             PAI,
             OJSON,
             OCSV,
+            REALM,
+            AUTHALG,
+            NONCE,
         )
     elif COMMAND == "ping":
         if args.help == 1:

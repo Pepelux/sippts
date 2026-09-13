@@ -37,6 +37,9 @@ from .lib.logos import Logo
 
 class SipDigestLeak:
     def __init__(self):
+        self.realm = "asterisk"
+        self.auth_alg = "MD5"
+        self.nonce = ""
         self.ojson = ""
         self.ocsv = ""
         self.ip = ""
@@ -781,6 +784,9 @@ class SipDigestLeak:
                     local_ip,
                     via,
                     self.auth_mode,
+                    realm=self.realm,
+                    algorithm=self.auth_alg,
+                    nonce=self.nonce,
                 )
 
                 print(f"{self.c.YELLOW}[=>] Request 407 Proxy Authentication Required")
@@ -857,7 +863,11 @@ class SipDigestLeak:
                     headers = parse_digest(auth)
 
                     if self.ofile != "":
-                        data = '%s"%s"%s"%s"BYE"%s"%s"%s"%s"%s"MD5"%s' % (
+                        # the algorithm was written as MD5 no matter what:
+                        # with -alg SHA-256 the file lied and dcrack could
+                        # never crack it. parse_digest already defaults to
+                        # MD5, so a victim that sends none comes out as before
+                        data = '%s"%s"%s"%s"BYE"%s"%s"%s"%s"%s"%s"%s' % (
                             ip,
                             local_ip,
                             headers["username"],
@@ -867,6 +877,7 @@ class SipDigestLeak:
                             headers["cnonce"],
                             headers["nc"],
                             headers["qop"],
+                            headers["algorithm"],
                             headers["response"],
                         )
 

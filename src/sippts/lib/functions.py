@@ -486,12 +486,68 @@ class _NullLog:
         pass
 
 
-SIPPTS_VERSION = "4.1.2"
+# Last resort only: the real version lives in the 'version' file of the
+# repository, which is also the one github serves for the -up check.
+_FALLBACK_VERSION = "4.1.2"
+
+
+def version_file():
+    """
+    Path of the file holding the version number.
+
+    'version' at the root of the repository is the one the author edits and
+    the one github serves. setup.py copies it into the package as
+    data/version.txt so an installed copy finds it too. Resolved the same way
+    as cve_file(), so it works from a checkout, from an editable install and
+    from a normal install.
+    """
+    aqui = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+    # source tree first: <repo>/version, two levels above src/sippts. It is
+    # the one the author edits, so editing it has to take effect right away
+    # without reinstalling, and the copy inside the package must not shadow it
+    path = os.path.join(os.path.dirname(os.path.dirname(aqui)), "version")
+
+    if os.path.isfile(path):
+        return path
+
+    # installed package: sippts/data/version.txt
+    path = os.path.join(aqui, "data", "version.txt")
+
+    if os.path.isfile(path):
+        return path
+
+    import sysconfig
+
+    path = sysconfig.get_paths()["purelib"] + "/sippts/data/version.txt"
+
+    if not os.path.isfile(path):
+        path = path.replace("/usr/", "/usr/local/").replace(
+            "/Library/Python", "/Library/Frameworks/Python.framework/Versions"
+        )
+
+    return path
 
 
 def load_version():
-    """Version of sippts, kept here so there is only one place to change it."""
-    return SIPPTS_VERSION
+    """
+    Version of sippts, read from the version file so that releasing means
+    editing one file and nothing else.
+    """
+    try:
+        with open(version_file()) as f:
+            valor = f.readline().strip()
+
+        if valor != "":
+            return valor
+    except OSError:
+        pass
+
+    return _FALLBACK_VERSION
+
+
+# kept as a name because params.py and sippts-gui import it
+SIPPTS_VERSION = load_version()
 
 
 # Names of the fields of self.found, in the same order in which each module
@@ -818,6 +874,20 @@ def generate_random_integer(len_ini, len_end):
     return randint(len_ini, len_end)
 
 
+# Default Accept for the events used in an audit. An unknown event goes out
+# without Accept unless -accept says otherwise.
+EVENT_ACCEPT = {
+    "message-summary": "application/simple-message-summary",
+    "presence": "application/pidf+xml",
+    "presence.winfo": "application/watcherinfo+xml",
+    "dialog": "application/dialog-info+xml",
+    "refer": "message/sipfrag",
+    "reg": "application/reginfo+xml",
+    "conference": "application/conference-info+xml",
+    "as-feature-event": "application/x-as-feature-event+xml",
+}
+
+
 def create_message(
     method,
     ip_sdp,
@@ -847,6 +917,12 @@ def create_message(
     pai,
     header,
     withcontact,
+    *,
+    event="",
+    accept="",
+    sub_expires="",
+    ppi_domain="",
+    pai_domain="",
 ):
     expires = "120"
 
@@ -940,11 +1016,31 @@ def create_message(
         headers["Referred-By"] = "<sip:%s@%s:%s>" % (fromuser, domain, fromport)
 
     if method == "SUBSCRIBE":
-        headers["Accept"] = "application/x-as-feature-event+xml"
-        headers["Event"] = "as-feature-event"
+        if event == "":
+            # what it always did: an as-feature-event of Asterisk
+            headers["Accept"] = "application/x-as-feature-event+xml"
+            headers["Event"] = "as-feature-event"
+        else:
+            headers["Event"] = event
+
+            if accept != "":
+                headers["Accept"] = accept
+            elif event.split(";")[0] in EVENT_ACCEPT:
+                headers["Accept"] = EVENT_ACCEPT[event.split(";")[0]]
+
+            # RFC 6665 asks for it, but only on the new path so that the
+            # message of always does not change
+            headers["Expires"] = sub_expires if sub_expires != "" else "3600"
 
     if method == "NOTIFY":
-        headers["Event"] = "keep-alive"
+        if event == "":
+            headers["Event"] = "keep-alive"
+        else:
+            headers["Event"] = event
+            # mandatory in a NOTIFY according to RFC 6665, and never built
+            headers["Subscription-State"] = "active;expires=%s" % (
+                sub_expires if sub_expires != "" else "3600"
+            )
 
     if method != "ACK":
         headers["User-Agent"] = "%s" % useragent
@@ -961,11 +1057,26 @@ def create_message(
         headers["Accept"] = "application/sdp, application/dtmf-relay"
 
     if method == "INVITE":
+        # the domain of these two was hardcoded to telefonica.net. It stays as
+        # the default so nothing changes, but it can be set now, and a value
+        # that already carries a @ is used as it is
         if ppi != "":
-            headers["P-Preferred-Identity"] = "<sip:%s@telefonica.net>" % ppi
+            if str(ppi).find("@") > 0:
+                headers["P-Preferred-Identity"] = "<sip:%s>" % ppi
+            else:
+                headers["P-Preferred-Identity"] = "<sip:%s@%s>" % (
+                    ppi,
+                    ppi_domain if ppi_domain != "" else "telefonica.net",
+                )
 
         if pai != "":
-            headers["P-Asserted-Identity"] = "<sip:%s@telefonica.net>" % pai
+            if str(pai).find("@") > 0:
+                headers["P-Asserted-Identity"] = "<sip:%s>" % pai
+            else:
+                headers["P-Asserted-Identity"] = "<sip:%s@%s>" % (
+                    pai,
+                    pai_domain if pai_domain != "" else "telefonica.net",
+                )
 
     msg = starting_line + "\r\n"
     for h in headers.items():
@@ -1055,10 +1166,19 @@ def create_response_error(
     iplocal,
     via,
     auth_code,
+    *,
+    realm="asterisk",
+    algorithm="MD5",
+    nonce="",
 ):
-    realm = "asterisk"
-    nonce = generate_random_string(8, 8, "ascii")
-    digest = 'Digest algorithm=MD5, realm="%s", nonce="%s"' % (realm, nonce)
+    # keyword-only with the values of always as default: the challenge was
+    # hardcoded to MD5 and realm="asterisk". Quite a few hardware phones only
+    # answer when the realm matches the one of their provisioning, and a
+    # server that only accepts SHA-256 could not be challenged at all
+    if nonce == "":
+        nonce = generate_random_string(8, 8, "ascii")
+
+    digest = 'Digest algorithm=%s, realm="%s", nonce="%s"' % (algorithm, realm, nonce)
 
     starting_line = "SIP/2.0 %s" % message
 

@@ -1,11 +1,12 @@
 [project]
 name = "sippts"
-version = "4.1.dev0"
 description = "SIPPTS is a set of tools for auditing VoIP systems based on the SIP protocol"
 readme = "README.md"
 requires-python = ">=3.7"
 license = {file = "LICENSE.txt"}
-dynamic = ["dependencies"]
+# the version is read from the 'version' file, the same one github serves for
+# the -up check, so releasing means editing that single file
+dynamic = ["dependencies", "version"]
 
 authors = [
   {name = "Jose Luis Verdeguer", email = "pepeluxx@gmail.com" }
@@ -81,6 +82,7 @@ maintainers = [
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"] }
+version = {file = ["version"] }
 
 [build-system]
 # These are the assumed default build requirements from pip:

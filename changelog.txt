@@ -30,9 +30,13 @@ New in this version:
   'leak -o' -> 'dcrack -f' does not change. The JSON carries the same envelope
   for every tool (tool, version, timestamp, target, count and a flat results
   array), so a single consumer works with all of them
+- global: the version number is read from the 'version' file, the same one
+  github serves for the -up check. It used to be written by hand in four
+  places (that file, params.py, sippts-gui and setup.py) and two of them had
+  already drifted apart: setup.py said 4.1 and pyproject.toml 4.1.dev0 while
+  the file said 4.1.2. Releasing is editing that one file now
 - global: new helpers write_results(), result_rows(), read_targets_file() and
-  write_targets(), and a single place holding the version number, which was
-  written by hand in params.py and in sippts-gui
+  write_targets()
 
 - sipscan:
   - force domain name when target server is a domain

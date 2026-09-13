@@ -406,6 +406,9 @@ def main():
             pai,
             ojson,
             ocsv,
+            realm,
+            auth_alg,
+            nonce,
         ) = params
 
         from sippts.sipdigestleak import SipDigestLeak
@@ -440,6 +443,9 @@ def main():
         s.pai = pai
         s.ojson = ojson
         s.ocsv = ocsv
+        s.realm = realm
+        s.auth_alg = auth_alg
+        s.nonce = nonce
     elif params[0] == "ping":
         (
             cmd,
