@@ -27,6 +27,68 @@ BWHITE = "\033[1;37;20m"
 WHITE = "\033[0;37;20m"
 
 # single source of truth in lib/functions.py
+def leer_remoto(fichero, romper_cache=False):
+    """One of the tiny version files of the repository, or "" when github
+    cannot be reached.
+
+    raw.githubusercontent answers cache-control: max-age=300, and the
+    Cache-Control the request sends is a REQUEST header that the CDN ignores,
+    so for five minutes after a push it still serves the old content. A query
+    string it has not seen goes to the origin instead"""
+    url = "https://raw.githubusercontent.com/Pepelux/sippts/master/" + fichero
+
+    if romper_cache == True:
+        url += "?t=%d" % random.randint(1, 999999999)
+
+    try:
+        result = subprocess.run(
+            [
+                "curl",
+                "-s",
+                "--connect-timeout",
+                "2",
+                "--max-time",
+                "4",
+                url,
+                "-H",
+                "Cache-Control: no-cache, no-store",
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+    except Exception:
+        return ""
+
+    salida = result.stdout.replace("\n", "").strip()
+
+    if result.returncode != 0 or salida in ("", "404: Not Found"):
+        return ""
+
+    return salida
+
+
+def version_publicada(fichero, local):
+    """What is published, and whether it could be read at all.
+
+    When the local copy looks NEWER than the remote one it is asked again
+    without the CDN in the way, because that is exactly what a stale cache
+    looks like right after publishing. The extra request only happens in that
+    case, so the usual run still costs one cached request"""
+    remota = leer_remoto(fichero)
+
+    if remota == "":
+        return (local, False)
+
+    if version_is_older(remota, local):
+        confirmada = leer_remoto(fichero, True)
+
+        if confirmada != "":
+            remota = confirmada
+
+    return (remota, True)
+
+
 def estado_version(local, remota, comprobada):
     """The banner used to say '(updated)' for anything that was not older,
     which lied twice: when the local copy is AHEAD of what is published (a
@@ -45,68 +107,17 @@ def estado_version(local, remota, comprobada):
 
 
 local_version = SIPPTS_VERSION
-comprobada = False
-comprobada_cve = False
 
 
 def get_sippts_args():
-    try:
-        command = [
-            "curl",
-            "-s",
-            "--connect-timeout",
-            "2",
-            "--max-time",
-            "4",
-            "https://raw.githubusercontent.com/Pepelux/sippts/master/version",
-            "-H",
-            "Cache-Control: no-cache, no-store",
-        ]
-        result = subprocess.run(
-            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
-        )
-
-        output = result.stdout
-        error = result.stderr
-
-        if result.returncode == 0 and output.strip() not in ("", "404: Not Found"):
-            current_version = output.replace("\n", "")
-            comprobada = True
-        else:
-            current_version = local_version
-    except:
-        current_version = local_version
+    (current_version, comprobada) = version_publicada("version", local_version)
 
     local_version_status = estado_version(local_version, current_version, comprobada)
 
     local_cve_version = load_cve_version()
-
-    try:
-        command = [
-            "curl",
-            "-s",
-            "--connect-timeout",
-            "2",
-            "--max-time",
-            "4",
-            "https://raw.githubusercontent.com/Pepelux/sippts/master/cveversion",
-            "-H",
-            "Cache-Control: no-cache, no-store",
-        ]
-        result = subprocess.run(
-            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
-        )
-
-        output = result.stdout
-        error = result.stderr
-
-        if result.returncode == 0 and output.strip() not in ("", "404: Not Found"):
-            current_cve_version = output.replace("\n", "")
-            comprobada_cve = True
-        else:
-            current_cve_version = local_cve_version
-    except:
-        current_cve_version = local_cve_version
+    (current_cve_version, comprobada_cve) = version_publicada(
+        "cveversion", local_cve_version
+    )
 
     local_cve_version_status = estado_version(
         local_cve_version, current_cve_version, comprobada_cve

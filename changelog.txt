@@ -5,6 +5,7 @@ v4.2.1 (Sep/2026):
   - download_file() reports whether the file really landed
   - warn instead of crashing when the CVE list has more columns than known
   - fix the banner saying '(updated)' when newer than published, or unreachable
+  - ask github again without the CDN cache when the local version looks newer
 - scan:
   - added the CVSS of each CVE, coloured by severity
   - mark a score taken from CVSS v2, its scale is not the one of v3
