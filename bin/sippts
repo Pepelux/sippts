@@ -109,11 +109,13 @@ def main():
             ocsv,
             tlsinfo,
             tlsversions,
+            header,
         ) = params
 
         from sippts.sipscan import SipScan
 
         s = SipScan()
+        s.header = header
         s.ip = ip
         s.host = host
         s.proxy = proxy
@@ -173,11 +175,13 @@ def main():
             ocsv,
             file,
             oefile,
+            header,
         ) = params
 
         from sippts.sipexten import SipExten
 
         s = SipExten()
+        s.header = header
         s.ip = ip
         s.host = host
         s.proxy = proxy
@@ -375,11 +379,13 @@ def main():
             ojson,
             ocsv,
             nocolor,
+            header,
         ) = params
 
         from sippts.sipenumerate import SipEnumerate
 
         s = SipEnumerate()
+        s.header = header
         s.ip = ip
         s.host = host
         s.proxy = proxy
@@ -576,11 +582,13 @@ def main():
             pai,
             hangup,
             replaces,
+            header,
         ) = params
 
         from sippts.sipinvite import SipInvite
 
         s = SipInvite()
+        s.header = header
         s.ip = ip
         s.host = host
         s.proxy = proxy
@@ -682,11 +690,13 @@ def main():
             max,
             min,
             nocolor,
+            header,
         ) = params
 
         from sippts.sipflood import SipFlood
 
         s = SipFlood()
+        s.header = header
         s.ip = ip
         s.host = host
         s.rport = rport

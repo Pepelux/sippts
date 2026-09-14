@@ -47,6 +47,7 @@ class SipEnumerate:
         self.to_name = ""
         self.to_domain = ""
         self.user_agent = "pplsip"
+        self.header = ""
         self.digest = ""
         self.verbose = 0
         self.timeout = 5
@@ -294,7 +295,7 @@ class SipEnumerate:
                 self.route,
                 "",
                 "",
-                "",
+                self.header,
                 1,
             )
 

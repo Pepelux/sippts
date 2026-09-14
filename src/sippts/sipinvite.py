@@ -68,6 +68,7 @@ class SipInvite:
         self.transfer = ""
         self.hangup = 0
         self.replaces = ""
+        self.header = ""
         self.verbose = 0
         self.auth_user = ""
         self.auth_pwd = ""
@@ -164,7 +165,7 @@ class SipInvite:
                 self.route,
                 self.ppi,
                 self.pai,
-                "",
+                self.header,
                 1,
             )
 
@@ -285,7 +286,7 @@ class SipInvite:
                         self.route,
                         "",
                         "",
-                        "",
+                        self.header,
                         1,
                     )
 
@@ -378,7 +379,7 @@ class SipInvite:
                             self.route,
                             self.ppi,
                             self.pai,
-                            "",
+                            self.header,
                             1,
                         )
 
@@ -463,7 +464,7 @@ class SipInvite:
                         self.route,
                         "",
                         "",
-                        "",
+                        self.header,
                         1,
                     )
 
@@ -510,7 +511,7 @@ class SipInvite:
                             "",
                             "",
                             "",
-                            "",
+                            self.header,
                             1,
                             replaces=self.replaces,
                         )
@@ -660,7 +661,7 @@ class SipInvite:
                             self.route,
                             "",
                             "",
-                            "",
+                            self.header,
                             1,
                         )
 

@@ -83,6 +83,7 @@ scan = (
     ("to_user", "To User", False),
     ("to_domain", "To Domain", False),
     ("ua", "User-Agent header", False),
+    ("header", 'Add custom header (ex: "Allow-Events: presence"). Multiple headers: hdr1&hdr2', False),
     ("ppi", "P-Preferred-Identity header", False),
     ("pai", "P-Asserted-Identity header", False),
     ("verbose", "Verbosity level: 0|1|2", True),
@@ -119,6 +120,7 @@ exten = (
     ("contact_domain", "Domain or IP address for Contact header. Ex: 10.0.1.2", False),
     ("from_user", "From User", False),
     ("ua", "User-Agent header", False),
+    ("header", 'Add custom header (ex: "Allow-Events: presence"). Multiple headers: hdr1&hdr2', False),
     ("verbose", "Verbosity level: 0|1|2", True),
     ("output_file", "Save data into a log file", False),
     ("filter", "Filter response code (ex: 200)", False),
@@ -171,6 +173,7 @@ enumerate = (
     ("to_user", "To User", False),
     ("to_domain", "To Domain", False),
     ("ua", "User-Agent header", False),
+    ("header", 'Add custom header (ex: "Allow-Events: presence"). Multiple headers: hdr1&hdr2', False),
     ("verbose", "Verbosity level: 0|1", True),
     ("timeout", "Sockets timeout", True),
 )
@@ -272,6 +275,7 @@ invite = (
     ("to_user", "To User", False),
     ("to_domain", "To Domain", False),
     ("ua", "User-Agent header", False),
+    ("header", 'Add custom header (ex: "Allow-Events: presence"). Multiple headers: hdr1&hdr2', False),
     ("ppi", "P-Preferred-Identity header", False),
     ("pai", "P-Asserted-Identity header", False),
     ("nosdp", "Do not send SDP", False),
@@ -398,6 +402,7 @@ flood = (
     ("to_user", "To User", False),
     ("to_domain", "To Domain", False),
     ("ua", "User-Agent header", False),
+    ("header", 'Add custom header (ex: "Allow-Events: presence"). Multiple headers: hdr1&hdr2', False),
     ("digest", "Add a customized Digest header", False),
     ("bad", "Send malformed headers", False),
     ("charset", "Alphabet [all|printable|ascii|hex]", False),
@@ -986,6 +991,11 @@ class SIPPTS(Cmd):
                 self.mod.user_agent = value
             else:
                 value = self.mod.user_agent
+        elif param == "header":
+            if run == False:
+                self.mod.header = value
+            else:
+                value = self.mod.header
         elif param == "ppi":
             if run == False:
                 self.mod.ppi = value
@@ -1182,6 +1192,11 @@ class SIPPTS(Cmd):
                 self.mod.user_agent = value
             else:
                 value = self.mod.user_agent
+        elif param == "header":
+            if run == False:
+                self.mod.header = value
+            else:
+                value = self.mod.header
         elif param == "verbose":
             if run == False:
                 if value != "0" and value != "1" and value != "2":
@@ -1424,6 +1439,11 @@ class SIPPTS(Cmd):
                 self.mod.user_agent = value
             else:
                 value = self.mod.user_agent
+        elif param == "header":
+            if run == False:
+                self.mod.header = value
+            else:
+                value = self.mod.header
         elif param == "verbose":
             if run == False:
                 if value != "0" and value != "1":
@@ -1925,6 +1945,11 @@ class SIPPTS(Cmd):
                 self.mod.user_agent = value
             else:
                 value = self.mod.user_agent
+        elif param == "header":
+            if run == False:
+                self.mod.header = value
+            else:
+                value = self.mod.header
         elif param == "ppi":
             if run == False:
                 self.mod.ppi = value
@@ -2602,6 +2627,11 @@ class SIPPTS(Cmd):
                 self.mod.user_agent = value
             else:
                 value = self.mod.user_agent
+        elif param == "header":
+            if run == False:
+                self.mod.header = value
+            else:
+                value = self.mod.header
         elif param == "digest":
             if run == False:
                 self.mod.digest = value

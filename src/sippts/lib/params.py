@@ -541,6 +541,14 @@ Usage examples:
         default="",
     )
 
+    headers.add_argument(
+        "-header",
+        metavar="HEADER",
+        type=str,
+        help='Add custom header (ex: "Allow-Events: presence"). Multiple headers: hdr1&hdr2. A header given here replaces the one sippts would build for From, To and Contact; any other one is added, so it can end up twice on purpose',
+        dest="header",
+        default="",
+    )
     log = parser_scan.add_argument_group("Log")
     log.add_argument("-v", help="Increase verbosity", dest="verbose", action="count")
     log.add_argument(
@@ -777,6 +785,14 @@ Usage examples:
         default="pplsip",
     )
 
+    headers.add_argument(
+        "-header",
+        metavar="HEADER",
+        type=str,
+        help='Add custom header (ex: "Allow-Events: presence"). Multiple headers: hdr1&hdr2. A header given here replaces the one sippts would build for From, To and Contact; any other one is added, so it can end up twice on purpose',
+        dest="header",
+        default="",
+    )
     log = parser_exten.add_argument_group("Log")
     log.add_argument("-v", help="Increase verbosity", dest="verbose", action="count")
     log.add_argument(
@@ -1236,7 +1252,7 @@ Usage examples:
         "-header",
         metavar="HEADER",
         type=str,
-        help='Add custom header (ex: "Allow-Events: presence"). Multiple headers: hdr1&hdr2 ',
+        help='Add custom header (ex: "Allow-Events: presence"). Multiple headers: hdr1&hdr2. A header given here replaces the one sippts would build for From, To and Contact; any other one is added, so it can end up twice on purpose',
         dest="header",
         default="",
     )
@@ -1762,6 +1778,14 @@ Usage examples:
         default="pplsip",
     )
 
+    headers.add_argument(
+        "-header",
+        metavar="HEADER",
+        type=str,
+        help='Add custom header (ex: "Allow-Events: presence"). Multiple headers: hdr1&hdr2. A header given here replaces the one sippts would build for From, To and Contact; any other one is added, so it can end up twice on purpose',
+        dest="header",
+        default="",
+    )
     log = parser_enumerate.add_argument_group("Log")
     log.add_argument("-v", help="Increase verbosity", dest="verbose", action="count")
     log.add_argument(
@@ -2539,6 +2563,14 @@ Usage examples:
         action="count",
     )
 
+    headers.add_argument(
+        "-header",
+        metavar="HEADER",
+        type=str,
+        help='Add custom header (ex: "Allow-Events: presence"). Multiple headers: hdr1&hdr2. A header given here replaces the one sippts would build for From, To and Contact; any other one is added, so it can end up twice on purpose',
+        dest="header",
+        default="",
+    )
     auth = parser_invite.add_argument_group("Auth")
     auth.add_argument(
         "-user",
@@ -2993,6 +3025,14 @@ Usage examples:
         default="",
     )
 
+    headers.add_argument(
+        "-header",
+        metavar="HEADER",
+        type=str,
+        help='Add custom header (ex: "Allow-Events: presence"). Multiple headers: hdr1&hdr2. A header given here replaces the one sippts would build for From, To and Contact; any other one is added, so it can end up twice on purpose',
+        dest="header",
+        default="",
+    )
     log = parser_flood.add_argument_group("Log")
     log.add_argument("-v", help="Increase verbosity", dest="verbose", action="count")
     log.add_argument(
@@ -4040,6 +4080,7 @@ Usage examples:
         LOCALIP = args.localip
         CVE = args.cve
         TLSINFO = args.tlsinfo
+        HEADER = args.header
         TLSVERSIONS = args.tlsversions
 
         # the versions need the certificate read first, so it implies -tlsinfo
@@ -4082,6 +4123,7 @@ Usage examples:
             OCSV,
             TLSINFO,
             TLSVERSIONS,
+            HEADER,
         )
     elif COMMAND == "exten":
         if args.help == 1:
@@ -4121,6 +4163,7 @@ Usage examples:
         OJSON = args.ojson
         OCSV = args.ocsv
 
+        HEADER = args.header
         return (
             COMMAND,
             IPADDR,
@@ -4145,6 +4188,7 @@ Usage examples:
             OCSV,
             FILE,
             OEFILE,
+            HEADER,
         )
     elif COMMAND == "rcrack":
         if args.help == 1:
@@ -4409,6 +4453,7 @@ Usage examples:
         OCSV = args.ocsv
         NOCOLOR = args.nocolor
 
+        HEADER = args.header
         return (
             COMMAND,
             IPADDR,
@@ -4431,6 +4476,7 @@ Usage examples:
             OJSON,
             OCSV,
             NOCOLOR,
+            HEADER,
         )
     elif COMMAND == "leak":
         if args.help == 1:
@@ -4634,6 +4680,7 @@ Usage examples:
         PPI = args.ppi
         PAI = args.pai
         HANGUP = args.hangup
+        HEADER = args.header
         REPLACES = args.replaces
 
         return (
@@ -4667,6 +4714,7 @@ Usage examples:
             PAI,
             HANGUP,
             REPLACES,
+            HEADER,
         )
     elif COMMAND == "dump":
         if args.help == 1:
@@ -4786,6 +4834,7 @@ Usage examples:
         MAX = args.max
         NOCOLOR = args.nocolor
 
+        HEADER = args.header
         return (
             COMMAND,
             IPADDR,
@@ -4812,6 +4861,7 @@ Usage examples:
             MAX,
             MIN,
             NOCOLOR,
+            HEADER,
         )
     elif COMMAND == "sniff":
         if args.help == 1:

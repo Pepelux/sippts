@@ -96,6 +96,7 @@ class SipScan:
         self.tlsfindings = []
         self.tlsseen = set()
         self.tlsversions = 0
+        self.header = ""
         self.tlsver = []
         self.cvelist = []
         self.cve = []
@@ -604,7 +605,7 @@ class SipScan:
                 self.route,
                 self.ppi,
                 self.pai,
-                "",
+                self.header,
                 1,
             )
 

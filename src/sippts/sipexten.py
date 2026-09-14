@@ -56,6 +56,7 @@ class SipExten:
         self.contact_domain = ""
         self.from_user = "100"
         self.user_agent = "pplsip"
+        self.header = ""
         self.threads = "500"
         self.verbose = 0
         self.nocolor = ""
@@ -379,7 +380,7 @@ class SipExten:
                 self.route,
                 "",
                 "",
-                "",
+                self.header,
                 1,
             )
 

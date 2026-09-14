@@ -46,6 +46,7 @@ class SipFlood:
         self.to_name = ""
         self.to_domain = ""
         self.user_agent = "pplsip"
+        self.header = ""
         self.digest = ""
         self.verbose = 0
         self.nthreads = "300"
@@ -333,7 +334,7 @@ class SipFlood:
                         self.route,
                         "",
                         "",
-                        "",
+                        self.header,
                         1,
                     )
 
@@ -464,7 +465,7 @@ class SipFlood:
                             rr,
                             "",
                             "",
-                            "",
+                            self.header,
                             1,
                         )
 

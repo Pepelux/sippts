@@ -1060,6 +1060,25 @@ def create_message(
     if method == "REFER" and referto == "":
         referto = "999"
 
+    # which headers the caller supplies with -header, so the default one is not
+    # emitted on top of it. This used to be a ^from: against the WHOLE
+    # "hdr1&hdr2" string with no MULTILINE, so it only worked when the
+    # supplied header was the first of the list: anywhere else the message
+    # went out with two From, and a duplicated From makes many parsers drop
+    # the request
+    aportadas = set()
+
+    for trozo in str(header).split("&"):
+        trozo = trozo.strip()
+
+        if trozo == "":
+            continue
+
+        nombre = trozo.split(":", 1)[0].strip().lower()
+
+        if nombre != "":
+            aportadas.add(nombre)
+
     headers = dict()
     if via == "":
         headers["Via"] = "SIP/2.0/%s %s:%s;branch=%s;rport" % (
@@ -1080,8 +1099,7 @@ def create_message(
             count += 1
             headers["Route %s" % str(count)] = rr
 
-    m = re.search(r"^from:\s*(.+)", header.lower())
-    if not m:
+    if "from" not in aportadas:
         headers["From"] = "%s <sip:%s@%s>;tag=%s" % (
             fromname,
             fromuser,
@@ -1089,8 +1107,7 @@ def create_message(
             tag,
         )
 
-    m = re.search(r"^to:\s*(.+)", header.lower())
-    if not m:
+    if "to" not in aportadas:
         if method == "NOTIFY":
             if totag == "":
                 headers["To"] = "<sip:%s>" % sip_host(todomain)
@@ -1108,8 +1125,7 @@ def create_message(
                 )
 
     if withcontact == 1:
-        m = re.search(r"^contact:\s*(.+)", header.lower())
-        if not m:
+        if "contact" not in aportadas:
             if method != "CANCEL" and method != "ACK":
                 headers["Contact"] = "<sip:%s@%s:%d;transport=%s>;expires=%s" % (
                     fromuser,
