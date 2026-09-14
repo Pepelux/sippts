@@ -60,6 +60,7 @@ class SipPing:
         self.interval = 1
         self.ppi = ""
         self.pai = ""
+        self.max_forwards = ""
         self.timeout = 5
 
         self.run = True
@@ -309,6 +310,7 @@ class SipPing:
                 self.pai,
                 "",
                 1,
+                max_forwards=self.max_forwards,
             )
 
             if self.proxy == "":
@@ -449,6 +451,7 @@ class SipPing:
                             self.pai,
                             "",
                             1,
+                            max_forwards=self.max_forwards,
                         )
 
                         if self.proto == "TLS":

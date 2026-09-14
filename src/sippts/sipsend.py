@@ -33,6 +33,11 @@ class SipSend:
         self.sub_expires = ""
         self.ppi_domain = ""
         self.pai_domain = ""
+        self.body = ""
+        self.content_type = ""
+        self.max_forwards = ""
+        self.referto = ""
+        self.replaces = ""
         self.ip = ""
         self.host = ""
         self.template = ""
@@ -288,8 +293,13 @@ class SipSend:
         except (TypeError, ValueError):
             self.sdes = 0
 
+        # -sdes offers SRTP under RTP/SAVP, which is what RFC 4568 asks for.
+        # -sdes -sdes keeps the old RTP/AVP offer for a server that only
+        # accepted the malformed one
         if self.sdes == 1:
             self.sdp = 2
+        elif self.sdes >= 2:
+            self.sdp = 3
         if self.cseq == None or self.cseq == "":
             self.cseq = "1"
 
@@ -382,7 +392,7 @@ class SipSend:
                 self.to_tag,
                 self.digest,
                 1,
-                "",
+                self.referto,
                 self.sdp,
                 "",
                 self.route,
@@ -395,6 +405,10 @@ class SipSend:
                 sub_expires=self.sub_expires,
                 ppi_domain=self.ppi_domain,
                 pai_domain=self.pai_domain,
+                body=self.body,
+                content_type=self.content_type,
+                max_forwards=self.max_forwards,
+                replaces=self.replaces,
             )
 
         try:
@@ -571,6 +585,10 @@ class SipSend:
                         sub_expires=self.sub_expires,
                         ppi_domain=self.ppi_domain,
                         pai_domain=self.pai_domain,
+                body=self.body,
+                content_type=self.content_type,
+                max_forwards=self.max_forwards,
+                replaces=self.replaces,
                     )
 
                     try:

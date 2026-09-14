@@ -38,6 +38,7 @@ from .lib.functions import (
     result_rows,
     RESULT_FIELDS,
 )
+from .lib import tlsinfo
 from .lib.color import Color
 from .lib.logos import Logo
 from itertools import product
@@ -90,6 +91,12 @@ class SipScan:
         self.totaltime = 0
         self.fail = 0
         self.errors = 0
+        self.tlsinfo = 0
+        self.tls = []
+        self.tlsfindings = []
+        self.tlsseen = set()
+        self.tlsversions = 0
+        self.tlsver = []
         self.cvelist = []
         self.cve = []
 
@@ -463,6 +470,20 @@ class SipScan:
         if len(self.cve) > 0:
             self.print_cve()
 
+        if len(self.tls) > 0:
+            self.tls.sort(key=host_sort_key)
+            # the worst first: alphabetical order put CERT_DEFAULT_VENDOR
+            # above CERT_EXPIRED for no reason
+            orden = {"HIGH": 0, "MEDIUM": 1, "LOW": 2, "INFO": 3}
+            self.tlsfindings.sort(
+                key=lambda x: (
+                    host_sort_key(x),
+                    orden.get(x.split("###")[2], 9) if len(x.split("###")) > 2 else 9,
+                    x,
+                )
+            )
+            self.print_tls()
+
         try:
             cursor.show()
         except:
@@ -599,8 +620,23 @@ class SipScan:
                     context.verify_mode = ssl.CERT_NONE
                     context.load_default_certs()
 
-                    sock_ssl = context.wrap_socket(sock, server_hostname=str(host[0]))
+                    # the SNI: the address was always sent, so a SIP-TLS with
+                    # virtual hosts handed back its default certificate
+                    sni = self.domain if self.domain not in ("", None) else str(host[0])
+
+                    sock_ssl = context.wrap_socket(sock, server_hostname=str(sni))
                     sock_ssl.connect(host)
+
+                    if self.tlsinfo == 1:
+                        # read before sending anything: the handshake has
+                        # already happened, so this costs no extra connection,
+                        # and a host whose TLS answers but whose SIP does not
+                        # still gets reported
+                        try:
+                            self.inspect_tls(sock_ssl, ipaddr, port, sni)
+                        except Exception:
+                            self.errors += 1
+
                     sock_ssl.sendall(bytes(msg[:8192], "utf-8"))
                 else:
                     sock.sendto(bytes(msg[:8192], "utf-8"), (host))
@@ -901,19 +937,225 @@ class SipScan:
                 "method": self.method,
                 "elapsed": self.totaltime,
                 "errors": errores,
-                "cves": result_rows(self.cve, RESULT_FIELDS["scan_cve"])
-                if len(self.cve) > 0
+                "cves": self.cve_rows() if len(self.cve) > 0 else None,
+                # None makes write_results drop the key, so with -tlsinfo off
+                # the JSON comes out byte for byte what it was
+                "tls": self.tls_rows() if len(self.tls) > 0 else None,
+                "tls_findings": self.tls_finding_rows()
+                if len(self.tlsfindings) > 0
+                else None,
+                "tls_versions": result_rows(
+                    self.tlsver, RESULT_FIELDS["tls_versions"]
+                )
+                if len(self.tlsver) > 0
                 else None,
             },
         )
 
         self.found.clear()
 
+    def inspect_tls(self, sock_ssl, ipaddr, port, sni):
+        """Reads the certificate of an already connected socket. Never raises
+        out of here: a scan must not die because of a strange certificate."""
+        info = tlsinfo.inspect_socket(sock_ssl, sni)
+        clave = "%s###%s" % (ipaddr, port)
+
+        if clave in self.tlsseen:
+            return
+
+        self.tlsseen.add(clave)
+
+        # OpenSSL does the chain, with one extra connection, and only when
+        # asked for: rebuilding path validation by hand goes wrong quietly
+        confianza = tlsinfo.verify_chain(ipaddr, port, sni, 5)
+        info["trust"] = confianza[0]
+
+        self.tls.append(tlsinfo.fila(ipaddr, port, info))
+
+        if self.tlsversions == 1:
+            # one handshake per version, and only once per host:port thanks to
+            # tlsseen: that is what keeps this out of the hot loop
+            for nombre, estado, detalle in tlsinfo.versiones_aceptadas(
+                ipaddr, port, 5
+            ):
+                self.tlsver.append(
+                    "%s###%s###%s###%s###%s"
+                    % (ipaddr, port, nombre, estado, detalle)
+                )
+
+                if estado == "accepted" and nombre in ("TLSv1.0", "TLSv1.1"):
+                    self.tlsfindings.append(
+                        "%s###%s###MEDIUM###TLS_OLD_VERSION###%s is accepted"
+                        % (ipaddr, port, nombre)
+                    )
+
+        for severidad, codigo, detalle in tlsinfo.findings(info, sni, confianza):
+            self.tlsfindings.append(
+                "%s###%s###%s###%s###%s" % (ipaddr, port, severidad, codigo, detalle)
+            )
+
+    def tls_rows(self):
+        return result_rows(self.tls, RESULT_FIELDS["scan_tls"])
+
+    def tls_finding_rows(self):
+        return result_rows(self.tlsfindings, RESULT_FIELDS["tls_findings"])
+
+    def print_tls(self):
+        ilen = len("IP address")
+        plen = len("Port")
+        vlen = len("TLS")
+        clen = len("Cipher")
+        klen = len("Key")
+        elen = len("Expires")
+
+        filas = []
+
+        for x in self.tls:
+            c = x.split("###")
+
+            if len(c) < 14:
+                continue
+
+            filas.append((c[0], c[1], c[2], c[3], c[5], c[10], c[7], c[8], c[11], c[12]))
+
+        for f in filas:
+            ilen = max(ilen, len(f[0]))
+            plen = max(plen, len(f[1]))
+            vlen = max(vlen, len(f[2]))
+            clen = max(clen, len(f[3]))
+            klen = max(klen, len(f[4]))
+            elen = max(elen, len(f[5]))
+
+        raya = f"{self.c.WHITE}+{'-' * (ilen+2)}+{'-' * (plen+2)}+{'-' * (vlen+2)}+{'-' * (clen+2)}+{'-' * (klen+2)}+{'-' * (elen+2)}+"
+
+        print(raya)
+        print(
+            f"{self.c.WHITE}| {self.c.BWHITE}{'IP address'.ljust(ilen)}{self.c.WHITE} | {self.c.BWHITE}{'Port'.ljust(plen)}{self.c.WHITE} | {self.c.BWHITE}{'TLS'.ljust(vlen)}{self.c.WHITE} | {self.c.BWHITE}{'Cipher'.ljust(clen)}{self.c.WHITE} | {self.c.BWHITE}{'Key'.ljust(klen)}{self.c.WHITE} | {self.c.BWHITE}{'Expires'.ljust(elen)}{self.c.WHITE} |"
+        )
+        print(raya)
+
+        for f in filas:
+            print(
+                f"{self.c.WHITE}| {self.c.BGREEN}{f[0].ljust(ilen)}{self.c.WHITE} | {self.c.BGREEN}{f[1].ljust(plen)}{self.c.WHITE} | {self.c.BMAGENTA}{f[2].ljust(vlen)}{self.c.WHITE} | {self.c.BCYAN}{f[3].ljust(clen)}{self.c.WHITE} | {self.c.BYELLOW}{f[4].ljust(klen)}{self.c.WHITE} | {self.c.BWHITE}{f[5].ljust(elen)}{self.c.WHITE} |"
+            )
+
+            if self.verbose >= 1:
+                print(
+                    f"{self.c.WHITE}|   {self.c.WHITE}subject: {f[6]}   issuer: {f[7]}"
+                )
+
+                if f[8] != "":
+                    print(f"{self.c.WHITE}|   SAN: {f[8]}")
+
+                print(f"{self.c.WHITE}|   sha256: {f[9]}")
+
+        print(raya)
+        print(self.c.WHITE)
+
+        if len(self.tlsfindings) > 0:
+            slen = len("Sev")
+            flen = len("Finding")
+            dlen = len("Detail")
+            hallazgos = []
+
+            for x in self.tlsfindings:
+                c = x.split("###")
+
+                if len(c) < 5:
+                    continue
+
+                hallazgos.append((c[0], c[1], c[2], c[3], c[4]))
+
+            hilen = max([len(h[0]) for h in hallazgos] + [len("IP address")])
+            hplen = max([len(h[1]) for h in hallazgos] + [len("Port")])
+            slen = max([len(h[2]) for h in hallazgos] + [slen])
+            flen = max([len(h[3]) for h in hallazgos] + [flen])
+            dlen = max([len(h[4]) for h in hallazgos] + [dlen])
+
+            raya2 = f"{self.c.WHITE}+{'-' * (hilen+2)}+{'-' * (hplen+2)}+{'-' * (slen+2)}+{'-' * (flen+2)}+{'-' * (dlen+2)}+"
+            print(raya2)
+            print(
+                f"{self.c.WHITE}| {self.c.BWHITE}{'IP address'.ljust(hilen)}{self.c.WHITE} | {self.c.BWHITE}{'Port'.ljust(hplen)}{self.c.WHITE} | {self.c.BWHITE}{'Sev'.ljust(slen)}{self.c.WHITE} | {self.c.BWHITE}{'Finding'.ljust(flen)}{self.c.WHITE} | {self.c.BWHITE}{'Detail'.ljust(dlen)}{self.c.WHITE} |"
+            )
+            print(raya2)
+
+            for h in hallazgos:
+                color = (
+                    self.c.BRED
+                    if h[2] == "HIGH"
+                    else self.c.BYELLOW
+                    if h[2] == "MEDIUM"
+                    else self.c.BCYAN
+                )
+                print(
+                    f"{self.c.WHITE}| {self.c.BGREEN}{h[0].ljust(hilen)}{self.c.WHITE} | {self.c.BGREEN}{h[1].ljust(hplen)}{self.c.WHITE} | {color}{h[2].ljust(slen)}{self.c.WHITE} | {color}{h[3].ljust(flen)}{self.c.WHITE} | {self.c.WHITE}{h[4].ljust(dlen)}{self.c.WHITE} |"
+                )
+
+            print(raya2)
+            print(self.c.WHITE)
+
+        if len(self.tlsver) > 0:
+            filas = []
+
+            for x in self.tlsver:
+                c = x.split("###")
+
+                if len(c) >= 5:
+                    filas.append((c[0], c[1], c[2], c[3], c[4]))
+
+            a1 = max([len(f[0]) for f in filas] + [len("IP address")])
+            a2 = max([len(f[1]) for f in filas] + [len("Port")])
+            a3 = max([len(f[2]) for f in filas] + [len("Version")])
+            a4 = max([len(f[3]) for f in filas] + [len("Status")])
+            a5 = max([len(f[4]) for f in filas] + [len("Detail")])
+
+            raya3 = f"{self.c.WHITE}+{'-' * (a1+2)}+{'-' * (a2+2)}+{'-' * (a3+2)}+{'-' * (a4+2)}+{'-' * (a5+2)}+"
+            print(raya3)
+            print(
+                f"{self.c.WHITE}| {self.c.BWHITE}{'IP address'.ljust(a1)}{self.c.WHITE} | {self.c.BWHITE}{'Port'.ljust(a2)}{self.c.WHITE} | {self.c.BWHITE}{'Version'.ljust(a3)}{self.c.WHITE} | {self.c.BWHITE}{'Status'.ljust(a4)}{self.c.WHITE} | {self.c.BWHITE}{'Detail'.ljust(a5)}{self.c.WHITE} |"
+            )
+            print(raya3)
+
+            for f in filas:
+                color = (
+                    self.c.BYELLOW
+                    if f[3] == "accepted" and f[2] in ("TLSv1.0", "TLSv1.1")
+                    else self.c.BGREEN
+                    if f[3] == "accepted"
+                    else self.c.WHITE
+                )
+                print(
+                    f"{self.c.WHITE}| {self.c.BGREEN}{f[0].ljust(a1)}{self.c.WHITE} | {self.c.BGREEN}{f[1].ljust(a2)}{self.c.WHITE} | {self.c.BMAGENTA}{f[2].ljust(a3)}{self.c.WHITE} | {color}{f[3].ljust(a4)}{self.c.WHITE} | {self.c.WHITE}{f[4].ljust(a5)}{self.c.WHITE} |"
+                )
+
+            print(raya3)
+            print(self.c.WHITE)
+            print(
+                f"{self.c.YELLOW}[!] 'untested' means this OpenSSL cannot offer that version, NOT that the server has it disabled{self.c.WHITE}"
+            )
+
+        print(
+            f"{self.c.YELLOW}[!] A self-signed certificate on an internal SIP trunk is not a finding by itself. SSLv2/SSLv3 cannot be tested: this OpenSSL does not offer them\n{self.c.WHITE}"
+        )
+
+    def cve_rows(self):
+        # 'type' is really the CVE description. The key is kept so that an
+        # existing jq '.cves[].type' does not break, and 'description' is
+        # added with the same value: it goes away in 5.0. RESULT_FIELDS is
+        # left alone on purpose, so the CSV stays byte for byte what it was
+        rows = result_rows(self.cve, RESULT_FIELDS["scan_cve"])
+
+        for row in rows:
+            row["description"] = row["type"]
+
+        return rows
+
     def print_cve(self):
         delen = len("Device")
         velen = len("Version")
         cvlen = len("CVE")
-        tylen = len("Type")
+        # the 4th column of cve.csv is the CVE description, not a type
+        tylen = len("Description")
         urlen = len("URL")
 
         for x in self.cve:
@@ -939,7 +1181,7 @@ class SipScan:
             f"{self.c.WHITE}+{'-' * (delen+2)}+{'-' * (velen+2)}+{'-' * (cvlen+2)}+{'-' * (tylen+2)}+{'-' * (urlen+2)}+"
         )
         print(
-            f"{self.c.WHITE}| {self.c.BWHITE}{'Device'.ljust(delen)}{self.c.WHITE} | {self.c.BWHITE}{'Version'.ljust(velen)}{self.c.WHITE} | {self.c.BWHITE}{'CVE'.ljust(cvlen)}{self.c.WHITE} | {self.c.BWHITE}{'Type'.ljust(tylen)}{self.c.WHITE} | {self.c.BWHITE}{'URL'.ljust(urlen)}{self.c.WHITE} |"
+            f"{self.c.WHITE}| {self.c.BWHITE}{'Device'.ljust(delen)}{self.c.WHITE} | {self.c.BWHITE}{'Version'.ljust(velen)}{self.c.WHITE} | {self.c.BWHITE}{'CVE'.ljust(cvlen)}{self.c.WHITE} | {self.c.BWHITE}{'Description'.ljust(tylen)}{self.c.WHITE} | {self.c.BWHITE}{'URL'.ljust(urlen)}{self.c.WHITE} |"
         )
         print(
             f"{self.c.WHITE}+{'-' * (delen+2)}+{'-' * (velen+2)}+{'-' * (cvlen+2)}+{'-' * (tylen+2)}+{'-' * (urlen+2)}+"

@@ -13,6 +13,9 @@ import csv
 import json
 import hashlib
 import platform
+import base64
+import secrets
+from urllib.parse import quote
 
 
 BRED = "\033[1;31;20m"
@@ -586,6 +589,24 @@ SIPPTS_VERSION = load_version()
 RESULT_FIELDS = {
     "scan": ("ip", "port", "proto", "response", "user_agent", "type", "fingerprint"),
     "scan_cve": ("device", "version", "cve", "type", "url"),
+    "scan_tls": (
+        "ip",
+        "port",
+        "version",
+        "cipher",
+        "cipher_bits",
+        "key",
+        "sigalg",
+        "subject",
+        "issuer",
+        "valid_from",
+        "valid_to",
+        "san",
+        "sha256",
+        "trust",
+    ),
+    "tls_findings": ("ip", "port", "severity", "id", "detail"),
+    "tls_versions": ("ip", "port", "version", "status", "detail"),
     "exten": ("ip", "port", "proto", "exten", "response", "user_agent"),
     "enumerate": ("method", "response", "user_agent", "fingerprint"),
     "leak": ("ip", "port", "proto", "response"),
@@ -875,6 +896,14 @@ def bind_local_port(sock, bind="0.0.0.0", lport=0):
         return 0
 
 
+def generate_srtp_key():
+    """A fresh SDES master key: 16 bytes of key plus 14 of salt, base64, which
+    is the 40 characters an AES_CM_128_HMAC_SHA1_80 inline: expects. The two
+    keys that were written here before were static and public in the repo, so
+    every session used the same one and an IDS could fingerprint it."""
+    return base64.b64encode(secrets.token_bytes(30)).decode()
+
+
 def generate_random_string(len_ini, len_end, type):
     len = generate_random_integer(len_ini, len_end)
 
@@ -1009,6 +1038,10 @@ def create_message(
     sub_expires="",
     ppi_domain="",
     pai_domain="",
+    body="",
+    content_type="",
+    max_forwards="",
+    replaces="",
 ):
     expires = "120"
 
@@ -1095,11 +1128,34 @@ def create_message(
             headers["Authorization"] = "%s" % digest
 
     headers["CSeq"] = "%s %s" % (cseq, method)
-    headers["Max-Forwards"] = "70"
+    # configurable so a SIP traceroute can be done by hand (0, 1, 2...) and so
+    # a parser can be probed with Max-Forwards: 0. -header cannot do this: it
+    # would emit the header twice
+    headers["Max-Forwards"] = str(max_forwards) if str(max_forwards) != "" else "70"
 
     if method == "REFER":
-        headers["Refer-To"] = "<sip:%s@%s>" % (referto, sip_host(domain))
+        if replaces != "":
+            # RFC 3891: attended transfer. The Replaces goes inside the
+            # Refer-To URI, and RFC 3261 19.1.1 says the ; and the = of an
+            # embedded header have to be escaped, or the receiver reads them
+            # as URI parameters and the whole thing falls apart
+            headers["Refer-To"] = "<sip:%s@%s?Replaces=%s>" % (
+                referto,
+                sip_host(domain),
+                quote(replaces, safe=""),
+            )
+            headers["Require"] = "replaces"
+        else:
+            headers["Refer-To"] = "<sip:%s@%s>" % (referto, sip_host(domain))
+
         headers["Referred-By"] = "<sip:%s@%s:%s>" % (fromuser, sip_host(domain), fromport)
+
+    if method == "INVITE" and replaces != "":
+        # the same RFC, the other half: an INVITE with Replaces takes over a
+        # call that is already up. Here it is a header of its own, so it is
+        # NOT url encoded
+        headers["Replaces"] = replaces
+        headers["Require"] = "replaces"
 
     if method == "SUBSCRIBE":
         if event == "":
@@ -1141,6 +1197,12 @@ def create_message(
     if withsdp == 1:
         headers["Content-Type"] = "application/sdp"
         headers["Accept"] = "application/sdp, application/dtmf-relay"
+    elif body != "":
+        # RFC 3428: a MESSAGE with a body needs its Content-Type. Without this
+        # 'send -m message' went out with Content-Length 0 and proved nothing
+        headers["Content-Type"] = (
+            content_type if content_type != "" else "text/plain;charset=UTF-8"
+        )
 
     if method == "INVITE":
         # the domain of these two was hardcoded to telefonica.net. It stays as
@@ -1182,6 +1244,13 @@ def create_message(
             msg += "%s\r\n" % hdr
 
     sdp = ""
+
+    # the body travels in the same variable as the SDP and with the same shape
+    # (a leading \r\n), because Content-Length is computed as len(sdp) and it
+    # only adds up thanks to that leading break compensating the trailing one
+    if withsdp == 0 and body != "":
+        sdp = "\r\n" + body
+
     if withsdp == 1:
         # Use RTP
         sdp = "\r\n"
@@ -1204,15 +1273,21 @@ def create_message(
         sdp += "a=maxptime:60\r\n"
         sdp += "a=sendrecv\r\n"
 
-    if withsdp == 2:
-        # Use SRTP
+    if withsdp == 2 or withsdp == 3:
+        # SDES-SRTP. RFC 4568 puts the crypto lines under the RTP/SAVP
+        # profile: offering them under RTP/AVP is contradictory, and a server
+        # either ignores the crypto and answers in the clear or rejects the
+        # offer with a 488, so -sdes was not really testing SRTP at all.
+        # withsdp 3 is the old permissive behaviour, kept behind -sdes -sdes
+        perfil = "RTP/AVP" if withsdp == 3 else "RTP/SAVP"
+
         sdp = "\r\n"
         sdp += "v=0\r\n"
         sdp += "o=anonymous 1312841870 1312841870 IN IP%s %s\r\n" % ("6" if is_ipv6(ip_sdp) else "4", ip_sdp)
         sdp += "s=SIPPTS\r\n"
         sdp += "c=IN IP%s %s\r\n" % ("6" if is_ipv6(ip_sdp) else "4", ip_sdp)
         sdp += "t=0 0\r\n"
-        sdp += "m=audio 12194 RTP/AVP 0 9 8 18 3 110 101\r\n"
+        sdp += "m=audio 12194 %s 0 9 8 18 3 110 101\r\n" % perfil
         sdp += "a=rtpmap:0 PCMU/8000\r\n"
         sdp += "a=rtpmap:9 G722/8000\r\n"
         sdp += "a=rtpmap:8 PCMA/8000\r\n"
@@ -1225,8 +1300,9 @@ def create_message(
         sdp += "a=ptime:20\r\n"
         sdp += "a=maxptime:60\r\n"
         sdp += "a=sendrecv\r\n"
-        sdp += "a=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:4EvYRd22P8n36wRrlWCMZIWegovyv7iWm464D4Pt\r\n"
-        sdp += "a=crypto:2 AES_CM_128_HMAC_SHA1_32 inline:mWQ4cakWKOnfH9Tji2pEF87JtVFUqBAMPqub9roe\r\n"
+        # one key per line: reusing it would leak the first one in the second
+        sdp += "a=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:%s\r\n" % generate_srtp_key()
+        sdp += "a=crypto:2 AES_CM_128_HMAC_SHA1_32 inline:%s\r\n" % generate_srtp_key()
 
     msg += "Content-Length: " + str(len(sdp)) + "\r\n"
     msg += sdp
@@ -1386,6 +1462,9 @@ def parse_message(buffer):
     data["sipuser"] = ""
     data["sipdomain"] = ""
     data["ua"] = ""
+    data["allow"] = ""
+    data["supported"] = ""
+    data["allow_events"] = ""
     data["via"] = ""
     data["via2"] = ""
     data["rr"] = ""
@@ -1475,6 +1554,24 @@ def parse_message(buffer):
         m = re.search(r"^Call-ID:\s*(.*)", header)
         if m:
             data["callid"] = "%s" % (m.group(1))
+
+        # what the server says it supports, which is the authoritative answer:
+        # sipenumerate was guessing the methods from the status code with this
+        # in front of it. They can arrive split over several lines, so they are
+        # accumulated instead of overwritten
+        for cabecera, clave in (
+            ("Allow", "allow"),
+            ("Supported", "supported"),
+            ("Allow-Events", "allow_events"),
+        ):
+            m = re.search(r"^%s:\s*(.+)" % cabecera, header)
+            if m:
+                valor = m.group(1).strip()
+
+                if data[clave] == "":
+                    data[clave] = valor
+                elif valor != "":
+                    data[clave] += ", " + valor
 
         m = re.search(r"^Server:\s*(.+)", header)
         if m:
@@ -2498,34 +2595,41 @@ def check_model(ua, fp, type, cvelist):
         # a CVE with no range affects every version, so matching the product
         # is enough even when the User-Agent carries no version at all
         if spec == "":
-            confirmados.append(cve.lower())
+            confirmados.append(cve)
             continue
 
         for candidata in candidatas:
             if version_matches(candidata, spec) == True:
-                confirmados.append(cve.lower())
+                confirmados.append(cve)
                 break
 
+    # lowercase is needed to COMPARE, never to return: the original line is
+    # what goes out, or the CVE id and the NVD url come back downcased and a
+    # 'grep CVE-2022' over the results finds nothing
     for cve in cvelist:
-        cve = cve.lower()
-        if cve.find(model) > -1 and cve.find(version) > -1 and cve.find(firmware) > -1:
+        cve_lc = cve.lower()
+        if (
+            cve_lc.find(model) > -1
+            and cve_lc.find(version) > -1
+            and cve_lc.find(firmware) > -1
+        ):
             found.append(cve)
 
     if len(found) == 0:
         for cve in cvelist:
-            cve = cve.lower()
-            if cve.find(model) > -1:
+            cve_lc = cve.lower()
+            if cve_lc.find(model) > -1:
                 if (
-                    cve.find(version) > -1
-                    or cve.replace(" ", "").find(version) > -1
-                    or cve.find(version.replace(" ", "")) > -1
-                    or cve.replace(" ", "").find(version.replace(" ", "")) > -1
+                    cve_lc.find(version) > -1
+                    or cve_lc.replace(" ", "").find(version) > -1
+                    or cve_lc.find(version.replace(" ", "")) > -1
+                    or cve_lc.replace(" ", "").find(version.replace(" ", "")) > -1
                 ):
                     found.append(cve)
                 elif (
-                    cve.replace("-", "").find(version) > -1
-                    or cve.find(version.replace("-", "")) > -1
-                    or cve.replace("-", "").find(version.replace("-", "")) > -1
+                    cve_lc.replace("-", "").find(version) > -1
+                    or cve_lc.find(version.replace("-", "")) > -1
+                    or cve_lc.replace("-", "").find(version.replace("-", "")) > -1
                 ):
                     found.append(cve)
 
@@ -2537,8 +2641,7 @@ def check_model(ua, fp, type, cvelist):
         # empty string returned the whole CVE list as a match
         if model != "":
             for cve in cvelist:
-                cve = cve.lower()
-                if cve.find(model) > -1:
+                if cve.lower().find(model) > -1:
                     found.append(cve)
 
     # the ones whose version really falls inside the range go first, and

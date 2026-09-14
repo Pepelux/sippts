@@ -220,6 +220,84 @@ Sippts is a set of tools for auditing VoIP servers and devices using the SIP pro
 
   * _**rtpbleedinject**_ to exploit RTP Bleed vulnerability injecting RTP traffic. [Click here to read more about rtpbleedinject command](https://github.com/Pepelux/sippts/wiki/Command-rtpbleedinject)
 
+## TLS certificates ##
+
+sippts speaks TLS, and until now it threw the certificate away. With
+`-tlsinfo` the `scan` module reads what the server presents:
+
+```
+sippts scan -i 192.168.0.1 -r 5061 -p tls -tlsinfo
+```
+
+It costs no extra connection, because the handshake happens anyway. Two tables
+come after the usual one: what the certificate says (TLS version, cipher, key,
+expiry, and with `-v` also subject, issuer, SAN and SHA-256), and what is
+worth reporting about it — expired, self signed, key under 2048 bits, SHA-1 or
+MD5 signature, a name that does not match, an old TLS version or a weak
+cipher.
+
+The one that matters most in VoIP is `CERT_DEFAULT_VENDOR`: the factory
+certificate of a PBX or a phone, whose private key ships inside the firmware
+image. Anyone who downloads that image can sit in the middle of the SIP-TLS.
+
+With `-tlsversions` it also tries TLS 1.0, 1.1, 1.2 and 1.3 one at a time,
+which costs one handshake per version and is done once per host and port:
+
+```
+sippts scan -i 192.168.0.1 -r 5061 -p tls -tlsversions
+```
+
+Each version comes back as `accepted`, `refused` or `untested`. The last one
+means *this* OpenSSL cannot offer that version, which is not the same as the
+server having it switched off, and the difference matters when the result goes
+into a report.
+
+Two honest limits, which the tool prints instead of hiding:
+
+  * **SSLv2 and SSLv3 cannot be tested.** OpenSSL 3 is built without them, so
+  sippts cannot offer them. They are reported as `untested`, never as
+  `disabled`.
+
+  * A self signed certificate on an internal SIP trunk is not a finding by
+  itself. Judge it in context.
+
+The main table, the file of `-o` and the CSV of `-ocsv` do not change. The
+JSON of `-oj` gains `tls` and `tls_findings`.
+
+## Call hijacking ##
+
+`Replaces` (RFC 3891) points at a call that is already up, by its Call-ID and
+its two tags. `sippts dump` and `sippts sniff` are what give you those three
+values out of a capture; from there:
+
+```
+sippts send -i 192.168.0.1 -m REFER -refer-to 200 -replaces "CALLID;to-tag=X;from-tag=Y"
+sippts send -i 192.168.0.1 -m INVITE -replaces "CALLID;to-tag=X;from-tag=Y"
+```
+
+On a REFER it is an attended transfer, and on an INVITE it takes the call
+over. `sippts invite` also takes `-replaces`, to add it to the REFER that `-t`
+already sends, so the transfer happens inside a call it has just set up.
+
+## What a server says it supports ##
+
+`enumerate` tries the 14 SIP methods one by one and tells them apart by the
+answer, but a server also states what it takes in the `Allow`, `Supported` and
+`Allow-Events` headers. Those are read too and printed in a second table,
+which also points out the two contradictions worth looking at: a method
+advertised in `Allow` that then answers `405`, and a method that answers fine
+without being advertised at all. `Allow-Events` is the one that says whether
+`dialog`, `message-summary` or `presence` can be subscribed to, which is where
+`send -m subscribe` goes next.
+
+```
+sippts enumerate -i 192.168.0.1
+```
+
+The first table keeps the shape it always had, and so does the CSV of
+`-ocsv`. The new data is only added to the JSON of `-oj`, under
+`capabilities`.
+
 ## Known vulnerabilities ##
 
 With `-cve`, the `scan` module compares what it fingerprints against a list of

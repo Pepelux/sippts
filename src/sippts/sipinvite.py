@@ -66,6 +66,8 @@ class SipInvite:
         self.user_agent = "pplsip"
         self.localip = ""
         self.transfer = ""
+        self.hangup = 0
+        self.replaces = ""
         self.verbose = 0
         self.auth_user = ""
         self.auth_pwd = ""
@@ -129,6 +131,12 @@ class SipInvite:
             callid = generate_random_string(32, 32, "hex")
             tag = generate_random_string(8, 8, "hex")
 
+            # RFC 3261 13.2.2.4: the ACK carries the SAME CSeq as the INVITE it
+            # acknowledges. It was hardcoded to 2, which only matched when the
+            # call had been challenged; against an open PBX the INVITE was 1 and
+            # the ACK 2, so a strict server never matched them and kept
+            # retransmitting the 200 OK until it tore the call down
+            cseq_invite = "1"
             msg = create_message(
                 "INVITE",
                 self.localip,
@@ -342,6 +350,7 @@ class SipInvite:
                             digest += ", nc=%s" % nc
 
                         print(f"{self.c.YELLOW}[=>] Request INVITE from {src} to {dst}")
+                        cseq_invite = "2"
                         msg = create_message(
                             "INVITE",
                             self.localip,
@@ -419,7 +428,7 @@ class SipInvite:
                                         % (dst, src, response)
                                     )
                                     if self.verbose == 1:
-                                        fw.write(resp.code() + "\n")
+                                        fw.write(resp.decode() + "\n")
 
                                 totag = headers["totag"]
 
@@ -444,7 +453,7 @@ class SipInvite:
                         branch,
                         callid,
                         tag,
-                        "2",
+                        cseq_invite,
                         totag,
                         digest,
                         auth_type,
@@ -503,6 +512,7 @@ class SipInvite:
                             "",
                             "",
                             1,
+                            replaces=self.replaces,
                         )
 
                         if self.verbose == 1 and self.ofile == "":
@@ -518,8 +528,40 @@ class SipInvite:
                         else:
                             sock.sendto(bytes(msg[:8192], "utf-8"), host)
 
-                        # receive response
-                        headers = parse_message(resp.decode())
+                        # receive the response TO THE REFER: re-parsing the
+                        # previous one reported the 200 OK of the INVITE even
+                        # when the server answered 403 to the transfer
+                        rescode = "100"
+                        tries = 0
+                        headers = None
+
+                        while rescode[:1] == "1" and tries < 10:
+                            tries += 1
+
+                            try:
+                                if self.proto == "TLS":
+                                    resp = sock_ssl.recv(4096)
+                                else:
+                                    resp = sock.recv(4096)
+                            except socket.timeout:
+                                print(
+                                    f"{self.c.RED}[!] Timeout waiting for the REFER response"
+                                )
+
+                                if self.ofile != "":
+                                    fw.write(
+                                        "[!] Timeout waiting for the REFER response\n"
+                                    )
+
+                                headers = None
+                                break
+
+                            headers = parse_message(resp.decode())
+
+                            if not headers:
+                                break
+
+                            rescode = headers["response_code"]
 
                         if headers:
                             response = "%s %s" % (
@@ -542,13 +584,27 @@ class SipInvite:
                                     fw.write(resp.decode() + "\n")
 
                     bye = ""
+                    colgado = False
+
+                    # with -hangup sippts is the one that hangs up, instead of
+                    # waiting here forever for the peer to do it: with -th 200
+                    # a sweep used to leave every thread stuck on this recv
+                    if self.hangup > 0:
+                        sock.settimeout(self.hangup)
 
                     while bye == "":
                         # wait bor BYE
-                        if self.proto == "TLS":
-                            resp = sock_ssl.recv(4096)
-                        else:
-                            resp = sock.recv(4096)
+                        try:
+                            if self.proto == "TLS":
+                                resp = sock_ssl.recv(4096)
+                            else:
+                                resp = sock.recv(4096)
+                        except socket.timeout:
+                            if self.hangup > 0:
+                                colgado = True
+                                break
+
+                            raise
 
                         try:
                             headers = parse_message(resp.decode())
@@ -573,43 +629,111 @@ class SipInvite:
                         except:
                             pass
 
-                    # send 200 Ok
-                    try:
-                        cseq = int(headers["cseq"])
-                    except (ValueError, TypeError):
-                        cseq = 1
-                    msg = create_response_ok(
-                        src,
-                        dst,
-                        self.proto,
-                        self.domain,
-                        lport,
-                        cseq,
-                        branch,
-                        callid,
-                        tag,
-                        totag,
-                        headers["via2"],
-                        headers["from"],
-                        headers["to"],
-                    )
+                    if colgado == True:
+                        print(
+                            f"{self.c.YELLOW}[=>] Request BYE from {src} to {dst} after {self.hangup}s"
+                        )
+                        msg = create_message(
+                            "BYE",
+                            self.localip,
+                            self.contact_domain,
+                            src,
+                            self.from_name,
+                            self.from_domain,
+                            dst,
+                            self.to_name,
+                            self.to_domain,
+                            self.proto,
+                            self.domain,
+                            self.user_agent,
+                            lport,
+                            branch,
+                            callid,
+                            tag,
+                            "5",
+                            totag,
+                            "",
+                            "",
+                            "",
+                            0,
+                            "",
+                            self.route,
+                            "",
+                            "",
+                            "",
+                            1,
+                        )
 
-                    print(f"{self.c.YELLOW}[=>] Sending 200 Ok from {src} to {dst}\n")
+                        if self.ofile != "":
+                            fw.write(
+                                "[=>] Request BYE from %s to %s\n" % (src, dst)
+                            )
+                            if self.verbose == 1:
+                                fw.write(msg + "\n")
 
-                    if self.verbose == 1 and self.ofile == "":
-                        print(f"{self.c.YELLOW}{msg}")
+                        try:
+                            if self.proto == "TLS":
+                                sock_ssl.sendall(bytes(msg[:8192], "utf-8"))
+                            else:
+                                sock.sendto(bytes(msg[:8192], "utf-8"), host)
 
-                    print(self.c.WHITE)
+                            sock.settimeout(5)
 
-                    if self.ofile != "":
-                        fw.write("[=>] Sending 200 Ok from %s to %s\n" % (src, dst))
-                        if self.verbose == 1:
-                            fw.write(msg + "\n")
+                            if self.proto == "TLS":
+                                resp = sock_ssl.recv(4096)
+                            else:
+                                resp = sock.recv(4096)
 
-                    if self.proto == "TLS":
-                        sock_ssl.sendall(bytes(msg[:8192], "utf-8"))
-                    else:
-                        sock.sendto(bytes(msg[:8192], "utf-8"), host)
+                            headers = parse_message(resp.decode())
+
+                            if headers:
+                                print(
+                                    f"{self.c.CYAN}[<=] Response from {dst} to {src}: {headers['response_code']} {headers['response_text']}"
+                                )
+                        except socket.timeout:
+                            # the call is torn down on our side either way
+                            pass
+
+                    # with -hangup we already tore the call down, so there
+                    # is no BYE from the peer left to answer
+                    if colgado == False:
+                        # send 200 Ok
+                        try:
+                            cseq = int(headers["cseq"])
+                        except (ValueError, TypeError):
+                            cseq = 1
+                        msg = create_response_ok(
+                            src,
+                            dst,
+                            self.proto,
+                            self.domain,
+                            lport,
+                            cseq,
+                            branch,
+                            callid,
+                            tag,
+                            totag,
+                            headers["via2"],
+                            headers["from"],
+                            headers["to"],
+                        )
+
+                        print(f"{self.c.YELLOW}[=>] Sending 200 Ok from {src} to {dst}\n")
+
+                        if self.verbose == 1 and self.ofile == "":
+                            print(f"{self.c.YELLOW}{msg}")
+
+                        print(self.c.WHITE)
+
+                        if self.ofile != "":
+                            fw.write("[=>] Sending 200 Ok from %s to %s\n" % (src, dst))
+                            if self.verbose == 1:
+                                fw.write(msg + "\n")
+
+                        if self.proto == "TLS":
+                            sock_ssl.sendall(bytes(msg[:8192], "utf-8"))
+                        else:
+                            sock.sendto(bytes(msg[:8192], "utf-8"), host)
             except socket.timeout:
                 pass
             except:
@@ -644,8 +768,18 @@ class SipInvite:
         except:
             self.sdes = 0
 
+        try:
+            self.hangup = int(self.hangup)
+        except (TypeError, ValueError):
+            self.hangup = 0
+
+        # -sdes offers SRTP under RTP/SAVP, which is what RFC 4568 asks for.
+        # -sdes -sdes keeps the old RTP/AVP offer for a server that only
+        # accepted the malformed one
         if self.sdes == 1:
             self.sdp = 2
+        elif self.sdes >= 2:
+            self.sdp = 3
 
         if self.nocolor == 1:
             self.c.ansy()

@@ -55,6 +55,10 @@ class SipEnumerate:
         self.quit = False
 
         self.found = []
+        # what the server advertises, kept apart from self.found so the main
+        # table does not change shape. list.append is atomic under the GIL,
+        # which is what self.found already relies on with 20 threads
+        self.capsfound = []
 
         self.c = Color()
 
@@ -373,6 +377,12 @@ class SipEnumerate:
                 if fp[0:1] == "/":
                     fp = fp[1:]
 
+                for clave in ("allow", "supported", "allow_events"):
+                    if headers.get(clave, "") != "":
+                        self.capsfound.append(
+                            "%s###%s###%s" % (method, clave, headers[clave])
+                        )
+
                 line = "%s###%s###%s###%s" % (method, resdata, ua, fp)
                 self.found.append(line)
             except KeyboardInterrupt:
@@ -457,6 +467,11 @@ class SipEnumerate:
                 f"{self.c.YELLOW}[!] Fingerprinting is based on `To-tag` and other header values. The result may not be correct\n{self.c.WHITE}"
             )
 
+        capacidades = self.capabilities()
+
+        if capacidades != {}:
+            self.print_capabilities(capacidades)
+
         write_results(
             self.found,
             RESULT_FIELDS["enumerate"],
@@ -468,7 +483,103 @@ class SipEnumerate:
                 "port": self.rport,
                 "proto": self.proto,
                 "elapsed": self.totaltime,
+                # only the JSON carries meta, so RESULT_FIELDS and the CSV stay
+                # exactly as they were
+                "capabilities": {
+                    k: sorted(v) for k, v in capacidades.items()
+                }
+                if capacidades != {}
+                else None,
             },
         )
 
         self.found.clear()
+
+    def capabilities(self):
+        """The union of what the server advertised, header by header."""
+        capacidades = {}
+
+        for linea in self.capsfound:
+            partes = linea.split("###")
+
+            if len(partes) < 3:
+                continue
+
+            valores = [v.strip() for v in partes[2].split(",") if v.strip() != ""]
+            capacidades.setdefault(partes[1], set()).update(valores)
+
+        return capacidades
+
+    def print_capabilities(self, capacidades):
+        etiquetas = {
+            "allow": "Allow",
+            "supported": "Supported",
+            "allow_events": "Allow-Events",
+        }
+        filas = []
+
+        for clave in ("allow", "supported", "allow_events"):
+            if clave in capacidades:
+                filas.append((etiquetas[clave], ", ".join(sorted(capacidades[clave]))))
+
+        # the point of the table: what the server says it takes versus what it
+        # actually answered. A method advertised in Allow that never answered
+        # is the interesting one
+        anunciados = set(m.upper() for m in capacidades.get("allow", set()))
+
+        # a method that answers 405 or 501 is NOT supported, whatever Allow
+        # says: counting it as answered would hide the contradiction, which is
+        # the interesting part
+        aceptados = set()
+
+        for x in self.found:
+            partes = x.split("###")
+
+            if len(partes) < 2:
+                continue
+
+            codigo = partes[1].split(" ")[0]
+
+            if codigo in ("405", "501") or partes[1] in ("Timeout", "Error"):
+                continue
+
+            aceptados.add(partes[0].upper())
+
+        hlen = max([len(f[0]) for f in filas] + [len("Header")])
+        vlen = max([len(f[1]) for f in filas] + [len("Values")])
+
+        print(
+            f"{self.c.WHITE}+{'-' * (hlen + 2)}+{'-' * (vlen + 2)}+"
+        )
+        print(
+            f"{self.c.WHITE}| {self.c.BWHITE}{'Header'.ljust(hlen)}{self.c.WHITE} | {self.c.BWHITE}{'Values'.ljust(vlen)}{self.c.WHITE} |"
+        )
+        print(
+            f"{self.c.WHITE}+{'-' * (hlen + 2)}+{'-' * (vlen + 2)}+"
+        )
+
+        for nombre, valor in filas:
+            print(
+                f"{self.c.WHITE}| {self.c.BGREEN}{nombre.ljust(hlen)}{self.c.WHITE} | {self.c.BCYAN}{valor.ljust(vlen)}{self.c.WHITE} |"
+            )
+
+        print(
+            f"{self.c.WHITE}+{'-' * (hlen + 2)}+{'-' * (vlen + 2)}+"
+        )
+        print(self.c.WHITE)
+
+        solo_anunciados = sorted(anunciados - aceptados)
+        solo_aceptados = sorted(aceptados - anunciados)
+
+        if solo_anunciados != []:
+            print(
+                f"{self.c.BWHITE}Advertised in Allow but rejected or unanswered: {self.c.BYELLOW}{', '.join(solo_anunciados)}{self.c.WHITE}"
+            )
+
+        if solo_aceptados != []:
+            print(
+                f"{self.c.BWHITE}Accepted but not advertised in Allow: {self.c.BYELLOW}{', '.join(solo_aceptados)}{self.c.WHITE}"
+            )
+
+        if solo_anunciados != [] or solo_aceptados != []:
+            print(self.c.WHITE)

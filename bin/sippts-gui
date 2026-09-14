@@ -89,6 +89,8 @@ scan = (
     ("output_file", "Save data into a log file", False),
     ("output_ip_file", "Save IPs into a log file", False),
     ("cve", "Show possible CVEs", False),
+    ("tlsinfo", "With proto tls, show certificate info and weak TLS findings", False),
+    ("tlsversions", "With tlsinfo, also test TLS 1.0/1.1/1.2/1.3 one by one", False),
     ("threads", "Number of threads", True),
     ("timeout", "Sockets timeout", True),
     ("ping", "Ping host before scan", True),
@@ -203,6 +205,11 @@ send = (
         'Add custom header (ex: "Allow-Events: presence"). Multiple headers: hdr1&hdr2',
         False,
     ),
+    ("refer_to", "Refer-To of a REFER (default: 999)", False),
+    ("replaces", "Replaces header: callid;to-tag=X;from-tag=Y", False),
+    ("max_forwards", "Max-Forwards value (default: 70)", False),
+    ("body", "Message body, for methods that carry one (ex: MESSAGE)", False),
+    ("content_type", "Content-Type of the body (default: text/plain;charset=UTF-8)", False),
     ("no_contact", "Do not send the Contact header", False),
     ("branch", "Customize Branch header", False),
     ("callid", "Customize CallID header", False),
@@ -275,6 +282,8 @@ invite = (
     ("output_file", "Save data into a log file", False),
     ("threads", "Number of threads", True),
     ("transfer", "Phone number to transfer the call", False),
+    ("replaces", "Add Replaces to the REFER of transfer: callid;to-tag=X;from-tag=Y", False),
+    ("hangup", "Send a BYE after N seconds of established call (0 = wait for the peer)", False),
     ("local_ip", "Set local IP address (by default try to get it)", False),
 )
 
@@ -362,6 +371,7 @@ ping = (
     ("ua", "User-Agent header", False),
     ("ppi", "P-Preferred-Identity header", False),
     ("pai", "P-Asserted-Identity header", False),
+    ("max_forwards", "Max-Forwards value (default: 70)", False),
     ("branch", "Customize Branch header", False),
     ("callid", "Customize CallID header", False),
     ("cseq", "Customize Seq number", False),
@@ -1013,6 +1023,16 @@ class SIPPTS(Cmd):
                 self.mod.getcve = value
             else:
                 value = self.mod.getcve
+        elif param == "tlsinfo":
+            if run == False:
+                self.mod.tlsinfo = value
+            else:
+                value = self.mod.tlsinfo
+        elif param == "tlsversions":
+            if run == False:
+                self.mod.tlsversions = value
+            else:
+                value = self.mod.tlsversions
         elif param == "threads":
             if run == False:
                 self.mod.threads = value
@@ -1564,6 +1584,31 @@ class SIPPTS(Cmd):
                 self.mod.header = value
             else:
                 value = self.mod.header
+        elif param == "refer_to":
+            if run == False:
+                self.mod.referto = value
+            else:
+                value = self.mod.referto
+        elif param == "replaces":
+            if run == False:
+                self.mod.replaces = value
+            else:
+                value = self.mod.replaces
+        elif param == "max_forwards":
+            if run == False:
+                self.mod.max_forwards = value
+            else:
+                value = self.mod.max_forwards
+        elif param == "body":
+            if run == False:
+                self.mod.body = value
+            else:
+                value = self.mod.body
+        elif param == "content_type":
+            if run == False:
+                self.mod.content_type = value
+            else:
+                value = self.mod.content_type
         elif param == "no_contact":
             if run == False:
                 self.mod.nocontact = value
@@ -1935,6 +1980,16 @@ class SIPPTS(Cmd):
                 self.mod.transfer = value
             else:
                 value = self.mod.transfer
+        elif param == "hangup":
+            if run == False:
+                self.mod.hangup = value
+            else:
+                value = self.mod.hangup
+        elif param == "replaces":
+            if run == False:
+                self.mod.replaces = value
+            else:
+                value = self.mod.replaces
         elif param == "local_ip":
             if run == False:
                 self.mod.localip = value
@@ -2387,6 +2442,11 @@ class SIPPTS(Cmd):
                 self.mod.pai = value
             else:
                 value = self.mod.pai
+        elif param == "max_forwards":
+            if run == False:
+                self.mod.max_forwards = value
+            else:
+                value = self.mod.max_forwards
         elif param == "branch":
             if run == False:
                 self.mod.branch = value

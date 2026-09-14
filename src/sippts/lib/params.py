@@ -613,6 +613,18 @@ Usage examples:
     )
     other.add_argument("-fp", help="Try to fingerprinting", dest="fp", action="count")
     other.add_argument(
+        "-tlsinfo",
+        help="With -p tls, read the certificate the server presents (subject, issuer, dates, key, signature) and report weak or expired ones. It costs no extra connection: the handshake already happens",
+        dest="tlsinfo",
+        action="count",
+    )
+    other.add_argument(
+        "-tlsversions",
+        help="With -tlsinfo, also try TLS 1.0/1.1/1.2/1.3 one by one. It is one extra handshake per version and per host, done once per host:port. SSLv2/SSLv3 cannot be tested: this OpenSSL does not offer them",
+        dest="tlsversions",
+        action="count",
+    )
+    other.add_argument(
         "-random", help="Randomize target hosts", dest="random", action="count"
     )
     other.add_argument(
@@ -1229,6 +1241,46 @@ Usage examples:
         default="",
     )
     headers.add_argument(
+        "-mf",
+        metavar="NUMBER",
+        type=str,
+        help="Max-Forwards value (default: 70). Use 0, 1, 2... to walk the proxy chain by hand",
+        dest="maxforwards",
+        default="",
+    )
+    headers.add_argument(
+        "-refer-to",
+        metavar="NUMBER",
+        type=str,
+        help="Refer-To of a REFER (default: 999)",
+        dest="referto",
+        default="",
+    )
+    headers.add_argument(
+        "-replaces",
+        metavar="DIALOG",
+        type=str,
+        help='Replaces header: "callid;to-tag=X;from-tag=Y". On a REFER it is an attended transfer, on an INVITE it takes over the call. Get the values from sippts dump or sippts sniff',
+        dest="replaces",
+        default="",
+    )
+    headers.add_argument(
+        "-body",
+        metavar="TEXT",
+        type=str,
+        help="Message body, for methods that carry one (ex: MESSAGE). Sets Content-Type to text/plain unless -content-type says otherwise. Ignored when the message already carries an SDP",
+        dest="body",
+        default="",
+    )
+    headers.add_argument(
+        "-content-type",
+        metavar="TYPE",
+        type=str,
+        help="Content-Type of -body (default: text/plain;charset=UTF-8)",
+        dest="content_type",
+        default="",
+    )
+    headers.add_argument(
         "-nc", help="Don't send Contact header", dest="nocontact", action="count"
     )
     headers.add_argument(
@@ -1253,7 +1305,12 @@ Usage examples:
     headers.add_argument(
         "-sdp", help="Send SDP in INVITE messages", dest="sdp", action="count"
     )
-    headers.add_argument("-sdes", help="Send SDES in SDP", dest="sdes", action="count")
+    headers.add_argument(
+        "-sdes",
+        help="Send SDES in SDP (RTP/SAVP). Repeat it (-sdes -sdes) to offer the crypto lines under RTP/AVP instead, as older versions did",
+        dest="sdes",
+        action="count",
+    )
     headers.add_argument(
         "-digest",
         metavar="DIGEST",
@@ -1928,7 +1985,12 @@ Usage examples:
     headers.add_argument(
         "-sdp", help="Send SDP in INVITE messages", dest="sdp", action="count"
     )
-    headers.add_argument("-sdes", help="Send SDES in SDP", dest="sdes", action="count")
+    headers.add_argument(
+        "-sdes",
+        help="Send SDES in SDP (RTP/SAVP). Repeat it (-sdes -sdes) to offer the crypto lines under RTP/AVP instead, as older versions did",
+        dest="sdes",
+        action="count",
+    )
 
     auth = parser_leak.add_argument_group("Auth")
     auth.add_argument(
@@ -2236,6 +2298,15 @@ Usage examples:
         default="",
     )
 
+    headers.add_argument(
+        "-mf",
+        metavar="NUMBER",
+        type=str,
+        help="Max-Forwards value (default: 70). Use 0, 1, 2... to walk the proxy chain by hand",
+        dest="maxforwards",
+        default="",
+    )
+
     auth = parser_ping.add_argument_group("Auth")
     auth.add_argument(
         "-user",
@@ -2461,7 +2532,12 @@ Usage examples:
         dest="nosdp",
         action="count",
     )
-    headers.add_argument("-sdes", help="Send SDES in SDP", dest="sdes", action="count")
+    headers.add_argument(
+        "-sdes",
+        help="Send SDES in SDP (RTP/SAVP). Repeat it (-sdes -sdes) to offer the crypto lines under RTP/AVP instead, as older versions did",
+        dest="sdes",
+        action="count",
+    )
 
     auth = parser_invite.add_argument_group("Auth")
     auth.add_argument(
@@ -2503,6 +2579,22 @@ Usage examples:
         help="Phone number to transfer the call",
         dest="transfer_number",
         default="",
+    )
+    other.add_argument(
+        "-replaces",
+        metavar="DIALOG",
+        type=str,
+        help='Add Replaces to the REFER of -t, turning the blind transfer into an attended one: "callid;to-tag=X;from-tag=Y". Get the values from sippts dump or sippts sniff',
+        dest="replaces",
+        default="",
+    )
+    other.add_argument(
+        "-hangup",
+        metavar="SECONDS",
+        type=int,
+        help="Send a BYE after N seconds of established call (default: 0, wait for the peer to hang up). The BYE goes to the Request-URI, not to the Contact of the 200 OK",
+        dest="hangup",
+        default=0,
     )
     other.add_argument(
         "-th",
@@ -3947,6 +4039,12 @@ Usage examples:
         PAI = args.pai
         LOCALIP = args.localip
         CVE = args.cve
+        TLSINFO = args.tlsinfo
+        TLSVERSIONS = args.tlsversions
+
+        # the versions need the certificate read first, so it implies -tlsinfo
+        if TLSVERSIONS and not TLSINFO:
+            TLSINFO = 1
 
         return (
             COMMAND,
@@ -3982,6 +4080,8 @@ Usage examples:
             OTFILE,
             OJSON,
             OCSV,
+            TLSINFO,
+            TLSVERSIONS,
         )
     elif COMMAND == "exten":
         if args.help == 1:
@@ -4161,6 +4261,11 @@ Usage examples:
         NOCONTACT = args.nocontact
         TIMEOUT = args.timeout
         VERBOSE = args.verbose
+        BODY = args.body
+        CONTENTTYPE = args.content_type
+        MAXFORWARDS = args.maxforwards
+        REFERTO = args.referto
+        REPLACES = args.replaces
 
         return (
             COMMAND,
@@ -4205,6 +4310,11 @@ Usage examples:
             SUBEXPIRES,
             PPIDOMAIN,
             PAIDOMAIN,
+            BODY,
+            CONTENTTYPE,
+            MAXFORWARDS,
+            REFERTO,
+            REPLACES,
         )
     elif COMMAND == "wssend":
         if args.help == 1:
@@ -4448,6 +4558,7 @@ Usage examples:
         PAI = args.pai
         TIMEOUT = args.timeout
         NOCOLOR = args.nocolor
+        MAXFORWARDS = args.maxforwards
 
         return (
             COMMAND,
@@ -4481,6 +4592,7 @@ Usage examples:
             PAI,
             TIMEOUT,
             NOCOLOR,
+            MAXFORWARDS,
         )
     elif COMMAND == "invite":
         if args.help == 1:
@@ -4521,6 +4633,8 @@ Usage examples:
         OFILE = args.ofile
         PPI = args.ppi
         PAI = args.pai
+        HANGUP = args.hangup
+        REPLACES = args.replaces
 
         return (
             COMMAND,
@@ -4551,6 +4665,8 @@ Usage examples:
             OFILE,
             PPI,
             PAI,
+            HANGUP,
+            REPLACES,
         )
     elif COMMAND == "dump":
         if args.help == 1:

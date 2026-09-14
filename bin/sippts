@@ -107,6 +107,8 @@ def main():
             otfile,
             ojson,
             ocsv,
+            tlsinfo,
+            tlsversions,
         ) = params
 
         from sippts.sipscan import SipScan
@@ -142,6 +144,8 @@ def main():
         s.pai = pai
         s.localip = local_ip
         s.getcve = cve
+        s.tlsinfo = tlsinfo
+        s.tlsversions = tlsversions
         s.ojson = ojson
         s.ocsv = ocsv
     elif params[0] == "exten":
@@ -292,6 +296,11 @@ def main():
             sub_expires,
             ppi_domain,
             pai_domain,
+            body,
+            content_type,
+            max_forwards,
+            referto,
+            replaces,
         ) = params
 
         from sippts.sipsend import SipSend
@@ -338,6 +347,11 @@ def main():
         s.sub_expires = sub_expires
         s.ppi_domain = ppi_domain
         s.pai_domain = pai_domain
+        s.body = body
+        s.content_type = content_type
+        s.max_forwards = max_forwards
+        s.referto = referto
+        s.replaces = replaces
     elif params[0] == "enumerate":
         (
             cmd,
@@ -493,6 +507,7 @@ def main():
             pai,
             timeout,
             nocolor,
+            max_forwards,
         ) = params
 
         from sippts.sipping import SipPing
@@ -528,6 +543,7 @@ def main():
         s.pai = pai
         s.timeout = timeout
         s.nocolor = nocolor
+        s.max_forwards = max_forwards
     elif params[0] == "invite":
         (
             cmd,
@@ -558,6 +574,8 @@ def main():
             ofile,
             ppi,
             pai,
+            hangup,
+            replaces,
         ) = params
 
         from sippts.sipinvite import SipInvite
@@ -590,6 +608,8 @@ def main():
         s.ofile = ofile
         s.ppi = ppi
         s.pai = pai
+        s.hangup = hangup
+        s.replaces = replaces
     elif params[0] == "dump":
         (cmd, file, ofile, nocolor) = params
 

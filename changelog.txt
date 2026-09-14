@@ -1,4 +1,98 @@
 v4.2.0 (Sep/2026):
+- invite: the ACK that confirms a 200 OK carried a CSeq of 2 always, but RFC
+  3261 13.2.2.4 says it has to repeat the CSeq of the INVITE it acknowledges.
+  It only matched when the call had been challenged, because then the second
+  INVITE really was CSeq 2. Against a PBX that answers without asking for
+  credentials, which is the very thing this tool looks for, the INVITE went
+  out as 1 and the ACK as 2, so a server that checks it never matched the two
+  and kept retransmitting the 200 OK until it tore the call down
+- invite: with -o and -v, an authenticated call died silently right after the
+  200 OK. The log line called resp.code() on a bytes object, and the
+  AttributeError was swallowed by a bare except, taking the ACK, the REFER and
+  the wait for the BYE with it. The call was left half open and nothing was
+  printed
+- invite: the response to a REFER was never read. The code re-parsed the
+  previous answer, so sippts reported the 200 OK of the INVITE even when the
+  server had refused the transfer with a 403, which is a false positive in
+  exactly the test the option exists for
+- invite: new param -hangup SECONDS, sends a BYE after N seconds of
+  established call. Without it sippts waits for the other end to hang up, with
+  no timeout: a sweep with -tu 100-300 and 200 threads left every thread stuck
+  on that recv. Default 0, which is what it did before
+- invite, send: -sdes offered the crypto lines under the RTP/AVP profile, and
+  RFC 4568 puts them under RTP/SAVP. The offer was contradictory, so a server
+  would either ignore the crypto and answer in the clear or reject it with a
+  488: -sdes was not really testing SRTP. The two inline: keys were also
+  static and written in the repo, the same ones in every session, which an IDS
+  can fingerprint. Now the profile is RTP/SAVP and both keys are random and
+  different from each other. This changes what a server answers: one that used
+  to accept the malformed offer may now reject it, which is the honest result.
+  -sdes -sdes keeps the old RTP/AVP offer
+- scan: new param -tlsinfo. With -p tls, sippts spoke TLS and then threw the
+  certificate away: there was not a single getpeercert(), cipher() or
+  version() call anywhere in the package, so it could not tell an expired
+  certificate, a 1024 bit key, a SHA-1 signature or the factory certificate of
+  a PBX, whose private key ships inside the firmware image and is therefore a
+  full MITM of the SIP-TLS. It costs no extra connection: the handshake
+  already happens, and the certificate is read right after it. A host whose
+  TLS answers but whose SIP does not now shows up too, which it did not before
+  Two tables are printed after the usual one, and the JSON gains 'tls' and
+  'tls_findings'. Nothing else moves: the main table, the file of -o, the CSV
+  of -ocsv and the results of -oj are byte for byte what they were, and the
+  flag is off by default
+  Reading the certificate needed a DER parser (lib/tlsx509.py): with
+  CERT_NONE, which is what an audit uses, getpeercert() answers an empty dict,
+  and nothing in the standard library turns the DER into fields. It was
+  checked field by field against OpenSSL over the 193 certificates of the
+  system CA bundle, with no difference. The chain is NOT validated by hand:
+  OpenSSL is asked, with one extra connection, and its own wording is
+  reported
+  What cannot be done, and the tool says so instead of guessing: SSLv2 and
+  SSLv3 are not testable, OpenSSL 3 is built without them, so they are
+  reported as untested and never as disabled
+- scan: new param -tlsversions, which with -tlsinfo tries TLS 1.0, 1.1, 1.2
+  and 1.3 one at a time and says which ones the server takes. One handshake
+  per version, done once per host:port, so it stays out of the hot loop.
+  Three states and not two: accepted, refused, and untested, the last one
+  meaning the local OpenSSL cannot offer that version, which is NOT the same
+  as the server having it switched off. Saying otherwise would be a lie in a
+  report
+- scan: the SNI was always the address, so a SIP-TLS with virtual hosts handed
+  back its default certificate instead of the one of the name being audited.
+  It now uses the domain when the target was given as a name
+- enumerate: it now reads the Allow, Supported and Allow-Events headers of the
+  answers, which is the authoritative list of what the server takes. It was
+  guessing the supported methods from the status code with that header in
+  front of it, and it never even looked at Allow-Events, which is what says
+  whether dialog, message-summary or presence can be subscribed to. A second
+  table is printed after the usual one, and it points out the contradictions:
+  a method advertised in Allow that answers 405, and a method that answers
+  fine without being advertised. The main table, RESULT_FIELDS and the CSV do
+  not change; the JSON gains a 'capabilities' key
+- send, invite: new param -replaces, which adds the Replaces header of RFC
+  3891. There was not a single Replaces anywhere in sippts. On a REFER it
+  turns the blind transfer into an attended one, and on an INVITE it takes
+  over a call that is already up, which is what the Call-ID and the tags that
+  come out of 'sippts dump' or 'sippts sniff' are good for. Inside the
+  Refer-To it goes url encoded, because RFC 3261 19.1.1 wants the ; and the =
+  of an embedded header escaped; as a header of its own on the INVITE it goes
+  as is
+- send: new param -refer-to. A REFER always went out with Refer-To 999 and
+  there was no way to change it
+- send, ping: new param -mf NUMBER, the value of Max-Forwards, which was fixed
+  at 70. With 0, 1, 2... the proxy chain can be walked by hand, and 0 also
+  says how a parser reacts to it. -header could not do this, it would send the
+  header twice
+- send: new params -body TEXT and -content-type TYPE. A MESSAGE went out with
+  Content-Length 0 and no Content-Type, so it proved nothing
+- scan: the CVE table titled a column 'Type' over what is really the CVE
+  description, the 4th column of cve.csv. The table now says Description, and
+  the JSON carries both keys: 'description' and the old 'type' with the same
+  value, deprecated and going away in 5.0. The CSV is untouched
+- scan: the CVEs came back downcased, so the table, the JSON, the CSV and the
+  log showed 'cve-2022-27438' and a non canonical NVD url, and grepping the
+  results for a CVE id found nothing. Lowercase is needed to compare, not to
+  return
 - rtpbleed: 
   - bug fixes
 - rtcpbleed: 
