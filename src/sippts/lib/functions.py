@@ -588,7 +588,7 @@ SIPPTS_VERSION = load_version()
 # joins them with ### when it builds a result line.
 RESULT_FIELDS = {
     "scan": ("ip", "port", "proto", "response", "user_agent", "type", "fingerprint"),
-    "scan_cve": ("device", "version", "cve", "type", "url"),
+    "scan_cve": ("device", "version", "cve", "type", "url", "cvss"),
     "scan_tls": (
         "ip",
         "port",
@@ -2437,6 +2437,19 @@ def load_cve():
     for line in f:
         if c > 0:
             line = line.replace("\n", "")
+            # a list with more columns than this code knows how to read is a
+            # list from a newer sippts. It is not a reason to crash: the known
+            # columns are used and the user is told once
+            if line.count(";") > _CVE_COLUMNAS - 1:
+                global _AVISO_CVE
+
+                if _AVISO_CVE == False:
+                    _AVISO_CVE = True
+                    print(
+                        "[!] This CVE list is newer than your sippts, update it with -up",
+                        file=sys.stderr,
+                    )
+
             line = line.replace(";", "###")
             if len(line) > 0:
                 cve.append(line)
@@ -2556,6 +2569,52 @@ def version_matches(version, spec):
     return True
 
 
+# the 6th column of cve.csv, SEVERITY|SCORE|VERSION (ex: HIGH|8.8|3.1), empty
+# when the NVD has no metric for that CVE
+_CVE_COLUMNAS = 6
+_AVISO_CVE = False
+
+
+def cvss_severity(campo):
+    partes = str(campo).split("|")
+
+    return partes[0].strip().upper() if partes[0].strip() != "" else ""
+
+
+def cvss_score(campo):
+    partes = str(campo).split("|")
+
+    if len(partes) < 2:
+        return 0.0
+
+    try:
+        return float(partes[1])
+    except (ValueError, TypeError):
+        return 0.0
+
+
+def cvss_version(campo):
+    partes = str(campo).split("|")
+
+    return partes[2].strip() if len(partes) > 2 else ""
+
+
+def cvss_text(campo):
+    """What the table shows. A v2 score carries the mark, because its scale is
+    not the one of v3 and it has no CRITICAL level: reading 6.0 MEDIUM without
+    knowing it comes from v2 hides that v3 calls the same CVE 8.0 HIGH"""
+    sev = cvss_severity(campo)
+
+    if sev == "":
+        return ""
+
+    score = cvss_score(campo)
+    version = cvss_version(campo)
+    texto = "%s %s" % (("%.1f" % score) if score > 0 else "-", sev)
+
+    return texto + " v2" if version.startswith("2") else texto
+
+
 def check_model(ua, fp, type, cvelist):
     found = []
     model = "$$$"
@@ -2619,11 +2678,20 @@ def check_model(ua, fp, type, cvelist):
                 confirmados.append(cve)
                 break
 
+    # the fallback passes below used to run find() over the WHOLE line, which
+    # carries the description, the URL and now the CVSS too, so a version like
+    # "2.0" matched a piece of a link and a score matched a version. Only the
+    # three columns that identify the entry are searched
+    def pajar(linea):
+        columnas = linea.lower().split("###")
+
+        return "###".join(columnas[:3])
+
     # lowercase is needed to COMPARE, never to return: the original line is
     # what goes out, or the CVE id and the NVD url come back downcased and a
     # 'grep CVE-2022' over the results finds nothing
     for cve in cvelist:
-        cve_lc = cve.lower()
+        cve_lc = pajar(cve)
         if (
             cve_lc.find(model) > -1
             and cve_lc.find(version) > -1
@@ -2633,7 +2701,7 @@ def check_model(ua, fp, type, cvelist):
 
     if len(found) == 0:
         for cve in cvelist:
-            cve_lc = cve.lower()
+            cve_lc = pajar(cve)
             if cve_lc.find(model) > -1:
                 if (
                     cve_lc.find(version) > -1
@@ -2657,14 +2725,23 @@ def check_model(ua, fp, type, cvelist):
         # empty string returned the whole CVE list as a match
         if model != "":
             for cve in cvelist:
-                if cve.lower().find(model) > -1:
+                if pajar(cve).find(model) > -1:
                     found.append(cve)
 
     # the ones whose version really falls inside the range go first, and
     # nothing is dropped: in a scanner a false negative is worse than a false
     # positive, so the text matches are kept behind them
+    # worst first inside each group, so the top of the table is where to look
+    def por_gravedad(linea):
+        columnas = linea.split("###")
+        campo = columnas[5] if len(columnas) > 5 else ""
+
+        return (-cvss_score(campo), linea)
+
     if confirmados != []:
         resto = [c for c in found if c not in confirmados]
-        found = confirmados + resto
+        found = sorted(confirmados, key=por_gravedad) + sorted(resto, key=por_gravedad)
+    else:
+        found = sorted(found, key=por_gravedad)
 
     return found

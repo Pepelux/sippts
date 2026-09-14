@@ -27,7 +27,26 @@ BWHITE = "\033[1;37;20m"
 WHITE = "\033[0;37;20m"
 
 # single source of truth in lib/functions.py
+def estado_version(local, remota, comprobada):
+    """The banner used to say '(updated)' for anything that was not older,
+    which lied twice: when the local copy is AHEAD of what is published (a
+    development tree), and when github could not be reached at all, because
+    the remote version was then set equal to the local one"""
+    if comprobada == False:
+        return WHITE + " (not checked)"
+
+    if version_is_older(local, remota):
+        return BRED + " (last version " + remota + ")"
+
+    if version_is_older(remota, local):
+        return BYELLOW + " (unreleased, published is " + remota + ")"
+
+    return BWHITE + " (updated)"
+
+
 local_version = SIPPTS_VERSION
+comprobada = False
+comprobada_cve = False
 
 
 def get_sippts_args():
@@ -50,17 +69,15 @@ def get_sippts_args():
         output = result.stdout
         error = result.stderr
 
-        if result.returncode == 0:
+        if result.returncode == 0 and output.strip() not in ("", "404: Not Found"):
             current_version = output.replace("\n", "")
+            comprobada = True
         else:
             current_version = local_version
     except:
         current_version = local_version
 
-    if version_is_older(local_version, current_version):
-        local_version_status = BRED + """ (last version """ + current_version + """)"""
-    else:
-        local_version_status = BWHITE + """ (updated)"""
+    local_version_status = estado_version(local_version, current_version, comprobada)
 
     local_cve_version = load_cve_version()
 
@@ -83,19 +100,17 @@ def get_sippts_args():
         output = result.stdout
         error = result.stderr
 
-        if result.returncode == 0 and output != "404: Not Found":
+        if result.returncode == 0 and output.strip() not in ("", "404: Not Found"):
             current_cve_version = output.replace("\n", "")
+            comprobada_cve = True
         else:
             current_cve_version = local_cve_version
     except:
         current_cve_version = local_cve_version
 
-    if version_is_older(local_cve_version, current_cve_version):
-        local_cve_version_status = (
-            BRED + """ (last version """ + current_cve_version + """)"""
-        )
-    else:
-        local_cve_version_status = BWHITE + """ (updated)"""
+    local_cve_version_status = estado_version(
+        local_cve_version, current_cve_version, comprobada_cve
+    )
 
     rnd = random.randint(1, 4)
     if rnd == 1:
@@ -3740,6 +3755,9 @@ Usage examples:
                 "site-packages", "dist-packages"
             )
 
+        # the console was never updated by -up, it lives next to the launcher
+        binpath_gui = binpath + "-gui"
+
         # a source checkout is updated with git, not by overwriting its files
         checkout = source_checkout(modulepath)
 
@@ -3783,131 +3801,156 @@ Usage examples:
         except:
             sys.exit()
 
-        if version_is_older(local_version, current_version):
-            download_file(giturl + "bin/sippts", binpath, "bin/sippts")
+        # the CVE list must not get ahead of the modules that read it, so
+        # every failure is counted and checked before touching it. Declared
+        # out here because the check below also runs when the program was
+        # already up to date
+        fallos = 0
 
-            download_file(
+        if version_is_older(local_version, current_version):
+            fallos += not download_file(giturl + "bin/sippts", binpath, "bin/sippts")
+
+            fallos += not download_file(
                 giturl + "src/sippts/lib/color.py",
                 modulepath + "lib/color.py",
                 "lib/color.py",
             )
-            download_file(
+            fallos += not download_file(
+                giturl + "src/sippts/lib/tlsx509.py",
+                modulepath + "lib/tlsx509.py",
+                "lib/tlsx509.py",
+            )
+            fallos += not download_file(
+                giturl + "src/sippts/lib/tlsinfo.py",
+                modulepath + "lib/tlsinfo.py",
+                "lib/tlsinfo.py",
+            )
+            fallos += not download_file(
+                giturl + "src/sippts/data/version.txt",
+                modulepath + "data/version.txt",
+                "data/version.txt",
+            )
+            if os.path.isfile(binpath_gui):
+                fallos += not download_file(
+                    giturl + "bin/sippts-gui", binpath_gui, "bin/sippts-gui"
+                )
+            fallos += not download_file(
                 giturl + "src/sippts/lib/functions.py",
                 modulepath + "lib/functions.py",
                 "lib/functions.py",
             )
-            download_file(
+            fallos += not download_file(
                 giturl + "src/sippts/lib/logos.py",
                 modulepath + "lib/logos.py",
                 "lib/logos.py",
             )
-            download_file(
+            fallos += not download_file(
                 giturl + "src/sippts/lib/params.py",
                 modulepath + "lib/params.py",
                 "lib/params.py",
             )
-            download_file(
+            fallos += not download_file(
                 giturl + "src/sippts/lib/videos.py",
                 modulepath + "lib/videos.py",
                 "lib/videos.py",
             )
 
-            download_file(
+            fallos += not download_file(
                 giturl + "src/sippts/arpspoof.py",
                 modulepath + "arpspoof.py",
                 "arpspoof.py",
             )
-            download_file(
+            fallos += not download_file(
                 giturl + "src/sippts/rtcpbleed.py",
                 modulepath + "rtcpbleed.py",
                 "rtcpbleed.py",
             )
-            download_file(
+            fallos += not download_file(
                 giturl + "src/sippts/rtpbleed.py",
                 modulepath + "rtpbleed.py",
                 "rtpbleed.py",
             )
-            download_file(
+            fallos += not download_file(
                 giturl + "src/sippts/rtpbleedflood.py",
                 modulepath + "rtpbleedflood.py",
                 "rtpbleedflood.py",
             )
-            download_file(
+            fallos += not download_file(
                 giturl + "src/sippts/rtpbleedinject.py",
                 modulepath + "rtpbleedinject.py",
                 "rtpbleedinject.py",
             )
-            download_file(
+            fallos += not download_file(
                 giturl + "src/sippts/sipdigestcrack.py",
                 modulepath + "sipdigestcrack.py",
                 "sipdigestcrack.py",
             )
-            download_file(
+            fallos += not download_file(
                 giturl + "src/sippts/sipdigestleak.py",
                 modulepath + "sipdigestleak.py",
                 "sipdigestleak.py",
             )
-            download_file(
+            fallos += not download_file(
                 giturl + "src/sippts/sipenumerate.py",
                 modulepath + "sipenumerate.py",
                 "sipenumerate.py",
             )
-            download_file(
+            fallos += not download_file(
                 giturl + "src/sippts/sipexten.py",
                 modulepath + "sipexten.py",
                 "sipexten.py",
             )
-            download_file(
+            fallos += not download_file(
                 giturl + "src/sippts/sipflood.py",
                 modulepath + "sipflood.py",
                 "sipflood.py",
             )
-            download_file(
+            fallos += not download_file(
                 giturl + "src/sippts/sipinvite.py",
                 modulepath + "sipinvite.py",
                 "sipinvite.py",
             )
-            download_file(
+            fallos += not download_file(
                 giturl + "src/sippts/sipdump.py",
                 modulepath + "sipdump.py",
                 "sipdump.py",
             )
-            download_file(
+            fallos += not download_file(
                 giturl + "src/sippts/sippcapdump.py",
                 modulepath + "sippcapdump.py",
                 "sippcapdump.py",
             )
-            download_file(
+            fallos += not download_file(
                 giturl + "src/sippts/sipping.py",
                 modulepath + "sipping.py",
                 "sipping.py",
             )
-            download_file(
+            fallos += not download_file(
                 giturl + "src/sippts/siprcrack.py",
                 modulepath + "siprcrack.py",
                 "siprcrack.py",
             )
-            download_file(
+            fallos += not download_file(
                 giturl + "src/sippts/sipscan.py",
                 modulepath + "sipscan.py",
                 "sipscan.py",
             )
-            download_file(
+            fallos += not download_file(
                 giturl + "src/sippts/sipsend.py",
                 modulepath + "sipsend.py",
                 "sipsend.py",
             )
-            download_file(
+            fallos += not download_file(
                 giturl + "src/sippts/sipsniff.py",
                 modulepath + "sipsniff.py",
                 "sipsniff.py",
             )
-            download_file(
+            fallos += not download_file(
                 giturl + "src/sippts/astami.py",
                 modulepath + "astami.py",
                 "astami.py",
             )
-            download_file(
+            fallos += not download_file(
                 giturl + "src/sippts/wssend.py", modulepath + "wssend.py", "wssend.py"
             )
 
@@ -3915,7 +3958,17 @@ Usage examples:
         else:
             print(f"{BYELLOW}SIPPTS is in the last version")
 
-        # CVE file
+        # CVE file. It is only replaced when every module landed: a CVE list
+        # newer than the code that reads it is what breaks a scan, and it
+        # breaks it at the end, after all the work is done
+        if fallos > 0:
+            print(
+                f"{BRED}{fallos} file(s) could not be updated, so the CVE list is left alone"
+            )
+            print(f"{BYELLOW}Run {BGREEN}sippts -up{BYELLOW} again")
+            print(WHITE)
+            sys.exit()
+
         local_cve_version = load_cve_version()
 
         try:
@@ -5052,20 +5105,22 @@ def source_checkout(path):
 
 
 def download_file(url, path, file):
+    """True when the file really landed. The caller needs to know: the CVE
+    list must not be replaced when the modules that read it did not update"""
     if not os.path.isdir(os.path.dirname(path)):
         print(f"{BRED}Cannot write {BGREEN}{path}{BRED}: directory not found")
-        return
+        return False
 
     try:
         r = requests.get(url, headers={"Cache-Control": "no-cache, no-store"})
     except Exception as error:
         print(f"{BRED}Error downloading file {BGREEN}{url}{BRED}: {error}")
-        return
+        return False
 
     # a 404 page must not be written over a module that works
     if not r.ok or r.content == b"" or r.content == b"404: Not Found":
         print(f"{BRED}Error downloading file {BGREEN}{url}")
-        return
+        return False
 
     print(f"{WHITE}Updating {file}")
 
@@ -5077,3 +5132,5 @@ def download_file(url, path, file):
         f.write(r.content)
 
     os.replace(tmp, path)
+
+    return True

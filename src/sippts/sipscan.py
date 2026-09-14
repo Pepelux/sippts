@@ -37,8 +37,11 @@ from .lib.functions import (
     write_results,
     result_rows,
     RESULT_FIELDS,
+    cvss_text,
+    cvss_severity,
+    cvss_score,
+    cvss_version,
 )
-from .lib import tlsinfo
 from .lib.color import Color
 from .lib.logos import Logo
 from itertools import product
@@ -958,6 +961,22 @@ class SipScan:
     def inspect_tls(self, sock_ssl, ipaddr, port, sni):
         """Reads the certificate of an already connected socket. Never raises
         out of here: a scan must not die because of a strange certificate."""
+        # imported here and not at the top on purpose: sippts -up updates the
+        # modules one by one, so a run that does not bring lib/tlsinfo.py yet
+        # would otherwise stop `scan` from even starting. This way the only
+        # thing lost is -tlsinfo
+        try:
+            from .lib import tlsinfo
+        except ImportError:
+            self.tlsinfo = 0
+            self.tlsversions = 0
+
+            print(
+                f"{self.c.BRED}[!] -tlsinfo needs lib/tlsinfo.py, which is not installed. Update sippts with -up{self.c.WHITE}"
+            )
+
+            return
+
         info = tlsinfo.inspect_socket(sock_ssl, sni)
         clave = "%s###%s" % (ipaddr, port)
 
@@ -1148,45 +1167,57 @@ class SipScan:
 
         for row in rows:
             row["description"] = row["type"]
+            # split so a consumer does not have to parse "HIGH|8.8|3.1"
+            row["cvss_severity"] = cvss_severity(row["cvss"])
+            row["cvss_score"] = cvss_score(row["cvss"])
+            row["cvss_version"] = cvss_version(row["cvss"])
 
         return rows
 
     def print_cve(self):
+        def campos(x):
+            """Never unpack into a fixed number of names: it used to be
+            (de, ve, cv, ty, ur) = x.split("###"), so the day the list grew a
+            column every scan that found something died with ValueError right
+            at the end, after all the work"""
+            c = x.split("###")
+
+            return [c[i] if i < len(c) else "" for i in range(6)]
+
         delen = len("Device")
         velen = len("Version")
         cvlen = len("CVE")
         # the 4th column of cve.csv is the CVE description, not a type
         tylen = len("Description")
         urlen = len("URL")
+        cslen = len("CVSS")
+
+        filas = []
 
         for x in self.cve:
-            (de, ve, cv, ty, ur) = x.split("###")
-            if len(de) > delen:
-                delen = len(de)
-            if len(ve) > velen:
-                velen = len(ve)
-            if len(cv) > cvlen:
-                cvlen = len(cv)
-            if len(ty) > tylen:
-                tylen = len(ty)
-            if len(ur) > urlen:
-                urlen = len(ur)
+            (de, ve, cv, ty, ur, cs) = campos(x)
+            texto = cvss_text(cs)
+            filas.append((de, ve, cv, ty, ur, texto, cvss_severity(cs)))
+            delen = max(delen, len(de))
+            velen = max(velen, len(ve))
+            cvlen = max(cvlen, len(cv))
+            tylen = max(tylen, len(ty))
+            urlen = max(urlen, len(ur))
+            cslen = max(cslen, len(texto))
 
-        tlen = delen + velen + cvlen + tylen + urlen + 14
+        tlen = delen + velen + cvlen + tylen + urlen + cslen + 17
+
+        raya = f"{self.c.WHITE}+{'-' * (delen+2)}+{'-' * (velen+2)}+{'-' * (cvlen+2)}+{'-' * (cslen+2)}+{'-' * (tylen+2)}+{'-' * (urlen+2)}+"
 
         print(f"{self.c.WHITE}+{'-' * tlen}+")
         print(
             f"{self.c.WHITE}| {self.c.BYELLOW}{'Potential known vulnerabilities'.ljust(tlen-2)}{self.c.WHITE} |"
         )
+        print(raya)
         print(
-            f"{self.c.WHITE}+{'-' * (delen+2)}+{'-' * (velen+2)}+{'-' * (cvlen+2)}+{'-' * (tylen+2)}+{'-' * (urlen+2)}+"
+            f"{self.c.WHITE}| {self.c.BWHITE}{'Device'.ljust(delen)}{self.c.WHITE} | {self.c.BWHITE}{'Version'.ljust(velen)}{self.c.WHITE} | {self.c.BWHITE}{'CVE'.ljust(cvlen)}{self.c.WHITE} | {self.c.BWHITE}{'CVSS'.ljust(cslen)}{self.c.WHITE} | {self.c.BWHITE}{'Description'.ljust(tylen)}{self.c.WHITE} | {self.c.BWHITE}{'URL'.ljust(urlen)}{self.c.WHITE} |"
         )
-        print(
-            f"{self.c.WHITE}| {self.c.BWHITE}{'Device'.ljust(delen)}{self.c.WHITE} | {self.c.BWHITE}{'Version'.ljust(velen)}{self.c.WHITE} | {self.c.BWHITE}{'CVE'.ljust(cvlen)}{self.c.WHITE} | {self.c.BWHITE}{'Description'.ljust(tylen)}{self.c.WHITE} | {self.c.BWHITE}{'URL'.ljust(urlen)}{self.c.WHITE} |"
-        )
-        print(
-            f"{self.c.WHITE}+{'-' * (delen+2)}+{'-' * (velen+2)}+{'-' * (cvlen+2)}+{'-' * (tylen+2)}+{'-' * (urlen+2)}+"
-        )
+        print(raya)
 
         if self.ofile != "":
             f = open_log(self.ofile)
@@ -1194,25 +1225,39 @@ class SipScan:
         if len(self.cve) == 0:
             print(f"{self.c.WHITE}| {self.c.WHITE}{'Nothing found'.ljust(tlen - 2)} |")
         else:
-            if self.ofile != "" and len(self.cve) > 0:
+            if self.ofile != "":
                 f.write("-----\n")
 
-            for x in self.cve:
-                (de, ve, cv, ty, ur) = x.split("###")
+            colores = {
+                "CRITICAL": self.c.BMAGENTA,
+                "HIGH": self.c.BRED,
+                "MEDIUM": self.c.BYELLOW,
+                "LOW": self.c.BCYAN,
+            }
+
+            for de, ve, cv, ty, ur, texto, sev in filas:
+                color = colores.get(sev, self.c.WHITE)
 
                 print(
-                    f"{self.c.WHITE}| {self.c.BGREEN}{de.ljust(delen)}{self.c.WHITE} | {self.c.BMAGENTA}{ve.ljust(velen)}{self.c.WHITE} | {self.c.BYELLOW}{cv.ljust(cvlen)}{self.c.WHITE} | {self.c.BCYAN}{ty.ljust(tylen)}{self.c.WHITE} | {self.c.BBLUE}{ur.ljust(urlen)}{self.c.WHITE} |"
+                    f"{self.c.WHITE}| {self.c.BGREEN}{de.ljust(delen)}{self.c.WHITE} | {self.c.BMAGENTA}{ve.ljust(velen)}{self.c.WHITE} | {self.c.BYELLOW}{cv.ljust(cvlen)}{self.c.WHITE} | {color}{texto.ljust(cslen)}{self.c.WHITE} | {self.c.BCYAN}{ty.ljust(tylen)}{self.c.WHITE} | {self.c.BBLUE}{ur.ljust(urlen)}{self.c.WHITE} |"
                 )
-                if self.ofile != "":
-                    f.write("%s %s => %s - %s - %s\n" % (de, ve, cv, ty, ur))
 
-            if self.ofile != "" and len(self.cve) > 0:
+                if self.ofile != "":
+                    f.write(
+                        "%s %s => %s - %s - %s - %s\n" % (de, ve, cv, texto, ty, ur)
+                    )
+
+            if self.ofile != "":
                 f.write("-----\n")
 
-        print(
-            f"{self.c.WHITE}+{'-' * (delen+2)}+{'-' * (velen+2)}+{'-' * (cvlen+2)}+{'-' * (tylen+2)}+{'-' * (urlen+2)}+"
-        )
+        print(raya)
         print(self.c.WHITE)
+
+        if any(fila[5].endswith("v2") for fila in filas):
+            print(
+                f"{self.c.YELLOW}[!] A score marked v2 comes from CVSS v2, whose scale is not the one of v3 and has no CRITICAL level{self.c.WHITE}"
+            )
+            print(self.c.WHITE)
 
         if self.ofile != "":
             f.close()

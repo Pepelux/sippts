@@ -329,6 +329,19 @@ sippts -up
 
 which downloads it from github along with the rest of the modules.
 
+### Severity ###
+
+Each CVE carries its CVSS, coloured by severity: purple for critical, red for
+high, yellow for medium and cyan for low. The worst ones are listed first.
+
+The NVD does not have CVSS v3 for every CVE: roughly a third of the list is
+older than 2016 and only has v2, and for Asterisk it is most of them. When
+only v2 exists it is used and **marked with `v2`**, because the two scales are
+not equivalent and v2 has no CRITICAL level: CVE-2017-16563 is 6.0 MEDIUM in
+v2 and 8.0 HIGH in v3.
+
+A sippts older than 4.2.1 cannot read this column. Update with `sippts -up`.
+
 ### Rebuilding the list (maintainers) ###
 
 `tools/cve_update.py` rebuilds `cve.csv` from the NVD. It is not something the
