@@ -1,30 +1,19 @@
 v4.2.1 (Sep/2026):
 - global:
-  - fix sippts -up, which did not download lib/tlsx509.py and lib/tlsinfo.py,
-    so scan died with ImportError after updating. Also missing from the list
-    were data/version.txt and bin/sippts-gui
-  - the CVE list is only replaced when every module was updated: a list newer
-    than the code that reads it breaks a scan at the end, after all the work
+  - fix -up, which did not download the files added in 4.2.0, breaking scan
+  - update the CVE list only when every module was updated
   - download_file() reports whether the file really landed
-  - warn instead of crashing when the CVE list has more columns than this
-    version knows, and keep using the ones it does
-  - the banner said '(updated)' for anything that was not older, so a tree
-    ahead of what is published claimed to be up to date, and so did a run
-    where github could not be reached at all
+  - warn instead of crashing when the CVE list has more columns than known
+  - fix the banner saying '(updated)' when newer than published, or unreachable
 - scan:
-  - added the CVSS of each CVE, coloured by severity: purple critical, red
-    high, yellow medium, cyan low
-  - a score taken from CVSS v2 is marked, its scale is not the one of v3 and
-    it has no CRITICAL level
-  - order the CVEs by score, worst first, inside each group
-  - lib/tlsinfo.py is imported only when -tlsinfo is used, so a missing
-    optional module no longer stops scan from starting
-  - the fallback CVE match no longer searches the description and the URL,
-    which was a source of false positives
-  - print_cve() no longer unpacks into a fixed number of columns
+  - added the CVSS of each CVE, coloured by severity
+  - mark a score taken from CVSS v2, its scale is not the one of v3
+  - order the CVEs by score, worst first
+  - import lib/tlsinfo.py only when -tlsinfo is used
+  - the fallback CVE match no longer searches the description and the URL
+  - fix print_cve() unpacking into a fixed number of columns
 - data/cve.csv:
-  - new 6th column with the CVSS: SEVERITY|SCORE|VERSION (list version 0.5).
-    A version older than 4.2.1 cannot read it: update with sippts -up
+  - new 6th column with the CVSS (list version 0.5), needs 4.2.1 or newer
 
 v4.2.0 (Sep/2026):
 - added TLS certificate inspection (lib/tlsx509.py, lib/tlsinfo.py)
