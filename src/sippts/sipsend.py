@@ -20,6 +20,7 @@ from .lib.functions import (
     generate_random_string,
     calculateHash,
     get_machine_default_ip,
+    create_socket,
 )
 from .lib.color import Color
 from .lib.logos import Logo
@@ -138,7 +139,7 @@ class SipSend:
         local_ip = self.localip
         if self.localip == "":
             try:
-                local_ip = get_machine_default_ip()
+                local_ip = get_machine_default_ip(target=self.ip)
                 self.localip = local_ip
             except:
                 print(f"{self.c.BRED}Error getting local IP")
@@ -168,10 +169,9 @@ class SipSend:
             self.timeout = 30
 
         try:
-            if self.proto == "UDP":
-                sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            else:
-                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            # the family depends on the target: every socket was AF_INET, so
+            # an IPv6 address could not be reached at all
+            sock = create_socket(self.ip, self.proto)
         except socket.error:
             print(f"{self.c.RED}Failed to create socket")
             print(self.c.WHITE)

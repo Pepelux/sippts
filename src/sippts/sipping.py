@@ -21,6 +21,7 @@ from .lib.functions import (
     calculateHash,
     generate_random_string,
     get_machine_default_ip,
+    create_socket,
 )
 from .lib.color import Color
 from .lib.logos import Logo
@@ -138,7 +139,7 @@ class SipPing:
         local_ip = self.localip
         if self.localip == "":
             try:
-                local_ip = get_machine_default_ip()
+                local_ip = get_machine_default_ip(target=self.ip)
             except:
                 print(f"{self.c.BRED}Error getting local IP")
                 print(
@@ -263,10 +264,7 @@ class SipPing:
 
         while self.run == True and self.pingcount < self.number:
             try:
-                if self.proto == "UDP":
-                    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                else:
-                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock = create_socket(self.ip, self.proto)
             except socket.error:
                 print(f"{self.c.RED}Failed to create socket")
                 print(self.c.WHITE)

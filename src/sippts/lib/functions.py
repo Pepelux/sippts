@@ -98,9 +98,14 @@ def get_default_gateway_linux():
             return socket.inet_ntoa(struct.pack("<L", int(fields[2], 16)))
 
 
-def get_machine_default_ip(type="ip"):
+def get_machine_default_ip(type="ip", target=""):
     """
     Return the default gateway IP for the machine.
+
+    With `target` set, the address of the same family as the target is
+    preferred: against an IPv6 server the local address has to be IPv6 too, or
+    the Via and the Contact carry an IPv4 address and the answers never come
+    back. Without it, IPv4 first, exactly as before.
 
     It used to return None when there was no default route, and the callers,
     which expect an exception to suggest -local-ip, silently put the string
@@ -122,10 +127,18 @@ def get_machine_default_ip(type="ip"):
             else:
                 return addresses[0]["addr"]
 
-    address = default_ip(netifaces.AF_INET) or default_ip(netifaces.AF_INET6)
+    if target != "" and is_ipv6(target):
+        address = default_ip(netifaces.AF_INET6) or default_ip(netifaces.AF_INET)
+    else:
+        address = default_ip(netifaces.AF_INET) or default_ip(netifaces.AF_INET6)
 
     if not address:
         raise OSError("no address on the default interface")
+
+    # netifaces puts the scope in link-local addresses, fe80::1%en0, and that
+    # cannot travel inside a SIP header
+    if type != "mask":
+        address = str(address).split("%")[0]
 
     return address
 
@@ -836,6 +849,11 @@ def bind_local_port(sock, bind="0.0.0.0", lport=0):
     kernel pick one. Returns 0 when every attempt failed, so the caller can
     close the socket instead of leaking it.
     """
+    # an AF_INET6 socket cannot bind to 0.0.0.0, and the default gets here
+    # from every caller
+    if bind == "0.0.0.0" and sock.family == socket.AF_INET6:
+        bind = "::"
+
     if lport:
         try:
             sock.bind((bind, int(lport)))
@@ -906,6 +924,56 @@ EVENT_ACCEPT = {
 }
 
 
+def is_ipv6(host):
+    """Whether `host` is an IPv6 literal (not a name, not an IPv4)."""
+    try:
+        return ipaddress.ip_address(str(host).strip("[]")).version == 6
+    except ValueError:
+        return False
+
+
+def sip_host(host):
+    """
+    Host as it has to travel inside a SIP URI or a Via.
+
+    RFC 3261 asks for an IPv6 literal in brackets, sip:[2001:db8::1]:5060,
+    because otherwise the colons of the address cannot be told apart from the
+    one of the port. A name or an IPv4 comes back untouched.
+    """
+    host = str(host)
+
+    if host.startswith("["):
+        return host
+
+    if is_ipv6(host):
+        return "[%s]" % host
+
+    return host
+
+
+def socket_family(host):
+    """AF_INET6 for an IPv6 target, AF_INET for everything else."""
+    if is_ipv6(host):
+        return socket.AF_INET6
+
+    return socket.AF_INET
+
+
+def create_socket(host, proto):
+    """
+    Socket of the right family for the target.
+
+    Every socket of the package was AF_INET, so an IPv6 address could not be
+    reached at all.
+    """
+    familia = socket_family(host)
+
+    if str(proto).upper() == "UDP":
+        return socket.socket(familia, socket.SOCK_DGRAM)
+
+    return socket.socket(familia, socket.SOCK_STREAM)
+
+
 def create_message(
     method,
     ip_sdp,
@@ -945,9 +1013,9 @@ def create_message(
     expires = "120"
 
     if method == "REGISTER" or method == "NOTIFY" or method == "ACK":
-        starting_line = "%s sip:%s SIP/2.0" % (method, domain)
+        starting_line = "%s sip:%s SIP/2.0" % (method, sip_host(domain))
     else:
-        starting_line = "%s sip:%s@%s SIP/2.0" % (method, touser, domain)
+        starting_line = "%s sip:%s@%s SIP/2.0" % (method, touser, sip_host(domain))
 
     if branch == "":
         branch = generate_random_string(71, 71, "ascii")
@@ -963,7 +1031,7 @@ def create_message(
     if via == "":
         headers["Via"] = "SIP/2.0/%s %s:%s;branch=%s;rport" % (
             proto.upper(),
-            contactdomain,
+            sip_host(contactdomain),
             fromport,
             branch,
         )
@@ -984,7 +1052,7 @@ def create_message(
         headers["From"] = "%s <sip:%s@%s>;tag=%s" % (
             fromname,
             fromuser,
-            fromdomain,
+            sip_host(fromdomain),
             tag,
         )
 
@@ -992,12 +1060,12 @@ def create_message(
     if not m:
         if method == "NOTIFY":
             if totag == "":
-                headers["To"] = "<sip:%s>" % todomain
+                headers["To"] = "<sip:%s>" % sip_host(todomain)
             else:
-                headers["To"] = "<sip:%s>;tag=%s" % (todomain, totag)
+                headers["To"] = "<sip:%s>;tag=%s" % (sip_host(todomain), totag)
         else:
             if totag == "":
-                headers["To"] = "%s <sip:%s@%s>" % (toname, touser, todomain)
+                headers["To"] = "%s <sip:%s@%s>" % (toname, touser, sip_host(todomain))
             else:
                 headers["To"] = "%s <sip:%s@%s>;tag=%s" % (
                     toname,
@@ -1012,7 +1080,7 @@ def create_message(
             if method != "CANCEL" and method != "ACK":
                 headers["Contact"] = "<sip:%s@%s:%d;transport=%s>;expires=%s" % (
                     fromuser,
-                    contactdomain,
+                    sip_host(contactdomain),
                     fromport,
                     proto,
                     expires,
@@ -1030,8 +1098,8 @@ def create_message(
     headers["Max-Forwards"] = "70"
 
     if method == "REFER":
-        headers["Refer-To"] = "<sip:%s@%s>" % (referto, domain)
-        headers["Referred-By"] = "<sip:%s@%s:%s>" % (fromuser, domain, fromport)
+        headers["Refer-To"] = "<sip:%s@%s>" % (referto, sip_host(domain))
+        headers["Referred-By"] = "<sip:%s@%s:%s>" % (fromuser, sip_host(domain), fromport)
 
     if method == "SUBSCRIBE":
         if event == "":
@@ -1118,9 +1186,9 @@ def create_message(
         # Use RTP
         sdp = "\r\n"
         sdp += "v=0\r\n"
-        sdp += "o=%s 8000 8000 IN IP4 %s\r\n" % (fromuser, ip_sdp)
+        sdp += "o=%s 8000 8000 IN IP%s %s\r\n" % (fromuser, "6" if is_ipv6(ip_sdp) else "4", ip_sdp)
         sdp += "s=SIPPTS\r\n"
-        sdp += "c=IN IP4 %s\r\n" % ip_sdp
+        sdp += "c=IN IP%s %s\r\n" % ("6" if is_ipv6(ip_sdp) else "4", ip_sdp)
         sdp += "t=0 0\r\n"
         sdp += "m=audio 12194 RTP/AVP 0 9 8 18 3 110 101\r\n"
         sdp += "a=rtpmap:0 PCMU/8000\r\n"
@@ -1140,9 +1208,9 @@ def create_message(
         # Use SRTP
         sdp = "\r\n"
         sdp += "v=0\r\n"
-        sdp += "o=anonymous 1312841870 1312841870 IN IP4 %s\r\n" % ip_sdp
+        sdp += "o=anonymous 1312841870 1312841870 IN IP%s %s\r\n" % ("6" if is_ipv6(ip_sdp) else "4", ip_sdp)
         sdp += "s=SIPPTS\r\n"
-        sdp += "c=IN IP4 %s\r\n" % ip_sdp
+        sdp += "c=IN IP%s %s\r\n" % ("6" if is_ipv6(ip_sdp) else "4", ip_sdp)
         sdp += "t=0 0\r\n"
         sdp += "m=audio 12194 RTP/AVP 0 9 8 18 3 110 101\r\n"
         sdp += "a=rtpmap:0 PCMU/8000\r\n"
@@ -1204,7 +1272,7 @@ def create_response_error(
     if via == "":
         headers["Via"] = "SIP/2.0/%s %s:%s;branch=%s;rport" % (
             proto.upper(),
-            domain,
+            sip_host(domain),
             fromport,
             branch,
         )
@@ -1216,8 +1284,8 @@ def create_response_error(
             count += 1
             headers["Via %s" % str(count)] = via
 
-    headers["From"] = "<sip:%s@%s>;tag=%s" % (fromuser, domain, totag)
-    headers["To"] = "<sip:%s@%s>;tag=%s" % (touser, iplocal, tag)
+    headers["From"] = "<sip:%s@%s>;tag=%s" % (fromuser, sip_host(domain), totag)
+    headers["To"] = "<sip:%s@%s>;tag=%s" % (touser, sip_host(iplocal), tag)
     headers["Call-ID"] = "%s" % callid
     headers["CSeq"] = "%d %s" % (cseq, method)
     if method == "BYE":

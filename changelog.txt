@@ -41,6 +41,19 @@ New in this version:
   Crestron, Yeastar, Zoiper and the rest. The version ranges come from the CPEs
   of the NVD instead of being written by hand, and the rows the NVD does not
   cover are kept
+- send, ping: they reach an IPv6 target now. Every socket of the package was
+  AF_INET, so an IPv6 address could not be dialled at all, and the addresses
+  travelled inside the SIP URIs without the brackets RFC 3261 asks for, which
+  is what tells the colons of the address from the one of the port. The
+  Request-URI, the Via, the Contact, the From, the To and the SDP carry the
+  address bracketed and announce c=IN IP6, the socket picks its family from
+  the target, and the local address is chosen of the same family, because an
+  IPv4 address in the Via means the answers never come back. With an IPv4
+  target nothing changes: the helper hands the string back untouched when it
+  is not an IPv6 literal
+  Only send and ping for now. The other modules keep their AF_INET socket and
+  are IPv4 only, and what was tested is loopback: no machine with global IPv6
+  was available
 - global: the banner said 'last version 0.1' while running 0.3, as if the old
   one were the good one, to anyone working from a branch or with a CVE list
   just regenerated. It compared with != instead of looking at which one is
