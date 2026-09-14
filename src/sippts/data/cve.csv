@@ -1,4 +1,4 @@
-version;0.3;;;
+version;0.4;;;
 3CX CRM Template Generator;2.1.23;CVE-2022-27438;Caphyon Ltd Advanced Installer 19.3 and earlier and many products that use the updater...;https://nvd.nist.gov/vuln/detail/CVE-2022-27438
 3CX Call Flow Designer;18.2.13;CVE-2022-27438;Caphyon Ltd Advanced Installer 19.3 and earlier and many products that use the updater...;https://nvd.nist.gov/vuln/detail/CVE-2022-27438
 3CX Live Chat;8.0.15;CVE-2018-18460;XSS exists in the wp-live-chat-support v8.0.15 plugin for WordPress via the modules/gdp...;https://nvd.nist.gov/vuln/detail/CVE-2018-18460
@@ -14,11 +14,16 @@ version;0.3;;;
 3CX Live Chat;< 8.0.27;CVE-2019-14950;The wp-live-chat-support plugin before 8.0.27 for WordPress has XSS via the GDPR page.;https://nvd.nist.gov/vuln/detail/CVE-2019-14950
 3CX Live Chat;< 8.0.33;CVE-2019-12498;The WP Live Chat Support plugin before 8.0.33 for WordPress accepts certain REST API ca...;https://nvd.nist.gov/vuln/detail/CVE-2019-12498
 3CX Live Chat;<= 7.0.06;CVE-2017-2187;Cross-site scripting vulnerability in WP Live Chat Support prior to version 7.0.07 allo...;https://nvd.nist.gov/vuln/detail/CVE-2017-2187
+3CX Phone System;16.0.0.1570;CVE-2019-9971;PhoneSystem Terminal in 3CX Phone System (Debian based installation) 16.0.0.1570 allows...;https://nvd.nist.gov/vuln/detail/CVE-2019-9971
+3CX Phone System;16.0.0.1570;CVE-2019-9972;PhoneSystem Terminal in 3CX Phone System (Debian based installation) 16.0.0.1570 allows...;https://nvd.nist.gov/vuln/detail/CVE-2019-9972
 3CX System;16.0.0.1570;CVE-2019-9971;PhoneSystem Terminal in 3CX Phone System (Debian based installation) 16.0.0.1570 allows...;https://nvd.nist.gov/vuln/detail/CVE-2019-9971
 3CX System;16.0.0.1570;CVE-2019-9972;PhoneSystem Terminal in 3CX Phone System (Debian based installation) 16.0.0.1570 allows...;https://nvd.nist.gov/vuln/detail/CVE-2019-9972
 3CX WEB Server;15.5.8801.3;CVE-2018-14905;The Web server in 3CX version 15.5.8801.3 is vulnerable to Reflected XSS on the api/Cal...;https://nvd.nist.gov/vuln/detail/CVE-2018-14905
 3CX WEB Server;15.5.8801.3;CVE-2018-14906;The Web server in 3CX version 15.5.8801.3 is vulnerable to Reflected XSS on all stack t...;https://nvd.nist.gov/vuln/detail/CVE-2018-14906
 3CX WEB Server;15.5.8801.3;CVE-2018-14907;The Web server in 3CX version 15.5.8801.3 is vulnerable to Information Leakage, because...;https://nvd.nist.gov/vuln/detail/CVE-2018-14907
+3CX WEB;15.5.8801.3;CVE-2018-14905;The Web server in 3CX version 15.5.8801.3 is vulnerable to Reflected XSS on the api/Cal...;https://nvd.nist.gov/vuln/detail/CVE-2018-14905
+3CX WEB;15.5.8801.3;CVE-2018-14906;The Web server in 3CX version 15.5.8801.3 is vulnerable to Reflected XSS on all stack t...;https://nvd.nist.gov/vuln/detail/CVE-2018-14906
+3CX WEB;15.5.8801.3;CVE-2018-14907;The Web server in 3CX version 15.5.8801.3 is vulnerable to Information Leakage, because...;https://nvd.nist.gov/vuln/detail/CVE-2018-14907
 3CX;15.5.3554.1;CVE-2017-15359;In the 3CX Phone System 15.5.3554.1, the Management Console typically listens to port 5...;https://nvd.nist.gov/vuln/detail/CVE-2017-15359
 3CX;15.5.6354.2;CVE-2018-7654;On 3CX 15.5.6354.2 devices, the parameter "file" in the request "/api/RecordingList/dow...;https://nvd.nist.gov/vuln/detail/CVE-2018-7654
 3CX;15;CVE-2019-14935;3CX Phone 15 on Windows has insecure permissions on the "%PROGRAMDATA%\3CXPhone for Win...;https://nvd.nist.gov/vuln/detail/CVE-2019-14935
@@ -123,6 +128,7 @@ Asterisk Business Edition;<= c.1.0;CVE-2009-0041;IAX2 in Asterisk Open Source 1.
 Asterisk Business Edition;<= c.1.0beta7;CVE-2008-0095;The SIP channel driver in Asterisk Open Source 1.4.x before 1.4.17, Business Edition be...;https://nvd.nist.gov/vuln/detail/CVE-2008-0095
 Asterisk Business Edition;<= c.1.0beta7;CVE-2008-1289;Multiple buffer overflows in Asterisk Open Source 1.4.x before 1.4.18.1 and 1.4.19-rc3,...;https://nvd.nist.gov/vuln/detail/CVE-2008-1289
 Asterisk Business Edition;<= c.1.6.1;CVE-2008-1332;Unspecified vulnerability in Asterisk Open Source 1.2.x before 1.2.27, 1.4.x before 1.4...;https://nvd.nist.gov/vuln/detail/CVE-2008-1332
+Asterisk Business Edition;<= c.3.7.5;CVE-2012-2186;Incomplete blacklist vulnerability in main/manager.c in Asterisk Open Source 1.8.x befo...;https://nvd.nist.gov/vuln/detail/CVE-2012-2186
 Asterisk Business Edition;<= c1.8.0;CVE-2008-1897;The IAX2 channel driver (chan_iax2) in Asterisk Open Source 1.0.x, 1.2.x before 1.2.28,...;https://nvd.nist.gov/vuln/detail/CVE-2008-1897
 Asterisk Business Edition;<= c1.8.0;CVE-2008-1923;The IAX2 channel driver (chan_iax2) in Asterisk 1.2 before revision 72630 and 1.4 befor...;https://nvd.nist.gov/vuln/detail/CVE-2008-1923
 Asterisk Business Edition;>= b.1.3.2 and <= b.1.3.3;CVE-2008-2119;Asterisk Open Source 1.0.x and 1.2.x before 1.2.29 and Business Edition A.x.x and B.x.x...;https://nvd.nist.gov/vuln/detail/CVE-2008-2119
@@ -139,6 +145,8 @@ Asterisk Business Edition;>= c.1.0-beta7 and <= c.1.0-beta8;CVE-2008-1390;The As
 Asterisk Business Edition;>= c.1.0-beta7 and <= c.1.6.1;CVE-2008-1923;The IAX2 channel driver (chan_iax2) in Asterisk 1.2 before revision 72630 and 1.4 befor...;https://nvd.nist.gov/vuln/detail/CVE-2008-1923
 Asterisk Business Edition;>= c.1.0-beta7 and <= c1.8.1;CVE-2008-3264;The FWDOWNL firmware-download implementation in Asterisk Open Source 1.0.x, 1.2.x befor...;https://nvd.nist.gov/vuln/detail/CVE-2008-3264
 Asterisk Business Edition;>= c.1.0beta7 and <= b.1.3.3;CVE-2007-6430;Asterisk Open Source 1.2.x before 1.2.26 and 1.4.x before 1.4.16, and Business Edition...;https://nvd.nist.gov/vuln/detail/CVE-2007-6430
+Asterisk Business Edition;>= c.3.2.2 and <= c.3.3.2;CVE-2013-2264;The SIP channel driver in Asterisk Open Source 1.8.x before 1.8.20.2, 10.x before 10.12...;https://nvd.nist.gov/vuln/detail/CVE-2013-2264
+Asterisk Business Edition;c.3.0;CVE-2012-2186;Incomplete blacklist vulnerability in main/manager.c in Asterisk Open Source 1.8.x befo...;https://nvd.nist.gov/vuln/detail/CVE-2012-2186
 Asterisk Digiumphones;<= 10.7.0;CVE-2012-2186;Incomplete blacklist vulnerability in main/manager.c in Asterisk Open Source 1.8.x befo...;https://nvd.nist.gov/vuln/detail/CVE-2012-2186
 Asterisk Digiumphones;>= 10.0.0 and <= 10.12.1;CVE-2013-2264;The SIP channel driver in Asterisk Open Source 1.8.x before 1.8.20.2, 10.x before 10.12...;https://nvd.nist.gov/vuln/detail/CVE-2013-2264
 Asterisk Digiumphones;>= 10.0.0 and <= 10.12.1;CVE-2013-2686;main/http.c in the HTTP server in Asterisk Open Source 1.8.x before 1.8.20.2, 10.x befo...;https://nvd.nist.gov/vuln/detail/CVE-2013-2686
@@ -508,6 +516,7 @@ Avaya Aura Utility Services;>= 7.0 and <= 7.1.3;CVE-2021-25651;A privilege escal
 Avaya Aura Voice Portal;>= 5.0 and <= 5.1;CVE-2010-2492;Buffer overflow in the ecryptfs_uid_hash macro in fs/ecryptfs/messaging.c in the eCrypt...;https://nvd.nist.gov/vuln/detail/CVE-2010-2492
 Avaya Aura Voice Portal;>= 5.0 and <= 5.1;CVE-2010-2943;The xfs implementation in the Linux kernel before 2.6.35 does not look up inode allocat...;https://nvd.nist.gov/vuln/detail/CVE-2010-2943
 Avaya Aura;<= 7.1.1;CVE-2018-6635;System Manager in Avaya Aura before 7.1.2 does not properly use SSL in conjunction with...;https://nvd.nist.gov/vuln/detail/CVE-2018-6635
+Avaya Basic Call Management System Reporting Desktop;;CVE-2011-1229;win32k.sys in the kernel-mode drivers in Microsoft Windows XP SP2 and SP3, Windows Serv...;https://nvd.nist.gov/vuln/detail/CVE-2011-1229
 Avaya Call Management Server Supervisor;;CVE-2011-1229;win32k.sys in the kernel-mode drivers in Microsoft Windows XP SP2 and SP3, Windows Serv...;https://nvd.nist.gov/vuln/detail/CVE-2011-1229
 Avaya Call Management System Reporting Desktop;;CVE-2011-1229;win32k.sys in the kernel-mode drivers in Microsoft Windows XP SP2 and SP3, Windows Serv...;https://nvd.nist.gov/vuln/detail/CVE-2011-1229
 Avaya Call Management System Server;11.0;CVE-2004-0800;Format string vulnerability in CDE Mailer (dtmail) on Solaris 8 and 9 allows local user...;https://nvd.nist.gov/vuln/detail/CVE-2004-0800
@@ -567,6 +576,36 @@ Avaya Converged Communications Server;2.0;CVE-2004-0595;The strip_tags function 
 Avaya Converged Communications Server;2.0;CVE-2004-1235;Race condition in the (1) load_elf_library and (2) binfmt_aout function calls for useli...;https://nvd.nist.gov/vuln/detail/CVE-2004-1235
 Avaya Converged Communications Server;2.0;CVE-2005-0003;The 64 bit ELF support in Linux kernel 2.6 before 2.6.10, on 64-bit architectures, does...;https://nvd.nist.gov/vuln/detail/CVE-2005-0003
 Avaya Handset;;CVE-2007-5556;Unspecified vulnerability in the Avaya VoIP Handset allows remote attackers to cause a...;https://nvd.nist.gov/vuln/detail/CVE-2007-5556
+Avaya IP Office Application Server;>= 11.0 and <= 11.0.4.0;CVE-2019-7004;A Cross-Site Scripting (XSS) vulnerability in the WebUI component of IP Office Applicat...;https://nvd.nist.gov/vuln/detail/CVE-2019-7004
+Avaya IP Office Contact Center;>= 10.0 and <= 10.1;CVE-2017-12969;Buffer overflow in the ViewerCtrlLib.ViewerCtrl ActiveX control in Avaya IP Office Cont...;https://nvd.nist.gov/vuln/detail/CVE-2017-12969
+Avaya IP Office Contact Center;>= 10.0.0.0 and <= 10.1.2.1;CVE-2019-7001;A SQL injection vulnerability in the WebUI component of IP Office Contact Center could...;https://nvd.nist.gov/vuln/detail/CVE-2019-7001
+Avaya IP Office Contact Center;>= 9.0.0 and <= 9.1.9;CVE-2019-7001;A SQL injection vulnerability in the WebUI component of IP Office Contact Center could...;https://nvd.nist.gov/vuln/detail/CVE-2019-7001
+Avaya IP Office Contact Center;>= 9.1 and <= 9.1.9;CVE-2017-12969;Buffer overflow in the ViewerCtrlLib.ViewerCtrl ActiveX control in Avaya IP Office Cont...;https://nvd.nist.gov/vuln/detail/CVE-2017-12969
+Avaya IP Office Customer Call Reporter;7.0;CVE-2012-3811;Unrestricted file upload vulnerability in ImageUpload.ashx in the Wallboard application...;https://nvd.nist.gov/vuln/detail/CVE-2012-3811
+Avaya IP Office Customer Call Reporter;8.0;CVE-2012-3811;Unrestricted file upload vulnerability in ImageUpload.ashx in the Wallboard application...;https://nvd.nist.gov/vuln/detail/CVE-2012-3811
+Avaya IP Office Phone Manager;;CVE-2005-0506;The Avaya IP Office Phone Manager, and other products such as the IP Softphone, stores...;https://nvd.nist.gov/vuln/detail/CVE-2005-0506
+Avaya IP Office;10.0;CVE-2016-5285;A Null pointer dereference vulnerability exists in Mozilla Network Security Services du...;https://nvd.nist.gov/vuln/detail/CVE-2016-5285
+Avaya IP Office;11.0;CVE-2018-15614;A vulnerability in the one-x Portal component of IP Office could allow an authenticated...;https://nvd.nist.gov/vuln/detail/CVE-2018-15614
+Avaya IP Office;11.1;CVE-2021-25657;A privilege escalation vulnerability was discovered in Avaya IP Office Admin Lite and U...;https://nvd.nist.gov/vuln/detail/CVE-2021-25657
+Avaya IP Office;8.1;CVE-2016-5285;A Null pointer dereference vulnerability exists in Mozilla Network Security Services du...;https://nvd.nist.gov/vuln/detail/CVE-2016-5285
+Avaya IP Office;9.1;CVE-2016-5285;A Null pointer dereference vulnerability exists in Mozilla Network Security Services du...;https://nvd.nist.gov/vuln/detail/CVE-2016-5285
+Avaya IP Office;9.1;CVE-2018-15610;A vulnerability in the one-X Portal component of Avaya IP Office allows an authenticate...;https://nvd.nist.gov/vuln/detail/CVE-2018-15610
+Avaya IP Office;< 10.1.1;CVE-2017-11309;Buffer overflow in the SoftConsole client in Avaya IP Office before 10.1.1 allows remot...;https://nvd.nist.gov/vuln/detail/CVE-2017-11309
+Avaya IP Office;< 11.1.3.1;CVE-2024-4196;An improper input validation vulnerability was discovered in Avaya IP Office that could...;https://nvd.nist.gov/vuln/detail/CVE-2024-4196
+Avaya IP Office;< 11.1.3.1;CVE-2024-4197;An unrestricted file upload vulnerability in Avaya IP Office was discovered that could...;https://nvd.nist.gov/vuln/detail/CVE-2024-4197
+Avaya IP Office;< 11.1;CVE-2021-25657;A privilege escalation vulnerability was discovered in Avaya IP Office Admin Lite and U...;https://nvd.nist.gov/vuln/detail/CVE-2021-25657
+Avaya IP Office;>= 10.0 and <= 10.1.0.7;CVE-2019-7005;A vulnerability was discovered in the web interface component of IP Office that may pot...;https://nvd.nist.gov/vuln/detail/CVE-2019-7005
+Avaya IP Office;>= 10.0 and <= 10.1.0.7;CVE-2020-7030;A sensitive information disclosure vulnerability was discovered in the web interface co...;https://nvd.nist.gov/vuln/detail/CVE-2020-7030
+Avaya IP Office;>= 10.0 and <= 10.1;CVE-2018-15610;A vulnerability in the one-X Portal component of Avaya IP Office allows an authenticate...;https://nvd.nist.gov/vuln/detail/CVE-2018-15610
+Avaya IP Office;>= 10.0 and <= 10.1;CVE-2018-15614;A vulnerability in the one-x Portal component of IP Office could allow an authenticated...;https://nvd.nist.gov/vuln/detail/CVE-2018-15614
+Avaya IP Office;>= 11.0 and <= 11.0.4.2;CVE-2019-7005;A vulnerability was discovered in the web interface component of IP Office that may pot...;https://nvd.nist.gov/vuln/detail/CVE-2019-7005
+Avaya IP Office;>= 11.0 and <= 11.0.4.2;CVE-2020-7030;A sensitive information disclosure vulnerability was discovered in the web interface co...;https://nvd.nist.gov/vuln/detail/CVE-2020-7030
+Avaya IP Office;>= 9.0 and <= 9.1;CVE-2020-7030;A sensitive information disclosure vulnerability was discovered in the web interface co...;https://nvd.nist.gov/vuln/detail/CVE-2020-7030
+Avaya IP Soft Phone;6.0;CVE-2007-3286;Multiple buffer overflows in unspecified ActiveX controls in COM objects in Avaya IP So...;https://nvd.nist.gov/vuln/detail/CVE-2007-3286
+Avaya IP Soft Phone;;CVE-2005-0506;The Avaya IP Office Phone Manager, and other products such as the IP Softphone, stores...;https://nvd.nist.gov/vuln/detail/CVE-2005-0506
+Avaya IP Soft Phone;<= 5.2;CVE-2007-3286;Multiple buffer overflows in unspecified ActiveX controls in COM objects in Avaya IP So...;https://nvd.nist.gov/vuln/detail/CVE-2007-3286
+Avaya IP Soft Phone;>= 6.0 and <= 6.01.85;CVE-2008-6141;Unspecified vulnerability in Avaya IP Softphone 6.0 SP4 and 6.01.85 allows remote attac...;https://nvd.nist.gov/vuln/detail/CVE-2008-6141
+Avaya IP Softphone;;CVE-2011-1229;win32k.sys in the kernel-mode drivers in Microsoft Windows XP SP2 and SP3, Windows Serv...;https://nvd.nist.gov/vuln/detail/CVE-2011-1229
 Avaya Office Application Server;>= 11.0 and <= 11.0.4.0;CVE-2019-7004;A Cross-Site Scripting (XSS) vulnerability in the WebUI component of IP Office Applicat...;https://nvd.nist.gov/vuln/detail/CVE-2019-7004
 Avaya Office Contact Center;>= 10.0 and <= 10.1;CVE-2017-12969;Buffer overflow in the ViewerCtrlLib.ViewerCtrl ActiveX control in Avaya IP Office Cont...;https://nvd.nist.gov/vuln/detail/CVE-2017-12969
 Avaya Office Contact Center;>= 10.0.0.0 and <= 10.1.2.1;CVE-2019-7001;A SQL injection vulnerability in the WebUI component of IP Office Contact Center could...;https://nvd.nist.gov/vuln/detail/CVE-2019-7001
@@ -621,6 +660,7 @@ Avaya Unified Communication Center;;CVE-2011-1229;win32k.sys in the kernel-mode 
 Avaya Voice Portal;5.0;CVE-2009-3939;The poll_mode_io file for the megaraid_sas driver in the Linux kernel 2.6.31.6 and earl...;https://nvd.nist.gov/vuln/detail/CVE-2009-3939
 Avaya Voice Portal;>= 5.0 and <= 5.1;CVE-2010-2798;The gfs2_dirent_find_space function in fs/gfs2/dir.c in the Linux kernel before 2.6.35...;https://nvd.nist.gov/vuln/detail/CVE-2010-2798
 Avaya Voice Portal;>= 5.0 and <= 5.1;CVE-2010-2942;The actions implementation in the network queueing functionality in the Linux kernel be...;https://nvd.nist.gov/vuln/detail/CVE-2010-2942
+Avaya Voip Handset;;CVE-2007-5556;Unspecified vulnerability in the Avaya VoIP Handset allows remote attackers to cause a...;https://nvd.nist.gov/vuln/detail/CVE-2007-5556
 Avm Fritz! OS;<= 6.23;CVE-2014-8886;AVM FRITZ!OS before 6.30 extracts the contents of firmware updates before verifying the...;https://nvd.nist.gov/vuln/detail/CVE-2014-8886
 Avm Fritz! OS;<= 6.23;CVE-2015-7242;Cross-site scripting (XSS) vulnerability in the Push-Service-Mails feature in AVM FRITZ...;https://nvd.nist.gov/vuln/detail/CVE-2015-7242
 Avm Fritz!box 6810 LTE;;CVE-2014-8872;Improper Verification of Cryptographic Signature in AVM FRITZ!Box 6810 LTE after firmwa...;https://nvd.nist.gov/vuln/detail/CVE-2014-8872
@@ -1308,15 +1348,15 @@ Cisco Unified Communications Manager;>= 8.5 and <= 8.6(2a)su2;CVE-2013-3460;Memo
 Cisco Unified Communications Manager;>= 8.5 and <= 8.6(2a)su2;CVE-2013-3461;Cisco Unified Communications Manager (Unified CM) 8.5(x) and 8.6(x) before 8.6(2a)su3 a...;https://nvd.nist.gov/vuln/detail/CVE-2013-3461
 Cisco Unified Communications Manager;>= 8.5 and <= 8.6(2a)su2;CVE-2013-3462;Buffer overflow in Cisco Unified Communications Manager (Unified CM) 7.1(x) before 7.1(...;https://nvd.nist.gov/vuln/detail/CVE-2013-3462
 Cisco Unified Communications Manager;>= 8.6 and <= 8.6(4);CVE-2013-1133;Cisco Unified Communications Manager (CUCM) 8.6 before 8.6(2a)su2, 8.6 BE3k before 8.6(...;https://nvd.nist.gov/vuln/detail/CVE-2013-1133
-Cisco Unified Communications Manager;>= 9.0(1) and <= 9.1(1);CVE-2013-3403;Multiple untrusted search path vulnerabilities in Cisco Unified Communications Manager...;https://nvd.nist.gov/vuln/detail/CVE-2013-3403
-Cisco Unified Communications Manager;>= 9.0(1) and <= 9.1(1);CVE-2013-3404;SQL injection vulnerability in Cisco Unified Communications Manager (CUCM) 7.1(x) throu...;https://nvd.nist.gov/vuln/detail/CVE-2013-3404
-Cisco Unified Communications Manager;>= 9.0(1) and <= 9.1(1);CVE-2013-3433;Untrusted search path vulnerability in Cisco Unified Communications Manager (CUCM) 7.1(...;https://nvd.nist.gov/vuln/detail/CVE-2013-3433
-Cisco Unified Communications Manager;>= 9.0(1) and <= 9.1(1);CVE-2013-3434;Untrusted search path vulnerability in Cisco Unified Communications Manager (CUCM) 7.1(...;https://nvd.nist.gov/vuln/detail/CVE-2013-3434
 Cisco Unified Communications Manager;>= 9.0(1) and <= 9.1(1a);CVE-2013-3453;Memory leak in Cisco Unified Communications Manager IM and Presence Service before 8.6(...;https://nvd.nist.gov/vuln/detail/CVE-2013-3453
 Cisco Unified Communications Manager;>= 9.0(1) and <= 9.1(2);CVE-2013-3402;An unspecified function in Cisco Unified Communications Manager (CUCM) 7.1(x) through 9...;https://nvd.nist.gov/vuln/detail/CVE-2013-3402
 Cisco Unified Communications Manager;>= 9.0(1) and <= 9.1(2);CVE-2013-3412;SQL injection vulnerability in Cisco Unified Communications Manager (CUCM) 7.1(x) throu...;https://nvd.nist.gov/vuln/detail/CVE-2013-3412
+Cisco Unified Communications Manager;>= 9.0(1) and <= 9.1.1(a);CVE-2013-3403;Multiple untrusted search path vulnerabilities in Cisco Unified Communications Manager...;https://nvd.nist.gov/vuln/detail/CVE-2013-3403
+Cisco Unified Communications Manager;>= 9.0(1) and <= 9.1.1(a);CVE-2013-3404;SQL injection vulnerability in Cisco Unified Communications Manager (CUCM) 7.1(x) throu...;https://nvd.nist.gov/vuln/detail/CVE-2013-3404
+Cisco Unified Communications Manager;>= 9.0(1) and <= 9.1.1(a);CVE-2013-3433;Untrusted search path vulnerability in Cisco Unified Communications Manager (CUCM) 7.1(...;https://nvd.nist.gov/vuln/detail/CVE-2013-3433
+Cisco Unified Communications Manager;>= 9.0(1) and <= 9.1.1(a);CVE-2013-3434;Untrusted search path vulnerability in Cisco Unified Communications Manager (CUCM) 7.1(...;https://nvd.nist.gov/vuln/detail/CVE-2013-3434
 Cisco Unified Communications Manager;>= 9.1(1) and <= 9.1(2);CVE-2014-0686;Cisco Unified Communications Manager (aka Unified CM) 9.1 (2.10000.28) and earlier allo...;https://nvd.nist.gov/vuln/detail/CVE-2014-0686
-Cisco Unified Communications Manager;>= 9.1.1(a) and <= 9.1(1a);CVE-2013-3462;Buffer overflow in Cisco Unified Communications Manager (Unified CM) 7.1(x) before 7.1(...;https://nvd.nist.gov/vuln/detail/CVE-2013-3462
+Cisco Unified Communications Manager;>= 9.1(1) and <= 9.1.1(a);CVE-2013-3462;Buffer overflow in Cisco Unified Communications Manager (Unified CM) 7.1(x) before 7.1(...;https://nvd.nist.gov/vuln/detail/CVE-2013-3462
 Cisco Unified IP Phone;7906g;CVE-2012-5445;The kernel in Cisco Native Unix (CNU) on Cisco Unified IP Phone 7900 series devices (ak...;https://nvd.nist.gov/vuln/detail/CVE-2012-5445
 Cisco Unified IP Phone;7911g;CVE-2012-5445;The kernel in Cisco Native Unix (CNU) on Cisco Unified IP Phone 7900 series devices (ak...;https://nvd.nist.gov/vuln/detail/CVE-2012-5445
 Cisco Unified IP Phone;7935;CVE-2012-5445;The kernel in Cisco Native Unix (CNU) on Cisco Unified IP Phone 7900 series devices (ak...;https://nvd.nist.gov/vuln/detail/CVE-2012-5445
@@ -1332,6 +1372,9 @@ Cisco Unified IP Phone;>= 7960 and <= 7960g;CVE-2012-5445;The kernel in Cisco Na
 CommuniGate PRO Core Server;5.0.7;CVE-2006-0566;The LDAP component in CommuniGate Pro Core Server 5.0.7 allows remote attackers to caus...;https://nvd.nist.gov/vuln/detail/CVE-2006-0566
 CommuniGate PRO;6.2;CVE-2018-18621;CommuniGate Pro 6.2 allows stored XSS via a message body in Pronto! Mail Composer, whic...;https://nvd.nist.gov/vuln/detail/CVE-2018-18621
 CommuniGate PRO;< 6.2.1;CVE-2017-16962;The WebMail components (Crystal, pronto, and pronto4) in CommuniGate Pro before 6.2.1 h...;https://nvd.nist.gov/vuln/detail/CVE-2017-16962
+Communigate PRO Core Server;5.0.7;CVE-2006-0566;The LDAP component in CommuniGate Pro Core Server 5.0.7 allows remote attackers to caus...;https://nvd.nist.gov/vuln/detail/CVE-2006-0566
+Communigate PRO;6.2;CVE-2018-18621;CommuniGate Pro 6.2 allows stored XSS via a message body in Pronto! Mail Composer, whic...;https://nvd.nist.gov/vuln/detail/CVE-2018-18621
+Communigate PRO;< 6.2.1;CVE-2017-16962;The WebMail components (Crystal, pronto, and pronto4) in CommuniGate Pro before 6.2.1 h...;https://nvd.nist.gov/vuln/detail/CVE-2017-16962
 Crestron AM-100;1.6.0.2;CVE-2019-3925;Crestron AM-100 with firmware 1.6.0.2 and AM-101 with firmware 2.7.0.2 are vulnerable t...;https://nvd.nist.gov/vuln/detail/CVE-2019-3925
 Crestron AM-100;1.6.0.2;CVE-2019-3926;Crestron AM-100 with firmware 1.6.0.2 and AM-101 with firmware 2.7.0.2 are vulnerable t...;https://nvd.nist.gov/vuln/detail/CVE-2019-3926
 Crestron AM-100;1.6.0.2;CVE-2019-3927;Crestron AM-100 with firmware 1.6.0.2 and AM-101 with firmware 2.7.0.2 anyone can chang...;https://nvd.nist.gov/vuln/detail/CVE-2019-3927
@@ -1381,7 +1424,7 @@ Crestron DGE-100;<= 1.3384.00049.001;CVE-2018-5553;The Crestron Console service 
 Crestron DM-DGE-200-C;<= 1.3384.00049.001;CVE-2018-5553;The Crestron Console service running on DGE-100, DM-DGE-200-C, and TS-1542-C devices wi...;https://nvd.nist.gov/vuln/detail/CVE-2018-5553
 Crestron DM-NVX-DIR-160;1.0.1.788;CVE-2020-16839;On Crestron DM-NVX-DIR, DM-NVX-DIR80, and DM-NVX-ENT devices before the DM-XIO/1-0-3-80...;https://nvd.nist.gov/vuln/detail/CVE-2020-16839
 Crestron DM-NVX-DIR-80;1.0.1.788;CVE-2020-16839;On Crestron DM-NVX-DIR, DM-NVX-DIR80, and DM-NVX-ENT devices before the DM-XIO/1-0-3-80...;https://nvd.nist.gov/vuln/detail/CVE-2020-16839
-Crestron DM-TXRX-100-STR;1.2866.00026;CVE-2016-5666;Crestron Electronics DM-TXRX-100-STR devices with firmware before 1.3039.00040 rely on ...;https://nvd.nist.gov/vuln/detail/CVE-2016-5666
+Crestron DM-TXRX-100-STR;1.2866.00026;CVE-2016-5666;Crestron Electronics DM-TXRX-100-STR devices with firmware before 1.3039.00040 rely on...;https://nvd.nist.gov/vuln/detail/CVE-2016-5666
 Crestron DM-TXRX-100-STR;1.2866.00026;CVE-2016-5667;Crestron Electronics DM-TXRX-100-STR devices with firmware before 1.3039.00040 allow re...;https://nvd.nist.gov/vuln/detail/CVE-2016-5667
 Crestron DM-TXRX-100-STR;1.2866.00026;CVE-2016-5668;Crestron Electronics DM-TXRX-100-STR devices with firmware before 1.3039.00040 allow re...;https://nvd.nist.gov/vuln/detail/CVE-2016-5668
 Crestron DM-TXRX-100-STR;1.2866.00026;CVE-2016-5669;Crestron Electronics DM-TXRX-100-STR devices with firmware before 1.3039.00040 use a ha...;https://nvd.nist.gov/vuln/detail/CVE-2016-5669
@@ -1785,8 +1828,8 @@ Fanvil X210;2.12.20;CVE-2025-64057;Directory traversal vulnerability in Fanvil x
 Fortinet FORTIGATE-VOICE-80C;;CVE-2012-4948;The default configuration of Fortinet Fortigate UTM appliances uses the same Certificat...;https://nvd.nist.gov/vuln/detail/CVE-2012-4948
 Fortinet FORTIGATE-VOICE-80C;;CVE-2013-1414;Multiple cross-site request forgery (CSRF) vulnerabilities in Fortinet FortiOS on Forti...;https://nvd.nist.gov/vuln/detail/CVE-2013-1414
 Fortinet Fortianalyzer BIG Data;6.2.5;CVE-2023-41842;A use of externally-controlled format string vulnerability [CWE-134] vulnerability in F...;https://nvd.nist.gov/vuln/detail/CVE-2023-41842
-Fortinet Fortianalyzer BIG Data;7.4.0;CVE-2024-23666;A client-side enforcement of server-side security in Fortinet FortiAnalyzer-BigData at ...;https://nvd.nist.gov/vuln/detail/CVE-2024-23666
-Fortinet Fortianalyzer BIG Data;7.4.0;CVE-2024-31496;A stack-based buffer overflow vulnerability [CWE-121] in Fortinet FortiManager version ...;https://nvd.nist.gov/vuln/detail/CVE-2024-31496
+Fortinet Fortianalyzer BIG Data;7.4.0;CVE-2024-23666;A client-side enforcement of server-side security in Fortinet FortiAnalyzer-BigData at...;https://nvd.nist.gov/vuln/detail/CVE-2024-23666
+Fortinet Fortianalyzer BIG Data;7.4.0;CVE-2024-31496;A stack-based buffer overflow vulnerability [CWE-121] in Fortinet FortiManager version...;https://nvd.nist.gov/vuln/detail/CVE-2024-31496
 Fortinet Fortianalyzer BIG Data;7.4.0;CVE-2024-32116;Multiple relative path traversal vulnerabilities [CWE-23] in Fortinet FortiManager vers...;https://nvd.nist.gov/vuln/detail/CVE-2024-32116
 Fortinet Fortianalyzer BIG Data;7.4.0;CVE-2024-32117;An improper limitation of a pathname to a restricted directory ('Path Traversal') vulne...;https://nvd.nist.gov/vuln/detail/CVE-2024-32117
 Fortinet Fortianalyzer BIG Data;7.4.0;CVE-2024-32118;Multiple improper neutralization of special elements used in an OS command ('OS Command...;https://nvd.nist.gov/vuln/detail/CVE-2024-32118
@@ -1794,8 +1837,8 @@ Fortinet Fortianalyzer BIG Data;7.4.0;CVE-2024-33501;Two improper neutralization
 Fortinet Fortianalyzer BIG Data;7.4.0;CVE-2024-40584;An improper neutralization of special elements used in an OS command ('OS Command Injec...;https://nvd.nist.gov/vuln/detail/CVE-2024-40584
 Fortinet Fortianalyzer BIG Data;7.6.0;CVE-2025-49784;An improper neutralization of special elements used in an sql command ('sql injection')...;https://nvd.nist.gov/vuln/detail/CVE-2025-49784
 Fortinet Fortianalyzer BIG Data;>= 6.2.1 and < 7.2.6;CVE-2023-44255;An exposure of sensitive information to an unauthorized actor [CWE-200] in Fortinet For...;https://nvd.nist.gov/vuln/detail/CVE-2023-44255
-Fortinet Fortianalyzer BIG Data;>= 6.2.1 and < 7.2.7;CVE-2024-23666;A client-side enforcement of server-side security in Fortinet FortiAnalyzer-BigData at ...;https://nvd.nist.gov/vuln/detail/CVE-2024-23666
-Fortinet Fortianalyzer BIG Data;>= 6.2.1 and < 7.2.8;CVE-2024-31496;A stack-based buffer overflow vulnerability [CWE-121] in Fortinet FortiManager version ...;https://nvd.nist.gov/vuln/detail/CVE-2024-31496
+Fortinet Fortianalyzer BIG Data;>= 6.2.1 and < 7.2.7;CVE-2024-23666;A client-side enforcement of server-side security in Fortinet FortiAnalyzer-BigData at...;https://nvd.nist.gov/vuln/detail/CVE-2024-23666
+Fortinet Fortianalyzer BIG Data;>= 6.2.1 and < 7.2.8;CVE-2024-31496;A stack-based buffer overflow vulnerability [CWE-121] in Fortinet FortiManager version...;https://nvd.nist.gov/vuln/detail/CVE-2024-31496
 Fortinet Fortianalyzer BIG Data;>= 6.2.1 and < 7.2.8;CVE-2024-32116;Multiple relative path traversal vulnerabilities [CWE-23] in Fortinet FortiManager vers...;https://nvd.nist.gov/vuln/detail/CVE-2024-32116
 Fortinet Fortianalyzer BIG Data;>= 6.2.1 and < 7.2.8;CVE-2024-32117;An improper limitation of a pathname to a restricted directory ('Path Traversal') vulne...;https://nvd.nist.gov/vuln/detail/CVE-2024-32117
 Fortinet Fortianalyzer BIG Data;>= 6.2.1 and < 7.2.8;CVE-2024-32118;Multiple improper neutralization of special elements used in an OS command ('OS Command...;https://nvd.nist.gov/vuln/detail/CVE-2024-32118
@@ -1827,7 +1870,7 @@ Fortinet Fortivoice;>= 6.0.0 and <= 6.0.11;CVE-2022-27488;A cross-site request f
 Fortinet Fortivoice;>= 6.0.0 and <= 6.0.12;CVE-2023-37932;An improper limitation of a pathname to a restricted directory ('path traversal') vulne...;https://nvd.nist.gov/vuln/detail/CVE-2023-37932
 Fortinet Fortivoice;>= 6.0.0 and <= 6.0.12;CVE-2023-40720;An authorization bypass through user-controlled key vulnerability [CWE-639] in FortiVoi...;https://nvd.nist.gov/vuln/detail/CVE-2023-40720
 Fortinet Fortivoice;>= 6.0.0 and <= 6.0.12;CVE-2025-64156;An improper neutralization of special elements used in an sql command ('sql injection')...;https://nvd.nist.gov/vuln/detail/CVE-2025-64156
-Fortinet Fortivoice;>= 6.0.0 and <= 6.0.1;CVE-2020-9294;An improper authentication vulnerability in FortiMail 5.4.10, 6.0.7, 6.2.2 and earlier ...;https://nvd.nist.gov/vuln/detail/CVE-2020-9294
+Fortinet Fortivoice;>= 6.0.0 and <= 6.0.1;CVE-2020-9294;An improper authentication vulnerability in FortiMail 5.4.10, 6.0.7, 6.2.2 and earlier...;https://nvd.nist.gov/vuln/detail/CVE-2020-9294
 Fortinet Fortivoice;>= 6.0.0 and <= 6.4.10;CVE-2024-48884;A improper limitation of a pathname to a restricted directory ('path traversal') vulner...;https://nvd.nist.gov/vuln/detail/CVE-2024-48884
 Fortinet Fortivoice;>= 6.0.0 and <= 6.4.10;CVE-2024-48885;A improper limitation of a pathname to a restricted directory ('path traversal') vulner...;https://nvd.nist.gov/vuln/detail/CVE-2024-48885
 Fortinet Fortivoice;>= 6.0.0 and <= 6.4.3;CVE-2021-42755;An integer overflow / wraparound vulnerability [CWE-190] in FortiSwitch 7.0.2 and below...;https://nvd.nist.gov/vuln/detail/CVE-2021-42755
@@ -2282,56 +2325,56 @@ Huawei P8 Smartphone;<= gra-cl00c92b350;CVE-2016-6192;Buffer overflow in the Wi-
 Huawei P8 Smartphone;<= gra-cl00c92b350;CVE-2016-6193;Buffer overflow in the Wi-Fi driver in Huawei P8 smartphones with software before GRA-C...;https://nvd.nist.gov/vuln/detail/CVE-2016-6193
 IceWarp Deep Castle G2;13.0.1.2;CVE-2023-40779;An issue in IceWarp Mail Server Deep Castle 2 v.13.0.1.2 allows a remote attacker to ex...;https://nvd.nist.gov/vuln/detail/CVE-2023-40779
 IceWarp Email Server;<= 9.3.0;CVE-2009-1467;Multiple cross-site scripting (XSS) vulnerabilities in IceWarp eMail Server and WebMail...;https://nvd.nist.gov/vuln/detail/CVE-2009-1467
-IceWarp Email Server;<= 9.3.0;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the ...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
+IceWarp Email Server;<= 9.3.0;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
 IceWarp Email Server;<= 9.3.0;CVE-2009-1469;CRLF injection vulnerability in the Forgot Password implementation in server/webmail.ph...;https://nvd.nist.gov/vuln/detail/CVE-2009-1469
 IceWarp Email Server;>= 2.10.105 and <= 2.10.360;CVE-2009-1467;Multiple cross-site scripting (XSS) vulnerabilities in IceWarp eMail Server and WebMail...;https://nvd.nist.gov/vuln/detail/CVE-2009-1467
-IceWarp Email Server;>= 2.10.105 and <= 2.10.360;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the ...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
+IceWarp Email Server;>= 2.10.105 and <= 2.10.360;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
 IceWarp Email Server;>= 2.10.105 and <= 2.10.360;CVE-2009-1469;CRLF injection vulnerability in the Forgot Password implementation in server/webmail.ph...;https://nvd.nist.gov/vuln/detail/CVE-2009-1469
 IceWarp Email Server;>= 3.00.100 and <= 3.10.110;CVE-2009-1467;Multiple cross-site scripting (XSS) vulnerabilities in IceWarp eMail Server and WebMail...;https://nvd.nist.gov/vuln/detail/CVE-2009-1467
-IceWarp Email Server;>= 3.00.100 and <= 3.10.110;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the ...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
+IceWarp Email Server;>= 3.00.100 and <= 3.10.110;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
 IceWarp Email Server;>= 3.00.100 and <= 3.10.110;CVE-2009-1469;CRLF injection vulnerability in the Forgot Password implementation in server/webmail.ph...;https://nvd.nist.gov/vuln/detail/CVE-2009-1469
 IceWarp Email Server;>= 4.00.30 and <= 4.10.050;CVE-2009-1467;Multiple cross-site scripting (XSS) vulnerabilities in IceWarp eMail Server and WebMail...;https://nvd.nist.gov/vuln/detail/CVE-2009-1467
-IceWarp Email Server;>= 4.00.30 and <= 4.10.050;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the ...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
+IceWarp Email Server;>= 4.00.30 and <= 4.10.050;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
 IceWarp Email Server;>= 4.00.30 and <= 4.10.050;CVE-2009-1469;CRLF injection vulnerability in the Forgot Password implementation in server/webmail.ph...;https://nvd.nist.gov/vuln/detail/CVE-2009-1469
 IceWarp Email Server;>= 5.1.2 and <= 5.9.4;CVE-2009-1467;Multiple cross-site scripting (XSS) vulnerabilities in IceWarp eMail Server and WebMail...;https://nvd.nist.gov/vuln/detail/CVE-2009-1467
-IceWarp Email Server;>= 5.1.2 and <= 5.9.4;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the ...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
+IceWarp Email Server;>= 5.1.2 and <= 5.9.4;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
 IceWarp Email Server;>= 5.1.2 and <= 5.9.4;CVE-2009-1469;CRLF injection vulnerability in the Forgot Password implementation in server/webmail.ph...;https://nvd.nist.gov/vuln/detail/CVE-2009-1469
 IceWarp Email Server;>= 6.0.2 and <= 6.2.1;CVE-2009-1467;Multiple cross-site scripting (XSS) vulnerabilities in IceWarp eMail Server and WebMail...;https://nvd.nist.gov/vuln/detail/CVE-2009-1467
-IceWarp Email Server;>= 6.0.2 and <= 6.2.1;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the ...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
+IceWarp Email Server;>= 6.0.2 and <= 6.2.1;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
 IceWarp Email Server;>= 6.0.2 and <= 6.2.1;CVE-2009-1469;CRLF injection vulnerability in the Forgot Password implementation in server/webmail.ph...;https://nvd.nist.gov/vuln/detail/CVE-2009-1469
 IceWarp Email Server;>= 7.0.1 and <= 7.6.4;CVE-2009-1467;Multiple cross-site scripting (XSS) vulnerabilities in IceWarp eMail Server and WebMail...;https://nvd.nist.gov/vuln/detail/CVE-2009-1467
-IceWarp Email Server;>= 7.0.1 and <= 7.6.4;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the ...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
+IceWarp Email Server;>= 7.0.1 and <= 7.6.4;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
 IceWarp Email Server;>= 7.0.1 and <= 7.6.4;CVE-2009-1469;CRLF injection vulnerability in the Forgot Password implementation in server/webmail.ph...;https://nvd.nist.gov/vuln/detail/CVE-2009-1469
 IceWarp Email Server;>= 8.0.1 and <= 8.9.1;CVE-2009-1467;Multiple cross-site scripting (XSS) vulnerabilities in IceWarp eMail Server and WebMail...;https://nvd.nist.gov/vuln/detail/CVE-2009-1467
-IceWarp Email Server;>= 8.0.1 and <= 8.9.1;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the ...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
+IceWarp Email Server;>= 8.0.1 and <= 8.9.1;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
 IceWarp Email Server;>= 8.0.1 and <= 8.9.1;CVE-2009-1469;CRLF injection vulnerability in the Forgot Password implementation in server/webmail.ph...;https://nvd.nist.gov/vuln/detail/CVE-2009-1469
 IceWarp Email Server;>= 9.0.0 and <= 9.2.0;CVE-2009-1467;Multiple cross-site scripting (XSS) vulnerabilities in IceWarp eMail Server and WebMail...;https://nvd.nist.gov/vuln/detail/CVE-2009-1467
-IceWarp Email Server;>= 9.0.0 and <= 9.2.0;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the ...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
+IceWarp Email Server;>= 9.0.0 and <= 9.2.0;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
 IceWarp Email Server;>= 9.0.0 and <= 9.2.0;CVE-2009-1469;CRLF injection vulnerability in the Forgot Password implementation in server/webmail.ph...;https://nvd.nist.gov/vuln/detail/CVE-2009-1469
 IceWarp Mail Server;10.4.4;CVE-2017-12844;Cross-site scripting (XSS) vulnerability in the admin panel in IceWarp Mail Server 10.4...;https://nvd.nist.gov/vuln/detail/CVE-2017-12844
 IceWarp Mail Server;10.4.5;CVE-2023-39699;IceWarp Mail Server v10.4.5 was discovered to contain a local file inclusion (LFI) vuln...;https://nvd.nist.gov/vuln/detail/CVE-2023-39699
-IceWarp Mail Server;10.4.5;CVE-2023-39700;IceWarp Mail Server v10.4.5 was discovered to contain a reflected cross-site scripting ...;https://nvd.nist.gov/vuln/detail/CVE-2023-39700
+IceWarp Mail Server;10.4.5;CVE-2023-39700;IceWarp Mail Server v10.4.5 was discovered to contain a reflected cross-site scripting...;https://nvd.nist.gov/vuln/detail/CVE-2023-39700
 IceWarp Mail Server;11.4.0;CVE-2025-40630;Open redirection vulnerability in IceWarp Mail Server affecting version 11.4.0;https://nvd.nist.gov/vuln/detail/CVE-2025-40630
 IceWarp Mail Server;11.4.0;CVE-2025-40631;HTTP host header injection vulnerability in Icewarp Mail Server affecting version 11.4.0;https://nvd.nist.gov/vuln/detail/CVE-2025-40631
 IceWarp Mail Server;11.4.0;CVE-2025-40632;Cross-site scripting (XSS) in Icewarp Mail Server affecting version 11.4.0;https://nvd.nist.gov/vuln/detail/CVE-2025-40632
 IceWarp Mail Server;11.4.5;CVE-2020-27982;IceWarp 11.4.5.0 allows XSS via the language parameter.;https://nvd.nist.gov/vuln/detail/CVE-2020-27982
 IceWarp Mail Server;12.0.3;CVE-2018-7475;Cross-site scripting (XSS) vulnerability for webdav/ticket/ URIs in IceWarp Mail Server...;https://nvd.nist.gov/vuln/detail/CVE-2018-7475
 IceWarp Mail Server;12.3.0.1;CVE-2020-14064;IceWarp Email Server 12.3.0.1 has Incorrect Access Control for user accounts.;https://nvd.nist.gov/vuln/detail/CVE-2020-14064
-IceWarp Mail Server;12.3.0.1;CVE-2020-14065;IceWarp Email Server 12.3.0.1 allows remote attackers to upload files and consume disk ...;https://nvd.nist.gov/vuln/detail/CVE-2020-14065
+IceWarp Mail Server;12.3.0.1;CVE-2020-14065;IceWarp Email Server 12.3.0.1 allows remote attackers to upload files and consume disk...;https://nvd.nist.gov/vuln/detail/CVE-2020-14065
 IceWarp Mail Server;12.3.0.1;CVE-2020-14066;IceWarp Email Server 12.3.0.1 allows remote attackers to upload JavaScript files that a...;https://nvd.nist.gov/vuln/detail/CVE-2020-14066
 IceWarp Mail Server;< 11.2.0;CVE-2015-1503;Multiple directory traversal vulnerabilities in IceWarp Mail Server before 11.2 allow r...;https://nvd.nist.gov/vuln/detail/CVE-2015-1503
 IceWarp Mail Server;< 12.2.1.1;CVE-2019-19265;IceWarp WebMail Server 12.2.0 and 12.1.x before 12.2.1.1 (and probably earlier versions...;https://nvd.nist.gov/vuln/detail/CVE-2019-19265
 IceWarp Mail Server;< 12.2.1.1;CVE-2019-19266;IceWarp WebMail Server 12.2.0 and 12.1.x before 12.2.1.1 (and probably earlier versions...;https://nvd.nist.gov/vuln/detail/CVE-2019-19266
 IceWarp Mail Server;< 13.0.1.2;CVE-2021-36580;Open Redirect vulnerability exists in IceWarp MailServer IceWarp Server Deep Castle 2 U...;https://nvd.nist.gov/vuln/detail/CVE-2021-36580
 IceWarp Mail Server;<= 10.3.2;CVE-2011-3579;server/webmail.php in IceWarp WebMail in IceWarp Mail Server before 10.3.3 allows remot...;https://nvd.nist.gov/vuln/detail/CVE-2011-3579
-IceWarp Mail Server;<= 10.3.2;CVE-2011-3580;IceWarp WebMail in IceWarp Mail Server before 10.3.3 allows remote attackers to obtain ...;https://nvd.nist.gov/vuln/detail/CVE-2011-3580
+IceWarp Mail Server;<= 10.3.2;CVE-2011-3580;IceWarp WebMail in IceWarp Mail Server before 10.3.3 allows remote attackers to obtain...;https://nvd.nist.gov/vuln/detail/CVE-2011-3580
 IceWarp Mail Server;<= 10.4.4;CVE-2019-12593;IceWarp Mail Server through 10.4.4 is prone to a local file inclusion vulnerability via...;https://nvd.nist.gov/vuln/detail/CVE-2019-12593
 IceWarp Mail Server;<= 12.0.3.1;CVE-2018-16324;In IceWarp Server 12.0.3.1 and before, there is XSS in the /webmail/ username field.;https://nvd.nist.gov/vuln/detail/CVE-2018-16324
 IceWarp Mail Server;>= 10.0.3 and <= 10.3.1;CVE-2011-3579;server/webmail.php in IceWarp WebMail in IceWarp Mail Server before 10.3.3 allows remot...;https://nvd.nist.gov/vuln/detail/CVE-2011-3579
-IceWarp Mail Server;>= 10.0.3 and <= 10.3.1;CVE-2011-3580;IceWarp WebMail in IceWarp Mail Server before 10.3.3 allows remote attackers to obtain ...;https://nvd.nist.gov/vuln/detail/CVE-2011-3580
+IceWarp Mail Server;>= 10.0.3 and <= 10.3.1;CVE-2011-3580;IceWarp WebMail in IceWarp Mail Server before 10.3.3 allows remote attackers to obtain...;https://nvd.nist.gov/vuln/detail/CVE-2011-3580
 IceWarp Mail Server;>= 9.3.0 and <= 9.4.2;CVE-2011-3579;server/webmail.php in IceWarp WebMail in IceWarp Mail Server before 10.3.3 allows remot...;https://nvd.nist.gov/vuln/detail/CVE-2011-3579
-IceWarp Mail Server;>= 9.3.0 and <= 9.4.2;CVE-2011-3580;IceWarp WebMail in IceWarp Mail Server before 10.3.3 allows remote attackers to obtain ...;https://nvd.nist.gov/vuln/detail/CVE-2011-3580
-IceWarp Merak Mail Server;9.3.2;CVE-2008-5734;Cross-site scripting (XSS) vulnerability in WebMail Pro in IceWarp Software Merak Mail ...;https://nvd.nist.gov/vuln/detail/CVE-2008-5734
+IceWarp Mail Server;>= 9.3.0 and <= 9.4.2;CVE-2011-3580;IceWarp WebMail in IceWarp Mail Server before 10.3.3 allows remote attackers to obtain...;https://nvd.nist.gov/vuln/detail/CVE-2011-3580
+IceWarp Merak Mail Server;9.3.2;CVE-2008-5734;Cross-site scripting (XSS) vulnerability in WebMail Pro in IceWarp Software Merak Mail...;https://nvd.nist.gov/vuln/detail/CVE-2008-5734
 IceWarp Merak Mail Server;9.4.1;CVE-2009-1516;Stack-based buffer overflow in the IceWarpServer.APIObject ActiveX control in api.dll i...;https://nvd.nist.gov/vuln/detail/CVE-2009-1516
 IceWarp Merak Mail Server;>= 8.9.1 and <= 8.9.2;CVE-2007-5046;Cross-site scripting (XSS) vulnerability in the Webmail interface for IceWarp Merak Mai...;https://nvd.nist.gov/vuln/detail/CVE-2007-5046
 IceWarp Server;11.3.1.5;CVE-2017-7855;In the webmail component in IceWarp Server 11.3.1.5, there was an XSS vulnerability dis...;https://nvd.nist.gov/vuln/detail/CVE-2017-7855
@@ -2339,7 +2382,7 @@ IceWarp Server;< 13.0.1.2;CVE-2021-36580;Open Redirect vulnerability exists in I
 IceWarp Server;<= 11.4.4.1;CVE-2020-8512;In IceWarp Webmail Server through 11.4.4.1, there is XSS in the /webmail/ color parameter.;https://nvd.nist.gov/vuln/detail/CVE-2020-8512
 IceWarp WEB Mail;3.3.2;CVE-2004-1669;Cross-site scripting (XSS) vulnerability in MERAK Mail Server 7.4.5 with Icewarp Web Ma...;https://nvd.nist.gov/vuln/detail/CVE-2004-1669
 IceWarp WEB Mail;3.3.2;CVE-2004-1670;Multiple directory traversal vulnerabilities Merak Mail Server 7.4.5 with Icewarp Web M...;https://nvd.nist.gov/vuln/detail/CVE-2004-1670
-IceWarp WEB Mail;3.3.2;CVE-2004-1671;Merak Mail Server 7.4.5 with Icewarp Web Mail 5.2.7 and possibly other versions allows ...;https://nvd.nist.gov/vuln/detail/CVE-2004-1671
+IceWarp WEB Mail;3.3.2;CVE-2004-1671;Merak Mail Server 7.4.5 with Icewarp Web Mail 5.2.7 and possibly other versions allows...;https://nvd.nist.gov/vuln/detail/CVE-2004-1671
 IceWarp WEB Mail;3.3.2;CVE-2004-1672;attachment.html in Merak Mail Server 7.4.5 with Icewarp Web Mail 5.2.7 and possibly oth...;https://nvd.nist.gov/vuln/detail/CVE-2004-1672
 IceWarp WEB Mail;3.3.2;CVE-2004-1673;accountsettings_add.html in Merak Mail Server 7.4.5 with Icewarp Web Mail 5.2.7 and pos...;https://nvd.nist.gov/vuln/detail/CVE-2004-1673
 IceWarp WEB Mail;3.3.2;CVE-2004-1674;viewaction.html in Merak Mail Server 7.4.5 with Icewarp Web Mail 5.2.7 and possibly oth...;https://nvd.nist.gov/vuln/detail/CVE-2004-1674
@@ -2352,7 +2395,7 @@ IceWarp WEB Mail;5.4.2;CVE-2005-1491;Merak Mail Server 8.0.3 with Icewarp Web Ma
 IceWarp WEB Mail;5.5.1;CVE-2005-3131;Multiple cross-site scripting (XSS) vulnerabilities in MERAK Mail Server 8.2.4r with Ic...;https://nvd.nist.gov/vuln/detail/CVE-2005-3131
 IceWarp WEB Mail;5.5.1;CVE-2005-3132;MERAK Mail Server 8.2.4r with Icewarp Web Mail 5.5.1, and possibly earlier versions, al...;https://nvd.nist.gov/vuln/detail/CVE-2005-3132
 IceWarp WEB Mail;5.5.1;CVE-2005-3133;Multiple directory traversal vulnerabilities in MERAK Mail Server 8.2.4r with Icewarp W...;https://nvd.nist.gov/vuln/detail/CVE-2005-3133
-IceWarp WEB Mail;5.5.1;CVE-2005-4556;PHP remote file include vulnerability in IceWarp Web Mail 5.5.1, as used by Merak Mail ...;https://nvd.nist.gov/vuln/detail/CVE-2005-4556
+IceWarp WEB Mail;5.5.1;CVE-2005-4556;PHP remote file include vulnerability in IceWarp Web Mail 5.5.1, as used by Merak Mail...;https://nvd.nist.gov/vuln/detail/CVE-2005-4556
 IceWarp WEB Mail;5.5.1;CVE-2005-4557;dir/include.html in IceWarp Web Mail 5.5.1, as used by Merak Mail Server 8.3.0r and Vis...;https://nvd.nist.gov/vuln/detail/CVE-2005-4557
 IceWarp WEB Mail;5.5.1;CVE-2005-4558;IceWarp Web Mail 5.5.1, as used by Merak Mail Server 8.3.0r and VisNetic Mail Server ve...;https://nvd.nist.gov/vuln/detail/CVE-2005-4558
 IceWarp WEB Mail;5.5.1;CVE-2005-4559;mail/include.html in IceWarp Web Mail 5.5.1, as used by Merak Mail Server 8.3.0r and Vi...;https://nvd.nist.gov/vuln/detail/CVE-2005-4559
@@ -2365,7 +2408,7 @@ IceWarp WEB Mail;>= 3.3.3 and <= 3.3.5;CVE-2002-1899;Cross-site scripting (XSS) 
 IceWarp WEB Mail;>= 4.1.4 and <= 4.1.5;CVE-2006-2484;Cross-site scripting (XSS) vulnerability in index.html in IceWarp WebMail 5.5.1 and ear...;https://nvd.nist.gov/vuln/detail/CVE-2006-2484
 IceWarp WEB Mail;>= 5.2.7 and <= 5.2.8;CVE-2004-1669;Cross-site scripting (XSS) vulnerability in MERAK Mail Server 7.4.5 with Icewarp Web Ma...;https://nvd.nist.gov/vuln/detail/CVE-2004-1669
 IceWarp WEB Mail;>= 5.2.7 and <= 5.2.8;CVE-2004-1670;Multiple directory traversal vulnerabilities Merak Mail Server 7.4.5 with Icewarp Web M...;https://nvd.nist.gov/vuln/detail/CVE-2004-1670
-IceWarp WEB Mail;>= 5.2.7 and <= 5.2.8;CVE-2004-1671;Merak Mail Server 7.4.5 with Icewarp Web Mail 5.2.7 and possibly other versions allows ...;https://nvd.nist.gov/vuln/detail/CVE-2004-1671
+IceWarp WEB Mail;>= 5.2.7 and <= 5.2.8;CVE-2004-1671;Merak Mail Server 7.4.5 with Icewarp Web Mail 5.2.7 and possibly other versions allows...;https://nvd.nist.gov/vuln/detail/CVE-2004-1671
 IceWarp WEB Mail;>= 5.2.7 and <= 5.2.8;CVE-2004-1672;attachment.html in Merak Mail Server 7.4.5 with Icewarp Web Mail 5.2.7 and possibly oth...;https://nvd.nist.gov/vuln/detail/CVE-2004-1672
 IceWarp WEB Mail;>= 5.2.7 and <= 5.2.8;CVE-2004-1673;accountsettings_add.html in Merak Mail Server 7.4.5 with Icewarp Web Mail 5.2.7 and pos...;https://nvd.nist.gov/vuln/detail/CVE-2004-1673
 IceWarp WEB Mail;>= 5.2.7 and <= 5.2.8;CVE-2004-1674;viewaction.html in Merak Mail Server 7.4.5 with Icewarp Web Mail 5.2.7 and possibly oth...;https://nvd.nist.gov/vuln/detail/CVE-2004-1674
@@ -2383,38 +2426,40 @@ IceWarp Webclient;>= 10.0 and < 10.2.1;CVE-2010-5338;IceWarp Webclient before 10
 IceWarp Webclient;>= 10.0 and < 10.2.1;CVE-2010-5339;IceWarp Webclient before 10.2.1 has XSS via an HTTP POST request: webmail/basic/ with t...;https://nvd.nist.gov/vuln/detail/CVE-2010-5339
 IceWarp Webclient;>= 10.0 and < 10.2.1;CVE-2010-5340;IceWarp Webclient before 10.2.1 has XSS via an HTTP POST request: webmail/ with the par...;https://nvd.nist.gov/vuln/detail/CVE-2010-5340
 IceWarp Webmail Server;<= 9.3.0;CVE-2009-1467;Multiple cross-site scripting (XSS) vulnerabilities in IceWarp eMail Server and WebMail...;https://nvd.nist.gov/vuln/detail/CVE-2009-1467
-IceWarp Webmail Server;<= 9.3.0;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the ...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
+IceWarp Webmail Server;<= 9.3.0;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
 IceWarp Webmail Server;<= 9.3.0;CVE-2009-1469;CRLF injection vulnerability in the Forgot Password implementation in server/webmail.ph...;https://nvd.nist.gov/vuln/detail/CVE-2009-1469
 IceWarp Webmail Server;>= 2.10.105 and <= 2.10.360;CVE-2009-1467;Multiple cross-site scripting (XSS) vulnerabilities in IceWarp eMail Server and WebMail...;https://nvd.nist.gov/vuln/detail/CVE-2009-1467
-IceWarp Webmail Server;>= 2.10.105 and <= 2.10.360;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the ...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
+IceWarp Webmail Server;>= 2.10.105 and <= 2.10.360;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
 IceWarp Webmail Server;>= 2.10.105 and <= 2.10.360;CVE-2009-1469;CRLF injection vulnerability in the Forgot Password implementation in server/webmail.ph...;https://nvd.nist.gov/vuln/detail/CVE-2009-1469
 IceWarp Webmail Server;>= 3.00.100 and <= 3.10.110;CVE-2009-1467;Multiple cross-site scripting (XSS) vulnerabilities in IceWarp eMail Server and WebMail...;https://nvd.nist.gov/vuln/detail/CVE-2009-1467
-IceWarp Webmail Server;>= 3.00.100 and <= 3.10.110;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the ...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
+IceWarp Webmail Server;>= 3.00.100 and <= 3.10.110;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
 IceWarp Webmail Server;>= 3.00.100 and <= 3.10.110;CVE-2009-1469;CRLF injection vulnerability in the Forgot Password implementation in server/webmail.ph...;https://nvd.nist.gov/vuln/detail/CVE-2009-1469
 IceWarp Webmail Server;>= 4.00.30 and <= 4.10.050;CVE-2009-1467;Multiple cross-site scripting (XSS) vulnerabilities in IceWarp eMail Server and WebMail...;https://nvd.nist.gov/vuln/detail/CVE-2009-1467
-IceWarp Webmail Server;>= 4.00.30 and <= 4.10.050;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the ...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
+IceWarp Webmail Server;>= 4.00.30 and <= 4.10.050;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
 IceWarp Webmail Server;>= 4.00.30 and <= 4.10.050;CVE-2009-1469;CRLF injection vulnerability in the Forgot Password implementation in server/webmail.ph...;https://nvd.nist.gov/vuln/detail/CVE-2009-1469
 IceWarp Webmail Server;>= 5.1.2 and <= 5.9.4;CVE-2009-1467;Multiple cross-site scripting (XSS) vulnerabilities in IceWarp eMail Server and WebMail...;https://nvd.nist.gov/vuln/detail/CVE-2009-1467
-IceWarp Webmail Server;>= 5.1.2 and <= 5.9.4;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the ...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
+IceWarp Webmail Server;>= 5.1.2 and <= 5.9.4;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
 IceWarp Webmail Server;>= 5.1.2 and <= 5.9.4;CVE-2009-1469;CRLF injection vulnerability in the Forgot Password implementation in server/webmail.ph...;https://nvd.nist.gov/vuln/detail/CVE-2009-1469
 IceWarp Webmail Server;>= 6.0.2 and <= 6.2.1;CVE-2009-1467;Multiple cross-site scripting (XSS) vulnerabilities in IceWarp eMail Server and WebMail...;https://nvd.nist.gov/vuln/detail/CVE-2009-1467
-IceWarp Webmail Server;>= 6.0.2 and <= 6.2.1;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the ...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
+IceWarp Webmail Server;>= 6.0.2 and <= 6.2.1;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
 IceWarp Webmail Server;>= 6.0.2 and <= 6.2.1;CVE-2009-1469;CRLF injection vulnerability in the Forgot Password implementation in server/webmail.ph...;https://nvd.nist.gov/vuln/detail/CVE-2009-1469
 IceWarp Webmail Server;>= 7.0.1 and <= 7.6.4;CVE-2009-1467;Multiple cross-site scripting (XSS) vulnerabilities in IceWarp eMail Server and WebMail...;https://nvd.nist.gov/vuln/detail/CVE-2009-1467
-IceWarp Webmail Server;>= 7.0.1 and <= 7.6.4;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the ...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
+IceWarp Webmail Server;>= 7.0.1 and <= 7.6.4;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
 IceWarp Webmail Server;>= 7.0.1 and <= 7.6.4;CVE-2009-1469;CRLF injection vulnerability in the Forgot Password implementation in server/webmail.ph...;https://nvd.nist.gov/vuln/detail/CVE-2009-1469
 IceWarp Webmail Server;>= 8.0.1 and <= 8.9.1;CVE-2009-1467;Multiple cross-site scripting (XSS) vulnerabilities in IceWarp eMail Server and WebMail...;https://nvd.nist.gov/vuln/detail/CVE-2009-1467
-IceWarp Webmail Server;>= 8.0.1 and <= 8.9.1;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the ...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
+IceWarp Webmail Server;>= 8.0.1 and <= 8.9.1;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
 IceWarp Webmail Server;>= 8.0.1 and <= 8.9.1;CVE-2009-1469;CRLF injection vulnerability in the Forgot Password implementation in server/webmail.ph...;https://nvd.nist.gov/vuln/detail/CVE-2009-1469
 IceWarp Webmail Server;>= 9.0.0 and <= 9.2.0;CVE-2009-1467;Multiple cross-site scripting (XSS) vulnerabilities in IceWarp eMail Server and WebMail...;https://nvd.nist.gov/vuln/detail/CVE-2009-1467
-IceWarp Webmail Server;>= 9.0.0 and <= 9.2.0;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the ...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
+IceWarp Webmail Server;>= 9.0.0 and <= 9.2.0;CVE-2009-1468;Multiple SQL injection vulnerabilities in the search form in server/webmail.php in the...;https://nvd.nist.gov/vuln/detail/CVE-2009-1468
 IceWarp Webmail Server;>= 9.0.0 and <= 9.2.0;CVE-2009-1469;CRLF injection vulnerability in the Forgot Password implementation in server/webmail.ph...;https://nvd.nist.gov/vuln/detail/CVE-2009-1469
-IceWarp;10.2.1;CVE-2023-37728;IceWarp v10.2.1 was discovered to contain cross-site scripting (XSS) vulnerability via ...;https://nvd.nist.gov/vuln/detail/CVE-2023-37728
+IceWarp;10.2.1;CVE-2023-37728;IceWarp v10.2.1 was discovered to contain cross-site scripting (XSS) vulnerability via...;https://nvd.nist.gov/vuln/detail/CVE-2023-37728
 IceWarp;10.2.1;CVE-2024-55218;IceWarp Server 10.2.1 is vulnerable to Cross Site Scripting (XSS) via the meta parameter.;https://nvd.nist.gov/vuln/detail/CVE-2024-55218
 IceWarp;10.3.1;CVE-2023-41013;Cross Site Scripting (XSS) in Webmail Calendar in IceWarp 10.3.1 allows remote attacker...;https://nvd.nist.gov/vuln/detail/CVE-2023-41013
 IceWarp;11.0.0.0;CVE-2018-25269;ICEWARP 10.3.4 and 11.0.0.0 contains a cross-site scripting vulnerability that allows a...;https://nvd.nist.gov/vuln/detail/CVE-2018-25269
 IceWarp;11.4.6.0;CVE-2023-39600;IceWarp 11.4.6.0 was discovered to contain a cross-site scripting (XSS) vulnerability v...;https://nvd.nist.gov/vuln/detail/CVE-2023-39600
 IceWarp;>= 12.0.2.1 and <= 12.0.3.1;CVE-2024-0246;A vulnerability classified as problematic has been found in IceWarp 12.0.2.1/12.0.3.1;https://nvd.nist.gov/vuln/detail/CVE-2024-0246
+Icewarp Server;< 13.0.1.2;CVE-2021-36580;Open Redirect vulnerability exists in IceWarp MailServer IceWarp Server Deep Castle 2 U...;https://nvd.nist.gov/vuln/detail/CVE-2021-36580
+Icewarp Server;<= 11.4.4.1;CVE-2020-8512;In IceWarp Webmail Server through 11.4.4.1, there is XSS in the /webmail/ color parameter.;https://nvd.nist.gov/vuln/detail/CVE-2020-8512
 Innovaphone PBX;14r1;CVE-2024-24720;An issue was discovered in the Forgot password function in Innovaphone PBX before 14r1...;https://nvd.nist.gov/vuln/detail/CVE-2024-24720
 Innovaphone PBX;< 14r1;CVE-2024-24720;An issue was discovered in the Forgot password function in Innovaphone PBX before 14r1...;https://nvd.nist.gov/vuln/detail/CVE-2024-24720
 Innovaphone PBX;< 14r1;CVE-2024-24721;An issue was discovered on Innovaphone PBX before 14r1 devices;https://nvd.nist.gov/vuln/detail/CVE-2024-24721
@@ -2424,12 +2469,12 @@ Innovaphone;< 13r2;CVE-2022-41870;AP Manager in Innovaphone before 13r2 Service 
 Intelbras ATA 200;74.19.10.21;CVE-2022-24654;Authenticated stored cross-site scripting (XSS) vulnerability in "Field Server Address"...;https://nvd.nist.gov/vuln/detail/CVE-2022-24654
 Intelbras Action RF 1200;1.1.3;CVE-2019-19517;Intelbras RF1200 1.1.3 devices allow CSRF to bypass the login.html form, as demonstrate...;https://nvd.nist.gov/vuln/detail/CVE-2019-19517
 Intelbras Action RF 1200;1.2.2;CVE-2024-22773;Intelbras Action RF 1200 routers 1.2.2 and earlier and Action RG 1200 routers 2.1.7 and...;https://nvd.nist.gov/vuln/detail/CVE-2024-22773
-Intelbras CIP 92200;;CVE-2020-8829;CSRF on Intelbras CIP 92200 devices allows an attacker to access the panel and perform ...;https://nvd.nist.gov/vuln/detail/CVE-2020-8829
-Intelbras IWR 1000N;1.6.4;CVE-2019-17600;Intelbras IWR 1000N 1.6.4 devices allow disclosure of the administrator login name and ...;https://nvd.nist.gov/vuln/detail/CVE-2019-17600
+Intelbras CIP 92200;;CVE-2020-8829;CSRF on Intelbras CIP 92200 devices allows an attacker to access the panel and perform...;https://nvd.nist.gov/vuln/detail/CVE-2020-8829
+Intelbras IWR 1000N;1.6.4;CVE-2019-17600;Intelbras IWR 1000N 1.6.4 devices allow disclosure of the administrator login name and...;https://nvd.nist.gov/vuln/detail/CVE-2019-17600
 Intelbras IWR 3000N;1.5.0;CVE-2019-11414;An issue was discovered on Intelbras IWR 3000N 1.5.0 devices;https://nvd.nist.gov/vuln/detail/CVE-2019-11414
 Intelbras IWR 3000N;1.5.0;CVE-2019-11415;An issue was discovered on Intelbras IWR 3000N 1.5.0 devices;https://nvd.nist.gov/vuln/detail/CVE-2019-11415
 Intelbras IWR 3000N;1.5.0;CVE-2019-11416;A CSRF issue was discovered on Intelbras IWR 3000N 1.5.0 devices, leading to complete c...;https://nvd.nist.gov/vuln/detail/CVE-2019-11416
-Intelbras IWR 3000N;1.8.7;CVE-2019-19007;Intelbras IWR 3000N 1.8.7 devices allow disclosure of the administrator login name and ...;https://nvd.nist.gov/vuln/detail/CVE-2019-19007
+Intelbras IWR 3000N;1.8.7;CVE-2019-19007;Intelbras IWR 3000N 1.8.7 devices allow disclosure of the administrator login name and...;https://nvd.nist.gov/vuln/detail/CVE-2019-19007
 Intelbras IWR 3000N;1.8.7;CVE-2019-19995;A CSRF issue was discovered on Intelbras IWR 3000N 1.8.7 devices, leading to complete c...;https://nvd.nist.gov/vuln/detail/CVE-2019-19995
 Intelbras IWR 3000N;1.8.7;CVE-2019-19996;An issue was discovered on Intelbras IWR 3000N 1.8.7 devices;https://nvd.nist.gov/vuln/detail/CVE-2019-19996
 Intelbras IWR 3000N;1.8.7;CVE-2019-20004;An issue was discovered on Intelbras IWR 3000N 1.8.7 devices;https://nvd.nist.gov/vuln/detail/CVE-2019-20004
@@ -2483,8 +2528,8 @@ Intelbras WRN 240;2.0.0;CVE-2019-19142;Intelbras WRN240 devices do not require a
 Intelbras WRN 240;;CVE-2017-14219;XSS (persistent) on the Intelbras Wireless N 150Mbps router with firmware WRN 240 allow...;https://nvd.nist.gov/vuln/detail/CVE-2017-14219
 Intelbras WRN 342;<= 2021-01-04;CVE-2021-3017;The web interface on Intelbras WIN 300 and WRN 342 devices through 2021-01-04 allows re...;https://nvd.nist.gov/vuln/detail/CVE-2021-3017
 Intelbras Wifiber 120AC Inmesh;>= 1.1-220216 and < 1.1-220826;CVE-2022-40005;Intelbras WiFiber 120AC inMesh before 1-1-220826 allows command injection by authentica...;https://nvd.nist.gov/vuln/detail/CVE-2022-40005
-Iptel SIP Express Router;>= 0.8.8 and <= 0.8.9;CVE-2003-1113;The Session Initiation Protocol (SIP) implementation in IPTel SIP Express Router 0.8.9 ...;https://nvd.nist.gov/vuln/detail/CVE-2003-1113
-Iptel Serweb;2.0.0dev1;CVE-2007-6290;Multiple directory traversal vulnerabilities in js/get_js.php in SERWeb 2.0.0 dev1 and ...;https://nvd.nist.gov/vuln/detail/CVE-2007-6290
+Iptel SIP Express Router;>= 0.8.8 and <= 0.8.9;CVE-2003-1113;The Session Initiation Protocol (SIP) implementation in IPTel SIP Express Router 0.8.9...;https://nvd.nist.gov/vuln/detail/CVE-2003-1113
+Iptel Serweb;2.0.0dev1;CVE-2007-6290;Multiple directory traversal vulnerabilities in js/get_js.php in SERWeb 2.0.0 dev1 and...;https://nvd.nist.gov/vuln/detail/CVE-2007-6290
 Iptel Serweb;<= 0.9.6;CVE-2007-3358;PHP remote file inclusion vulnerability in html/load_lang.php in SerWeb 0.9.6 and earli...;https://nvd.nist.gov/vuln/detail/CVE-2007-3358
 Iptel Serweb;<= 0.9.6;CVE-2007-3359;Multiple PHP remote file inclusion vulnerabilities in SerWeb 0.9.6 and earlier allow re...;https://nvd.nist.gov/vuln/detail/CVE-2007-3359
 Iptel Serweb;<= 2.0.0dev1;CVE-2007-6289;Multiple PHP remote file inclusion vulnerabilities in SerWeb 2.0.0 dev1 and earlier all...;https://nvd.nist.gov/vuln/detail/CVE-2007-6289
@@ -2527,14 +2572,17 @@ LifeSize 220;ls_ex2_4.7.10_2000_(14);CVE-2018-17981;Lifesize Express ls ex2_4.7.
 LifeSize Icon 300;ls_rm3_3.7.0(2421);CVE-2019-3702;A Remote Code Execution issue in the DNS Query Web UI in Lifesize Icon LS_RM3_3.7.0 (24...;https://nvd.nist.gov/vuln/detail/CVE-2019-3702
 LifeSize Icon 500;ls_rm3_3.7.0(2421);CVE-2019-3702;A Remote Code Execution issue in the DNS Query Web UI in Lifesize Icon LS_RM3_3.7.0 (24...;https://nvd.nist.gov/vuln/detail/CVE-2019-3702
 LifeSize Icon 700;ls_rm3_3.7.0(2421);CVE-2019-3702;A Remote Code Execution issue in the DNS Query Web UI in Lifesize Icon LS_RM3_3.7.0 (24...;https://nvd.nist.gov/vuln/detail/CVE-2019-3702
-LifeSize Networker 220;;CVE-2019-7632;LifeSize Team, Room, Passport, and Networker 220 devices allow Authenticated Remote OS ...;https://nvd.nist.gov/vuln/detail/CVE-2019-7632
-LifeSize Passport 220;;CVE-2019-7632;LifeSize Team, Room, Passport, and Networker 220 devices allow Authenticated Remote OS ...;https://nvd.nist.gov/vuln/detail/CVE-2019-7632
-LifeSize Room 220;;CVE-2019-7632;LifeSize Team, Room, Passport, and Networker 220 devices allow Authenticated Remote OS ...;https://nvd.nist.gov/vuln/detail/CVE-2019-7632
+LifeSize Networker 220;;CVE-2019-7632;LifeSize Team, Room, Passport, and Networker 220 devices allow Authenticated Remote OS...;https://nvd.nist.gov/vuln/detail/CVE-2019-7632
+LifeSize Passport 220;;CVE-2019-7632;LifeSize Team, Room, Passport, and Networker 220 devices allow Authenticated Remote OS...;https://nvd.nist.gov/vuln/detail/CVE-2019-7632
+LifeSize Room 220;;CVE-2019-7632;LifeSize Team, Room, Passport, and Networker 220 devices allow Authenticated Remote OS...;https://nvd.nist.gov/vuln/detail/CVE-2019-7632
 LifeSize Room 220I;ls_rm2_4.11.8_(14);CVE-2018-17981;Lifesize Express ls ex2_4.7.10 2000 (14) devices allow XSS via the interface/interface....;https://nvd.nist.gov/vuln/detail/CVE-2018-17981
 LifeSize Room Appliance Software;4.7.18;CVE-2011-2763;The web interface on the LifeSize Room appliance LS_RM1_3.5.3 (11) and 4.7.18 allows re...;https://nvd.nist.gov/vuln/detail/CVE-2011-2763
 LifeSize Room Appliance Software;ls_rm1_3.5.3;CVE-2011-2762;The web interface on the LifeSize Room appliance LS_RM1_3.5.3 (11) allows remote attack...;https://nvd.nist.gov/vuln/detail/CVE-2011-2762
 LifeSize Room Appliance Software;ls_rm1_3.5.3;CVE-2011-2763;The web interface on the LifeSize Room appliance LS_RM1_3.5.3 (11) and 4.7.18 allows re...;https://nvd.nist.gov/vuln/detail/CVE-2011-2763
-LifeSize Team 220;;CVE-2019-7632;LifeSize Team, Room, Passport, and Networker 220 devices allow Authenticated Remote OS ...;https://nvd.nist.gov/vuln/detail/CVE-2019-7632
+LifeSize Team 220;;CVE-2019-7632;LifeSize Team, Room, Passport, and Networker 220 devices allow Authenticated Remote OS...;https://nvd.nist.gov/vuln/detail/CVE-2019-7632
+Lifesize Room Appliance Software;4.7.18;CVE-2011-2763;The web interface on the LifeSize Room appliance LS_RM1_3.5.3 (11) and 4.7.18 allows re...;https://nvd.nist.gov/vuln/detail/CVE-2011-2763
+Lifesize Room Appliance Software;ls_rm1_3.5.3;CVE-2011-2762;The web interface on the LifeSize Room appliance LS_RM1_3.5.3 (11) allows remote attack...;https://nvd.nist.gov/vuln/detail/CVE-2011-2762
+Lifesize Room Appliance Software;ls_rm1_3.5.3;CVE-2011-2763;The web interface on the LifeSize Room appliance LS_RM1_3.5.3 (11) and 4.7.18 allows re...;https://nvd.nist.gov/vuln/detail/CVE-2011-2763
 Linksys SPA-2102 Phone Adapter;3.3.6;CVE-2008-2092;Linksys SPA-2102 Phone Adapter 3.3.6 allows remote attackers to cause a denial of servi...;https://nvd.nist.gov/vuln/detail/CVE-2008-2092
 Linksys Spa-2102;3.3.6;CVE-2008-2092;Denial of service (DoS);https://www.cvedetails.com/cve/CVE-2008-2092
 Linksys WIP 330 Wireless-g;1.0.6_a;CVE-2006-6411;PhoneCtrl.exe in Linksys WIP 330 Wireless-G IP Phone 1.00.06A allows remote attackers t...;https://nvd.nist.gov/vuln/detail/CVE-2006-6411
@@ -2605,6 +2653,21 @@ Mitel Micollab Audio, WEB & Video Conferencing;>= 8.1 and <= 8.1.1.11;CVE-2019-1
 Mitel Micollab Audio, WEB & Video Conferencing;>= 8.1 and <= 8.1.1.11;CVE-2019-19608;A SQL injection vulnerability in in the web conferencing component of Mitel MiCollab AW...;https://nvd.nist.gov/vuln/detail/CVE-2019-19608
 Mitel Micollab Audio, WEB & Video Conferencing;>= 9.0 and < 9.1.3;CVE-2020-11797;An Authentication Bypass vulnerability in the Published Area of the web conferencing co...;https://nvd.nist.gov/vuln/detail/CVE-2020-11797
 Mitel Micollab Audio, WEB & Video Conferencing;>= 9.0 and < 9.1.3;CVE-2020-11798;A Directory Traversal vulnerability in the web conference component of Mitel MiCollab A...;https://nvd.nist.gov/vuln/detail/CVE-2020-11798
+Mitel Micollab Audio, WEB& Video Conferencing;< 8.1.2.4;CVE-2020-11797;An Authentication Bypass vulnerability in the Published Area of the web conferencing co...;https://nvd.nist.gov/vuln/detail/CVE-2020-11797
+Mitel Micollab Audio, WEB& Video Conferencing;< 8.1.2.4;CVE-2020-11798;A Directory Traversal vulnerability in the web conference component of Mitel MiCollab A...;https://nvd.nist.gov/vuln/detail/CVE-2020-11798
+Mitel Micollab Audio, WEB& Video Conferencing;<= 8.0.2.301;CVE-2019-19371;A cross-site scripting (XSS) vulnerability in the web conferencing component of Mitel M...;https://nvd.nist.gov/vuln/detail/CVE-2019-19371
+Mitel Micollab Audio, WEB& Video Conferencing;<= 8.0.2.301;CVE-2019-19607;A SQL injection vulnerability in the web conferencing component of Mitel MiCollab AWV b...;https://nvd.nist.gov/vuln/detail/CVE-2019-19607
+Mitel Micollab Audio, WEB& Video Conferencing;<= 8.0.2.301;CVE-2019-19608;A SQL injection vulnerability in in the web conferencing component of Mitel MiCollab AW...;https://nvd.nist.gov/vuln/detail/CVE-2019-19608
+Mitel Micollab Audio, WEB& Video Conferencing;>= 5.0 and <= 5.0.5.7;CVE-2019-12165;MiCollab 7.3 PR2 (7.3.0.204) and earlier, 7.2 (7.2.2.13) and earlier, and 7.1 (7.1.0.57...;https://nvd.nist.gov/vuln/detail/CVE-2019-12165
+Mitel Micollab Audio, WEB& Video Conferencing;>= 6.0 and <= 6.0.0.61;CVE-2019-12165;MiCollab 7.3 PR2 (7.3.0.204) and earlier, 7.2 (7.2.2.13) and earlier, and 7.1 (7.1.0.57...;https://nvd.nist.gov/vuln/detail/CVE-2019-12165
+Mitel Micollab Audio, WEB& Video Conferencing;>= 6.1 and <= 6.1.0.28;CVE-2019-12165;MiCollab 7.3 PR2 (7.3.0.204) and earlier, 7.2 (7.2.2.13) and earlier, and 7.1 (7.1.0.57...;https://nvd.nist.gov/vuln/detail/CVE-2019-12165
+Mitel Micollab Audio, WEB& Video Conferencing;>= 6.2 and <= 6.2.2.8;CVE-2019-12165;MiCollab 7.3 PR2 (7.3.0.204) and earlier, 7.2 (7.2.2.13) and earlier, and 7.1 (7.1.0.57...;https://nvd.nist.gov/vuln/detail/CVE-2019-12165
+Mitel Micollab Audio, WEB& Video Conferencing;>= 6.3 and <= 6.3.0.103;CVE-2019-12165;MiCollab 7.3 PR2 (7.3.0.204) and earlier, 7.2 (7.2.2.13) and earlier, and 7.1 (7.1.0.57...;https://nvd.nist.gov/vuln/detail/CVE-2019-12165
+Mitel Micollab Audio, WEB& Video Conferencing;>= 8.1 and <= 8.1.1.11;CVE-2019-19371;A cross-site scripting (XSS) vulnerability in the web conferencing component of Mitel M...;https://nvd.nist.gov/vuln/detail/CVE-2019-19371
+Mitel Micollab Audio, WEB& Video Conferencing;>= 8.1 and <= 8.1.1.11;CVE-2019-19607;A SQL injection vulnerability in the web conferencing component of Mitel MiCollab AWV b...;https://nvd.nist.gov/vuln/detail/CVE-2019-19607
+Mitel Micollab Audio, WEB& Video Conferencing;>= 8.1 and <= 8.1.1.11;CVE-2019-19608;A SQL injection vulnerability in in the web conferencing component of Mitel MiCollab AW...;https://nvd.nist.gov/vuln/detail/CVE-2019-19608
+Mitel Micollab Audio, WEB& Video Conferencing;>= 9.0 and < 9.1.3;CVE-2020-11797;An Authentication Bypass vulnerability in the Published Area of the web conferencing co...;https://nvd.nist.gov/vuln/detail/CVE-2020-11797
+Mitel Micollab Audio, WEB& Video Conferencing;>= 9.0 and < 9.1.3;CVE-2020-11798;A Directory Traversal vulnerability in the web conference component of Mitel MiCollab A...;https://nvd.nist.gov/vuln/detail/CVE-2020-11798
 Mitel Micollab;6.0;CVE-2014-0160;The (1) TLS and (2) DTLS implementations in OpenSSL 1.0.1 before 1.0.1g do not properly...;https://nvd.nist.gov/vuln/detail/CVE-2014-0160
 Mitel Micollab;9.2;CVE-2021-27401;The Join Meeting page of Mitel MiCollab Web Client before 9.2 FP2 could allow an attack...;https://nvd.nist.gov/vuln/detail/CVE-2021-27401
 Mitel Micollab;9.2;CVE-2021-27402;The SAS Admin portal of Mitel MiCollab before 9.2 FP2 could allow an unauthenticated at...;https://nvd.nist.gov/vuln/detail/CVE-2021-27402
@@ -2747,9 +2810,9 @@ Ozeki Http-sms Gateway;<= 1.0;CVE-2006-6674;Ozeki HTTP-SMS Gateway 1.0, and poss
 Ozeki NG SMS Gateway;<= 4.17.6;CVE-2020-14021;An issue was discovered in Ozeki NG SMS Gateway through 4.17.6;https://nvd.nist.gov/vuln/detail/CVE-2020-14021
 Ozeki NG SMS Gateway;<= 4.17.6;CVE-2020-14022;Ozeki NG SMS Gateway 4.17.1 through 4.17.6 does not check the file type when bulk impor...;https://nvd.nist.gov/vuln/detail/CVE-2020-14022
 Ozeki NG SMS Gateway;<= 4.17.6;CVE-2020-14023;Ozeki NG SMS Gateway through 4.17.6 allows SSRF via SMS WCF or RSS To SMS.;https://nvd.nist.gov/vuln/detail/CVE-2020-14023
-Ozeki NG SMS Gateway;<= 4.17.6;CVE-2020-14024;Ozeki NG SMS Gateway through 4.17.6 has multiple authenticated stored and/or reflected ...;https://nvd.nist.gov/vuln/detail/CVE-2020-14024
+Ozeki NG SMS Gateway;<= 4.17.6;CVE-2020-14024;Ozeki NG SMS Gateway through 4.17.6 has multiple authenticated stored and/or reflected...;https://nvd.nist.gov/vuln/detail/CVE-2020-14024
 Ozeki NG SMS Gateway;<= 4.17.6;CVE-2020-14025;Ozeki NG SMS Gateway through 4.17.6 has multiple CSRF vulnerabilities;https://nvd.nist.gov/vuln/detail/CVE-2020-14025
-Ozeki NG SMS Gateway;<= 4.17.6;CVE-2020-14026;CSV Injection (aka Excel Macro Injection or Formula Injection) exists in the Export Of ...;https://nvd.nist.gov/vuln/detail/CVE-2020-14026
+Ozeki NG SMS Gateway;<= 4.17.6;CVE-2020-14026;CSV Injection (aka Excel Macro Injection or Formula Injection) exists in the Export Of...;https://nvd.nist.gov/vuln/detail/CVE-2020-14026
 Ozeki NG SMS Gateway;<= 4.17.6;CVE-2020-14027;An issue was discovered in Ozeki NG SMS Gateway through 4.17.6;https://nvd.nist.gov/vuln/detail/CVE-2020-14027
 Ozeki NG SMS Gateway;<= 4.17.6;CVE-2020-14028;An issue was discovered in Ozeki NG SMS Gateway through 4.17.6;https://nvd.nist.gov/vuln/detail/CVE-2020-14028
 Ozeki NG SMS Gateway;<= 4.17.6;CVE-2020-14029;An issue was discovered in Ozeki NG SMS Gateway through 4.17.6;https://nvd.nist.gov/vuln/detail/CVE-2020-14029
@@ -3067,7 +3130,8 @@ Snom 820;>= 6.5 and < 6.5.20;CVE-2009-1048;The web interface on the snom VoIP ph
 Snom 820;>= 7.1 and < 7.1.39;CVE-2009-1048;The web interface on the snom VoIP phones snom 300, snom 320, snom 360, snom 370, and s...;https://nvd.nist.gov/vuln/detail/CVE-2009-1048
 Snom 820;>= 7.3 and < 7.3.14;CVE-2009-1048;The web interface on the snom VoIP phones snom 300, snom 320, snom 360, snom 370, and s...;https://nvd.nist.gov/vuln/detail/CVE-2009-1048
 Snom Phone;>= 8.0.11 and <= 8.2.34;CVE-2010-2291;Unspecified vulnerability in the web interface in snom VoIP Phone firmware 8 before 8.2...;https://nvd.nist.gov/vuln/detail/CVE-2010-2291
-Starface Unified Communication & Collaboration Client;< 6.7.1.204;CVE-2020-10515;STARFACE UCC Client before 6.7.1.204 on WIndows allows binary planting to execute code ...;https://nvd.nist.gov/vuln/detail/CVE-2020-10515
+Snom Voip Phone;>= 8.0.11 and <= 8.2.34;CVE-2010-2291;Unspecified vulnerability in the web interface in snom VoIP Phone firmware 8 before 8.2...;https://nvd.nist.gov/vuln/detail/CVE-2010-2291
+Starface Unified Communication & Collaboration Client;< 6.7.1.204;CVE-2020-10515;STARFACE UCC Client before 6.7.1.204 on WIndows allows binary planting to execute code...;https://nvd.nist.gov/vuln/detail/CVE-2020-10515
 Starface;<= 7.3.0.10;CVE-2023-33243;RedTeam Pentesting discovered that the web interface of STARFACE as well as its REST AP...;https://nvd.nist.gov/vuln/detail/CVE-2023-33243
 Teluu;<= 2.11.1;CVE-2021-37706;Remote code execution (RCE);https://www.cvedetails.com/cve/CVE-2021-37706
 Teluu;<= 2.11.1;CVE-2022-21723;Out-of-bound read access;https://www.cvedetails.com/cve/CVE-2022-21723
@@ -3139,6 +3203,9 @@ Yealink VP530;;CVE-2012-1417;Multiple cross-site scripting (XSS) vulnerabilities
 Yealink VP59;91.15.0.118;CVE-2024-28442;Directory Traversal vulnerability in Yealink VP59 v.91.15.0.118 allows a physically pro...;https://nvd.nist.gov/vuln/detail/CVE-2024-28442
 Yealink VP59;91.15.0.118;CVE-2024-30939;An issue discovered in Yealink VP59 Teams Editions with firmware version 91.15.0.118 al...;https://nvd.nist.gov/vuln/detail/CVE-2024-30939
 Yealink VP59;>= 91.15.0.118 and < 122.15.0.142;CVE-2024-31747;An issue in Yealink VP59 Microsoft Teams Phone firmware 91.15.0.118 (fixed in 122.15.0....;https://nvd.nist.gov/vuln/detail/CVE-2024-31747
+Yealink Voip Phone;28.2.0.128.0.0.0;CVE-2014-3428;Cross-site scripting (XSS) vulnerability in Yealink VoIP Phones with firmware 28.72.0.2...;https://nvd.nist.gov/vuln/detail/CVE-2014-3428
+Yealink Voip Phone;28.72.0.2;CVE-2014-3427;CRLF injection vulnerability in Yealink VoIP Phones with firmware 28.72.0.2 allows remo...;https://nvd.nist.gov/vuln/detail/CVE-2014-3427
+Yealink Voip Phone;28.72.0.2;CVE-2014-3428;Cross-site scripting (XSS) vulnerability in Yealink VoIP Phones with firmware 28.72.0.2...;https://nvd.nist.gov/vuln/detail/CVE-2014-3428
 Yealink W52P;;CVE-2012-1417;Multiple cross-site scripting (XSS) vulnerabilities in Local Phone book and Blacklist f...;https://nvd.nist.gov/vuln/detail/CVE-2012-1417
 Yealink W60B;77.83.0.85;CVE-2020-24113;Directory Traversal vulnerability in Contacts File Upload Interface in Yealink W60B ver...;https://nvd.nist.gov/vuln/detail/CVE-2020-24113
 Yeastar N412;;CVE-2022-47732;In Yeastar N412 and N824 Configuration Panel 42.x and 45.x, an unauthenticated attacker...;https://nvd.nist.gov/vuln/detail/CVE-2022-47732
