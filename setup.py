@@ -40,8 +40,7 @@ if __name__ == "__main__":
         'IPy',
         'scapy',
         'pyshark',
-        'websocket-client',
-        'rel'
+        'websocket-client'
       ],
       # 'extra_requires' is not a setuptools option and was silently ignored,
       # so these were never declared anywhere: install them with .[full]

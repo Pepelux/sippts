@@ -7,11 +7,37 @@ __license__ = "GPL"
 __copyright__ = "Copyright (C) 2015-2024, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
 
+import os
+import signal
+import sys
+
 from sippts.lib.params import get_sippts_args
 from sippts.lib.videos import Video
 
 
+def terminate(signum, frame):
+    # SIGTERM/SIGHUP are turned into the Ctrl+C path. A long scan killed from
+    # outside -- a terminal being closed, a plain kill, the system reclaiming
+    # memory -- used to die without a word and throw away hours of work; this
+    # way the partial table is printed and the -o/-oi/-ot/-oj/-ocsv files are
+    # written before leaving
+    try:
+        # only the first one counts: a second kill while the results are being
+        # printed would come out as a traceback
+        signal.signal(signum, signal.SIG_IGN)
+    except Exception:
+        pass
+
+    raise KeyboardInterrupt
+
+
 def main():
+    for signame in ("SIGTERM", "SIGHUP"):
+        try:
+            signal.signal(getattr(signal, signame), terminate)
+        except Exception:
+            pass
+
     params = get_sippts_args()
 
     if params[0] == "video":
@@ -110,12 +136,14 @@ def main():
             tlsinfo,
             tlsversions,
             header,
+            ws_path,
         ) = params
 
         from sippts.sipscan import SipScan
 
         s = SipScan()
         s.header = header
+        s.path = ws_path
         s.ip = ip
         s.host = host
         s.proxy = proxy
@@ -305,11 +333,13 @@ def main():
             max_forwards,
             referto,
             replaces,
+            ws_path,
         ) = params
 
         from sippts.sipsend import SipSend
 
         s = SipSend()
+        s.path = ws_path
         s.ip = ip
         s.host = host
         s.template = template
@@ -380,12 +410,14 @@ def main():
             ocsv,
             nocolor,
             header,
+            ws_path,
         ) = params
 
         from sippts.sipenumerate import SipEnumerate
 
         s = SipEnumerate()
         s.header = header
+        s.path = ws_path
         s.ip = ip
         s.host = host
         s.proxy = proxy
@@ -721,58 +753,6 @@ def main():
         s.max = max
         s.min = min
         s.nocolor = nocolor
-    elif params[0] == "wssend":
-        (
-            cmd,
-            ip,
-            rport,
-            path,
-            verbose,
-            proto,
-            method,
-            domain,
-            contact_domain,
-            from_name,
-            from_user,
-            from_domain,
-            from_tag,
-            to_name,
-            to_user,
-            to_tag,
-            to_domain,
-            user_agent,
-            localip,
-            ppi,
-            pai,
-            timeout,
-            nocolor,
-        ) = params
-
-        from sippts.wssend import WsSend
-
-        s = WsSend()
-        s.ip = ip
-        s.path = path
-        s.rport = rport
-        s.proto = proto
-        s.method = method
-        s.domain = domain
-        s.contact_domain = contact_domain
-        s.from_name = from_name
-        s.from_domain = from_domain
-        s.from_tag = from_tag
-        s.to_name = to_name
-        s.from_user = from_user
-        s.to_user = to_user
-        s.to_domain = to_domain
-        s.to_tag = to_tag
-        s.user_agent = user_agent
-        s.localip = localip
-        s.verbose = verbose
-        s.ppi = ppi
-        s.pai = pai
-        s.timeout = timeout
-        s.nocolor = nocolor
     elif params[0] == "sniff":
         (cmd, dev, ofile, auth, verbose, proto, rport, nocolor) = params
 
@@ -863,7 +843,31 @@ def main():
         print(f"Error loading module {params[0]}")
         exit()
 
-    s.start()
+    try:
+        s.start()
+    except KeyboardInterrupt:
+        # a module that does not catch it on its own should not end in a
+        # traceback either
+        try:
+            s.stop()
+        except Exception:
+            pass
+
+        print()
+    finally:
+        try:
+            sys.stdout.flush()
+            sys.stderr.flush()
+        except Exception:
+            pass
+
+        # the modules work with pools of up to 200 threads, each one inside a
+        # socket timeout. Leaving the interpreter to its normal shutdown made
+        # it join every one of them, so after a Ctrl+C the tool hung there and
+        # a second Ctrl+C printed a KeyboardInterrupt traceback from
+        # threading._shutdown. Everything of ours is already written and
+        # flushed at this point, so exit without that cleanup
+        os._exit(0)
 
 
 if __name__ == "__main__":

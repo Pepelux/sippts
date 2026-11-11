@@ -1003,6 +1003,17 @@ def create_socket(host, proto):
     return socket.socket(familia, socket.SOCK_STREAM)
 
 
+def generate_branch(length=32):
+    """A Via branch as RFC 3261 8.1.1.7 wants it.
+
+    The magic cookie z9hG4bK is not decoration: a proxy uses it to tell an
+    RFC-compliant transaction id from a pre-2002 one, and some of them answer
+    nothing at all to a branch without it. The random part used to be 71
+    characters with no cookie, which is both non-compliant and a fingerprint.
+    """
+    return "z9hG4bK%s" % generate_random_string(length, length, "ascii")
+
+
 def create_message(
     method,
     ip_sdp,
@@ -1051,7 +1062,7 @@ def create_message(
         starting_line = "%s sip:%s@%s SIP/2.0" % (method, touser, sip_host(domain))
 
     if branch == "":
-        branch = generate_random_string(71, 71, "ascii")
+        branch = generate_branch()
     if callid == "":
         callid = generate_random_string(32, 32, "hex")
     if tag == "":
@@ -1127,11 +1138,19 @@ def create_message(
     if withcontact == 1:
         if "contact" not in aportadas:
             if method != "CANCEL" and method != "ACK":
+                # RFC 7118 5: a SIP URI over WebSocket carries transport=ws,
+                # also on a secure connection - there is no transport=wss
+                # token, the WSS only shows in the Via. Kamailio and Asterisk
+                # tolerate the wrong one, other stacks drop the Contact
+                transport = proto
+                if str(proto).upper() in ("WS", "WSS"):
+                    transport = "ws"
+
                 headers["Contact"] = "<sip:%s@%s:%d;transport=%s>;expires=%s" % (
                     fromuser,
                     sip_host(contactdomain),
                     fromport,
-                    proto,
+                    transport,
                     expires,
                 )
 
@@ -1978,6 +1997,81 @@ def format_time(value):
     return str(h) + " hour(s) " + str(m) + " min(s) " + str(s) + " sec(s)"
 
 
+# Products that name themselves in the User-Agent / Server header. When one of
+# these shows up there is nothing to guess: the header beats any heuristic
+# based on the To-tag, which is what used to answer "Aastra/Yate/Epygi" to a
+# server that had already said "Asterisk"
+UA_PRODUCTS = (
+    ("asterisk", "Asterisk PBX"),
+    ("freepbx", "Asterisk PBX"),
+    ("freeswitch", "FreeSWITCH"),
+    ("kamailio", "Kamailio SIP Proxy"),
+    ("sip-router", "Kamailio SIP Proxy"),
+    ("opensips", "OpenSIPS SIP Proxy"),
+    ("sylkserver", "SylkServer"),
+    ("yeastar", "Yeastar"),
+    ("3cx", "3CX Phone System"),
+    ("grandstream", "Grandstream"),
+    ("yealink", "Yealink"),
+    ("snom", "SNOM"),
+    ("fanvil", "Fanvil"),
+    ("polycom", "Polycom"),
+    ("plcm", "Polycom"),
+    ("mitel", "Mitel"),
+    ("avaya", "Avaya"),
+    ("audiocodes", "AudioCodes"),
+    ("patton", "Patton"),
+    ("sangoma", "Sangoma"),
+    ("draytek", "Draytek"),
+    ("akuvox", "Akuvox"),
+    ("dahua", "Dahua"),
+    ("hikvision", "Hikvision"),
+    ("zoiper", "Zoiper"),
+    ("linphone", "Linphone"),
+    ("pjsua", "PJSIP"),
+    ("pjsip", "PJSIP"),
+    ("baresip", "baresip"),
+    ("microsip", "MicroSIP"),
+    ("twinkle", "Twinkle"),
+    ("fortivoice", "FortiVoice"),
+    ("epygi", "Epygi Quadro"),
+    ("aastra", "Aastra"),
+    ("yate", "Yate"),
+    ("openscape", "OpenScape"),
+    ("panasonic", "Panasonic"),
+    ("gigaset", "Gigaset"),
+    ("fritz", "Fritz!Box"),
+    ("zyxel", "ZyXEL"),
+    ("huawei", "Huawei"),
+    ("alcatel", "Alcatel"),
+    ("brekeke", "Brekeke"),
+    ("ozeki", "Ozeki VoIP SIP SDK"),
+    ("mediatrix", "Mediatrix"),
+    ("intelbras", "Intelbras"),
+    ("doorbird", "DoorBird"),
+    ("crestron", "Crestron"),
+    ("digium", "Digium"),
+    ("clearlyip", "ClearlyIP"),
+    ("vodia", "Vodia PBX"),
+    ("nginx", "Web server"),
+    ("apache", "Web server"),
+)
+
+
+def ua_product(ua):
+    """The product a User-Agent/Server header names, or "" when it names none."""
+    if ua in ("", None):
+        return ""
+
+    texto = str(ua).lower()
+
+    for aguja, nombre in UA_PRODUCTS:
+        if aguja in texto:
+            return nombre
+
+    return ""
+
+
 def fingerprinting(method, msg, headers, verbose):
     fp = []
 
@@ -2352,6 +2446,12 @@ def fingerprinting(method, msg, headers, verbose):
                 fp.append("Asterisk PBX")
             if h.lower().find("o=ciscosystemssip-gw-useragent") == 0:
                 fp.append("Cisco SIP Gateway")
+    # the header wins over the heuristics
+    producto = ua_product(ua)
+
+    if producto != "":
+        return [producto]
+
     if ua != "":
         for f in fp:
             if (

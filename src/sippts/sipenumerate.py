@@ -7,6 +7,7 @@ __license__ = "GPL"
 __copyright__ = "Copyright (C) 2015-2024, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
 
+import re
 import socket
 import sys
 import ssl
@@ -20,7 +21,10 @@ from .lib.functions import (
     format_time,
     write_results,
     RESULT_FIELDS,
+    get_free_port,
+    generate_random_string,
 )
+from .lib.wsclient import ws_connect, ws_error_text, is_timeout
 from .lib.color import Color
 from .lib.logos import Logo
 from concurrent.futures import ThreadPoolExecutor
@@ -37,6 +41,8 @@ class SipEnumerate:
         self.route = ""
         self.rport = "5060"
         self.proto = "UDP"
+        self.path = ""
+        self.httpfound = False
         self.domain = ""
         self.contact_domain = ""
         self.from_user = "100"
@@ -94,7 +100,7 @@ class SipEnumerate:
         # did nothing at all
         self.quit = False
 
-        supported_protos = ["UDP", "TCP", "TLS"]
+        supported_protos = ["UDP", "TCP", "TLS", "WS", "WSS"]
         supported_methods = [
             "REGISTER",
             "SUBSCRIBE",
@@ -135,6 +141,8 @@ class SipEnumerate:
         print(
             f"{self.c.BWHITE}[✓] IP address: {self.c.GREEN}{str(self.ip)}{self.c.WHITE}:{self.c.GREEN}{self.rport}{self.c.WHITE}/{self.c.GREEN}{self.proto}"
         )
+        if self.proto in ("WS", "WSS") and self.path != "":
+            print(f"{self.c.BWHITE}[✓] WS path: {self.c.GREEN}{self.path}")
         if self.proxy != "":
             print(f"{self.c.BWHITE}[✓] Outbound Proxy: {self.c.GREEN}{self.proxy}")
         if self.domain != "":
@@ -207,6 +215,11 @@ class SipEnumerate:
 
     def send(self, method):
         if self.quit == False:
+            if self.proto in ("WS", "WSS"):
+                # SIP over WebSocket (RFC 7118): handshake and framing are done
+                # by the shared client, the answers end in the same table
+                return self.send_ws(method)
+
             try:
                 if self.proto == "UDP":
                     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -257,47 +270,7 @@ class SipEnumerate:
                 print(self.c.WHITE)
                 sys.exit()
 
-            from_user = self.from_user
-            to_user = self.to_user
-
-            if method == "REGISTER":
-                if self.to_user == "100" and self.from_user != "100":
-                    from_user = self.from_user
-                    to_user = self.from_user
-                if self.to_user != "100" and self.from_user == "100":
-                    from_user = self.to_user
-                    to_user = self.to_user
-
-            msg = create_message(
-                method,
-                "",
-                self.contact_domain,
-                from_user,
-                self.from_name,
-                self.domain,
-                to_user,
-                self.to_name,
-                self.domain,
-                self.proto,
-                self.domain,
-                self.user_agent,
-                lport,
-                "",
-                "",
-                self.from_tag,
-                "1",
-                "",
-                self.digest,
-                1,
-                "",
-                0,
-                "",
-                self.route,
-                "",
-                "",
-                self.header,
-                1,
-            )
+            msg = self.build_message(method, lport)
 
             if self.verbose == 1:
                 print(
@@ -305,87 +278,18 @@ class SipEnumerate:
                 )
                 print(f"{self.c.YELLOW}{msg}")
 
+            if self.proto == "TLS":
+                recv = lambda: sock_ssl.recv(4096)
+            else:
+                recv = lambda: sock.recv(4096)
+
             try:
                 if self.proto == "TLS":
                     sock_ssl.sendall(bytes(msg[:8192], "utf-8"))
                 else:
                     sock.sendto(bytes(msg[:8192], "utf-8"), host)
 
-                rescode = "100"
-                resdata = ""
-                resdataua = ""
-                ua = "Not found"
-                headers = None
-                tries = 0
-
-                # a server that answers something unparseable (or a TCP peer
-                # that closes the connection, where recv() returns b'' right
-                # away) left rescode at 100 and this loop spinning forever
-                while rescode[:1] == "1" and tries < 10:
-                    tries += 1
-
-                    if self.proto == "TLS":
-                        resp = sock_ssl.recv(4096)
-                    else:
-                        resp = sock.recv(4096)
-
-                    if not resp:
-                        break
-
-                    headers = parse_message(resp.decode())
-
-                    if headers:
-                        rescode = headers["response_code"]
-                        restext = headers["response_text"]
-
-                        ua = headers["ua"]
-                        if ua == "":
-                            ua = "Not found"
-
-                        if resdata != "":
-                            resdata = resdata + " / "
-                            resdataua = resdataua + self.c.WHITE + " / "
-                        resdata = resdata + "%s %s" % (rescode, restext)
-                        resdataua = (
-                            resdataua
-                            + self.c.YELLOW
-                            + "%s %s" % (rescode, restext)
-                            + self.c.WHITE
-                            + " (User-Agent: %s)" % ua
-                        )
-
-                if self.verbose == 1:
-                    print(
-                        f"{self.c.BWHITE}[+] Receiving from {self.ip}:{str(self.rport)} ..."
-                    )
-                    print(f"{self.c.GREEN}{resp.decode()}")
-                else:
-                    print(f"{self.c.BCYAN}{method}{self.c.WHITE} => {resdataua}")
-
-                try:
-                    fps = fingerprinting(method, resp.decode(), headers, self.verbose)
-                except Exception:
-                    # a missing header must not discard the whole result
-                    fps = []
-
-                fp = ""
-                for f in fps:
-                    if fp == "":
-                        fp = "%s" % f
-                    else:
-                        fp += "/%s" % f
-
-                if fp[0:1] == "/":
-                    fp = fp[1:]
-
-                for clave in ("allow", "supported", "allow_events"):
-                    if headers.get(clave, "") != "":
-                        self.capsfound.append(
-                            "%s###%s###%s" % (method, clave, headers[clave])
-                        )
-
-                line = "%s###%s###%s###%s" % (method, resdata, ua, fp)
-                self.found.append(line)
+                self.collect_answers(method, recv)
             except KeyboardInterrupt:
                 print(f"{self.c.RED}\nYou pressed Ctrl+C!{self.c.WHITE}")
                 self.quit = True
@@ -405,6 +309,220 @@ class SipEnumerate:
                 pass
 
             close_sockets(sock, sock_ssl)
+
+
+
+    def send_ws(self, method):
+        """Enumerate one method over a SIP WebSocket."""
+        conn = None
+        lport = get_free_port()
+
+        if self.contact_domain == "":
+            # RFC 7118: a WebSocket client has no address of its own
+            self.contact_domain = "%s.invalid" % generate_random_string(12, 12, "hex")
+
+        msg = self.build_message(method, lport)
+
+        try:
+            conn, url = ws_connect(
+                self.proto,
+                self.ip,
+                self.rport,
+                self.path,
+                timeout=self.timeout,
+                sni=self.domain if self.domain not in ("", None) else str(self.ip),
+            )
+        except Exception as error:
+            print(
+                f"{self.c.BGREEN}{method}{self.c.RED} => {ws_error_text(error)}{self.c.WHITE}"
+            )
+            self.found.append("%s###Error######" % method)
+
+            return
+
+        if self.verbose == 1:
+            print(f"{self.c.BWHITE}[+] Sending to {url} ...")
+            print(f"{self.c.YELLOW}{msg}")
+
+        try:
+            conn.settimeout(self.timeout)
+            conn.send(msg)
+
+            self.collect_answers(method, conn.recv)
+        except KeyboardInterrupt:
+            print(f"{self.c.RED}\nYou pressed Ctrl+C!{self.c.WHITE}")
+            self.quit = True
+        except Exception as error:
+            if is_timeout(error):
+                print(
+                    f"{self.c.BGREEN}{method}{self.c.RED} => Timeout error{self.c.WHITE}"
+                )
+                self.found.append("%s###Timeout######" % method)
+            else:
+                print(
+                    f"{self.c.BGREEN}{method}{self.c.RED} => {ws_error_text(error)}{self.c.WHITE}"
+                )
+                self.found.append("%s###Error######" % method)
+        finally:
+            try:
+                conn.close()
+            except Exception:
+                pass
+
+    def build_message(self, method, lport):
+        """The request for one method, shared by every transport."""
+        from_user = self.from_user
+        to_user = self.to_user
+
+        if method == "REGISTER":
+            if self.to_user == "100" and self.from_user != "100":
+                from_user = self.from_user
+                to_user = self.from_user
+            if self.to_user != "100" and self.from_user == "100":
+                from_user = self.to_user
+                to_user = self.to_user
+
+        msg = create_message(
+            method,
+            "",
+            self.contact_domain,
+            from_user,
+            self.from_name,
+            self.domain,
+            to_user,
+            self.to_name,
+            self.domain,
+            self.proto,
+            self.domain,
+            self.user_agent,
+            lport,
+            "",
+            "",
+            self.from_tag,
+            "1",
+            "",
+            self.digest,
+            1,
+            "",
+            0,
+            "",
+            self.route,
+            "",
+            "",
+            self.header,
+            1,
+        )
+
+        return msg
+
+
+    def collect_answers(self, method, recv):
+        """Read the answers to one method and record the row.
+
+        recv() returns the next answer (bytes or str), or something empty when
+        the peer closed: the same loop then works over a raw socket and over a
+        WebSocket, which has no recv(4096).
+        """
+        rescode = "100"
+        resdata = ""
+        resdataua = ""
+        ua = "Not found"
+        headers = None
+        tries = 0
+
+        # a server that answers something unparseable (or a TCP peer
+        # that closes the connection, where recv() returns b'' right
+        # away) left rescode at 100 and this loop spinning forever
+        while rescode[:1] == "1" and tries < 10:
+            tries += 1
+
+            resp = recv()
+
+            if not resp:
+                break
+
+            if isinstance(resp, (bytes, bytearray)):
+                resp = resp.decode("utf-8", errors="replace")
+
+            # a port that answers HTTP is a web server, not a SIP server with
+            # an empty response code: say so and do not fingerprint it
+            if resp.startswith("HTTP/"):
+                self.httpfound = True
+                status = resp.replace("\r\n", "\n").split("\n")[0].strip()
+                resdata = re.sub(r"^HTTP/[\d.]+\s+", "HTTP ", status)
+                ua = ""
+
+                for linea in resp.replace("\r\n", "\n").split("\n")[1:]:
+                    if linea.strip() == "":
+                        break
+
+                    if linea.lower().startswith("server:"):
+                        ua = linea.split(":", 1)[1].strip()
+                        break
+
+                print(
+                    f"{self.c.BCYAN}{method}{self.c.WHITE} => {self.c.YELLOW}{resdata}{self.c.WHITE} (Server: {ua})"
+                )
+                self.found.append(
+                    "%s###%s###%s###%s" % (method, resdata, ua, "Web server")
+                )
+
+                return
+
+            headers = parse_message(resp)
+
+            if headers:
+                rescode = headers["response_code"]
+                restext = headers["response_text"]
+
+                ua = headers["ua"]
+                if ua == "":
+                    ua = "Not found"
+
+                if resdata != "":
+                    resdata = resdata + " / "
+                    resdataua = resdataua + self.c.WHITE + " / "
+                resdata = resdata + "%s %s" % (rescode, restext)
+                resdataua = (
+                    resdataua
+                    + self.c.YELLOW
+                    + "%s %s" % (rescode, restext)
+                    + self.c.WHITE
+                    + " (User-Agent: %s)" % ua
+                )
+
+        if self.verbose == 1:
+            print(
+                f"{self.c.BWHITE}[+] Receiving from {self.ip}:{str(self.rport)} ..."
+            )
+            print(f"{self.c.GREEN}{resp}")
+        else:
+            print(f"{self.c.BCYAN}{method}{self.c.WHITE} => {resdataua}")
+
+        try:
+            fps = fingerprinting(method, resp, headers, self.verbose)
+        except Exception:
+            # a missing header must not discard the whole result
+            fps = []
+
+        fp = ""
+        for f in fps:
+            if fp == "":
+                fp = "%s" % f
+            else:
+                fp += "/%s" % f
+
+        if fp[0:1] == "/":
+            fp = fp[1:]
+
+        for clave in ("allow", "supported", "allow_events"):
+            if headers.get(clave, "") != "":
+                self.capsfound.append(
+                    "%s###%s###%s" % (method, clave, headers[clave])
+                )
+
+        line = "%s###%s###%s###%s" % (method, resdata, ua, fp)
+        self.found.append(line)
 
     def print(self):
         mlen = len("Method")
@@ -463,7 +581,12 @@ class SipEnumerate:
         )
         print(self.c.WHITE)
 
-        if len(self.found) > 0:
+        if self.httpfound == True:
+            print(
+                f"{self.c.YELLOW}[!] This port answered HTTP, not SIP. If it is an Asterisk/Kamailio HTTP port, try {self.c.BYELLOW}-p ws{self.c.YELLOW} or {self.c.BYELLOW}-p wss{self.c.WHITE}"
+            )
+            print(self.c.WHITE)
+        elif len(self.found) > 0:
             print(
                 f"{self.c.YELLOW}[!] Fingerprinting is based on `To-tag` and other header values. The result may not be correct\n{self.c.WHITE}"
             )

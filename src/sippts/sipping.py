@@ -20,6 +20,7 @@ from .lib.functions import (
     parse_digest,
     calculateHash,
     generate_random_string,
+    generate_branch,
     get_machine_default_ip,
     create_socket,
 )
@@ -224,7 +225,7 @@ class SipPing:
         print(self.c.WHITE)
 
         if self.branch == "":
-            self.branch = generate_random_string(71, 71, "ascii")
+            self.branch = generate_branch()
         if self.callid == "":
             self.callid = generate_random_string(32, 32, "hex")
         if self.from_tag == "":
@@ -436,7 +437,7 @@ class SipPing:
                             self.domain,
                             self.user_agent,
                             lport,
-                            generate_random_string(71, 71, "ascii"),
+                            generate_branch(),
                             self.callid,
                             self.from_tag,
                             str(int(self.cseq) + 1),

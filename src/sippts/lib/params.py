@@ -363,7 +363,7 @@ Usage examples:
         + BYELLOW
         + """scan"""
         + YELLOW
-        + """ is a fast SIP scanner using multithread that can check several IPs and port ranges. It works with UDP, TCP and TLS protocols."""
+        + """ is a fast SIP scanner using multithread that can check several IPs and port ranges. It works with UDP, TCP, TLS and WebSockets (WS and WSS)."""
         + WHITE,
         epilog="""
 Usage examples:
@@ -453,11 +453,22 @@ Usage examples:
     target.add_argument(
         "-p", "--protocol",
         metavar="PROTOCOL",
+        # no `choices` here: a scan may ask for several transports at once
+        # (-p udp,tls,wss), which argparse cannot express with choices. The
+        # list is validated in sipscan.py, where an unknown name is reported
+        # with the same wording
         type=str.upper,
-        help="Protocol: udp|tcp|tls|all (default: udp)",
+        help="Protocol: udp|tcp|tls|ws|wss|all, or a comma separated list like udp,tls,wss (default: udp). With ALL and the default port, each transport uses its own: 5060 udp/tcp, 5061 tls, 8088 ws, 8089 wss",
         dest="proto",
-        choices=["UDP", "TCP", "TLS", "ALL"],
         default="udp",
+    )
+    target.add_argument(
+        "-path",
+        metavar="PATH",
+        type=str,
+        help="WS path for -p ws|wss (default: try /ws, / and /sip)",
+        dest="path",
+        default="",
     )
     target.add_argument(
         "-proxy",
@@ -1145,10 +1156,18 @@ Usage examples:
         "-p", "--protocol",
         metavar="PROTOCOL",
         type=str.upper,
-        help="Protocol: udp|tcp|tls (default: udp)",
+        help="Protocol: udp|tcp|tls|ws|wss (default: udp)",
         dest="proto",
-        choices=["UDP", "TCP", "TLS"],
+        choices=["UDP", "TCP", "TLS", "WS", "WSS"],
         default="udp",
+    )
+    target.add_argument(
+        "-path",
+        metavar="PATH",
+        type=str,
+        help="WS path for -p ws|wss (default: try /ws, / and /sip)",
+        dest="path",
+        default="",
     )
     target.add_argument(
         "-l",
@@ -1454,209 +1473,6 @@ Usage examples:
     other.add_argument(
         "-h", "--help", help="Show this help", dest="help", action="count"
     )
-
-    ##################
-    # wssend command #
-    ##################
-    parser_wssend = subparsers.add_parser(
-        "wssend",
-        formatter_class=argparse.RawTextHelpFormatter,
-        help="Send a customized message over WS",
-        add_help=False,
-        description=RED
-        + Logo("wssend").get_logo()
-        + YELLOW
-        + """
-  Module """
-        + BYELLOW
-        + """wssend"""
-        + YELLOW
-        + """ allow us to send a customized SIP message over WebSockets and analyze the response."""
-        + WHITE,
-        epilog="""
-Usage examples:
-"""
-        + YELLOW
-        + """  Send customize INVITE message
-"""
-        + WHITE
-        + """     sippts send -i 192.168.0.1 -m invite -fn Bob -fu 100 -tu Alice
-"""
-        + YELLOW
-        + """  Register a known user
-"""
-        + WHITE
-        + """     sippts send -i 192.168.0.1 -m register -user bob -pass supersecret
-""",
-    )
-
-    target = parser_wssend.add_argument_group("Target")
-    target.add_argument(
-        "-i", metavar="IP|HOST", type=str, help="Target IP address", dest="ipaddr"
-    )
-    target.add_argument(
-        "-r",
-        metavar="REMOTE_PORT",
-        type=int,
-        help="Remote port (default: 5060)",
-        dest="rport",
-        default=5060,
-    )
-    target.add_argument(
-        "-p", "--protocol",
-        metavar="PROTOCOL",
-        type=str.upper,
-        help="Protocol: ws|wss (default: wss)",
-        dest="proto",
-        choices=["WS", "WSS"],
-        default="WSS",
-    )
-    target.add_argument(
-        "-path",
-        metavar="PATH",
-        type=str,
-        help="WS path (Ex: /ws)",
-        dest="path",
-        default="",
-    )
-
-    headers = parser_wssend.add_argument_group("Headers")
-    headers.add_argument(
-        "-m",
-        metavar="METHOD",
-        type=str.upper,
-        help="SIP method: options, invite, register (default: options)",
-        dest="method",
-        choices=["OPTIONS", "REGISTER", "INVITE"],
-        default="options",
-    )
-    headers.add_argument(
-        "-d", "--domain",
-        metavar="DOMAIN",
-        type=str,
-        help="SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)",
-        dest="domain",
-        default="",
-    )
-    headers.add_argument(
-        "-cd",
-        metavar="CONTACT_DOMAIN",
-        type=str,
-        help="Domain or IP address for Contact header. Ex: 10.0.1.2",
-        dest="contact_domain",
-        default="",
-    )
-    headers.add_argument(
-        "-fn",
-        metavar="FROM_NAME",
-        type=str,
-        help="From Name. Ex: Bob",
-        dest="from_name",
-        default="",
-    )
-    headers.add_argument(
-        "-fu",
-        metavar="FROM_USER",
-        type=str,
-        help="From User (default: 100)",
-        dest="from_user",
-        default="100",
-    )
-    headers.add_argument(
-        "-fd",
-        metavar="FROM_DOMAIN",
-        type=str,
-        help="From Domain. Ex: 10.0.0.1",
-        dest="from_domain",
-        default="",
-    )
-    headers.add_argument(
-        "-ft",
-        metavar="FROM_TAG",
-        type=str,
-        help="From Tag",
-        dest="from_tag",
-        default="",
-    )
-    headers.add_argument(
-        "-tn",
-        metavar="TO_NAME",
-        type=str,
-        help="To Name. Ex: Alice",
-        dest="to_name",
-        default="",
-    )
-    headers.add_argument(
-        "-tu",
-        metavar="TO_USER",
-        type=str,
-        help="To User (default: 100)",
-        dest="to_user",
-        default="100",
-    )
-    headers.add_argument(
-        "-td",
-        metavar="TO_DOMAIN",
-        type=str,
-        help="To Domain. Ex: 10.0.0.1",
-        dest="to_domain",
-        default="",
-    )
-    headers.add_argument(
-        "-tt", metavar="TO_TAG", type=str, help="To Tag", dest="to_tag", default=""
-    )
-    headers.add_argument(
-        "-ua",
-        metavar="USER_AGENT",
-        type=str,
-        help="User-Agent header (default: pplsip)",
-        dest="user_agent",
-        default="pplsip",
-    )
-    headers.add_argument(
-        "-ppi",
-        metavar="PPI",
-        type=str,
-        help="P-Preferred-Identity",
-        dest="ppi",
-        default="",
-    )
-    headers.add_argument(
-        "-pai",
-        metavar="PAI",
-        type=str,
-        help="P-Asserted-Identity",
-        dest="pai",
-        default="",
-    )
-
-    log = parser_wssend.add_argument_group("Log")
-    log.add_argument("-v", help="Increase verbosity", dest="verbose", action="count")
-    log.add_argument(
-        "-nocolor", help="Show result without colors", dest="nocolor", action="count"
-    )
-
-    other = parser_wssend.add_argument_group("Other options")
-    other.add_argument(
-        "-t", "--timeout",
-        metavar="TIMEOUT",
-        type=int,
-        help="Time to wait for an answer (default: 5)",
-        dest="timeout",
-        default=5,
-    )
-    other.add_argument(
-        "-local-ip",
-        metavar="IP",
-        type=str,
-        help="Set local IP address (by default try to get it)",
-        dest="localip",
-        default="",
-    )
-    other.add_argument(
-        "-h", "--help", help="Show this help", dest="help", action="count"
-    )
-
     #####################
     # enumerate command #
     #####################
@@ -1708,10 +1524,18 @@ Usage examples:
         "-p", "--protocol",
         metavar="PROTOCOL",
         type=str.upper,
-        help="Protocol: udp|tcp|tls (default: udp)",
+        help="Protocol: udp|tcp|tls|ws|wss (default: udp)",
         dest="proto",
-        choices=["UDP", "TCP", "TLS"],
+        choices=["UDP", "TCP", "TLS", "WS", "WSS"],
         default="udp",
+    )
+    target.add_argument(
+        "-path",
+        metavar="PATH",
+        type=str,
+        help="WS path for -p ws|wss (default: try /ws, / and /sip)",
+        dest="path",
+        default="",
     )
     target.add_argument(
         "-proxy",
@@ -3837,6 +3661,11 @@ Usage examples:
                 "lib/tlsinfo.py",
             )
             fallos += not download_file(
+                giturl + "src/sippts/lib/wsclient.py",
+                modulepath + "lib/wsclient.py",
+                "lib/wsclient.py",
+            )
+            fallos += not download_file(
                 giturl + "src/sippts/data/version.txt",
                 modulepath + "data/version.txt",
                 "data/version.txt",
@@ -3961,10 +3790,6 @@ Usage examples:
                 modulepath + "astami.py",
                 "astami.py",
             )
-            fallos += not download_file(
-                giturl + "src/sippts/wssend.py", modulepath + "wssend.py", "wssend.py"
-            )
-
             print(f"{BYELLOW}SIPPTS has been updated")
         else:
             print(f"{BYELLOW}SIPPTS is in the last version")
@@ -4146,6 +3971,7 @@ Usage examples:
         TLSINFO = args.tlsinfo
         HEADER = args.header
         TLSVERSIONS = args.tlsversions
+        WSPATH = args.path
 
         # the versions need the certificate read first, so it implies -tlsinfo
         if TLSVERSIONS and not TLSINFO:
@@ -4188,6 +4014,7 @@ Usage examples:
             TLSINFO,
             TLSVERSIONS,
             HEADER,
+            WSPATH,
         )
     elif COMMAND == "exten":
         if args.help == 1:
@@ -4374,6 +4201,7 @@ Usage examples:
         MAXFORWARDS = args.maxforwards
         REFERTO = args.referto
         REPLACES = args.replaces
+        WSPATH = args.path
 
         return (
             COMMAND,
@@ -4423,66 +4251,7 @@ Usage examples:
             MAXFORWARDS,
             REFERTO,
             REPLACES,
-        )
-    elif COMMAND == "wssend":
-        if args.help == 1:
-            parser_wssend.print_help()
-            exit()
-        if not args.ipaddr:
-            parser_wssend.print_help()
-            print(RED)
-            print("Param error!")
-            print(f"{BWHITE}{COMMAND}:{WHITE} Mandatory params: {GREEN}-i <IP|HOST>")
-            print(f"{WHITE}Use {CYAN}sippts {COMMAND} -h/--help{WHITE} for help")
-            exit()
-
-        IPADDR = args.ipaddr
-        PORT = args.rport
-        PATH = args.path
-        VERBOSE = args.verbose
-        PROTO = args.proto
-        METHOD = args.method
-        DOMAIN = args.domain
-        CONTACTDOMAIN = args.contact_domain
-        FROMNAME = args.from_name
-        FROMUSER = args.from_user
-        FROMDOMAIN = args.from_domain
-        FROMTAG = args.from_tag
-        TONAME = args.to_name
-        TOUSER = args.to_user
-        TOTAG = args.to_tag
-        TODOMAIN = args.to_domain
-        UA = args.user_agent
-        PPI = args.ppi
-        PAI = args.pai
-        LOCALIP = args.localip
-        TIMEOUT = args.timeout
-        NOCOLOR = args.nocolor
-
-        return (
-            COMMAND,
-            IPADDR,
-            PORT,
-            PATH,
-            VERBOSE,
-            PROTO,
-            METHOD,
-            DOMAIN,
-            CONTACTDOMAIN,
-            FROMNAME,
-            FROMUSER,
-            FROMDOMAIN,
-            FROMTAG,
-            TONAME,
-            TOUSER,
-            TOTAG,
-            TODOMAIN,
-            UA,
-            LOCALIP,
-            PPI,
-            PAI,
-            TIMEOUT,
-            NOCOLOR,
+            WSPATH,
         )
     elif COMMAND == "enumerate":
         if args.help == 1:
@@ -4516,6 +4285,7 @@ Usage examples:
         OJSON = args.ojson
         OCSV = args.ocsv
         NOCOLOR = args.nocolor
+        WSPATH = args.path
 
         HEADER = args.header
         return (
@@ -4541,6 +4311,7 @@ Usage examples:
             OCSV,
             NOCOLOR,
             HEADER,
+            WSPATH,
         )
     elif COMMAND == "leak":
         if args.help == 1:

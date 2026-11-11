@@ -1,3 +1,29 @@
+v4.2.2 (Nov/2026):
+- global:
+  - the Via branch now starts with the magic cookie z9hG4bK, as RFC 3261 asks
+  - new lib/wsclient.py: shared SIP over WebSocket client (RFC 7118)
+  - Contact over WebSocket uses transport=ws, there is no transport=wss token
+  - Ctrl+C stops at once, prints what was found and no longer ends in a traceback
+  - a kill (SIGTERM/SIGHUP) now prints and saves what was found instead of dying silently
+  - the User-Agent/Server header wins over the To-tag guesses in fingerprinting
+  - dropped the unused 'rel' dependency
+- scan:
+  - added -p ws|wss, and -p all includes them (5061 tls, 8088 ws, 8089 wss)
+  - added -path for ws|wss, with automatic path discovery
+  - a port answering HTTP is now a row in the table, not a discarded dump
+  - -tlsinfo also reads the certificate of a WSS port
+  - -r all no longer queues every probe up front (360MB of RSS before the first packet)
+  - the number of probes to send is shown when there are more than 10000
+  - -random now shuffles the whole scan, not each 100000-probe batch
+  - -p takes a list of transports now: -p udp,tls,wss
+  - a port answering a SIP request instead of a response is a row too (echo or reflector)
+  - a refused, unreachable or timed out port is no longer counted as an error
+- enumerate:
+  - added -p ws|wss and -path
+- send:
+  - added -p ws|wss and -path
+- wssend:
+  - module removed: use send -p ws|wss, which does the same over one code path
 v4.2.1 (Sep/2026):
 - global:
   - fix -up, which did not download the files added in 4.2.0, breaking scan

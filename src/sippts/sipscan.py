@@ -8,6 +8,7 @@ __copyright__ = "Copyright (C) 2015-2024, SIPPTS"
 __email__ = "pepeluxx@gmail.com"
 
 import random
+import signal
 import socket
 import sys
 import ssl
@@ -41,11 +42,15 @@ from .lib.functions import (
     cvss_severity,
     cvss_score,
     cvss_version,
+    get_free_port,
+    generate_random_string,
 )
+from .lib.wsclient import ws_connect, ws_send_recv, ws_error_text, is_timeout
 from .lib.color import Color
 from .lib.logos import Logo
 from itertools import product
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, FIRST_COMPLETED
+from concurrent.futures import wait as futures_wait
 import resource as res
 
 class SipScan:
@@ -56,6 +61,8 @@ class SipScan:
         self.route = ""
         self.rport = "5060"
         self.proto = "UDP"
+        self.path = ""
+        self.httpfound = False
         self.method = "OPTIONS"
         self.domain = ""
         self.contact_domain = ""
@@ -94,6 +101,7 @@ class SipScan:
         self.totaltime = 0
         self.fail = 0
         self.errors = 0
+        self.closed = 0
         self.tlsinfo = 0
         self.tls = []
         self.tlsfindings = []
@@ -149,7 +157,7 @@ class SipScan:
         self.threads = int(self.threads)
         self.set_ulimit(self.threads)
     
-        supported_protos = ["UDP", "TCP", "TLS"]
+        supported_protos = ["UDP", "TCP", "TLS", "WS", "WSS"]
         supported_methods = ["OPTIONS", "REGISTER", "INVITE"]
 
         if self.nocolor == 1:
@@ -196,12 +204,6 @@ class SipScan:
             print(self.c.WHITE)
             sys.exit()
 
-        # check protocol
-        if self.proto != "ALL" and self.proto not in supported_protos:
-            print(f"{self.c.BRED}Protocol {self.proto} is not supported")
-            print(self.c.WHITE)
-            sys.exit()
-
         # my IP address
         local_ip = self.localip
         if self.localip == "":
@@ -222,14 +224,32 @@ class SipScan:
         logo = Logo("sipscan", self.nocolor)
         logo.print()
 
-        # create a list of protocols
+        # create a list of protocols. -p takes one transport, ALL, or a comma
+        # separated list (-p udp,tls,wss): scanning two transports is a normal
+        # thing to ask for and there is no reason to force two runs
+        self.proto = str(self.proto).upper().strip()
         protos = []
-        if self.proto == "UDP" or self.proto == "ALL":
-            protos.append("UDP")
-        if self.proto == "TCP" or self.proto == "ALL":
-            protos.append("TCP")
-        if self.proto == "TLS" or self.proto == "ALL":
-            protos.append("TLS")
+        if self.proto == "ALL":
+            protos = list(supported_protos)
+        else:
+            for p in self.proto.split(","):
+                p = p.strip()
+                if p == "":
+                    continue
+                if p not in supported_protos:
+                    print(
+                        f"{self.c.RED}[!] Invalid protocol: {self.c.BRED}{p}{self.c.RED} (choose from {', '.join(supported_protos)} or ALL, comma separated){self.c.WHITE}"
+                    )
+                    return
+                if p not in protos:
+                    protos.append(p)
+
+        if len(protos) == 0:
+            print(f"{self.c.RED}[!] No protocol to scan{self.c.WHITE}")
+            return
+
+        # keep a stable transport order whatever the order on the command line
+        protos.sort(key=lambda x: supported_protos.index(x))
 
         # create a list of ports
         ports = []
@@ -336,8 +356,6 @@ class SipScan:
         return selected
 
     def prepare_scan(self, ips, ports, protos, iplist):
-        max_values = 100000
-
         # threads to use
         self.threads = int(self.threads)
         nthreads = self.threads
@@ -351,10 +369,14 @@ class SipScan:
         if self.proxy != "":
             print(f"{self.c.BWHITE}[✓] Outbound Proxy: {self.c.GREEN}{self.proxy}")
         print(f"{self.c.BWHITE}[✓] Port range: {self.c.GREEN}{self.rport}")
-        if self.proto == "ALL":
-            print(f"{self.c.BWHITE}[✓] Protocols: {self.c.GREEN}UDP, TCP, TLS")
+        # the normalized list, not what was typed: -p wss,udp,udp,tls has to
+        # read back as the three transports that will actually be scanned
+        if len(protos) > 1:
+            print(f"{self.c.BWHITE}[✓] Protocols: {self.c.GREEN}{', '.join(protos)}")
         else:
-            print(f"{self.c.BWHITE}[✓] Protocol: {self.c.GREEN}{self.proto.upper()}")
+            print(f"{self.c.BWHITE}[✓] Protocol: {self.c.GREEN}{protos[0]}")
+        if ("WS" in protos or "WSS" in protos) and self.path != "":
+            print(f"{self.c.BWHITE}[✓] WS path: {self.c.GREEN}{self.path}")
 
         print(f"{self.c.BWHITE}[✓] Method to scan: {self.c.GREEN}{self.method}")
 
@@ -395,6 +417,10 @@ class SipScan:
                 f"{self.c.BWHITE}[✓] Customized User-Agent: {self.c.GREEN}{self.user_agent}"
             )
         print(f"{self.c.BWHITE}[✓] Used threads: {self.c.GREEN}{str(nthreads)}")
+        # a full `-r all -p all` is 327675 probes: saying so up front
+        # saves wondering whether the scan is stuck
+        if total > 10000:
+            print(f"{self.c.BWHITE}[✓] Probes to send: {self.c.GREEN}{str(total)}")
         if self.file != "":
             print(
                 f"{self.c.BWHITE}[✓] Loading data from file: {self.c.CYAN}{self.file}"
@@ -412,58 +438,106 @@ class SipScan:
         print(self.c.WHITE)
 
         values = product(ips, ports, protos)
-        values2 = []
-        count = 0
+
+        # -random cannot work on a generator, so only in that case the whole
+        # product is materialized (a tuple per probe, ~40MB for 65535 ports x 5
+        # transports) and shuffled once. It used to be shuffled per 100k batch,
+        # which was not a global shuffle anyway
+        if self.random == 1:
+            values = list(values)
+            random.shuffle(values)
+
+        # how many futures may be alive at the same time. Submitting every
+        # probe up front cost ~360MB of RSS for `-r all -p all` (327675 probes)
+        # before the first packet left the box, and on a machine under memory
+        # pressure the process was killed outright. Keeping a small window
+        # ahead of the pool is just as fast -- the threads never starve -- and
+        # it also makes Ctrl+C immediate, because there is almost nothing left
+        # to cancel
+        window = max(nthreads * 4, 16)
+        tareas = set()
 
         start = time.time()
 
-        for i, val in enumerate(values):
-            if self.quit == False:
-                if count < max_values:
-                    values2.append(val)
-                    count += 1
+        executor = ThreadPoolExecutor(max_workers=nthreads)
 
-                if count == max_values or i + 1 == total:
-                    try:
-                        with ThreadPoolExecutor(max_workers=nthreads) as executor:
-                            if self.quit == False:
-                                if self.random == 1:
-                                    random.shuffle(values2)
+        try:
+            for val in values:
+                if self.quit == True:
+                    break
 
-                                for j, val2 in enumerate(values2):
-                                    if self.quit == False:
-                                        val_ipaddr = val2[0]
-                                        val_port = int(val2[1])
-                                        val_proto = val2[2]
+                val_ipaddr = val[0]
+                val_port = int(val[1])
+                val_proto = val[2]
 
-                                        if (
-                                            self.proto == "ALL"
-                                            and self.rport == "5060"
-                                            and val_proto == "TLS"
-                                        ):
-                                            val_port = 5061
+                # several transports with the default port: each one has its
+                # own well-known port, SIP over WebSocket does not live on
+                # 5060 (Asterisk: 8088/8089). Only when -r was not given, an
+                # explicit port is always honoured
+                if len(protos) > 1 and self.rport == "5060":
+                    if val_proto == "TLS":
+                        val_port = 5061
+                    if val_proto == "WS":
+                        val_port = 8088
+                    if val_proto == "WSS":
+                        val_port = 8089
 
-                                        executor.submit(
-                                            self.scan_host,
-                                            val_ipaddr,
-                                            val_port,
-                                            val_proto,
-                                        )
-                                try:
-                                    cursor.show()
-                                except: 
-                                    pass
-                    except KeyboardInterrupt:
-                        print(f"{self.c.RED}\nYou pressed Ctrl+C!")
-                        try:
-                            cursor.show()
-                        except:
-                            pass
-                        print(self.c.WHITE)
-                        self.quit = True
+                tareas.add(
+                    executor.submit(
+                        self.scan_host,
+                        val_ipaddr,
+                        val_port,
+                        val_proto,
+                    )
+                )
 
-                    values2.clear()
-                    count = 0
+                # waiting in short slices instead of a single blocking join:
+                # the main thread has to come back to the interpreter often
+                # enough for a Ctrl+C to be seen at all. Blocked inside
+                # executor.shutdown(wait=True) the signal was only processed
+                # when every thread had finished, so the tool looked frozen
+                # and the second Ctrl+C came out as a traceback
+                while len(tareas) >= window and self.quit == False:
+                    done, tareas = futures_wait(
+                        tareas, timeout=0.5, return_when=FIRST_COMPLETED
+                    )
+                    tareas = set(tareas)
+
+            while len(tareas) > 0 and self.quit == False:
+                done, tareas = futures_wait(
+                    tareas, timeout=0.5, return_when=FIRST_COMPLETED
+                )
+                tareas = set(tareas)
+
+            try:
+                cursor.show()
+            except:
+                pass
+        except KeyboardInterrupt:
+            print(f"{self.c.RED}\nYou pressed Ctrl+C!")
+            try:
+                cursor.show()
+            except:
+                pass
+            print(self.c.WHITE)
+            self.quit = True
+
+            # ignore any further Ctrl+C or kill: from here on the only
+            # thing left is printing what was found, and a second one used to
+            # come out as a traceback from the thread shutdown
+            for signame in ("SIGINT", "SIGTERM", "SIGHUP"):
+                try:
+                    signal.signal(getattr(signal, signame), signal.SIG_IGN)
+                except Exception:
+                    pass
+
+        # drop what has not started yet, instead of waiting for the whole
+        # queue to go through. The threads already inside a socket are left to
+        # their timeout, nothing is joined
+        for tarea in tareas:
+            tarea.cancel()
+
+        executor.shutdown(wait=False, cancel_futures=True)
 
         end = time.time()
         self.totaltime = int(end - start)
@@ -509,6 +583,12 @@ class SipScan:
             self.pos += 1
             if self.pos > 3:
                 self.pos = 0
+
+            if proto in ("WS", "WSS"):
+                # SIP over WebSocket (RFC 7118) does not go through a raw
+                # socket: the handshake and the framing are done by the shared
+                # client, and the answer ends in the same table
+                return self.scan_host_ws(ipaddr, port, proto)
 
             try:
                 if proto == "UDP":
@@ -556,61 +636,7 @@ class SipScan:
 
                 host = (str(proxy_ip), int(proxy_port))
 
-            domain = self.domain
-            if domain == "":
-                domain = ipaddr
-
-            contact_domain = self.contact_domain
-            if contact_domain == "":
-                contact_domain = "10.0.0.1"
-
-            fdomain = self.from_domain
-            tdomain = self.to_domain
-
-            if not self.from_domain or self.from_domain == "":
-                fdomain = domain
-            if not self.to_domain or self.to_domain == "":
-                tdomain = domain
-
-            if self.method == "REGISTER":
-                if self.to_user == "100" and self.from_user != "100":
-                    self.to_user = self.from_user
-                if self.to_user != "100" and self.from_user == "100":
-                    self.from_user = self.to_user
-
-            if self.proxy != "":
-                self.route = "<sip:%s;lr>" % self.proxy
-
-            msg = create_message(
-                self.method,
-                "",
-                contact_domain,
-                self.from_user,
-                self.from_name,
-                fdomain,
-                self.to_user,
-                self.to_name,
-                tdomain,
-                proto,
-                domain,
-                self.user_agent,
-                lport,
-                "",
-                "",
-                "",
-                "1",
-                "",
-                "",
-                1,
-                "",
-                0,
-                "",
-                self.route,
-                self.ppi,
-                self.pai,
-                self.header,
-                1,
-            )
+            msg = self.build_message(ipaddr, proto, lport)
 
             try:
                 sock.settimeout(self.timeout)
@@ -683,79 +709,27 @@ class SipScan:
 
                     if headers["response_code"] == "":
                         rescode = ""
-                        print(
-                            f"{self.c.RED}\nEmpty response code: {self.c.YELLOW}{ipaddr}:{str(port)}/{proto}: {self.c.CYAN}{resp}\n{self.c.WHITE}"
-                        )
 
-                headers = parse_message(resp.decode())
-
-                if headers and headers["response_code"] != "":
-                    sip_type = headers["type"]
-                    if self.method == "REGISTER":
-                        if headers["response_code"] == "405":
-                            sip_type = "Device"
-                        if headers["response_code"] == "401":
-                            sip_type = "Server"
-
-                    response = "%s %s" % (
-                        headers["response_code"],
-                        headers["response_text"],
-                    )
-
-                    try:
-                        fps = fingerprinting(
-                            self.method, resp.decode(), headers, self.verbose
-                        )
-                    except Exception:
-                        # a missing header must not discard the whole result
-                        fps = []
-
-                    fp = ""
-                    for f in fps:
-                        if fp == "":
-                            fp = "%s" % f
-                        else:
-                            fp += "/%s" % f
-
-                    if fp[0:1] == "/":
-                        fp = fp[1:]
-
-                    line = "%s###%d###%s###%s###%s###%s###%s" % (
-                        ip,
-                        rport,
-                        proto,
-                        response,
-                        headers["ua"],
-                        sip_type,
-                        fp,
-                    )
-                    self.found.append(line)
-
-                    if self.oifile != "":
-                        if ip not in self.ipsfound:
-                            self.ipsfound.append(ip)
-
-                    if self.verbose == 1:
-                        if headers["ua"] != "":
+                        # neither a plain HTTP answer nor a SIP request is a
+                        # broken SIP answer: the first is a web server (or a
+                        # SIP-over-WebSocket port asked the wrong way), the
+                        # second an echo or a host that answers with a
+                        # request. process_answer() puts both in the table
+                        texto = resp.decode(errors="replace")
+                        if not texto.startswith("HTTP/") and not self.is_sip_request(texto):
                             print(
-                                f"{self.c.WHITE}Response <{headers['response_code']} {headers['response_text']}> from {ip}:{str(rport)}/{proto} with User-Agent {headers['ua']}"
-                            )
-                        else:
-                            print(
-                                f"{self.c.WHITE}Response <{headers['response_code']} {headers['response_text']}> from {ip}:{str(rport)}/{proto} without User-Agent"
+                                f"{self.c.RED}\nEmpty response code: {self.c.YELLOW}{ipaddr}:{str(port)}/{proto}: {self.c.CYAN}{resp}\n{self.c.WHITE}"
                             )
 
-                    if headers["ua"] != "" and self.getcve == 1:
-                        val = check_model(headers["ua"], fp, sip_type, self.cvelist)
-                        if len(val) > 0:
-                            for v in val:
-                                if v not in self.cve:
-                                    self.cve.append(v)
+                headers = self.process_answer(resp.decode(), ip, rport, proto, msg)
             except socket.timeout:
                 pass
             except Exception as error:
                 # counted, so a scan that swallows errors says so at the end
-                self.errors += 1
+                if self.is_closed_port(error):
+                    self.closed += 1
+                else:
+                    self.errors += 1
 
                 if self.verbose == 2:
                     print(f"{self.c.RED}\n{error}{self.c.WHITE}")
@@ -764,6 +738,365 @@ class SipScan:
                 close_sockets(sock, sock_ssl)
 
             return headers
+
+
+
+
+    def scan_host_ws(self, ipaddr, port, proto):
+        """Scan one SIP-over-WebSocket port."""
+        headers = None
+        conn = None
+
+        lport = get_free_port()
+        # RFC 7118: a WebSocket client has no address of its own, Via and
+        # Contact carry a random .invalid host
+        contact = "%s.invalid" % generate_random_string(12, 12, "hex")
+        msg = self.build_message(ipaddr, proto, lport, contact)
+
+        sni = self.domain if self.domain not in ("", None) else str(ipaddr)
+
+        try:
+            conn, url = ws_connect(
+                proto,
+                ipaddr,
+                port,
+                self.path,
+                timeout=self.timeout,
+                sni=sni,
+            )
+
+            if self.verbose == 2:
+                print(f"{self.c.BWHITE}[+] Sending to {url} ...")
+                print(f"{self.c.YELLOW}{msg}")
+
+            if proto == "WSS" and self.tlsinfo == 1:
+                try:
+                    self.inspect_tls(conn.sock, ipaddr, port, sni)
+                except Exception:
+                    self.errors += 1
+
+            answer = ws_send_recv(conn, msg, timeout=self.timeout)
+
+            if answer == "":
+                if self.verbose == 2:
+                    print(
+                        f"{self.c.RED}\nNo SIP answer from {ipaddr}:{str(port)}/{proto}{self.c.WHITE}"
+                    )
+
+                return headers
+
+            if self.verbose == 2:
+                print(f"{self.c.BWHITE}[-] Receiving from {ipaddr}:{str(port)}/{proto} ...")
+                print(f"{self.c.GREEN}{answer}{self.c.WHITE}")
+
+            headers = self.process_answer(answer, str(ipaddr), int(port), proto, msg)
+        except Exception as error:
+            # a timeout is what a closed port looks like over WebSocket, and
+            # UDP/TCP/TLS already pass over theirs without a word: counting it
+            # as an error here was what filled the summary with thousands of
+            # them on a -r all scan
+            if is_timeout(error):
+                self.closed += 1
+            elif self.is_closed_port(error):
+                self.closed += 1
+            else:
+                self.errors += 1
+
+            if self.verbose == 2:
+                print(f"{self.c.RED}\n{ws_error_text(error)}{self.c.WHITE}")
+        finally:
+            try:
+                if conn is not None:
+                    conn.close()
+            except Exception:
+                pass
+
+        return headers
+
+    def build_message(self, ipaddr, proto, lport, contact_default="10.0.0.1"):
+        """The request this scan sends, built once for every transport."""
+        domain = self.domain
+        if domain == "":
+            domain = ipaddr
+
+        contact_domain = self.contact_domain
+        if contact_domain == "":
+            contact_domain = contact_default
+
+        fdomain = self.from_domain
+        tdomain = self.to_domain
+
+        if not self.from_domain or self.from_domain == "":
+            fdomain = domain
+        if not self.to_domain or self.to_domain == "":
+            tdomain = domain
+
+        if self.method == "REGISTER":
+            if self.to_user == "100" and self.from_user != "100":
+                self.to_user = self.from_user
+            if self.to_user != "100" and self.from_user == "100":
+                self.from_user = self.to_user
+
+        if self.proxy != "":
+            self.route = "<sip:%s;lr>" % self.proxy
+
+        msg = create_message(
+            self.method,
+            "",
+            contact_domain,
+            self.from_user,
+            self.from_name,
+            fdomain,
+            self.to_user,
+            self.to_name,
+            tdomain,
+            proto,
+            domain,
+            self.user_agent,
+            lport,
+            "",
+            "",
+            "",
+            "1",
+            "",
+            "",
+            1,
+            "",
+            0,
+            "",
+            self.route,
+            self.ppi,
+            self.pai,
+            self.header,
+            1,
+        )
+
+        return msg
+
+
+    def process_http_answer(self, resptext, ip, rport, proto):
+        """A port that answers HTTP instead of SIP.
+
+        Asterisk serves its WebSocket on the same port as its web server, so
+        asking it with -p tcp/tls gets a 404 back. That used to be printed as
+        an "Empty response code" dump and lost, when it is in fact the most
+        useful thing the port said: there is something there, try -p ws|wss.
+        """
+        lines = resptext.replace("\r\n", "\n").split("\n")
+        status = lines[0].strip()
+
+        server = ""
+        for linea in lines[1:]:
+            if linea.strip() == "":
+                break
+
+            if linea.lower().startswith("server:"):
+                server = linea.split(":", 1)[1].strip()
+                break
+
+        # the status line without the HTTP version reads like the SIP ones
+        response = status
+        m = re.search(r"^HTTP/[\d.]+\s+(.+)$", status)
+        if m:
+            response = "HTTP %s" % m.group(1)
+
+        self.httpfound = True
+
+        line = "%s###%d###%s###%s###%s###%s###%s" % (
+            ip,
+            rport,
+            proto,
+            response,
+            server,
+            "Web server",
+            "",
+        )
+
+        if line not in self.found:
+            self.found.append(line)
+
+        if self.oifile != "" and ip not in self.ipsfound:
+            self.ipsfound.append(ip)
+
+        if self.verbose == 1:
+            print(
+                f"{self.c.WHITE}Response <{response}> from {ip}:{str(rport)}/{proto}, not SIP but a web server"
+            )
+
+        return None
+
+    def is_closed_port(self, error):
+        """A refused or unreachable port is a closed port, not an error.
+
+        A `-r all` scan of a live host gets one of these for every closed
+        port, so lumping them in with the error counter ended a four-row table
+        with "65540 error(s) while scanning" and made a perfectly healthy scan
+        look broken.
+        """
+        if isinstance(error, (ConnectionRefusedError, ConnectionResetError)):
+            return True
+
+        numero = getattr(error, "errno", None)
+        if numero is None:
+            try:
+                numero = getattr(error.args[0], "errno", None)
+            except Exception:
+                numero = None
+
+        # ECONNREFUSED, ENETUNREACH, ECONNRESET, EHOSTUNREACH, EHOSTDOWN, on
+        # both the BSD and the Linux numbering
+        return numero in (61, 111, 51, 101, 54, 104, 65, 113, 64, 112)
+
+    def is_sip_request(self, resptext):
+        """True when the payload is a SIP request, not a SIP response."""
+        primera = resptext.replace("\r\n", "\n").split("\n")[0].strip()
+
+        return re.match(r"^[A-Z]+\s+\S+\s+SIP/2\.0$", primera) is not None
+
+    def process_sip_request(self, resptext, ip, rport, proto, sent=""):
+        """A port that answers with a SIP request instead of a response.
+
+        Two things look like this. Some hosts simply bounce the datagram back,
+        so what arrives is our own OPTIONS -- a UDP reflector, which is worth
+        knowing about on its own. Others (SBCs, proxies with an odd routing)
+        really do send a request back. Either way the port answered something,
+        and it used to end up in an "Empty response code" dump and be lost
+        instead of making it into the table.
+        """
+        lines = resptext.replace("\r\n", "\n").split("\n")
+        m = re.match(r"^([A-Z]+)\s+\S+\s+SIP/2\.0$", lines[0].strip())
+
+        if not m:
+            return False
+
+        metodo = m.group(1)
+
+        callid = ""
+        ua = ""
+        for linea in lines[1:]:
+            if linea.strip() == "":
+                break
+
+            baja = linea.lower()
+            if baja.startswith("call-id:") and callid == "":
+                callid = linea.split(":", 1)[1].strip()
+            if baja.startswith("user-agent:") and ua == "":
+                ua = linea.split(":", 1)[1].strip()
+
+        # our own Call-ID coming back means the host echoed the datagram: the
+        # User-Agent in it is ours, so reporting it would be a lie
+        eco = sent != "" and callid != "" and callid in sent
+
+        if eco:
+            response = "echo of our %s" % metodo
+            ua = ""
+            sip_type = "Reflector"
+        else:
+            response = "%s request" % metodo
+            sip_type = "SIP request"
+
+        line = "%s###%d###%s###%s###%s###%s###%s" % (
+            ip,
+            rport,
+            proto,
+            response,
+            ua,
+            sip_type,
+            "",
+        )
+
+        if line not in self.found:
+            self.found.append(line)
+
+        if self.oifile != "" and ip not in self.ipsfound:
+            self.ipsfound.append(ip)
+
+        if self.verbose >= 1:
+            print(
+                f"{self.c.WHITE}Response <{response}> from {ip}:{str(rport)}/{proto}, a SIP request and not an answer"
+            )
+
+        return True
+
+    def process_answer(self, resptext, ip, rport, proto, sent=""):
+        """Record a SIP answer: used by every transport, UDP/TCP/TLS and the
+        WebSocket ones, so a new transport does not have to copy the
+        fingerprinting, the result row and the CVE lookup."""
+        if resptext.startswith("HTTP/"):
+            return self.process_http_answer(resptext, ip, rport, proto)
+
+        headers = parse_message(resptext)
+
+        # a request instead of an answer: an echo, or a host that really does
+        # send one back. Either way the port is alive and belongs in the table
+        if not headers or headers["response_code"] == "":
+            if self.process_sip_request(resptext, ip, rport, proto, sent):
+                return headers
+
+        if headers and headers["response_code"] != "":
+            sip_type = headers["type"]
+            if self.method == "REGISTER":
+                if headers["response_code"] == "405":
+                    sip_type = "Device"
+                if headers["response_code"] == "401":
+                    sip_type = "Server"
+
+            response = "%s %s" % (
+                headers["response_code"],
+                headers["response_text"],
+            )
+
+            try:
+                fps = fingerprinting(
+                    self.method, resptext, headers, self.verbose
+                )
+            except Exception:
+                # a missing header must not discard the whole result
+                fps = []
+
+            fp = ""
+            for f in fps:
+                if fp == "":
+                    fp = "%s" % f
+                else:
+                    fp += "/%s" % f
+
+            if fp[0:1] == "/":
+                fp = fp[1:]
+
+            line = "%s###%d###%s###%s###%s###%s###%s" % (
+                ip,
+                rport,
+                proto,
+                response,
+                headers["ua"],
+                sip_type,
+                fp,
+            )
+            self.found.append(line)
+
+            if self.oifile != "":
+                if ip not in self.ipsfound:
+                    self.ipsfound.append(ip)
+
+            if self.verbose == 1:
+                if headers["ua"] != "":
+                    print(
+                        f"{self.c.WHITE}Response <{headers['response_code']} {headers['response_text']}> from {ip}:{str(rport)}/{proto} with User-Agent {headers['ua']}"
+                    )
+                else:
+                    print(
+                        f"{self.c.WHITE}Response <{headers['response_code']} {headers['response_text']}> from {ip}:{str(rport)}/{proto} without User-Agent"
+                    )
+
+            if headers["ua"] != "" and self.getcve == 1:
+                val = check_model(headers["ua"], fp, sip_type, self.cvelist)
+                if len(val) > 0:
+                    for v in val:
+                        if v not in self.cve:
+                            self.cve.append(v)
+
+        return headers
 
     def print(self):
         iplen = len("IP address")
@@ -907,6 +1240,17 @@ class SipScan:
         print(self.c.WHITE)
 
         errores = self.errors
+        cerrados = self.closed
+
+        # closed ports are only worth a line when asked for: on a live host a
+        # -r all scan collects tens of thousands of them and they say nothing
+        if self.closed > 0 and self.verbose >= 1:
+            print(
+                f"{self.c.YELLOW}[!] {str(self.closed)} closed port(s): refused or unreachable, not an error{self.c.WHITE}"
+            )
+            print(self.c.WHITE)
+
+        self.closed = 0
 
         if self.errors > 0:
             print(
@@ -914,6 +1258,12 @@ class SipScan:
             )
             print(self.c.WHITE)
             self.errors = 0
+
+        if self.httpfound == True:
+            print(
+                f"{self.c.YELLOW}[!] A `Web server` row answered HTTP, not SIP. If it is an Asterisk/Kamailio HTTP port, try {self.c.BYELLOW}-p ws{self.c.YELLOW} or {self.c.BYELLOW}-p wss{self.c.WHITE}"
+            )
+            print(self.c.WHITE)
 
         if self.fp == 1 and len(self.found) > 0:
             print(
@@ -941,6 +1291,7 @@ class SipScan:
                 "method": self.method,
                 "elapsed": self.totaltime,
                 "errors": errores,
+                "closed": cerrados,
                 "cves": self.cve_rows() if len(self.cve) > 0 else None,
                 # None makes write_results drop the key, so with -tlsinfo off
                 # the JSON comes out byte for byte what it was

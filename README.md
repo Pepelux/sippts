@@ -18,7 +18,7 @@ Show help:
 
 ```
 sippts -h
-usage: sippts [-h] [-up] {video,astami,scan,exten,rcrack,send,wssend,enumerate,leak,ping,invite,dump,dcrack,flood,sniff,spoof,pcapdump,rtpbleed,rtcpbleed,rtpbleedflood,rtpbleedinject} ...
+usage: sippts [-h] [-up] {video,astami,scan,exten,rcrack,send,enumerate,leak,ping,invite,dump,dcrack,flood,sniff,spoof,pcapdump,rtpbleed,rtcpbleed,rtpbleedflood,rtpbleedinject} ...
 
 
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⣀⣀⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣄⣀⣀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -51,14 +51,13 @@ usage: sippts [-h] [-up] {video,astami,scan,exten,rcrack,send,wssend,enumerate,l
  -= SIPPTS is a set of tools for auditing VoIP systems based on the SIP protocol =-
 
 Commands:
-  {video,astami,scan,exten,rcrack,send,wssend,enumerate,leak,ping,invite,dump,dcrack,flood,sniff,spoof,pcapdump,rtpbleed,rtcpbleed,rtpbleedflood,rtpbleedinject}
+  {video,astami,scan,exten,rcrack,send,enumerate,leak,ping,invite,dump,dcrack,flood,sniff,spoof,pcapdump,rtpbleed,rtcpbleed,rtpbleedflood,rtpbleedinject}
     video                                         Animated help
     astami                                        Asterisk AMI pentest
     scan                                          Fast SIP scanner
     exten                                         Search SIP extensions of a PBX
     rcrack                                        Remote password cracker
     send                                          Send a customized message
-    wssend                                        Send a customized message over WS
     enumerate                                     Enumerate methods of a SIP server
     leak                                          Exploit SIP Digest Leak vulnerability
     ping                                          SIP ping
@@ -100,14 +99,14 @@ usage: sippts scan [-i IP|HOST] [-f FILE] [-r REMOTE_PORT] [-p PROTOCOL]
  \__ \| ||  _/  _/ | | \__ \ (_-</ _/ _` | ' \ 
  |___/___|_| |_|   |_| |___/ /__/\__\__,_|_||_|
             
-  Module scan is a fast SIP scanner using multithread that can check several IPs and port ranges. It works with UDP, TCP and TLS protocols.
+  Module scan is a fast SIP scanner using multithread that can check several IPs and port ranges. It works with UDP, TCP, TLS, WS and WSS protocols.
 
 Target:
   -i IP|HOST            Host/IP address/network (ex: mysipserver.com | 192.168.0.10 | 192.168.0.0/24)
   -f FILE               File with several IPs or network ranges
   -r REMOTE_PORT        Ports to scan. Ex: 5060 | 5070,5080 | 5060-5080 | 5060,5062,5070-5080 | ALL for 1-65535 (default: 5060)
   -p, --protocol PROTOCOL
-                        Protocol: udp|tcp|tls|all (default: udp)
+                        Protocol: udp|tcp|tls|ws|wss|all, or a list like udp,tls,wss (default: udp)
   -proxy IP:PORT        Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)
 
 Headers:
@@ -178,7 +177,7 @@ sippts -up
 You can get help on how to use this tool at https://sippts.seguridadvoip.com and also on the Github wiki pages:
 
 Sippts is a set of tools for auditing VoIP servers and devices using the SIP protocol. Sippts is programmed in Python and consists of the following commands or modules:
-  * _**scan**_ is a fast multithreaded scanner for SIP services. It can check several IP addresses and port ranges, and it works over UDP, TCP and TLS. [Click here to read more about scan command](https://github.com/Pepelux/sippts/wiki/Command-scan)
+  * _**scan**_ is a fast multithreaded scanner for SIP services. It can check several IP addresses and port ranges, and it works over UDP, TCP, TLS and WebSockets (WS and WSS). [Click here to read more about scan command](https://github.com/Pepelux/sippts/wiki/Command-scan)
 
   * _**exten**_ identifies extensions on a SIP server. It also tells you whether the extension requires authentication. It can check several IP addresses, and with -f it reads the targets from a file. [Click here to read more about exten command](https://github.com/Pepelux/sippts/wiki/Command-exten)
 
@@ -190,11 +189,10 @@ Sippts is a set of tools for auditing VoIP servers and devices using the SIP pro
 
   * _**flood**_ sends unlimited messages to the target. [Click here to read more about flood command](https://github.com/Pepelux/sippts/wiki/Command-flood)
 
-  * _**send**_ sends a customized SIP message and analyzes the response. [Click here to read more about send command](https://github.com/Pepelux/sippts/wiki/Command-send)
+  * _**send**_ sends a customized SIP message over UDP, TCP, TLS or WebSockets (WS and WSS) and analyzes the response. [Click here to read more about send command](https://github.com/Pepelux/sippts/wiki/Command-send)
 
-  * _**wssend**_ sends a customized SIP message over WebSockets and analyzes the response. [Click here to read more about wssend command](https://github.com/Pepelux/sippts/wiki/Command-wssend)
 
-  * _**enumerate**_ enumerates the available methods of a SIP service or server. [Click here to read more about enumerate command](https://github.com/Pepelux/sippts/wiki/Command-enumerate)
+  * _**enumerate**_ enumerates the available methods of a SIP service or server, over UDP, TCP, TLS or WebSockets (WS and WSS). [Click here to read more about enumerate command](https://github.com/Pepelux/sippts/wiki/Command-enumerate)
 
   * _**dump**_ extracts SIP Digest authentications from a PCAP file. [Click here to read more about dump command](https://github.com/Pepelux/sippts/wiki/Command-dump)
 

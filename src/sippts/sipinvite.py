@@ -37,6 +37,7 @@ from .lib.functions import (
     create_response_ok,
     parse_message,
     generate_random_string,
+    generate_branch,
     get_machine_default_ip,
     parse_digest,
     calculateHash,
@@ -128,7 +129,7 @@ class SipInvite:
 
                 host = (str(proxy_ip), int(proxy_port))
 
-            branch = generate_random_string(71, 71, "ascii")
+            branch = generate_branch()
             callid = generate_random_string(32, 32, "hex")
             tag = generate_random_string(8, 8, "hex")
 
@@ -305,7 +306,7 @@ class SipInvite:
 
                     # send INVITE with Digest
                     totag = ""
-                    branch = generate_random_string(71, 71, "ascii")
+                    branch = generate_branch()
 
                     if headers["auth"] != "":
                         method = "INVITE"

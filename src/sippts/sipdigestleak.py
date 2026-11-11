@@ -22,6 +22,7 @@ from .lib.functions import (
     parse_message,
     parse_digest,
     generate_random_string,
+    generate_branch,
     get_machine_default_ip,
     expand_targets,
     host_sort_key,
@@ -363,7 +364,7 @@ class SipDigestLeak:
 
             host = (str(proxy_ip), int(proxy_port))
 
-        branch = generate_random_string(71, 71, "ascii")
+        branch = generate_branch()
         callid = generate_random_string(32, 32, "hex")
         tag = generate_random_string(8, 8, "hex")
 
@@ -554,7 +555,7 @@ class SipDigestLeak:
                     if nc != "":
                         digest += ", nc=%s" % nc
 
-                    branch = generate_random_string(71, 71, "ascii")
+                    branch = generate_branch()
                     cseq = str(int(cseq) + 1)
 
                     print(f"{self.c.YELLOW}[=>] Request INVITE{self.c.WHITE}")

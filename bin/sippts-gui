@@ -39,7 +39,6 @@ modules = [
     "rcrack",
     "enumerate",
     "send",
-    "wssend",
     "invite",
     "leak",
     "dump",
@@ -67,7 +66,8 @@ scan = (
         "Target port(s). Ex: 5060 | 5070,5080 | 5060-5080 | 5060,5062,5070-5080",
         True,
     ),
-    ("proto", "Protocol: udp|tcp|tls|all", True),
+    ("proto", "Protocol: udp|tcp|tls|ws|wss|all or a list: udp,tls,wss", True),
+    ("path", "WS path for proto ws|wss (default: try /ws, / and /sip)", False),
     ("proxy", "Use an outbound proxy (Ex: 192.168.1.1 or 192.168.1.1:5070)", False),
     ("method", "Method used to scan: options, invite, register", True),
     (
@@ -183,7 +183,8 @@ send = (
     ("rport", "Target port. Ex: 5060", True),
     ("lport", "Local port", False),
     ("template", "File with a SIP message template", False),
-    ("proto", "Protocol: udp|tcp|tls", True),
+    ("proto", "Protocol: udp|tcp|tls|ws|wss", True),
+    ("path", "WS path for proto ws|wss (default: try /ws, / and /sip)", False),
     ("proxy", "Use an outbound proxy (ex: 192.168.1.1 or 192.168.1.1:5070)", False),
     ("method", "Method used to scan: options, invite, register", True),
     (
@@ -225,34 +226,6 @@ send = (
     ("verbose", "Verbosity level: 0|1", True),
     ("output_file", "Save data into a log file", False),
     ("timeout", "Sockets timeout", True),
-    ("local_ip", "Set local IP address (by default try to get it)", False),
-)
-
-wssend = (
-    ("ip", "Target Host/IP address", True),
-    ("rport", "Target port. Ex: 5060", True),
-    ("proto", "Protocol: ws|wss", True),
-    ("path", "WS path. Ex: /ws", False),
-    ("method", "Method used to scan: options, invite, register", True),
-    (
-        "domain",
-        "SIP Domain or IP address. Ex: my.sipserver.com (default: target IP address)",
-        False,
-    ),
-    ("contact_domain", "Domain or IP address for Contact header. Ex: 10.0.1.2", False),
-    ("from_name", "From Name. Ex: Bob", False),
-    ("from_user", "From User", False),
-    ("from_domain", "From Domain", False),
-    ("from_tag", "From Tag", False),
-    ("to_name", "To Name. Ex: Alice", False),
-    ("to_user", "To User", False),
-    ("to_domain", "To Domain", False),
-    ("to_tag", "To Tag", False),
-    ("ua", "User-Agent header", False),
-    ("ppi", "P-Preferred-Identity header", False),
-    ("pai", "P-Asserted-Identity header", False),
-    ("verbose", "Verbosity level: 0|1", True),
-    ("timeout", "Time to wait for an answer", True),
     ("local_ip", "Set local IP address (by default try to get it)", False),
 )
 
@@ -453,7 +426,6 @@ modules_list = (
     ("rcrack", "Remote PBX extensions cracker"),
     ("enumerate", "To check the available methods of a SIP service/server"),
     ("send", "Send a customized SIP message"),
-    ("wssend", "Send a customized SIP message over Web Sockets"),
     ("invite", "SIP INVITE attack"),
     ("leak", "Exploit the SIP Digest Leak vulnerability"),
     ("dump", "Extracts SIP Digest authentications from a PCAP file"),
@@ -666,7 +638,6 @@ class SIPPTS(Cmd):
     load_parameters(rcrack)
     load_parameters(enumerate)
     load_parameters(send)
-    load_parameters(wssend)
     load_parameters(invite)
     load_parameters(leak)
     load_parameters(dump)
@@ -888,7 +859,7 @@ class SIPPTS(Cmd):
         print(f"{c.WHITE}\nType {c.BYELLOW}set <param> <value> {c.WHITE}to change\n")
 
     def set_option_scan(self, param, value, run, log):
-        supported_protos = ["UDP", "TCP", "TLS"]
+        supported_protos = ["UDP", "TCP", "TLS", "WS", "WSS"]
         supported_methods = ["OPTIONS", "REGISTER", "INVITE"]
 
         ok = True
@@ -915,19 +886,29 @@ class SIPPTS(Cmd):
         elif param == "proto":
             if run == False:
                 value = value.upper()
-                if value not in supported_protos:
-                    if value == "ALL":
-                        self.mod.proto = "UDP|TCP|TLS"
-                    else:
-                        if log == True:
-                            print(
-                                f"{c.WHITE}Protocol {c.BRED}{value} {c.WHITE}is not supported\n"
-                            )
-                        ok = False
+                # scan takes ALL or a comma separated list of transports. ALL
+                # used to be turned into the literal "UDP|TCP|TLS", which the
+                # module does not understand and which also left WS/WSS out
+                nombres = [p.strip() for p in value.split(",") if p.strip() != ""]
+                malos = [p for p in nombres if p not in supported_protos and p != "ALL"]
+
+                if len(nombres) == 0 or len(malos) > 0:
+                    if log == True:
+                        print(
+                            f"{c.WHITE}Protocol {c.BRED}{', '.join(malos) if malos else value} {c.WHITE}is not supported\n"
+                        )
+                    ok = False
+                elif "ALL" in nombres:
+                    self.mod.proto = "ALL"
                 else:
-                    self.mod.proto = value
+                    self.mod.proto = ",".join(nombres)
             else:
                 value = self.mod.proto
+        elif param == "path":
+            if run == False:
+                self.mod.path = value
+            else:
+                value = self.mod.path
         elif param == "proxy":
             if run == False:
                 self.mod.proxy = value
@@ -1471,7 +1452,9 @@ class SIPPTS(Cmd):
         return value
 
     def set_option_send(self, param, value, run, log):
-        supported_protos = ["UDP", "TCP", "TLS"]
+        # send speaks WebSockets as well since 4.2.2, which is what replaced
+        # the old wssend module
+        supported_protos = ["UDP", "TCP", "TLS", "WS", "WSS"]
         supported_methods = ["OPTIONS", "REGISTER", "INVITE"]
 
         ok = True
@@ -1503,19 +1486,24 @@ class SIPPTS(Cmd):
         elif param == "proto":
             if run == False:
                 value = value.upper()
+                # send carries one message over one transport: there is no
+                # ALL here, and the old branch set a literal "UDP|TCP|TLS"
+                # that no module understands
                 if value not in supported_protos:
-                    if value == "ALL":
-                        self.mod.proto = "UDP|TCP|TLS"
-                    else:
-                        if log == True:
-                            print(
-                                f"{c.WHITE}Protocol {c.BRED}{value} {c.WHITE}is not supported\n"
-                            )
-                        ok = False
+                    if log == True:
+                        print(
+                            f"{c.WHITE}Protocol {c.BRED}{value} {c.WHITE}is not supported\n"
+                        )
+                    ok = False
                 else:
                     self.mod.proto = value
             else:
                 value = self.mod.proto
+        elif param == "path":
+            if run == False:
+                self.mod.path = value
+            else:
+                value = self.mod.path
         elif param == "proxy":
             if run == False:
                 self.mod.proxy = value
@@ -1689,151 +1677,6 @@ class SIPPTS(Cmd):
                 self.mod.ofile = value
             else:
                 value = self.mod.ofile
-        elif param == "timeout":
-            if run == False:
-                self.mod.timeout = value
-            else:
-                value = self.mod.timeout
-        elif param == "local_ip":
-            if run == False:
-                self.mod.localip = value
-            else:
-                value = self.mod.localip
-        else:
-            if log == True:
-                print(f"{c.WHITE}Wrong option: {c.BRED}{param}{c.WHITE}")
-            ok = False
-
-        if run == False and ok == True:
-            if log == True:
-                print(f"{c.GREEN}\n{param}{c.WHITE} -> {c.YELLOW}{value}{c.WHITE}\n")
-
-        return value
-
-    def set_option_wssend(self, param, value, run, log):
-        # wssend only speaks WebSockets: the console was offering (and only
-        # accepting) udp|tcp|tls, so 'set proto ws' was rejected
-        supported_protos = ["WS", "WSS"]
-        supported_methods = ["OPTIONS", "REGISTER", "INVITE"]
-
-        ok = True
-
-        if param == "ip":
-            if run == False:
-                self.mod.ip = value
-            else:
-                value = self.mod.ip
-        elif param == "rport":
-            if run == False:
-                self.mod.rport = value
-            else:
-                value = self.mod.rport
-        elif param == "proto":
-            if run == False:
-                value = value.upper()
-                if value not in supported_protos:
-                    if log == True:
-                        print(
-                            f"{c.WHITE}Protocol {c.BRED}{value} {c.WHITE}is not supported\n"
-                        )
-                    ok = False
-                else:
-                    self.mod.proto = value
-            else:
-                value = self.mod.proto
-        elif param == "path":
-            if run == False:
-                self.mod.path = value
-            else:
-                value = self.mod.path
-        elif param == "method":
-            if run == False:
-                value = value.upper()
-                if value not in supported_methods:
-                    if log == True:
-                        print(
-                            f"{c.WHITE}Method {c.BRED}{value} {c.WHITE}is not supported\n"
-                        )
-                    ok = False
-                else:
-                    self.mod.method = value
-            else:
-                value = self.mod.method
-        elif param == "domain":
-            if run == False:
-                self.mod.domain = value
-            else:
-                value = self.mod.domain
-        elif param == "contact_domain":
-            if run == False:
-                self.mod.contact_domain = value
-            else:
-                value = self.mod.contact_domain
-        elif param == "from_name":
-            if run == False:
-                self.mod.from_name = value
-            else:
-                value = self.mod.from_name
-        elif param == "from_user":
-            if run == False:
-                self.mod.from_user = value
-            else:
-                value = self.mod.from_user
-        elif param == "from_domain":
-            if run == False:
-                self.mod.from_domain = value
-            else:
-                value = self.mod.from_domain
-        elif param == "from_tag":
-            if run == False:
-                self.mod.from_tag = value
-            else:
-                value = self.mod.from_tag
-        elif param == "to_name":
-            if run == False:
-                self.mod.to_name = value
-            else:
-                value = self.mod.to_name
-        elif param == "to_user":
-            if run == False:
-                self.mod.to_user = value
-            else:
-                value = self.mod.to_user
-        elif param == "to_domain":
-            if run == False:
-                self.mod.to_domain = value
-            else:
-                value = self.mod.to_domain
-        elif param == "to_tag":
-            if run == False:
-                self.mod.to_tag = value
-            else:
-                value = self.mod.to_tag
-        elif param == "ua":
-            if run == False:
-                self.mod.user_agent = value
-            else:
-                value = self.mod.user_agent
-        elif param == "ppi":
-            if run == False:
-                self.mod.ppi = value
-            else:
-                value = self.mod.ppi
-        elif param == "pai":
-            if run == False:
-                self.mod.pai = value
-            else:
-                value = self.mod.pai
-        elif param == "verbose":
-            if run == False:
-                if value != "0" and value != "1":
-                    if log == True:
-                        print(f"{c.WHITE}Value {c.BRED}{value} {c.WHITE}is not valid\n")
-                    ok = False
-                else:
-                    self.mod.verbose = value
-            else:
-                value = self.mod.verbose
         elif param == "timeout":
             if run == False:
                 self.mod.timeout = value
@@ -2902,8 +2745,6 @@ class SIPPTS(Cmd):
             return self.set_option_enumerate(param, value, run, log)
         if module == "send":
             return self.set_option_send(param, value, run, log)
-        if module == "wssend":
-            return self.set_option_wssend(param, value, run, log)
         if module == "invite":
             return self.set_option_invite(param, value, run, log)
         if module == "leak":
@@ -2992,10 +2833,6 @@ class SIPPTS(Cmd):
                     from sippts.sipsend import SipSend
 
                     self.mod = SipSend()
-                elif module == "wssend":
-                    from sippts.wssend import WsSend
-
-                    self.mod = WsSend()
                 elif module == "invite":
                     from sippts.sipinvite import SipInvite
 
@@ -3082,8 +2919,6 @@ class SIPPTS(Cmd):
                 module = enumerate
             elif self.active_mod == "send":
                 module = send
-            elif self.active_mod == "wssend":
-                module = wssend
             elif self.active_mod == "invite":
                 module = invite
             elif self.active_mod == "leak":
@@ -3176,8 +3011,6 @@ class SIPPTS(Cmd):
                 module = enumerate
             elif self.active_mod == "send":
                 module = send
-            elif self.active_mod == "wssend":
-                module = wssend
             elif self.active_mod == "invite":
                 module = invite
             elif self.active_mod == "leak":

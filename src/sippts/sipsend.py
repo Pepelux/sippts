@@ -18,10 +18,13 @@ from .lib.functions import (
     parse_message,
     parse_digest,
     generate_random_string,
+    generate_branch,
+    get_free_port,
     calculateHash,
     get_machine_default_ip,
     create_socket,
 )
+from .lib.wsclient import ws_connect, ws_error_text, is_timeout
 from .lib.color import Color
 from .lib.logos import Logo
 
@@ -46,6 +49,8 @@ class SipSend:
         self.rport = "5060"
         self.lport = ""
         self.proto = "UDP"
+        self.path = ""
+        self.ws = None
         self.method = ""
         self.domain = ""
         self.contact_domain = ""
@@ -76,9 +81,40 @@ class SipSend:
         self.timeout = 5
         self.verbose = 0
 
+        self.logoname = "sipsend"
         self.withcontact = 1
 
         self.c = Color()
+
+
+    def tx(self, sock, sock_ssl, msg, host):
+        """Send one message over whatever transport is in use."""
+        if self.ws is not None:
+            self.ws.send(msg[:8192])
+
+            return
+
+        if self.proto == "TLS":
+            sock_ssl.sendall(bytes(msg[:8192], "utf-8"))
+
+            return
+
+        sock.sendto(bytes(msg[:8192], "utf-8"), host)
+
+    def rx(self, sock, sock_ssl):
+        """Read the next answer, always as bytes."""
+        if self.ws is not None:
+            resp = self.ws.recv()
+
+            if isinstance(resp, str):
+                resp = resp.encode("utf-8", errors="replace")
+
+            return resp
+
+        if self.proto == "TLS":
+            return sock_ssl.recv(4096)
+
+        return sock.recv(4096)
 
     def start(self):
         # from sippts-gui it arrives as text and the comparison against 5060
@@ -106,7 +142,7 @@ class SipSend:
         except (TypeError, ValueError):
             self.timeout = 5
 
-        supported_protos = ["UDP", "TCP", "TLS"]
+        supported_protos = ["UDP", "TCP", "TLS", "WS", "WSS"]
         supported_methods = [
             "REGISTER",
             "SUBSCRIBE",
@@ -173,16 +209,19 @@ class SipSend:
         if self.method == "INVITE" and self.timeout == 5:
             self.timeout = 30
 
-        try:
-            # the family depends on the target: every socket was AF_INET, so
-            # an IPv6 address could not be reached at all
-            sock = create_socket(self.ip, self.proto)
-        except socket.error:
-            print(f"{self.c.RED}Failed to create socket")
-            print(self.c.WHITE)
-            sys.exit(1)
+        sock = None
 
-        logo = Logo("sipsend", self.nocolor)
+        if self.proto not in ("WS", "WSS"):
+            try:
+                # the family depends on the target: every socket was AF_INET,
+                # so an IPv6 address could not be reached at all
+                sock = create_socket(self.ip, self.proto)
+            except socket.error:
+                print(f"{self.c.RED}Failed to create socket")
+                print(self.c.WHITE)
+                sys.exit(1)
+
+        logo = Logo(self.logoname, self.nocolor)
         logo.print()
 
         print(
@@ -275,7 +314,7 @@ class SipSend:
             fw.write("\n")
 
         if self.branch == "":
-            self.branch = generate_random_string(71, 71, "ascii")
+            self.branch = generate_branch()
         if self.callid == "":
             self.callid = generate_random_string(32, 32, "hex")
         if self.from_tag == "":
@@ -309,7 +348,11 @@ class SipSend:
         sock_ssl = None
         bind = "0.0.0.0"
 
-        if self.lport == "" or self.lport == None:
+        if sock is None:
+            # a WebSocket has no local SIP port to bind, but the Via and the
+            # Contact still need a number
+            lport = get_free_port()
+        elif self.lport == "" or self.lport == None:
             lport = bind_local_port(sock, bind)
         else:
             lport = bind_local_port(sock, bind, self.lport)
@@ -346,7 +389,14 @@ class SipSend:
             self.to_domain = self.domain
 
         if self.contact_domain == "":
-            self.contact_domain = local_ip
+            if self.proto in ("WS", "WSS"):
+                # RFC 7118: a WebSocket client has no reachable address, Via
+                # and Contact carry a random .invalid host
+                self.contact_domain = "%s.invalid" % generate_random_string(
+                    12, 12, "hex"
+                )
+            else:
+                self.contact_domain = local_ip
 
         if self.proxy != "":
             self.route = "<sip:%s;lr>" % self.proxy
@@ -412,22 +462,32 @@ class SipSend:
             )
 
         try:
-            sock.settimeout(self.timeout)
-
-            if self.proto == "TCP":
-                sock.connect(host)
-
-            if self.proto == "TLS":
-                context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-                context.check_hostname = False
-                context.verify_mode = ssl.CERT_NONE
-                context.load_default_certs()
-
-                sock_ssl = context.wrap_socket(sock, server_hostname=str(host[0]))
-                sock_ssl.connect(host)
-                sock_ssl.sendall(bytes(msg[:8192], "utf-8"))
+            if self.proto in ("WS", "WSS"):
+                self.ws, wsurl = ws_connect(
+                    self.proto,
+                    host[0],
+                    host[1],
+                    self.path,
+                    timeout=self.timeout,
+                    sni=self.domain if self.domain not in ("", None) else str(host[0]),
+                )
+                self.ws.settimeout(self.timeout)
             else:
-                sock.sendto(bytes(msg[:8192], "utf-8"), host)
+                sock.settimeout(self.timeout)
+
+                if self.proto == "TCP":
+                    sock.connect(host)
+
+                if self.proto == "TLS":
+                    context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+                    context.check_hostname = False
+                    context.verify_mode = ssl.CERT_NONE
+                    context.load_default_certs()
+
+                    sock_ssl = context.wrap_socket(sock, server_hostname=str(host[0]))
+                    sock_ssl.connect(host)
+
+            self.tx(sock, sock_ssl, msg, host)
 
             if self.verbose == 1:
                 print(
@@ -460,10 +520,7 @@ class SipSend:
                 tries += 1
 
                 # receive temporary code
-                if self.proto == "TLS":
-                    resp = sock_ssl.recv(4096)
-                else:
-                    resp = sock.recv(4096)
+                resp = self.rx(sock, sock_ssl)
 
                 if not resp:
                     break
@@ -548,7 +605,7 @@ class SipSend:
                     if nc != "":
                         digest += ", nc=%s" % nc
 
-                    self.branch = generate_random_string(71, 71, "ascii")
+                    self.branch = generate_branch()
                     self.cseq = str(int(self.cseq) + 1)
 
                     msg = create_message(
@@ -592,10 +649,7 @@ class SipSend:
                     )
 
                     try:
-                        if self.proto == "TLS":
-                            sock_ssl.sendall(bytes(msg[:8192], "utf-8"))
-                        else:
-                            sock.sendto(bytes(msg[:8192], "utf-8"), host)
+                        self.tx(sock, sock_ssl, msg, host)
 
                         # Send AUTH
                         if self.verbose == 1:
@@ -620,10 +674,7 @@ class SipSend:
                             tries += 1
 
                             # receive temporary code
-                            if self.proto == "TLS":
-                                resp = sock_ssl.recv(4096)
-                            else:
-                                resp = sock.recv(4096)
+                            resp = self.rx(sock, sock_ssl)
 
                             headers = parse_message(resp.decode())
 
@@ -710,17 +761,28 @@ class SipSend:
                     fw.write("[+] Request ACK\n")
                     fw.write(msg + "\n")
 
-                if self.proto == "TLS":
-                    sock_ssl.sendall(bytes(msg[:8192], "utf-8"))
-                else:
-                    sock.sendto(bytes(msg[:8192], "utf-8"), host)
+                self.tx(sock, sock_ssl, msg, host)
 
         except socket.timeout:
             pass
-        except:
-            print(f"{self.c.RED}[!] Socket connection error\n{self.c.WHITE}")
+        except Exception as error:
+            if self.proto in ("WS", "WSS"):
+                if is_timeout(error):
+                    print(
+                        f"{self.c.RED}[!] No answer from {self.ip}:{self.rport} after {self.timeout} sec(s)\n{self.c.WHITE}"
+                    )
+                else:
+                    print(f"{self.c.RED}[!] {ws_error_text(error)}\n{self.c.WHITE}")
+            else:
+                print(f"{self.c.RED}[!] Socket connection error\n{self.c.WHITE}")
             pass
         finally:
+            if self.ws is not None:
+                try:
+                    self.ws.close()
+                except Exception:
+                    pass
+
             close_sockets(sock, sock_ssl)
 
         if self.ofile != "":
